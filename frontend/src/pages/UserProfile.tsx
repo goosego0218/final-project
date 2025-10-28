@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import GalleryCard from "@/components/GalleryCard";
 import { useEffect, useState } from "react";
@@ -24,6 +25,11 @@ const UserProfile = () => {
     logos: [],
     shorts: [],
   });
+  const [showAllLogos, setShowAllLogos] = useState(false);
+  const [showAllShorts, setShowAllShorts] = useState(false);
+  const [showAllCreations, setShowAllCreations] = useState(false);
+
+  const ITEMS_PER_PAGE = 5;
 
   useEffect(() => {
     // Load public creations from localStorage
@@ -93,7 +99,10 @@ const UserProfile = () => {
 
                 <TabsContent value="all" className="mt-6">
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {[...publicCreations.logos, ...publicCreations.shorts].map((creation) => (
+                    {(showAllCreations 
+                      ? [...publicCreations.logos, ...publicCreations.shorts]
+                      : [...publicCreations.logos, ...publicCreations.shorts].slice(0, ITEMS_PER_PAGE)
+                    ).map((creation) => (
                       <GalleryCard
                         key={creation.id}
                         image={creation.image}
@@ -108,11 +117,24 @@ const UserProfile = () => {
                       공개된 작품이 없습니다
                     </div>
                   )}
+                  {!showAllCreations && (publicCreations.logos.length + publicCreations.shorts.length) > ITEMS_PER_PAGE && (
+                    <div className="flex justify-center mt-6">
+                      <Button 
+                        variant="outline"
+                        onClick={() => setShowAllCreations(true)}
+                      >
+                        더보기 ({publicCreations.logos.length + publicCreations.shorts.length - ITEMS_PER_PAGE}개 더)
+                      </Button>
+                    </div>
+                  )}
                 </TabsContent>
 
                 <TabsContent value="logos" className="mt-6">
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {publicCreations.logos.map((logo) => (
+                    {(showAllLogos 
+                      ? publicCreations.logos 
+                      : publicCreations.logos.slice(0, ITEMS_PER_PAGE)
+                    ).map((logo) => (
                       <GalleryCard
                         key={logo.id}
                         image={logo.image}
@@ -126,11 +148,24 @@ const UserProfile = () => {
                       공개된 로고가 없습니다
                     </div>
                   )}
+                  {!showAllLogos && publicCreations.logos.length > ITEMS_PER_PAGE && (
+                    <div className="flex justify-center mt-6">
+                      <Button 
+                        variant="outline"
+                        onClick={() => setShowAllLogos(true)}
+                      >
+                        더보기 ({publicCreations.logos.length - ITEMS_PER_PAGE}개 더)
+                      </Button>
+                    </div>
+                  )}
                 </TabsContent>
 
                 <TabsContent value="shorts" className="mt-6">
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {publicCreations.shorts.map((short) => (
+                    {(showAllShorts 
+                      ? publicCreations.shorts 
+                      : publicCreations.shorts.slice(0, ITEMS_PER_PAGE)
+                    ).map((short) => (
                       <GalleryCard
                         key={short.id}
                         image={short.image}
@@ -143,6 +178,16 @@ const UserProfile = () => {
                   {publicCreations.shorts.length === 0 && (
                     <div className="text-center py-12 text-muted-foreground">
                       공개된 숏폼이 없습니다
+                    </div>
+                  )}
+                  {!showAllShorts && publicCreations.shorts.length > ITEMS_PER_PAGE && (
+                    <div className="flex justify-center mt-6">
+                      <Button 
+                        variant="outline"
+                        onClick={() => setShowAllShorts(true)}
+                      >
+                        더보기 ({publicCreations.shorts.length - ITEMS_PER_PAGE}개 더)
+                      </Button>
                     </div>
                   )}
                 </TabsContent>
