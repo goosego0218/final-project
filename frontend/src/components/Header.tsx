@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, Image, Video, FolderKanban, User, Menu } from "lucide-react";
+import { Home, Image, Video, FolderKanban, User, Menu, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import LoginModal from "./LoginModal";
 import ProfileDropdown from "./ProfileDropdown";
@@ -24,6 +24,7 @@ const Header = () => {
     { icon: Image, label: "로고 갤러리", path: "/logos" },
     { icon: Video, label: "숏폼 갤러리", path: "/shorts" },
     { icon: FolderKanban, label: "내 프로젝트", path: "/dashboard" },
+    { icon: CreditCard, label: "플랜관리", path: "/plan-management" },
     { icon: User, label: "프로필", path: "/profile-setup" },
   ];
 
@@ -34,7 +35,7 @@ const Header = () => {
           <div className="flex items-center gap-6">
             <Link to="/" className="flex items-center space-x-2">
               <span className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                AI Creator
+                Makary
               </span>
             </Link>
 

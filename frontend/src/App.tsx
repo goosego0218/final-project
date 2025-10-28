@@ -13,6 +13,7 @@ import ProfileSetup from "./pages/ProfileSetup";
 import Dashboard from "./pages/Dashboard";
 import ProjectDetail from "./pages/ProjectDetail";
 import UserProfile from "./pages/UserProfile";
+import PlanManagement from "./pages/PlanManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const AppContent = () => {
         <Route path="/profile/:userId" element={<UserProfile />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/project/:projectId" element={<ProjectDetail />} />
+        <Route path="/plan-management" element={<PlanManagement />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
