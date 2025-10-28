@@ -1,3 +1,4 @@
+import re
 from io import BytesIO
 from pathlib import Path
 from typing import Optional
@@ -6,9 +7,30 @@ from PIL import Image, ImageDraw, ImageFont
 
 from .config import FONT_DIR, SAVE_DIR
 
+INVALID_FILENAME_CHARS = set('<>:"/\\|?*')
+
 
 def contains_korean(text: str) -> bool:
     return any("\uac00" <= c <= "\ud7a3" for c in text)
+
+
+def make_safe_filename(value: str, fallback: str = "logo") -> str:
+    cleaned = value.strip()
+    if not cleaned:
+        cleaned = fallback
+    cleaned = re.sub(r"\s+", "_", cleaned)
+    safe_chars = []
+    for ch in cleaned:
+        if ch in INVALID_FILENAME_CHARS or ord(ch) < 32:
+            safe_chars.append("_")
+        else:
+            safe_chars.append(ch)
+    sanitized = "".join(safe_chars)
+    sanitized = sanitized.encode("utf-8", "ignore").decode("utf-8")
+    sanitized = sanitized.strip("_")
+    if not sanitized:
+        sanitized = fallback
+    return sanitized[:120]
 
 
 def overlay_korean_font(image_bytes: bytes, brand_name: str) -> Optional[str]:
@@ -34,7 +56,8 @@ def overlay_korean_font(image_bytes: bytes, brand_name: str) -> Optional[str]:
         )
         draw.text(pos, brand_name, font=font, fill=(30, 30, 30, 255))
 
-        output_path = SAVE_DIR / f"{brand_name}_final.png"
+        safe_name = make_safe_filename(brand_name)
+        output_path = SAVE_DIR / f"{safe_name}_final.png"
         img.save(output_path)
         return str(output_path)
     except Exception as exc:

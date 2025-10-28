@@ -12,7 +12,7 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 st.set_page_config(page_title="AI Logo Maker", page_icon="🎨", layout="wide")
 
 APP_TITLE = "🎨 AI Logo Maker"
-APP_SUBTITLE = "LLM Prompt Fusion + Ideogram + LangGraph + Korean Font Overlay"
+#APP_SUBTITLE = "LLM Prompt Fusion + Ideogram + LangGraph + Korean Font Overlay"
 
 MODE_TEXT_TO_IMAGE = "Text → Image"
 MODE_IMAGE_TO_IMAGE = "Image → Image"
@@ -96,52 +96,133 @@ def save_uploaded_image(uploaded_file) -> Path:
 
 
 st.title(APP_TITLE)
-st.caption(APP_SUBTITLE)
+#st.caption(APP_SUBTITLE)
 
 sidebar = st.sidebar
 sidebar.header("Workflow")
 mode = sidebar.radio("생성 모드 선택", [MODE_TEXT_TO_IMAGE, MODE_IMAGE_TO_IMAGE])
 reset_session_for_mode(mode)
 
-uploaded_image = None
 character_reference_upload = None
-if mode == MODE_IMAGE_TO_IMAGE:
+uploaded_image = None
+
+if mode == MODE_TEXT_TO_IMAGE:
+    sidebar.markdown("---")
+    sidebar.subheader("Controls")
+
+    brand = sidebar.text_input(
+        "브랜드명",
+        st.session_state.get("text_brand", "서민고기"),
+        key="text_brand_input",
+    )
+    st.session_state["text_brand"] = brand
+
+    description = sidebar.text_area(
+        "브랜드 설명",
+        st.session_state.get(
+            "text_description", "직화구이 전문점, 따뜻하고 정직한 이미지"
+        ),
+        key="text_description_input",
+    )
+    st.session_state["text_description"] = description
+
+    style = sidebar.text_input(
+        "디자인 스타일",
+        st.session_state.get(
+            "text_style", "warm, minimal, Korean calligraphy inspired"
+        ),
+        key="text_style_input",
+    )
+    st.session_state["text_style"] = style
+
+    negative_input = sidebar.text_input(
+        "네거티브 프롬프트 (선택)",
+        st.session_state.get("text_negative", ""),
+        key="text_negative_input",
+    )
+    st.session_state["text_negative"] = negative_input
+
+    seed_raw = sidebar.text_input(
+        "시드 값 (선택)",
+        st.session_state.get("text_seed_raw", ""),
+        key="text_seed_input",
+    )
+    st.session_state["text_seed_raw"] = seed_raw
+
+    style_type_default = st.session_state.get("text_style_type", "DESIGN")
+    style_type_index = (
+        STYLE_TYPE_OPTIONS.index(style_type_default)
+        if style_type_default in STYLE_TYPE_OPTIONS
+        else 0
+    )
+    style_type = sidebar.selectbox(
+        "스타일 타입",
+        STYLE_TYPE_OPTIONS,
+        index=style_type_index,
+        key="text_style_type_select",
+    )
+    st.session_state["text_style_type"] = style_type
+
+    if style_type:
+        guide = STYLE_TYPE_GUIDE.get(style_type)
+        if guide:
+            sidebar.markdown(
+                f"**{guide['title']}**\n\n"
+                f"- {guide['summary']}\n"
+                f"- 권장 용도: {guide['best_for']}"
+            )
+
+    cfg_default = float(st.session_state.get("text_cfg_scale", 15.0))
+    cfg_scale = sidebar.slider(
+        "CFG Scale(프롬프트 충실도)",
+        min_value=1.0,
+        max_value=20.0,
+        value=cfg_default,
+        step=0.5,
+        key="text_cfg_scale_slider",
+    )
+    st.session_state["text_cfg_scale"] = cfg_scale
+
+    character_reference_upload = None
+    image_weight = None
+    seed_value = parse_seed(seed_raw)
+    style_type_payload = style_type or None
+    negative_payload = negative_input.strip() or None
+
+else:
+    sidebar.markdown("---")
     sidebar.subheader("입력 이미지")
     uploaded_image = sidebar.file_uploader(
-        "원본 이미지 업로드", type=["png", "jpg", "jpeg", "webp"]
+        "원본 이미지 업로드",
+        type=["png", "jpg", "jpeg", "webp"],
+        key="image_mode_upload",
     )
     sidebar.markdown("---")
-elif mode == MODE_TEXT_TO_IMAGE:
-    character_reference_upload = sidebar.file_uploader(
-        "캐릭터 레퍼런스 이미지 (선택)", type=["png", "jpg", "jpeg", "webp"]
+
+    default_weight = int(st.session_state.get("image_mode_weight", 70))
+    image_weight = sidebar.slider(
+        "Image Weight (원본 보존 정도)",
+        min_value=0,
+        max_value=100,
+        value=default_weight,
+        step=5,
+        key="image_mode_weight_slider",
+        help="값이 높을수록 업로드한 이미지의 구성을 더 강하게 유지합니다.",
     )
-    if character_reference_upload:
-        sidebar.caption("· 최대 1장 업로드 가능 (총 용량 10MB 이하 권장)")
-    sidebar.markdown("---")
+    st.session_state["image_mode_weight"] = image_weight
+    sidebar.caption("Ideogram Remix 기본값은 50입니다. 필요에 따라 조절하세요.")
 
-sidebar.subheader("Ideogram 3.0 Controls")
+    character_reference_upload = None
 
-brand = sidebar.text_input("브랜드명", "서민고기")
-description = sidebar.text_area(
-    "브랜드 설명", "직화구이 전문점, 따뜻하고 정직한 이미지"
-)
-style = sidebar.text_input(
-    "디자인 스타일", "warm, minimal, Korean calligraphy inspired"
-)
-negative = sidebar.text_input("네거티브 프롬프트 (선택)", "")
-seed_raw = sidebar.text_input("시드 값 (선택)", "")
-style_type = sidebar.selectbox("스타일 타입", STYLE_TYPE_OPTIONS, index=4)
-if style_type:
-    guide = STYLE_TYPE_GUIDE.get(style_type)
-    if guide:
-        sidebar.markdown(
-            f"**{guide['title']}**\n\n"
-            f"- {guide['summary']}\n"
-            f"- 권장 용도: {guide['best_for']}"
-        )
-cfg_scale = sidebar.slider(
-    "CFG Scale", min_value=1.0, max_value=20.0, value=15.0, step=0.5
-)
+    brand = st.session_state.get("text_brand", "이미지 리믹스")
+    description = st.session_state.get("text_description", "")
+    style = st.session_state.get("text_style", "logo remix")
+    cfg_scale = float(st.session_state.get("text_cfg_scale", 15.0))
+    style_type_payload = st.session_state.get("text_style_type") or None
+    negative_payload = None
+    seed_value = None
+    negative_payload = None
+    seed_value = None
 
 sidebar.markdown("---")
 sidebar.markdown(
@@ -151,10 +232,6 @@ sidebar.markdown(
     "- Edit (`/v1/ideogram-v3/edit`)\n"
     "[API Reference](https://developer.ideogram.ai/api-reference/) 참고"
 )
-
-seed_value = parse_seed(seed_raw)
-style_type_payload = style_type or None
-negative_payload = negative.strip() or None
 
 main_container = st.container()
 prompt_container = st.container()
@@ -171,6 +248,7 @@ if mode == MODE_TEXT_TO_IMAGE:
                 "style": style,
                 "negative_prompt": negative_payload,
                 "cfg_scale": cfg_scale,
+                "enable_palette_suggestion": True,
             }
             if seed_value is not None:
                 payload["seed"] = seed_value
@@ -246,6 +324,8 @@ if mode == MODE_TEXT_TO_IMAGE:
                             "base_prompt": st.session_state.get("base_prompt"),
                             "negative_prompt": negative_payload,
                             "cfg_scale": cfg_scale,
+                            "auto_retry_remix": True,
+                            "remix_max_retries": 1,
                         }
                         if seed_value is not None:
                             payload["seed"] = seed_value
@@ -292,6 +372,13 @@ if mode == MODE_TEXT_TO_IMAGE:
 
 elif mode == MODE_IMAGE_TO_IMAGE:
     st.markdown("### 이미지 기반 리믹스")
+    if uploaded_image:
+        st.image(
+            uploaded_image,
+            caption="업로드 이미지 미리보기 (전송 전 확인용)",
+            use_container_width=True,
+        )
+
     edit_instruction = st.text_area(
         "수정 지시문",
         "원본 이미지를 유지하면서 브랜드 텍스트를 좀 더 굵고 선명하게 만들어 주세요.",
@@ -316,11 +403,15 @@ elif mode == MODE_IMAGE_TO_IMAGE:
                     "negative_prompt": negative_payload,
                     "cfg_scale": cfg_scale,
                     "skip_prompt_refine": True,
+                    "auto_retry_remix": True,
+                    "remix_max_retries": 1,
                 }
                 if seed_value is not None:
                     payload["seed"] = seed_value
                 if style_type_payload:
                     payload["style_type"] = style_type_payload
+                if image_weight is not None:
+                    payload["image_weight"] = image_weight
 
                 result = post_to_pipeline(payload)
                 if result:
@@ -329,6 +420,10 @@ elif mode == MODE_IMAGE_TO_IMAGE:
                         "base_prompt"
                     ) or result.get("prompt")
                     st.session_state.pop("edited_logo", None)
+                    st.session_state["last_image_to_image_prompt"] = payload[
+                        "edit_instruction"
+                    ]
+                    st.session_state["last_image_to_image_source"] = str(image_path)
                     st.success("✅ 이미지 리믹스 완료!")
 
     generated = st.session_state.get("generated_logo")
@@ -345,3 +440,16 @@ elif mode == MODE_IMAGE_TO_IMAGE:
 
         st.markdown("#### 프롬프트")
         st.code(generated.get("prompt") or "No prompt returned.", language="markdown")
+
+    if st.session_state.get("last_image_to_image_prompt"):
+        st.markdown("#### 전송 프롬프트 (이미지→이미지)")
+        st.code(
+            st.session_state["last_image_to_image_prompt"],
+            language="markdown",
+        )
+    if st.session_state.get("last_image_to_image_source"):
+        st.image(
+            st.session_state["last_image_to_image_source"],
+            caption="전송에 사용된 원본 이미지",
+            use_container_width=True,
+        )
