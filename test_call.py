@@ -1,1 +1,0 @@
-﻿import requests\npayload={'brand_name':'테스트','description':'테스트 설명','style':'modern'}\nresp=requests.post('http://127.0.0.1:8000/logo_pipeline', json=payload)\nprint(resp.status_code)\nprint(resp.text)
