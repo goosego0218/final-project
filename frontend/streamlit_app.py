@@ -3,6 +3,10 @@ from pathlib import Path
 from typing import Optional
 
 import requests
+from io import BytesIO
+import numpy as np
+from PIL import Image
+from streamlit_drawable_canvas import st_canvas
 import streamlit as st
 
 API_URL = "http://localhost:8000/logo_pipeline"
@@ -93,6 +97,90 @@ def save_uploaded_image(uploaded_file) -> Path:
     target_path = OUTPUT_DIR / safe_name
     target_path.write_bytes(uploaded_file.getvalue())
     return target_path
+
+
+def build_mask_from_canvas(canvas_data: np.ndarray, out_path: Path) -> Path:
+    """Convert RGBA canvas data to a binary mask: drawn area -> black (edit),
+    elsewhere -> white. Save as PNG and return path."""
+    if canvas_data is None:
+        raise ValueError("캔버스 데이터가 비어 있습니다.")
+    # canvas_data: H x W x 4 (RGBA)
+    alpha = canvas_data[:, :, 3]
+    # Drawn pixels: alpha > 0
+    drawn = alpha > 0
+    h, w = alpha.shape
+    mask = np.ones((h, w), dtype=np.uint8) * 255  # default white
+    mask[drawn] = 0  # black where edited
+    img = Image.fromarray(mask, mode="L")
+    img.save(out_path)
+    return out_path
+
+
+@st.cache_data(show_spinner=False)
+def load_image_bytes(src: str) -> bytes:
+    """Load image bytes from URL or local path (cached)."""
+    if src.startswith("http://") or src.startswith("https://"):
+        return requests.get(src, timeout=30).content
+    return Path(src).read_bytes()
+
+
+def sanitize_mask_file(path: Path) -> Path:
+    """Ensure mask contains only pure black(0) and white(255) pixels and
+    has an allowed mode. Convert to L, threshold, then force RGB for safety."""
+    try:
+        img = Image.open(path).convert("L")
+        arr = np.array(img)
+        bw = (arr > 127).astype(np.uint8) * 255
+        img_bw = Image.fromarray(bw, mode="L")
+        rgb = Image.merge("RGB", (img_bw, img_bw, img_bw))
+        rgb.save(path)
+    except Exception:
+        # If sanitization fails, leave original; downstream will error clearly
+        pass
+    return path
+
+ 
+
+
+def draw_mask_canvas_with_fallback(
+    *,
+    bg_image: Image.Image | None,
+    width: int,
+    height: int,
+    key: str,
+    update_streamlit: bool = False,
+):
+    """Try drawing canvas with background image. If the installed Streamlit/
+    canvas plugin combo does not support background images, fall back to a
+    blank canvas of the same size so 사용자가 대략 위치를 맞춰 그릴 수 있게 합니다."""
+    try:
+        return st_canvas(
+            fill_color="rgba(0, 0, 0, 1)",
+            stroke_width=20,
+            stroke_color="#000000",
+            background_image=bg_image,
+            height=height,
+            width=width,
+            drawing_mode="freedraw",
+            update_streamlit=update_streamlit,
+            key=key,
+        )
+    except AttributeError:
+        st.warning(
+            "캔버스 배경 이미지를 설정하지 못했습니다. (스트림릿/캔버스 버전 호환 이슈)\n"
+            "대신 동일 크기의 빈 캔버스를 제공합니다."
+        )
+        return st_canvas(
+            fill_color="rgba(0, 0, 0, 1)",
+            stroke_width=20,
+            stroke_color="#000000",
+            background_color="#FFFFFF",
+            height=height,
+            width=width,
+            drawing_mode="freedraw",
+            update_streamlit=update_streamlit,
+            key=f"{key}_fallback",
+        )
 
 
 st.title(APP_TITLE)
@@ -275,13 +363,13 @@ if mode == MODE_TEXT_TO_IMAGE:
         col_left, col_right = st.columns([2, 1])
         with col_left:
             st.image(
-                generated["image_url"], caption="AI 생성 로고", use_container_width=True
+                generated["image_url"], caption="AI 생성 로고", use_column_width=True
             )
             if generated.get("final_logo"):
                 st.image(
                     generated["final_logo"],
                     caption="한글 폰트 적용 버전",
-                    use_container_width=True,
+                    use_column_width=True,
                 )
         with col_right:
             st.markdown("#### 생성 정보")
@@ -340,7 +428,77 @@ if mode == MODE_TEXT_TO_IMAGE:
                             )
                             st.success("✨ Remix 완료!")
         else:
-            st.info("Edit 워크플로우는 준비 중입니다. 곧 제공될 예정이에요.")
+            st.markdown("---")
+            st.subheader("Edit (마스크 기반)")
+            st.caption("검은색(또는 불투명) 영역이 수정 대상입니다. PNG 권장")
+            mask_mode = st.radio("마스크 입력 방식", ["파일 업로드", "직접 그리기"], horizontal=True, key="mask_mode_text")
+            edit_inst2 = st.text_area("Edit 지시문", value="문자 가독성 강화, 아이콘 단순화")
+
+            mask_path: Path | None = None
+            if mask_mode == "파일 업로드":
+                mask_upload = st.file_uploader(
+                    "마스크 이미지 업로드",
+                    type=["png", "jpg", "jpeg", "webp"],
+                    key="mask_upload_text_mode",
+                )
+                if mask_upload is not None:
+                    mask_path = sanitize_mask_file(save_uploaded_image(mask_upload))
+                    st.session_state["last_mask_path"] = str(mask_path)
+            else:
+                st.caption("원본 이미지 위에 수정할 영역을 그려주세요.")
+                base_url = generated.get("original_logo") or generated.get("image_url")
+                applied_text_mask = False
+                if base_url:
+                    if Path(str(base_url)).exists():
+                        bg_img = Image.open(base_url)
+                    else:
+                        bg_bytes = load_image_bytes(str(base_url))
+                        bg_img = Image.open(BytesIO(bg_bytes))
+
+                    with st.form("mask_form_text"):
+                        canvas_result = draw_mask_canvas_with_fallback(
+                            bg_image=bg_img,
+                            width=bg_img.width,
+                            height=bg_img.height,
+                            key="mask_canvas_text_mode",
+                            update_streamlit=False,
+                        )
+                        applied_text_mask = st.form_submit_button("🖌️ 마스크 적용")
+                    if applied_text_mask and canvas_result.image_data is not None:
+                        st.session_state["mask_canvas_text_data"] = canvas_result.image_data
+
+            edit_clicked = st.button("✏️ Edit 실행", use_container_width=True)
+            if edit_clicked:
+                if mask_mode == "직접 그리기":
+                    canvas_data = st.session_state.get("mask_canvas_text_data")
+                    if canvas_data is None:
+                        st.error("캔버스에 마스크를 그려주세요.")
+                        st.stop()
+                    out_path = OUTPUT_DIR / f"user_mask_{uuid.uuid4().hex}.png"
+                    mask_path = sanitize_mask_file(build_mask_from_canvas(canvas_data, out_path))
+                    st.session_state["last_mask_path"] = str(mask_path)
+                if mask_path is None:
+                    st.error("마스크를 업로드하거나 직접 그려주세요.")
+                else:
+                    with st.spinner("Edit 작업 중..."):
+                        payload = {
+                            "brand_name": brand,
+                            "description": description,
+                            "style": style,
+                            "negative_prompt": negative_payload,
+                            "edit_instruction": edit_inst2.strip(),
+                            "edit_image_url": generated.get("original_logo") or generated.get("image_url"),
+                            "mask_image_url": str(mask_path),
+                            "cfg_scale": cfg_scale,
+                        }
+                        if seed_value is not None:
+                            payload["seed"] = seed_value
+                        if style_type_payload:
+                            payload["style_type"] = style_type_payload
+                        edited = post_to_pipeline(payload)
+                        if edited:
+                            st.session_state["edited_logo"] = edited
+                            st.success("✨ Edit 완료!")
 
     edited = st.session_state.get("edited_logo")
     if edited:
@@ -349,11 +507,11 @@ if mode == MODE_TEXT_TO_IMAGE:
         col_original, col_remix = st.columns(2)
         with col_original:
             st.image(
-                original["image_url"], caption="원본 로고", use_container_width=True
+                original["image_url"], caption="원본 로고", use_column_width=True
             )
         with col_remix:
             st.image(
-                edited["image_url"], caption="Remix 로고", use_container_width=True
+                edited["image_url"], caption="Remix 로고", use_column_width=True
             )
 
         st.markdown("#### 프롬프트 비교")
@@ -429,13 +587,13 @@ elif mode == MODE_IMAGE_TO_IMAGE:
     generated = st.session_state.get("generated_logo")
     if generated:
         st.image(
-            generated["image_url"], caption="리믹스 결과", use_container_width=True
+            generated["image_url"], caption="리믹스 결과", use_column_width=True
         )
         if generated.get("final_logo"):
             st.image(
                 generated["final_logo"],
                 caption="한글 폰트 적용 버전",
-                use_container_width=True,
+                use_column_width=True,
             )
 
         st.markdown("#### 프롬프트")
@@ -453,3 +611,98 @@ elif mode == MODE_IMAGE_TO_IMAGE:
             caption="전송에 사용된 원본 이미지",
             use_container_width=True,
         )
+
+ 
+
+    st.markdown("---")
+    st.subheader("마스크 기반 Edit (이미지 → 이미지)")
+    st.caption("검은색(또는 불투명) 영역이 수정 대상입니다. PNG 권장")
+    mask_mode_img = st.radio("마스크 입력 방식", ["파일 업로드", "직접 그리기"], horizontal=True, key="mask_mode_image")
+    edit_instruction2 = st.text_area(
+        "Edit 지시문",
+        value=st.session_state.get(
+            "last_edit_instruction",
+            "원본 로고는 유지하고 배경만 교체해 주세요.",
+        ),
+    )
+
+    mask_path2: Path | None = None
+    if mask_mode_img == "파일 업로드":
+        mask_upload2 = st.file_uploader(
+            "마스크 이미지 업로드",
+            type=["png", "jpg", "jpeg", "webp"],
+            key="mask_upload_image_mode",
+        )
+        if mask_upload2 is not None:
+            mask_path2 = sanitize_mask_file(save_uploaded_image(mask_upload2))
+            st.session_state["last_mask_path"] = str(mask_path2)
+    else:
+        if uploaded_image is not None:
+            base_preview = Image.open(uploaded_image)
+            with st.form("mask_form_image"):
+                canvas_result2 = draw_mask_canvas_with_fallback(
+                    bg_image=base_preview,
+                    width=base_preview.width,
+                    height=base_preview.height,
+                    key="mask_canvas_image_mode",
+                    update_streamlit=False,
+                )
+                applied_image_mask = st.form_submit_button("🖌️ 마스크 적용")
+            if applied_image_mask and canvas_result2.image_data is not None:
+                st.session_state["mask_canvas_image_data"] = canvas_result2.image_data
+
+    edit_btn = st.button("✏️ Edit 실행", use_container_width=True)
+    if edit_btn:
+        if not uploaded_image:
+            st.error("원본 이미지를 먼저 업로드해주세요.")
+        elif mask_mode_img == "직접 그리기":
+            canvas_data2 = st.session_state.get("mask_canvas_image_data")
+            if canvas_data2 is None and mask_path2 is None:
+                st.error("마스크를 업로드하거나 직접 그려주세요.")
+                st.stop()
+            if canvas_data2 is not None and mask_path2 is None:
+                out_path2 = OUTPUT_DIR / f"user_mask_{uuid.uuid4().hex}.png"
+                mask_path2 = sanitize_mask_file(build_mask_from_canvas(canvas_data2, out_path2))
+                st.session_state["last_mask_path"] = str(mask_path2)
+        elif mask_path2 is None:
+            st.error("마스크를 업로드하거나 직접 그려주세요.")
+        elif not edit_instruction2.strip():
+            st.error("Edit 지시문을 입력해주세요.")
+        else:
+            base_path = save_uploaded_image(uploaded_image)
+            with st.spinner("Edit 작업 중..."):
+                payload = {
+                    "brand_name": brand,
+                    "description": description,
+                    "style": style,
+                    "edit_instruction": edit_instruction2.strip(),
+                    "edit_image_url": str(base_path),
+                    "mask_image_url": str(mask_path2),
+                    "cfg_scale": cfg_scale,
+                }
+                if style_type_payload:
+                    payload["style_type"] = style_type_payload
+                edited2 = post_to_pipeline(payload)
+                if edited2:
+                    st.session_state["generated_logo"] = edited2
+                    st.session_state["last_image_to_image_prompt"] = payload["edit_instruction"]
+                    st.session_state["last_image_to_image_source"] = str(base_path)
+                    st.success("✨ Edit 완료!")
+
+    # Debug section for mask validation
+    with st.expander("디버그: 마스크 점검"):
+        last_mask = st.session_state.get("last_mask_path")
+        if last_mask and Path(last_mask).exists():
+            try:
+                mimg = Image.open(last_mask)
+                st.image(last_mask, caption=f"마스크 미리보기 ({mimg.mode} {mimg.size})")
+                arr = np.array(mimg.convert("L"))
+                uniques = np.unique(arr)
+                st.write({"mode": mimg.mode, "size": mimg.size, "unique": uniques.tolist()[:10]})
+                st.write(
+                    f"검정 비율: {(arr==0).mean():.2%}, 흰색 비율: {(arr==255).mean():.2%}"
+                )
+            except Exception as e:
+                st.warning(f"마스크 분석 실패: {e}")
+        else:
+            st.info("최근 생성된 마스크가 없습니다. (적용/실행 후 표시)")
