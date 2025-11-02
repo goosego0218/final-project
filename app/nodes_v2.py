@@ -9,19 +9,7 @@ from pydantic import HttpUrl
 
 from .config import IDEOGRAM_API_KEY, client
 
-from .agent_schema import (
-    EvaluatorIn,
-    EvaluatorOut,
-    ImageOperatorIn,
-    ImageOperatorOut,
-    IntentRouterIn,
-    IntentRouterOut,
-    LogoState,
-    PromptPlannerIn,
-    PromptPlannerOut,
-    TaskType,
-    choose_task_type,
-)
+from .agent_schema import LogoState, TaskType, choose_task_type
 
 
 def intent_router_node(state: LogoState) -> LogoState:
@@ -31,11 +19,14 @@ def intent_router_node(state: LogoState) -> LogoState:
     # If image present and human/edit instruction present, prefer remix (no mask) or edit (mask)
     if has_mask:
         task = TaskType.EDIT
+        reason = "mask_present"
     elif has_image and (state.get("human_feedback") or state.get("next_prompt_hint")):
         task = TaskType.REMIX
+        reason = "image_and_feedback_present"
     else:
         task = choose_task_type(user_text, has_image=has_image, has_mask=has_mask)
-    return {"task_type": task.value}
+        reason = "heuristic"
+    return {"task_type": task.value, "task_reason": reason, "updated_at": datetime.utcnow()}
 
 
 def prompt_planner_node(state: LogoState) -> LogoState:
@@ -150,7 +141,12 @@ def image_operator_node(state: LogoState) -> LogoState:
         img = _first_url(input_images)
         if not img:
             # If no image, return empty and mark done
-            return {"candidate_images": [], "last_generated_image_url": None, "updated_at": datetime.utcnow()}
+            return {
+                "candidate_images": [],
+                "last_generated_image_url": None,
+                "api_endpoint": "describe",
+                "updated_at": datetime.utcnow(),
+            }
         data = {"image_url": img}
         body = _post_json("https://api.ideogram.ai/v1/ideogram-v3/describe", headers, data)
         description = body.get("data", [{}])[0].get("description", "")
@@ -159,11 +155,16 @@ def image_operator_node(state: LogoState) -> LogoState:
             "eval_feedback": f"Image description: {description}",
             "candidate_images": [],
             "last_generated_image_url": img,
+            "api_endpoint": "describe",
             "updated_at": datetime.utcnow(),
         }
 
     # GENERATE / REMIX / EDIT
+    api_ep = None
     if task == TaskType.GENERATE.value:
+        # Default to DESIGN style for initial logo generation if not specified
+        if not style_type:
+            style_type = "DESIGN"
         payload = {"prompt": prompt, "rendering_speed": rendering_speed}
         if negative:
             payload["negative_prompt"] = negative
@@ -177,6 +178,7 @@ def image_operator_node(state: LogoState) -> LogoState:
         if seed is not None:
             payload["seed"] = seed
         body = _post_json("https://api.ideogram.ai/v1/ideogram-v3/generate", headers, payload)
+        api_ep = "generate"
     elif task == TaskType.REMIX.value:
         base_img = _first_url(input_images)
         if not base_img:
@@ -194,6 +196,7 @@ def image_operator_node(state: LogoState) -> LogoState:
         if aspect_ratio:
             data["aspect_ratio"] = aspect_ratio
         body = _post_multipart("https://api.ideogram.ai/v1/ideogram-v3/remix", headers, data, files)
+        api_ep = "remix"
     elif task == TaskType.EDIT.value or task == TaskType.REPLACE_BG.value:
         base_img = _first_url(input_images)
         if not base_img or not input_mask:
@@ -224,6 +227,7 @@ def image_operator_node(state: LogoState) -> LogoState:
         if aspect_ratio:
             data["aspect_ratio"] = aspect_ratio
         body = _post_multipart("https://api.ideogram.ai/v1/ideogram-v3/edit", headers, data, files)
+        api_ep = "edit"
     else:
         raise ValueError(f"Unsupported task_type: {task}")
 
@@ -242,6 +246,7 @@ def image_operator_node(state: LogoState) -> LogoState:
         "candidate_images": candidates,
         "last_generated_image_url": last_url,
         "is_image_safe": True,
+        "api_endpoint": api_ep,
         "updated_at": datetime.utcnow(),
     }
 

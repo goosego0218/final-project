@@ -39,7 +39,6 @@ def run_logo_pipeline(req: LogoRequest):
             # 사용자가 명시적으로 base_prompt를 준 경우에만 초기 프롬프트로 사용.
             "enhanced_prompt": req.base_prompt or "",
             "negative_prompt": req.negative_prompt,
-            "color_palette": None,
             "style_tags": None,
             # Prefer style_type (Ideogram); keep style_preset for compatibility
             "style_type": req.style_type or None,
@@ -68,7 +67,6 @@ def run_logo_pipeline(req: LogoRequest):
             "final_logo": None,
             "negative_prompt": state.get("negative_prompt"),
             "prompt_history": [],
-            "color_palette": state.get("color_palette"),
             "remix_attempts": state.get("regen_round"),
             "image_weight": None,
         }

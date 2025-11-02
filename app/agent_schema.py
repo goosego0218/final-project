@@ -55,7 +55,6 @@ class LogoState(TypedDict, total=False):
     # 3. Prompt planning
     enhanced_prompt: str
     negative_prompt: Optional[str]
-    color_palette: Optional[List[str]]
     style_tags: Optional[List[str]]
     style_preset: Optional[str]
     style_type: Optional[str]
@@ -77,6 +76,13 @@ class LogoState(TypedDict, total=False):
 
     # 6. Completion
     done: bool
+
+    # 7. Debug/trace (optional)
+    task_reason: Optional[str]                 # why router chose this task
+    api_endpoint: Optional[str]               # generate|remix|edit|describe
+    mask_source: Optional[str]                # upload|canvas|server_sanitized
+    mask_size: Optional[List[int]]            # [width, height]
+    image_operator_error: Optional[str]
 
 
 # -------- Node I/O Models (Pydantic) --------
@@ -105,7 +111,6 @@ class PromptPlannerIn(BaseModel):
 class PromptPlannerOut(BaseModel):
     enhanced_prompt: str
     negative_prompt: Optional[str] = None
-    color_palette: Optional[List[str]] = None
     style_tags: Optional[List[str]] = None
     style_preset: Optional[str] = None
     rendering_speed: Optional[RenderingSpeed] = None

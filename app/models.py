@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -19,8 +19,6 @@ class LogoRequest(BaseModel):
     base_prompt: Optional[str] = None
     skip_prompt_refine: bool = False
     image_weight: Optional[int] = None
-    color_palette: Optional[dict[str, Any]] = None
-    enable_palette_suggestion: bool = True
     auto_retry_remix: bool = True
     remix_max_retries: int = 1
 

@@ -100,17 +100,35 @@ def save_uploaded_image(uploaded_file) -> Path:
 
 
 def build_mask_from_canvas(canvas_data: np.ndarray, out_path: Path) -> Path:
-    """Convert RGBA canvas data to a binary mask: drawn area -> black (edit),
-    elsewhere -> white. Save as PNG and return path."""
+    """Convert canvas RGBA to a binary mask using a unique stroke color key.
+    - We draw with pure magenta (255, 0, 255) on the canvas.
+    - Pixels close to this color are treated as edited (mask=black), others white.
+    - This works even when a background image is shown under the strokes.
+    """
     if canvas_data is None:
         raise ValueError("캔버스 데이터가 비어 있습니다.")
-    # canvas_data: H x W x 4 (RGBA)
-    alpha = canvas_data[:, :, 3]
-    # Drawn pixels: alpha > 0
-    drawn = alpha > 0
-    h, w = alpha.shape
-    mask = np.ones((h, w), dtype=np.uint8) * 255  # default white
-    mask[drawn] = 0  # black where edited
+    arr = canvas_data
+    # Ensure uint8 0..255
+    if arr.dtype != np.uint8:
+        arr = arr.astype("float32")
+        if arr.max() <= 1.0:
+            arr = (arr * 255.0).clip(0, 255)
+        arr = arr.astype("uint8")
+    r = arr[:, :, 0].astype("int16")
+    g = arr[:, :, 1].astype("int16")
+    b = arr[:, :, 2].astype("int16")
+    a = arr[:, :, 3].astype("int16")
+    # Target stroke color (magenta) with small tolerance
+    tol = 10
+    is_magenta = (
+        (abs(r - 255) <= tol)
+        & (abs(g - 0) <= tol)
+        & (abs(b - 255) <= tol)
+        & (a > 0)
+    )
+    h, w = a.shape
+    mask = np.ones((h, w), dtype=np.uint8) * 255
+    mask[is_magenta] = 0
     img = Image.fromarray(mask, mode="L")
     img.save(out_path)
     return out_path
@@ -150,20 +168,30 @@ def draw_mask_canvas_with_fallback(
     key: str,
     update_streamlit: bool = False,
 ):
-    """Try drawing canvas with background image. If the installed Streamlit/
-    canvas plugin combo does not support background images, fall back to a
-    blank canvas of the same size so 사용자가 대략 위치를 맞춰 그릴 수 있게 합니다."""
+    """Draw a canvas for mask creation.
+    - If bg_image is provided, render it as background (visual guide only).
+    - If bg_image is None, force a fully transparent background so alpha channel
+      differentiates drawn strokes reliably (alpha>0 -> mask region).
+    - On environments without background_image support, fall back to a blank canvas.
+    """
     try:
+        background_kwargs = {
+            "background_image": bg_image,
+        }
+        if bg_image is None:
+            background_kwargs = {
+                "background_color": "rgba(0, 0, 0, 0)",  # fully transparent
+            }
         return st_canvas(
-            fill_color="rgba(0, 0, 0, 1)",
+            fill_color="rgba(255, 0, 255, 1)",  # magenta fill (mask key color)
             stroke_width=20,
-            stroke_color="#000000",
-            background_image=bg_image,
+            stroke_color="#ff00ff",
             height=height,
             width=width,
             drawing_mode="freedraw",
             update_streamlit=update_streamlit,
             key=key,
+            **background_kwargs,
         )
     except AttributeError:
         st.warning(
@@ -171,10 +199,10 @@ def draw_mask_canvas_with_fallback(
             "대신 동일 크기의 빈 캔버스를 제공합니다."
         )
         return st_canvas(
-            fill_color="rgba(0, 0, 0, 1)",
+            fill_color="rgba(255, 0, 255, 1)",
             stroke_width=20,
-            stroke_color="#000000",
-            background_color="#FFFFFF",
+            stroke_color="#ff00ff",
+            background_color="rgba(0, 0, 0, 0)",
             height=height,
             width=width,
             drawing_mode="freedraw",
@@ -200,7 +228,7 @@ if mode == MODE_TEXT_TO_IMAGE:
 
     brand = sidebar.text_input(
         "브랜드명",
-        st.session_state.get("text_brand", "서민고기"),
+        st.session_state.get("text_brand", "모카로스터스"),
         key="text_brand_input",
     )
     st.session_state["text_brand"] = brand
@@ -208,7 +236,7 @@ if mode == MODE_TEXT_TO_IMAGE:
     description = sidebar.text_area(
         "브랜드 설명",
         st.session_state.get(
-            "text_description", "직화구이 전문점, 따뜻하고 정직한 이미지"
+            "text_description", "스페셜티 커피 전문점, 따뜻하고 세련된 분위기"
         ),
         key="text_description_input",
     )
@@ -217,7 +245,7 @@ if mode == MODE_TEXT_TO_IMAGE:
     style = sidebar.text_input(
         "디자인 스타일",
         st.session_state.get(
-            "text_style", "warm, minimal, Korean calligraphy inspired"
+            "text_style", "modern, minimal, cafe logo, coffee bean icon"
         ),
         key="text_style_input",
     )
@@ -336,7 +364,6 @@ if mode == MODE_TEXT_TO_IMAGE:
                 "style": style,
                 "negative_prompt": negative_payload,
                 "cfg_scale": cfg_scale,
-                "enable_palette_suggestion": True,
             }
             if seed_value is not None:
                 payload["seed"] = seed_value
@@ -456,16 +483,39 @@ if mode == MODE_TEXT_TO_IMAGE:
                         bg_img = Image.open(BytesIO(bg_bytes))
 
                     with st.form("mask_form_text"):
+                        hide_bg = st.checkbox(
+                            "배경 숨기기(정확도↑, 가이드↓)", value=False, help="배경을 숨기면 검출은 더 정확해지지만, 가이드는 보이지 않습니다.")
+                        st.caption("분홍색으로 칠한 영역이 편집 대상입니다. 아이콘/텍스트를 '꽉 채워서' 칠하세요.")
                         canvas_result = draw_mask_canvas_with_fallback(
-                            bg_image=bg_img,
+                            bg_image=None if hide_bg else bg_img,
                             width=bg_img.width,
                             height=bg_img.height,
                             key="mask_canvas_text_mode",
-                            update_streamlit=False,
+                            update_streamlit=True,
                         )
                         applied_text_mask = st.form_submit_button("🖌️ 마스크 적용")
                     if applied_text_mask and canvas_result.image_data is not None:
                         st.session_state["mask_canvas_text_data"] = canvas_result.image_data
+                        # Build and preview a sanitized mask image immediately
+                        preview_path = OUTPUT_DIR / f"mask_preview_{uuid.uuid4().hex}.png"
+                        preview_path = sanitize_mask_file(
+                            build_mask_from_canvas(canvas_result.image_data, preview_path)
+                        )
+                        st.session_state["last_mask_path"] = str(preview_path)
+                        # Show side-by-side original and mask preview + coverage
+                        col_a, col_b = st.columns(2)
+                        with col_a:
+                            st.image(bg_img, caption="원본 미리보기", use_column_width=True)
+                        with col_b:
+                            st.image(str(preview_path), caption="마스크 미리보기", use_column_width=True)
+                            try:
+                                import numpy as _np
+                                from PIL import Image as _PILImage
+                                _arr = _np.array(_PILImage.open(preview_path).convert("L"))
+                                coverage = 100.0 * (1.0 - (_arr == 255).mean())
+                                st.caption(f"마스크 커버리지: {coverage:.1f}% (검정=수정 영역)")
+                            except Exception:
+                                pass
 
             edit_clicked = st.button("✏️ Edit 실행", use_container_width=True)
             if edit_clicked:
@@ -640,16 +690,38 @@ elif mode == MODE_IMAGE_TO_IMAGE:
         if uploaded_image is not None:
             base_preview = Image.open(uploaded_image)
             with st.form("mask_form_image"):
+                hide_bg2 = st.checkbox(
+                    "배경 숨기기(정확도↑, 가이드↓)", value=False, help="배경을 숨기면 검출은 더 정확해지지만, 가이드는 보이지 않습니다.")
+                st.caption("분홍색으로 칠한 영역이 편집 대상입니다. 원하는 부위를 '꽉 채워서' 칠하세요.")
                 canvas_result2 = draw_mask_canvas_with_fallback(
-                    bg_image=base_preview,
+                    bg_image=None if hide_bg2 else base_preview,
                     width=base_preview.width,
                     height=base_preview.height,
                     key="mask_canvas_image_mode",
-                    update_streamlit=False,
+                    update_streamlit=True,
                 )
                 applied_image_mask = st.form_submit_button("🖌️ 마스크 적용")
             if applied_image_mask and canvas_result2.image_data is not None:
                 st.session_state["mask_canvas_image_data"] = canvas_result2.image_data
+                # Build and preview a sanitized mask image immediately for image mode
+                preview_path2 = OUTPUT_DIR / f"mask_preview_{uuid.uuid4().hex}.png"
+                preview_path2 = sanitize_mask_file(
+                    build_mask_from_canvas(canvas_result2.image_data, preview_path2)
+                )
+                st.session_state["last_mask_path"] = str(preview_path2)
+                col_c, col_d = st.columns(2)
+                with col_c:
+                    st.image(base_preview, caption="원본 미리보기", use_column_width=True)
+                with col_d:
+                    st.image(str(preview_path2), caption="마스크 미리보기", use_column_width=True)
+                    try:
+                        import numpy as _np
+                        from PIL import Image as _PILImage
+                        _arr2 = _np.array(_PILImage.open(preview_path2).convert("L"))
+                        coverage2 = 100.0 * (1.0 - (_arr2 == 255).mean())
+                        st.caption(f"마스크 커버리지: {coverage2:.1f}% (검정=수정 영역)")
+                    except Exception:
+                        pass
 
     edit_btn = st.button("✏️ Edit 실행", use_container_width=True)
     if edit_btn:

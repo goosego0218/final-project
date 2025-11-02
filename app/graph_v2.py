@@ -74,5 +74,3 @@ def build_graph_v2() -> StateGraph:
 
 
 compiled_graph_v2 = build_graph_v2().compile()
-# Backward-compatible alias so other modules can import a single symbol
-compiled_graph = compiled_graph_v2
