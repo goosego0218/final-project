@@ -26,7 +26,11 @@ def intent_router_node(state: LogoState) -> LogoState:
     else:
         task = choose_task_type(user_text, has_image=has_image, has_mask=has_mask)
         reason = "heuristic"
-    return {"task_type": task.value, "task_reason": reason, "updated_at": datetime.utcnow()}
+    return {
+        "task_type": task.value,
+        "task_reason": reason,
+        "updated_at": datetime.utcnow(),
+    }
 
 
 def prompt_planner_node(state: LogoState) -> LogoState:
@@ -98,7 +102,9 @@ def _load_bytes(source: str) -> bytes:
     return Path(source).read_bytes()
 
 
-def _sanitize_mask_bytes(mask_bytes: bytes, target_size: Optional[Tuple[int, int]] = None) -> bytes:
+def _sanitize_mask_bytes(
+    mask_bytes: bytes, target_size: Optional[Tuple[int, int]] = None
+) -> bytes:
     """Coerce the mask to pure black/white and allowed mode. Optionally resize to target.
     - Convert to L, apply threshold, then convert to RGB, and PNG-encode.
     - If target_size is provided, resize with NEAREST to preserve BW.
@@ -148,7 +154,9 @@ def image_operator_node(state: LogoState) -> LogoState:
                 "updated_at": datetime.utcnow(),
             }
         data = {"image_url": img}
-        body = _post_json("https://api.ideogram.ai/v1/ideogram-v3/describe", headers, data)
+        body = _post_json(
+            "https://api.ideogram.ai/v1/ideogram-v3/describe", headers, data
+        )
         description = body.get("data", [{}])[0].get("description", "")
         # Store as feedback to influence next planning
         return {
@@ -177,7 +185,9 @@ def image_operator_node(state: LogoState) -> LogoState:
             payload["style_type"] = style_preset
         if seed is not None:
             payload["seed"] = seed
-        body = _post_json("https://api.ideogram.ai/v1/ideogram-v3/generate", headers, payload)
+        body = _post_json(
+            "https://api.ideogram.ai/v1/ideogram-v3/generate", headers, payload
+        )
         api_ep = "generate"
     elif task == TaskType.REMIX.value:
         base_img = _first_url(input_images)
@@ -195,7 +205,9 @@ def image_operator_node(state: LogoState) -> LogoState:
             data["seed"] = str(seed)
         if aspect_ratio:
             data["aspect_ratio"] = aspect_ratio
-        body = _post_multipart("https://api.ideogram.ai/v1/ideogram-v3/remix", headers, data, files)
+        body = _post_multipart(
+            "https://api.ideogram.ai/v1/ideogram-v3/remix", headers, data, files
+        )
         api_ep = "remix"
     elif task == TaskType.EDIT.value or task == TaskType.REPLACE_BG.value:
         base_img = _first_url(input_images)
@@ -206,6 +218,7 @@ def image_operator_node(state: LogoState) -> LogoState:
         try:
             from PIL import Image
             from io import BytesIO
+
             with Image.open(BytesIO(base_bytes)) as _im:
                 target_size = _im.size
         except Exception:
@@ -226,7 +239,9 @@ def image_operator_node(state: LogoState) -> LogoState:
             data["seed"] = str(seed)
         if aspect_ratio:
             data["aspect_ratio"] = aspect_ratio
-        body = _post_multipart("https://api.ideogram.ai/v1/ideogram-v3/edit", headers, data, files)
+        body = _post_multipart(
+            "https://api.ideogram.ai/v1/ideogram-v3/edit", headers, data, files
+        )
         api_ep = "edit"
     else:
         raise ValueError(f"Unsupported task_type: {task}")
@@ -240,7 +255,9 @@ def image_operator_node(state: LogoState) -> LogoState:
         if not url:
             continue
         last_url = url
-        candidates.append({"url": url, "source": "ideogram", "variant_id": item.get("id")})
+        candidates.append(
+            {"url": url, "source": "ideogram", "variant_id": item.get("id")}
+        )
 
     return {
         "candidate_images": candidates,

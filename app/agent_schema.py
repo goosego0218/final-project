@@ -78,10 +78,10 @@ class LogoState(TypedDict, total=False):
     done: bool
 
     # 7. Debug/trace (optional)
-    task_reason: Optional[str]                 # why router chose this task
-    api_endpoint: Optional[str]               # generate|remix|edit|describe
-    mask_source: Optional[str]                # upload|canvas|server_sanitized
-    mask_size: Optional[List[int]]            # [width, height]
+    task_reason: Optional[str]  # why router chose this task
+    api_endpoint: Optional[str]  # generate|remix|edit|describe
+    mask_source: Optional[str]  # upload|canvas|server_sanitized
+    mask_size: Optional[List[int]]  # [width, height]
     image_operator_error: Optional[str]
 
 
