@@ -2,7 +2,6 @@ from pathlib import Path
 import os
 
 from dotenv import load_dotenv
-from openai import OpenAI
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -10,8 +9,14 @@ load_dotenv(BASE_DIR / ".env")
 
 IDEOGRAM_API_KEY = os.getenv("IDEOGRAM_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+LANGCHAIN_API_KEY = os.getenv("LANGCHAIN_API_KEY")
+LANGCHAIN_PROJECT = os.getenv("LANGCHAIN_PROJECT") or os.getenv("LANGSMITH_PROJECT")
+LANGCHAIN_ENDPOINT = os.getenv("LANGCHAIN_ENDPOINT")
 
-client = OpenAI(api_key=OPENAI_API_KEY)
+# Automatically enable LangSmith tracing when credentials are present.
+if LANGCHAIN_API_KEY and not os.getenv("LANGCHAIN_TRACING_V2"):
+    os.environ["LANGCHAIN_TRACING_V2"] = "true"
 
 SAVE_DIR = Path("data/outputs")
 FONT_DIR = Path("fonts")

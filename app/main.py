@@ -34,6 +34,10 @@ def run_logo_pipeline(req: LogoRequest):
             "target_usage": ["generic"],
             "input_image_urls": input_images,
             "input_mask_url": req.mask_image_url or None,
+            "requested_task_type": req.image_task_mode or None,
+            # Sidebar/Main prompt inputs from UI (optional)
+            "prompt_keywords": req.prompt_keywords or None,
+            "user_prompt": req.user_prompt or (req.base_prompt or ""),
             # 초기에는 사용자 스타일 텍스트를 그대로 프롬프트로 쓰지 않고,
             # PromptPlanner가 브랜드/설명/톤을 결합해 최종 프롬프트를 만들게 한다.
             # 사용자가 명시적으로 base_prompt를 준 경우에만 초기 프롬프트로 사용.
@@ -46,6 +50,10 @@ def run_logo_pipeline(req: LogoRequest):
             "rendering_speed": "DEFAULT",
             "aspect_ratio": None,
             "seed": req.seed,
+            "remix_strength": req.remix_strength,
+            "remix_num_images": req.remix_num_images,
+            "edit_inpaint_strength": req.edit_inpaint_strength,
+            "edit_keep_background": req.edit_keep_background,
             "candidate_images": [],
             "last_generated_image_url": None,
             "is_image_safe": None,
@@ -59,6 +67,18 @@ def run_logo_pipeline(req: LogoRequest):
 
         state = compiled_graph_v2.invoke(v2_state)
 
+        eval_scores = {
+            "match": state.get("eval_alignment_score"),
+            "typography": state.get("eval_typography_score"),
+            "hangul": state.get("eval_hangul_score"),
+            "negative": state.get("eval_negative_score"),
+            "layout": state.get("eval_layout_score"),
+            "feedback": state.get("eval_feedback_score"),
+        }
+        overall_norm = state.get("eval_score")
+        if overall_norm is not None:
+            eval_scores["overall"] = int(round(overall_norm * 100))
+
         return {
             "prompt": state.get("enhanced_prompt"),
             "base_prompt": state.get("enhanced_prompt"),
@@ -68,6 +88,11 @@ def run_logo_pipeline(req: LogoRequest):
             "negative_prompt": state.get("negative_prompt"),
             "prompt_history": [],
             "remix_attempts": state.get("regen_round"),
+            "regen_attempts": state.get("regen_round"),
+            "regen_history": state.get("regen_history"),
+            "eval_feedback": state.get("eval_feedback"),
+            "eval_scores": eval_scores,
+            "next_prompt_hint": state.get("next_prompt_hint"),
             "image_weight": None,
         }
     except Exception as exc:

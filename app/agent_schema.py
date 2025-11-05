@@ -49,10 +49,14 @@ class LogoState(TypedDict, total=False):
         "replace_bg",
         "describe",
     ]
+    requested_task_type: Optional[str]
     input_image_urls: List[str]
     input_mask_url: Optional[str]
 
     # 3. Prompt planning
+    # Sidebar/Main prompt inputs
+    prompt_keywords: Optional[List[str]]
+    user_prompt: Optional[str]
     enhanced_prompt: str
     negative_prompt: Optional[str]
     style_tags: Optional[List[str]]
@@ -61,18 +65,30 @@ class LogoState(TypedDict, total=False):
     rendering_speed: Optional[str]
     aspect_ratio: Optional[str]
     seed: Optional[int]
+    remix_strength: Optional[float]
+    remix_num_images: Optional[int]
+    edit_inpaint_strength: Optional[float]
+    edit_keep_background: Optional[bool]
 
     # 4. Image results
     candidate_images: List[CandidateImage]
     last_generated_image_url: Optional[str]
     is_image_safe: Optional[bool]
 
-    # 5. Evaluation / feedback
+     # 5. Evaluation / feedback
     eval_score: Optional[float]
     eval_feedback: Optional[str]
     human_feedback: Optional[str]
     next_prompt_hint: Optional[str]
+    safety_notes: Optional[str]
+    eval_alignment_score: Optional[int]
+    eval_typography_score: Optional[int]
+    eval_hangul_score: Optional[int]
+    eval_negative_score: Optional[int]
+    eval_layout_score: Optional[int]
+    eval_feedback_score: Optional[int]
     regen_round: int
+    regen_history: Optional[List[Dict[str, str]]]
 
     # 6. Completion
     done: bool
@@ -103,6 +119,9 @@ class PromptPlannerIn(BaseModel):
     brand_description: str
     brand_tone: Optional[str] = None
     target_usage: Optional[List[str]] = None
+    # Sidebar + main prompt inputs
+    prompt_keywords: Optional[List[str]] = None
+    user_prompt: Optional[str] = None
     base_prompt: Optional[str] = None
     human_feedback: Optional[str] = None
     eval_feedback: Optional[str] = None

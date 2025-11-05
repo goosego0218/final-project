@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AirPods Pro 3 리뷰 분석 대시보드</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body { background-color: #F9FAFB; color: #333; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; }
+    .card { background: white; border: 1px solid #E5E7EB; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); padding: 24px; }
+  </style>
+</head>
+<body class="p-8">
+  <h1 class="text-3xl font-bold mb-8 text-[#5B8EFF]">AirPods Pro 3 리뷰 분석 대시보드</h1>
+
+  <!-- KPI 섹션 -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="card">
+      <p class="text-sm text-gray-500 mb-1">총 리뷰 수</p>
+      <p class="text-2xl font-semibold">1,235건</p>
+      <p class="text-sm text-[#5B8EFF] font-medium">+12%</p>
+      <p class="text-xs text-gray-400 mt-1">분석 대상 전체 리뷰 수</p>
+    </div>
+    <div class="card">
+      <p class="text-sm text-gray-500 mb-1">긍정 비율</p>
+      <p class="text-2xl font-semibold">78%</p>
+      <p class="text-sm text-[#5B8EFF] font-medium">▲3%</p>
+      <p class="text-xs text-gray-400 mt-1">긍정 평가 비중</p>
+    </div>
+    <div class="card">
+      <p class="text-sm text-gray-500 mb-1">부정 비율</p>
+      <p class="text-2xl font-semibold">12%</p>
+      <p class="text-sm text-[#5B8EFF] font-medium">▼2%</p>
+      <p class="text-xs text-gray-400 mt-1">부정 평가 비중</p>
+    </div>
+    <div class="card">
+      <p class="text-sm text-gray-500 mb-1">종합 스코어</p>
+      <p class="text-2xl font-semibold">4.5 / 5.0</p>
+      <p class="text-sm text-[#5B8EFF] font-medium">+0.2</p>
+      <p class="text-xs text-gray-400 mt-1">전체 감정 점수 기반 산출</p>
+    </div>
+  </div>
+
+  <!-- 감정 추이 + 레이더 -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="card">
+      <h2 class="font-semibold mb-4">📈 감정 추이 (최근 1개월)</h2>
+      <canvas id="trendChart" height="200"></canvas>
+    </div>
+    <div class="card">
+      <h2 class="font-semibold mb-4">🕸️ 속성별 감정 밸런스</h2>
+      <canvas id="radarChart" height="200"></canvas>
+    </div>
+  </div>
+
+  <!-- 막대 그래프 -->
+  <div class="card mb-8">
+    <h2 class="font-semibold mb-4">📊 속성별 긍·부정 분기형 막대 그래프</h2>
+    <canvas id="barChart" height="250"></canvas>
+  </div>
+
+  <!-- 인사이트 카드 -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="card">
+      <h3 class="font-semibold mb-2">A. 핵심 인사이트</h3>
+      <p>전체 긍정률이 78%로 꾸준히 상승 중이며, ‘디자인’, ‘착용감’, ‘음질’이 주요 강점입니다.</p>
+    </div>
+    <div class="card">
+      <h3 class="font-semibold mb-2">B. 개선 제안</h3>
+      <p>배터리 지속시간 관련 부정 리뷰가 40% 이상 발생. 전원 효율성 개선 필요.</p>
+    </div>
+    <div class="card">
+      <h3 class="font-semibold mb-2">C. 리뷰 샘플</h3>
+      <ul class="text-sm space-y-2">
+        <li>💬 “디자인은 예쁜데 가격이 비싸요.”</li>
+        <li>💬 “소음이 거의 없어 만족합니다.”</li>
+        <li>💬 “배터리 빨리 닳아요.”</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    // 감정 추이
+    new Chart(document.getElementById('trendChart'), {
+      type: 'line',
+      data: {
+        labels: ['1/15', '1/22', '1/29', '2/07'],
+        datasets: [
+          { label: '긍정', data: [62, 70, 75, 78], borderColor: '#5B8EFF', tension: 0.3 },
+          { label: '부정', data: [18, 15, 13, 12], borderColor: '#B0B0B0', tension: 0.3 }
+        ]
+      },
+      options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    });
+
+    // 레이더 차트
+    new Chart(document.getElementById('radarChart'), {
+      type: 'radar',
+      data: {
+        labels: ['디자인', '착용감', '음질', '배터리', '전원 효율', '브랜드 신뢰도'],
+        datasets: [
+          { label: '긍정', data: [90, 82, 75, 60, 55, 88], borderColor: '#5B8EFF', backgroundColor: 'rgba(91,142,255,0.4)' },
+          { label: '부정', data: [10, 18, 25, 40, 45, 12], borderColor: '#D1D5DB', backgroundColor: 'rgba(209,213,219,0.3)' }
+        ]
+      },
+      options: { responsive: true, scales: { r: { angleLines: { display: false }, suggestedMin: 0, suggestedMax: 100 } } }
+    });
+
+    // 막대 그래프
+    new Chart(document.getElementById('barChart'), {
+      type: 'bar',
+      data: {
+        labels: ['가격', '디자인', '음질', '배터리', '착용감'],
+        datasets: [
+          { label: '부정', data: [10, 2, 3, 8, 2], backgroundColor: '#D1D5DB' },
+          { label: '긍정', data: [6, 14, 10, 4, 9], backgroundColor: '#5B8EFF' }
+        ]
+      },
+      options: { responsive: true, indexAxis: 'y', plugins: { legend: { position: 'bottom' } } }
+    });
+  </script>
+</body>
+</html>

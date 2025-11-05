@@ -8,6 +8,9 @@ class LogoRequest(BaseModel):
     description: str
     style: str = "minimal, clean, flat design"
     negative_prompt: Optional[str] = None
+    # Sidebar/Main prompt inputs (optional)
+    prompt_keywords: Optional[list[str]] = None
+    user_prompt: Optional[str] = None
     reference_images: Optional[list[str]] = None
     character_reference_images: Optional[list[str]] = None
     edit_image_url: Optional[str] = None
@@ -21,6 +24,11 @@ class LogoRequest(BaseModel):
     image_weight: Optional[int] = None
     auto_retry_remix: bool = True
     remix_max_retries: int = 1
+    image_task_mode: Optional[str] = None  # "remix" | "edit"
+    remix_strength: Optional[float] = None
+    remix_num_images: Optional[int] = None
+    edit_inpaint_strength: Optional[float] = None
+    edit_keep_background: Optional[bool] = None
 
 
 # v1 state definitions removed; v2 uses app.agent_schema.LogoState

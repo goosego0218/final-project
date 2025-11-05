@@ -13,45 +13,17 @@ API_URL = "http://localhost:8000/logo_pipeline"
 OUTPUT_DIR = Path("data/outputs")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-st.set_page_config(page_title="AI Logo Maker", page_icon="🎨", layout="wide")
+st.set_page_config(page_title="AI 로고 메이커", page_icon=":art:", layout="wide")
 
-APP_TITLE = "🎨 AI Logo Maker"
-#APP_SUBTITLE = "LLM Prompt Fusion + Ideogram + LangGraph + Korean Font Overlay"
+APP_TITLE = "AI 로고 메이커"
 
-MODE_TEXT_TO_IMAGE = "Text → Image"
-MODE_IMAGE_TO_IMAGE = "Image → Image"
+MODE_TEXT_TO_IMAGE = "텍스트 → 이미지"
+MODE_IMAGE_TO_IMAGE = "이미지 → 이미지"
 
 FOLLOW_UP_REMX = "Remix"
 FOLLOW_UP_EDIT = "Edit"
 
 STYLE_TYPE_OPTIONS = ["", "AUTO", "GENERAL", "REALISTIC", "DESIGN", "FICTION"]
-STYLE_TYPE_GUIDE = {
-    "AUTO": {
-        "title": "Auto",
-        "summary": "모델이 자동으로 판단해 스타일을 결정합니다.",
-        "best_for": "탐색용, 아무 방향도 정하지 않았을 때",
-    },
-    "GENERAL": {
-        "title": "General",
-        "summary": "균형 잡힌 결과물을 노리는 기본 스타일.",
-        "best_for": "다양한 그래픽 스타일을 두루 시도해보고 싶을 때",
-    },
-    "REALISTIC": {
-        "title": "Realistic",
-        "summary": "사진/실사에 가까운 질감을 강조합니다.",
-        "best_for": "제품 사진, 포토리얼 이미지",
-    },
-    "DESIGN": {
-        "title": "Design",
-        "summary": "그래픽/벡터 형태와 타이포그래피에 최적화.",
-        "best_for": "로고, 아이콘, 포스터 등 브랜드 디자인 작업",
-    },
-    "FICTION": {
-        "title": "Fiction",
-        "summary": "상상력 있는 콘셉트와 판타지 이미지에 적합.",
-        "best_for": "캐릭터, 판타지 세계관",
-    },
-}
 
 
 def reset_session_for_mode(new_mode: str) -> None:
@@ -63,6 +35,7 @@ def reset_session_for_mode(new_mode: str) -> None:
         "base_prompt",
         "last_action",
         "last_error",
+        "last_mask_path",
     ]:
         st.session_state.pop(key, None)
     st.session_state["active_mode"] = new_mode
@@ -74,19 +47,19 @@ def parse_seed(raw_seed: str) -> Optional[int]:
     try:
         return int(raw_seed)
     except ValueError:
-        st.warning("시드 값은 숫자여야 합니다. 입력을 무시합니다.")
+        st.warning("시드는 숫자만 입력 가능합니다.")
         return None
 
 
 def post_to_pipeline(payload: dict) -> Optional[dict]:
     try:
-        response = requests.post(API_URL, json=payload, timeout=60)
+        response = requests.post(API_URL, json=payload, timeout=120)
     except requests.RequestException as exc:
         st.error(f"API 요청 실패: {exc}")
         return None
 
     if response.status_code != 200:
-        st.error(f"❌ API 오류: {response.text}")
+        st.error(f"API 오류: {response.text}")
         return None
     return response.json()
 
@@ -100,15 +73,9 @@ def save_uploaded_image(uploaded_file) -> Path:
 
 
 def build_mask_from_canvas(canvas_data: np.ndarray, out_path: Path) -> Path:
-    """Convert canvas RGBA to a binary mask using a unique stroke color key.
-    - We draw with pure magenta (255, 0, 255) on the canvas.
-    - Pixels close to this color are treated as edited (mask=black), others white.
-    - This works even when a background image is shown under the strokes.
-    """
     if canvas_data is None:
-        raise ValueError("캔버스 데이터가 비어 있습니다.")
+        raise ValueError("Canvas data is empty.")
     arr = canvas_data
-    # Ensure uint8 0..255
     if arr.dtype != np.uint8:
         arr = arr.astype("float32")
         if arr.max() <= 1.0:
@@ -118,7 +85,6 @@ def build_mask_from_canvas(canvas_data: np.ndarray, out_path: Path) -> Path:
     g = arr[:, :, 1].astype("int16")
     b = arr[:, :, 2].astype("int16")
     a = arr[:, :, 3].astype("int16")
-    # Target stroke color (magenta) with small tolerance
     tol = 10
     is_magenta = (
         (abs(r - 255) <= tol)
@@ -134,17 +100,24 @@ def build_mask_from_canvas(canvas_data: np.ndarray, out_path: Path) -> Path:
     return out_path
 
 
+def apply_image_options(payload: dict, force_mode: Optional[str] = None) -> dict:
+    """Attach shared image-to-image options captured from the sidebar."""
+    payload["image_task_mode"] = force_mode or st.session_state.get("image_task_mode")
+    payload["remix_strength"] = st.session_state.get("remix_strength")
+    payload["remix_num_images"] = st.session_state.get("remix_num_images")
+    payload["edit_inpaint_strength"] = st.session_state.get("edit_inpaint_strength")
+    payload["edit_keep_background"] = st.session_state.get("edit_keep_background")
+    return payload
+
+
 @st.cache_data(show_spinner=False)
 def load_image_bytes(src: str) -> bytes:
-    """Load image bytes from URL or local path (cached)."""
     if src.startswith("http://") or src.startswith("https://"):
         return requests.get(src, timeout=30).content
     return Path(src).read_bytes()
 
 
 def sanitize_mask_file(path: Path) -> Path:
-    """Ensure mask contains only pure black(0) and white(255) pixels and
-    has an allowed mode. Convert to L, threshold, then force RGB for safety."""
     try:
         img = Image.open(path).convert("L")
         arr = np.array(img)
@@ -153,37 +126,15 @@ def sanitize_mask_file(path: Path) -> Path:
         rgb = Image.merge("RGB", (img_bw, img_bw, img_bw))
         rgb.save(path)
     except Exception:
-        # If sanitization fails, leave original; downstream will error clearly
         pass
     return path
 
- 
 
-
-def draw_mask_canvas_with_fallback(
-    *,
-    bg_image: Image.Image | None,
-    width: int,
-    height: int,
-    key: str,
-    update_streamlit: bool = False,
-):
-    """Draw a canvas for mask creation.
-    - If bg_image is provided, render it as background (visual guide only).
-    - If bg_image is None, force a fully transparent background so alpha channel
-      differentiates drawn strokes reliably (alpha>0 -> mask region).
-    - On environments without background_image support, fall back to a blank canvas.
-    """
+def draw_mask_canvas_with_fallback(*, bg_image: Image.Image | None, width: int, height: int, key: str, update_streamlit: bool = False):
     try:
-        background_kwargs = {
-            "background_image": bg_image,
-        }
-        if bg_image is None:
-            background_kwargs = {
-                "background_color": "rgba(0, 0, 0, 0)",  # fully transparent
-            }
+        background_kwargs = {"background_image": bg_image} if bg_image is not None else {"background_color": "rgba(0, 0, 0, 0)"}
         return st_canvas(
-            fill_color="rgba(255, 0, 255, 1)",  # magenta fill (mask key color)
+            fill_color="rgba(255, 0, 255, 1)",
             stroke_width=20,
             stroke_color="#ff00ff",
             height=height,
@@ -194,10 +145,6 @@ def draw_mask_canvas_with_fallback(
             **background_kwargs,
         )
     except AttributeError:
-        st.warning(
-            "캔버스 배경 이미지를 설정하지 못했습니다. (스트림릿/캔버스 버전 호환 이슈)\n"
-            "대신 동일 크기의 빈 캔버스를 제공합니다."
-        )
         return st_canvas(
             fill_color="rgba(255, 0, 255, 1)",
             stroke_width=20,
@@ -212,569 +159,472 @@ def draw_mask_canvas_with_fallback(
 
 
 st.title(APP_TITLE)
-#st.caption(APP_SUBTITLE)
+
+st.session_state.setdefault("image_task_mode", "remix")
+st.session_state.setdefault("remix_strength", 0.55)
+st.session_state.setdefault("remix_num_images", 1)
+st.session_state.setdefault("edit_inpaint_strength", 0.75)
+st.session_state.setdefault("edit_keep_background", True)
 
 sidebar = st.sidebar
-sidebar.header("Workflow")
-mode = sidebar.radio("생성 모드 선택", [MODE_TEXT_TO_IMAGE, MODE_IMAGE_TO_IMAGE])
+sidebar.header("워크플로우")
+mode = sidebar.radio("작업 모드", [MODE_TEXT_TO_IMAGE, MODE_IMAGE_TO_IMAGE])
 reset_session_for_mode(mode)
 
-character_reference_upload = None
-uploaded_image = None
+# 공통 사이드바 입력
+brand = sidebar.text_input(
+    "브랜드명",
+    st.session_state.get("text_brand", ""),
+    placeholder="예: 카페모카"
+)
+st.session_state["text_brand"] = brand
 
-if mode == MODE_TEXT_TO_IMAGE:
-    sidebar.markdown("---")
-    sidebar.subheader("Controls")
+description = sidebar.text_area(
+    "브랜드 설명",
+    st.session_state.get("text_description", ""),
+    placeholder="예: 스페셜티 커피, 따뜻하고 신뢰감 있는 브랜드"
+)
+st.session_state["text_description"] = description
 
-    brand = sidebar.text_input(
-        "브랜드명",
-        st.session_state.get("text_brand", "모카로스터스"),
-        key="text_brand_input",
-    )
-    st.session_state["text_brand"] = brand
+style = sidebar.text_input(
+    "스타일/톤 (간단 키워드)",
+    st.session_state.get("text_style", ""),
+    placeholder="예: modern, minimal, cafe logo, coffee bean icon"
+)
+st.session_state["text_style"] = style
 
-    description = sidebar.text_area(
-        "브랜드 설명",
-        st.session_state.get(
-            "text_description", "스페셜티 커피 전문점, 따뜻하고 세련된 분위기"
-        ),
-        key="text_description_input",
-    )
-    st.session_state["text_description"] = description
+negative_input = sidebar.text_input(
+    "부정 프롬프트 (선택)",
+    st.session_state.get("text_negative", ""),
+    placeholder="예: blurry text, gradient background"
+)
+st.session_state["text_negative"] = negative_input
 
-    style = sidebar.text_input(
-        "디자인 스타일",
-        st.session_state.get(
-            "text_style", "modern, minimal, cafe logo, coffee bean icon"
-        ),
-        key="text_style_input",
-    )
-    st.session_state["text_style"] = style
+seed_raw = sidebar.text_input(
+    "시드 (선택)",
+    st.session_state.get("text_seed_raw", ""),
+    placeholder="예: 42"
+)
+st.session_state["text_seed_raw"] = seed_raw
+seed_value = parse_seed(seed_raw)
 
-    negative_input = sidebar.text_input(
-        "네거티브 프롬프트 (선택)",
-        st.session_state.get("text_negative", ""),
-        key="text_negative_input",
-    )
-    st.session_state["text_negative"] = negative_input
+style_type_default = st.session_state.get("text_style_type", "")
+style_type_index = STYLE_TYPE_OPTIONS.index(style_type_default) if style_type_default in STYLE_TYPE_OPTIONS else 0
+style_type = sidebar.selectbox("스타일 타입", STYLE_TYPE_OPTIONS, index=style_type_index)
+st.session_state["text_style_type"] = style_type
 
-    seed_raw = sidebar.text_input(
-        "시드 값 (선택)",
-        st.session_state.get("text_seed_raw", ""),
-        key="text_seed_input",
-    )
-    st.session_state["text_seed_raw"] = seed_raw
+cfg_default = float(st.session_state.get("text_cfg_scale", 15.0))
+cfg_scale = sidebar.slider("CFG 강도", 1.0, 20.0, cfg_default, 0.5)
+st.session_state["text_cfg_scale"] = cfg_scale
 
-    style_type_default = st.session_state.get("text_style_type", "DESIGN")
-    style_type_index = (
-        STYLE_TYPE_OPTIONS.index(style_type_default)
-        if style_type_default in STYLE_TYPE_OPTIONS
-        else 0
-    )
-    style_type = sidebar.selectbox(
-        "스타일 타입",
-        STYLE_TYPE_OPTIONS,
-        index=style_type_index,
-        key="text_style_type_select",
-    )
-    st.session_state["text_style_type"] = style_type
+# 사이드바: 중요 키워드 (콤마 구분)
+keywords_raw = sidebar.text_input(
+    "중요 키워드 (콤마로 구분)",
+    st.session_state.get("text_keywords_raw", ""),
+    placeholder="예: minimal, neon, mascot"
+)
+st.session_state["text_keywords_raw"] = keywords_raw
+prompt_keywords = [k.strip() for k in keywords_raw.split(",") if k.strip()]
+st.session_state["text_prompt_keywords"] = prompt_keywords
 
-    if style_type:
-        guide = STYLE_TYPE_GUIDE.get(style_type)
-        if guide:
-            sidebar.markdown(
-                f"**{guide['title']}**\n\n"
-                f"- {guide['summary']}\n"
-                f"- 권장 용도: {guide['best_for']}"
-            )
-
-    cfg_default = float(st.session_state.get("text_cfg_scale", 15.0))
-    cfg_scale = sidebar.slider(
-        "CFG Scale(프롬프트 충실도)",
-        min_value=1.0,
-        max_value=20.0,
-        value=cfg_default,
-        step=0.5,
-        key="text_cfg_scale_slider",
-    )
-    st.session_state["text_cfg_scale"] = cfg_scale
-
-    character_reference_upload = None
-    image_weight = None
-    seed_value = parse_seed(seed_raw)
-    style_type_payload = style_type or None
-    negative_payload = negative_input.strip() or None
-
-else:
-    sidebar.markdown("---")
-    sidebar.subheader("입력 이미지")
-    uploaded_image = sidebar.file_uploader(
-        "원본 이미지 업로드",
-        type=["png", "jpg", "jpeg", "webp"],
-        key="image_mode_upload",
-    )
-    sidebar.markdown("---")
-
-    default_weight = int(st.session_state.get("image_mode_weight", 70))
-    image_weight = sidebar.slider(
-        "Image Weight (원본 보존 정도)",
-        min_value=0,
-        max_value=100,
-        value=default_weight,
-        step=5,
-        key="image_mode_weight_slider",
-        help="값이 높을수록 업로드한 이미지의 구성을 더 강하게 유지합니다.",
-    )
-    st.session_state["image_mode_weight"] = image_weight
-    sidebar.caption("Ideogram Remix 기본값은 50입니다. 필요에 따라 조절하세요.")
-
-    character_reference_upload = None
-
-    brand = st.session_state.get("text_brand", "이미지 리믹스")
-    description = st.session_state.get("text_description", "")
-    style = st.session_state.get("text_style", "logo remix")
-    cfg_scale = float(st.session_state.get("text_cfg_scale", 15.0))
-    style_type_payload = st.session_state.get("text_style_type") or None
-    negative_payload = None
-    seed_value = None
-    negative_payload = None
-    seed_value = None
+# 메인 프롬프트 영역
+st.markdown("### 메인 프롬프트")
+user_prompt = st.text_area(
+    "메인 프롬프트 (상세 요구사항)",
+    value=st.session_state.get("user_prompt", ""),
+    height=120,
+    placeholder="예: 브랜드 네임은 Cafe Mocha, 심볼은 커피콩과 미니멀한 원으로 구성"
+)
+st.session_state["user_prompt"] = user_prompt
 
 sidebar.markdown("---")
-sidebar.markdown(
-    "### Ideogram 3.0 API\n"
-    "- Generate (`/v1/ideogram-v3/generate`)\n"
-    "- Remix (`/v1/ideogram-v3/remix`)\n"
-    "- Edit (`/v1/ideogram-v3/edit`)\n"
-    "[API Reference](https://developer.ideogram.ai/api-reference/) 참고"
-)
+sidebar.caption("Ideogram 3.0: Generate / Remix / Edit")
 
-main_container = st.container()
-prompt_container = st.container()
+if mode == MODE_IMAGE_TO_IMAGE:
+    image_mode_labels = {
+        "Remix (원본 변형)": "remix",
+        "Edit (마스크)": "edit",
+    }
+    current_mode = st.session_state.get("image_task_mode", "remix")
+    default_label = next((label for label, value in image_mode_labels.items() if value == current_mode), "Remix (원본 변형)")
+    options_list = list(image_mode_labels.keys())
+    default_index = options_list.index(default_label) if default_label in options_list else 0
+    selected_label = sidebar.radio(
+        "이미지 작업 유형",
+        options_list,
+        index=default_index,
+        key="image_task_mode_label",
+    )
+    st.session_state["image_task_mode"] = image_mode_labels[selected_label]
+
+    remix_expander = sidebar.expander("Remix 세부 옵션", expanded=False)
+    with remix_expander:
+        st.slider(
+            "강도 (strength)",
+            0.0,
+            1.0,
+            float(st.session_state.get("remix_strength", 0.55)),
+            0.05,
+            key="remix_strength",
+        )
+        st.slider(
+            "생성 이미지 수",
+            1,
+            4,
+            int(st.session_state.get("remix_num_images", 1)),
+            1,
+            key="remix_num_images",
+        )
+
+    edit_expander = sidebar.expander("Edit 세부 옵션", expanded=False)
+    with edit_expander:
+        st.slider(
+            "Inpaint 강도",
+            0.0,
+            1.0,
+            float(st.session_state.get("edit_inpaint_strength", 0.75)),
+            0.05,
+            key="edit_inpaint_strength",
+        )
+        st.checkbox(
+            "배경 유지",
+            value=st.session_state.get("edit_keep_background", True),
+            key="edit_keep_background",
+        )
 
 if mode == MODE_TEXT_TO_IMAGE:
-    st.markdown("### 텍스트 기반 로고 생성")
-    generate_clicked = st.button("🚀 로고 생성하기", use_container_width=True)
-
-    if generate_clicked:
-        with st.spinner("로고 생성 중..."):
+    st.markdown("### 텍스트 → 이미지 생성")
+    if st.button("생성하기", use_container_width=True):
+        with st.spinner("생성 중..."):
             payload = {
                 "brand_name": brand,
                 "description": description,
                 "style": style,
-                "negative_prompt": negative_payload,
+                "negative_prompt": (negative_input.strip() or None),
                 "cfg_scale": cfg_scale,
+                "seed": seed_value,
+                "style_type": (style_type or None),
+                "prompt_keywords": prompt_keywords or None,
+                "user_prompt": (user_prompt or None),
             }
-            if seed_value is not None:
-                payload["seed"] = seed_value
-            if style_type_payload:
-                payload["style_type"] = style_type_payload
-            if character_reference_upload:
-                if getattr(character_reference_upload, "size", 0) > 10 * 1024 * 1024:
-                    st.error("캐릭터 레퍼런스 이미지는 10MB 이하만 지원합니다.")
-                    st.stop()
-                reference_path = save_uploaded_image(character_reference_upload)
-                payload["character_reference_images"] = [str(reference_path)]
-
             result = post_to_pipeline(payload)
             if result:
                 st.session_state["generated_logo"] = result
-                st.session_state["base_prompt"] = result.get(
-                    "base_prompt"
-                ) or result.get("prompt")
-                st.session_state.pop("edited_logo", None)
-                st.success("✅ 로고 생성 완료!")
+                st.session_state["base_prompt"] = result.get("base_prompt") or result.get("prompt")
+                st.success("완료!")
 
     generated = st.session_state.get("generated_logo")
     if generated:
-        col_left, col_right = st.columns([2, 1])
-        with col_left:
-            st.image(
-                generated["image_url"], caption="AI 생성 로고", use_column_width=True
-            )
-            if generated.get("final_logo"):
-                st.image(
-                    generated["final_logo"],
-                    caption="한글 폰트 적용 버전",
-                    use_column_width=True,
-                )
-        with col_right:
-            st.markdown("#### 생성 정보")
-            st.write(f"- 브랜드명: **{brand}**")
-            st.write(f"- 스타일 타입: **{style_type_payload or '미지정'}**")
-            st.write(f"- CFG Scale: **{cfg_scale}**")
-            if seed_value is not None:
-                st.write(f"- Seed: **{seed_value}**")
-            if negative_payload:
-                st.write(f"- Negative: `{negative_payload}`")
+        st.image(generated.get("image_url"), caption="생성된 로고", use_column_width=True)
+        st.markdown("#### 사용된 프롬프트")
+        st.code(generated.get("prompt") or "프롬프트가 반환되지 않았습니다.")
 
-        st.markdown("### 후속 작업 선택")
-        action = st.radio(
-            "수정 옵션",
+        eval_scores = generated.get("eval_scores") or {}
+        score_labels = [
+            ("overall", "총점"),
+            ("match", "요구 반영"),
+            ("typography", "가독성/타이포"),
+            ("hangul", "한글 품질"),
+            ("negative", "네거티브 준수"),
+            ("layout", "레이아웃"),
+            ("feedback", "피드백 반영"),
+        ]
+        if any(eval_scores.get(k) is not None for k, _ in score_labels):
+            st.markdown("#### 평가 점수")
+            cols = st.columns(len(score_labels))
+            for col, (key, label) in zip(cols, score_labels):
+                value = eval_scores.get(key)
+                display = f"{value}/100" if isinstance(value, (int, float)) else "--"
+                col.metric(label, display)
+
+        eval_feedback = generated.get("eval_feedback")
+        if eval_feedback:
+            st.info(f"평가 피드백: {eval_feedback}")
+        next_hint = generated.get("next_prompt_hint")
+        if next_hint:
+            st.warning(f"다음 개선 힌트: {next_hint}")
+
+        regen_attempts = generated.get("regen_attempts") or generated.get("remix_attempts") or 0
+        regen_history = generated.get("regen_history") or []
+        if regen_attempts:
+            st.caption(f"자동 재생성 시도: {regen_attempts}회 (최대 3회)")
+        if regen_history:
+            st.markdown("##### 재생성 기록")
+            for item in regen_history:
+                round_id = item.get("round") or "?"
+                reason = item.get("reason") or "사유 없음"
+                score = item.get("score") or "-"
+                timestamp = item.get("timestamp") or ""
+                st.write(f"- {round_id}회차 | 점수 {score} | {reason} | {timestamp}")
+
+        base_image_url = generated.get("image_url")
+        st.markdown("### 후속 작업")
+        follow_action = st.radio(
+            "다음 작업",
             [FOLLOW_UP_REMX, FOLLOW_UP_EDIT],
             horizontal=True,
+            key="post_generate_action",
         )
 
-        if action == FOLLOW_UP_REMX:
-            edit_instruction = st.text_area(
-                "Remix 지시문",
+        if follow_action == FOLLOW_UP_REMX:
+            remix_instruction = st.text_area(
+                "Remix 지시",
                 value=st.session_state.get(
-                    "last_remix_instruction",
-                    "배경에 은은한 불빛 효과를 추가하고 텍스트를 더 선명하게 만들어 주세요.",
+                    "post_gen_remix_instruction",
+                    "구도는 유지하고, 텍스트 가독성 개선, 아이콘 단순화",
                 ),
+                key="post_gen_remix_instruction_field",
             )
-            remix_clicked = st.button("🔄 Remix 실행", use_container_width=True)
-            if remix_clicked:
-                if not edit_instruction.strip():
-                    st.error("Remix 지시문을 입력해주세요.")
+            if st.button("생성된 로고 Remix", use_container_width=True, key="post_gen_remix_btn"):
+                if not base_image_url:
+                    st.error("생성된 이미지가 없습니다.")
                 else:
-                    with st.spinner("Remix 작업 중..."):
-                        payload = {
-                            "brand_name": brand,
-                            "description": description,
-                            "style": style,
-                            "edit_instruction": edit_instruction.strip(),
-                            "edit_image_url": generated.get("original_logo")
-                            or generated.get("image_url"),
-                            "base_prompt": st.session_state.get("base_prompt"),
-                            "negative_prompt": negative_payload,
-                            "cfg_scale": cfg_scale,
-                            "auto_retry_remix": True,
-                            "remix_max_retries": 1,
-                        }
-                        if seed_value is not None:
-                            payload["seed"] = seed_value
-                        if style_type_payload:
-                            payload["style_type"] = style_type_payload
-
-                        remix_result = post_to_pipeline(payload)
-                        if remix_result:
-                            st.session_state["edited_logo"] = remix_result
-                            st.session_state["last_remix_instruction"] = (
-                                edit_instruction
-                            )
-                            st.success("✨ Remix 완료!")
+                    st.session_state["post_gen_remix_instruction"] = remix_instruction
+                    payload = apply_image_options({
+                        "brand_name": brand,
+                        "description": description,
+                        "style": style,
+                        "edit_instruction": remix_instruction.strip(),
+                        "edit_image_url": base_image_url,
+                        "base_prompt": st.session_state.get("base_prompt"),
+                        "negative_prompt": (negative_input.strip() or None),
+                        "cfg_scale": cfg_scale,
+                        "auto_retry_remix": True,
+                        "remix_max_retries": 1,
+                        "seed": seed_value,
+                        "style_type": (style_type or None),
+                        "prompt_keywords": prompt_keywords or None,
+                        "user_prompt": (user_prompt or None),
+                    }, force_mode="remix")
+                    remix_result = post_to_pipeline(payload)
+                    if remix_result:
+                        st.session_state["edited_logo"] = remix_result
+                        st.success("Remix 완료!")
+                        if remix_result.get("image_url"):
+                            st.image(remix_result["image_url"], caption="Remix 결과", use_column_width=True)
         else:
-            st.markdown("---")
-            st.subheader("Edit (마스크 기반)")
-            st.caption("검은색(또는 불투명) 영역이 수정 대상입니다. PNG 권장")
-            mask_mode = st.radio("마스크 입력 방식", ["파일 업로드", "직접 그리기"], horizontal=True, key="mask_mode_text")
-            edit_inst2 = st.text_area("Edit 지시문", value="문자 가독성 강화, 아이콘 단순화")
+            st.caption("마스크: 검정=수정, 흰색=보존 (PNG)")
+            mask_mode_gen = st.radio(
+                "마스크 입력",
+                ["업로드", "그리기"],
+                horizontal=True,
+                key="post_gen_mask_mode",
+            )
+            mask_path_gen: Optional[Path] = None
 
-            mask_path: Path | None = None
-            if mask_mode == "파일 업로드":
+            if mask_mode_gen == "업로드":
                 mask_upload = st.file_uploader(
-                    "마스크 이미지 업로드",
+                    "마스크 업로드",
                     type=["png", "jpg", "jpeg", "webp"],
-                    key="mask_upload_text_mode",
+                    key="post_gen_mask_upload",
                 )
                 if mask_upload is not None:
-                    mask_path = sanitize_mask_file(save_uploaded_image(mask_upload))
-                    st.session_state["last_mask_path"] = str(mask_path)
+                    mask_path_gen = sanitize_mask_file(save_uploaded_image(mask_upload))
+                    st.session_state["post_gen_mask_path"] = str(mask_path_gen)
             else:
-                st.caption("원본 이미지 위에 수정할 영역을 그려주세요.")
-                base_url = generated.get("original_logo") or generated.get("image_url")
-                applied_text_mask = False
-                if base_url:
-                    if Path(str(base_url)).exists():
-                        bg_img = Image.open(base_url)
-                    else:
-                        bg_bytes = load_image_bytes(str(base_url))
+                if base_image_url:
+                    try:
+                        bg_bytes = load_image_bytes(base_image_url)
                         bg_img = Image.open(BytesIO(bg_bytes))
-
-                    with st.form("mask_form_text"):
-                        hide_bg = st.checkbox(
-                            "배경 숨기기(정확도↑, 가이드↓)", value=False, help="배경을 숨기면 검출은 더 정확해지지만, 가이드는 보이지 않습니다.")
-                        st.caption("분홍색으로 칠한 영역이 편집 대상입니다. 아이콘/텍스트를 '꽉 채워서' 칠하세요.")
                         canvas_result = draw_mask_canvas_with_fallback(
-                            bg_image=None if hide_bg else bg_img,
+                            bg_image=bg_img,
                             width=bg_img.width,
                             height=bg_img.height,
-                            key="mask_canvas_text_mode",
+                            key="post_gen_mask_canvas",
                             update_streamlit=True,
                         )
-                        applied_text_mask = st.form_submit_button("🖌️ 마스크 적용")
-                    if applied_text_mask and canvas_result.image_data is not None:
-                        st.session_state["mask_canvas_text_data"] = canvas_result.image_data
-                        # Build and preview a sanitized mask image immediately
-                        preview_path = OUTPUT_DIR / f"mask_preview_{uuid.uuid4().hex}.png"
-                        preview_path = sanitize_mask_file(
-                            build_mask_from_canvas(canvas_result.image_data, preview_path)
-                        )
-                        st.session_state["last_mask_path"] = str(preview_path)
-                        # Show side-by-side original and mask preview + coverage
-                        col_a, col_b = st.columns(2)
-                        with col_a:
-                            st.image(bg_img, caption="원본 미리보기", use_column_width=True)
-                        with col_b:
-                            st.image(str(preview_path), caption="마스크 미리보기", use_column_width=True)
-                            try:
-                                import numpy as _np
-                                from PIL import Image as _PILImage
-                                _arr = _np.array(_PILImage.open(preview_path).convert("L"))
-                                coverage = 100.0 * (1.0 - (_arr == 255).mean())
-                                st.caption(f"마스크 커버리지: {coverage:.1f}% (검정=수정 영역)")
-                            except Exception:
-                                pass
-
-            edit_clicked = st.button("✏️ Edit 실행", use_container_width=True)
-            if edit_clicked:
-                if mask_mode == "직접 그리기":
-                    canvas_data = st.session_state.get("mask_canvas_text_data")
-                    if canvas_data is None:
-                        st.error("캔버스에 마스크를 그려주세요.")
-                        st.stop()
-                    out_path = OUTPUT_DIR / f"user_mask_{uuid.uuid4().hex}.png"
-                    mask_path = sanitize_mask_file(build_mask_from_canvas(canvas_data, out_path))
-                    st.session_state["last_mask_path"] = str(mask_path)
-                if mask_path is None:
-                    st.error("마스크를 업로드하거나 직접 그려주세요.")
+                        if st.button("마스크 적용", key="post_gen_apply_mask") and canvas_result.image_data is not None:
+                            out_path = OUTPUT_DIR / f"user_mask_{uuid.uuid4().hex}.png"
+                            mask_path_gen = sanitize_mask_file(
+                                build_mask_from_canvas(canvas_result.image_data, out_path)
+                            )
+                            st.session_state["post_gen_mask_path"] = str(mask_path_gen)
+                            st.success("Mask applied")
+                    except Exception as exc:
+                        st.error(f"마스크 캔버스를 불러오지 못했습니다: {exc}")
                 else:
-                    with st.spinner("Edit 작업 중..."):
-                        payload = {
+                    st.info("생성된 이미지가 없습니다.")
+
+            edit_inst_gen = st.text_area(
+                "Edit 지시",
+                value=st.session_state.get("post_gen_edit_instruction", "문구 산세리프, 배경 단색"),
+                key="post_gen_edit_instruction_field",
+            )
+
+            if st.button("생성된 로고 Edit", use_container_width=True, key="post_gen_edit_btn"):
+                if not base_image_url:
+                    st.error("생성된 이미지가 없습니다.")
+                else:
+                    if mask_path_gen is None:
+                        mask_path_saved = st.session_state.get("post_gen_mask_path")
+                        if mask_path_saved:
+                            mask_path_gen = Path(mask_path_saved)
+                    if mask_path_gen is None:
+                        st.error("마스크를 업로드하거나 그려주세요.")
+                    elif not edit_inst_gen.strip():
+                        st.error("Edit 지시를 입력해 주세요.")
+                    else:
+                        st.session_state["post_gen_edit_instruction"] = edit_inst_gen
+                        payload = apply_image_options({
                             "brand_name": brand,
                             "description": description,
                             "style": style,
-                            "negative_prompt": negative_payload,
-                            "edit_instruction": edit_inst2.strip(),
-                            "edit_image_url": generated.get("original_logo") or generated.get("image_url"),
-                            "mask_image_url": str(mask_path),
+                            "edit_instruction": edit_inst_gen.strip(),
+                            "edit_image_url": base_image_url,
+                            "mask_image_url": str(mask_path_gen),
                             "cfg_scale": cfg_scale,
-                        }
-                        if seed_value is not None:
-                            payload["seed"] = seed_value
-                        if style_type_payload:
-                            payload["style_type"] = style_type_payload
-                        edited = post_to_pipeline(payload)
-                        if edited:
-                            st.session_state["edited_logo"] = edited
-                            st.success("✨ Edit 완료!")
+                            "style_type": (style_type or None),
+                            "prompt_keywords": prompt_keywords or None,
+                            "user_prompt": (user_prompt or None),
+                        }, force_mode="edit")
+                        edited_gen = post_to_pipeline(payload)
+                        if edited_gen:
+                            st.session_state["generated_logo"] = edited_gen
+                            st.success("Edit 완료!")
+                            if edited_gen.get("image_url"):
+                                st.image(edited_gen["image_url"], caption="Edit 결과", use_column_width=True)
 
-    edited = st.session_state.get("edited_logo")
-    if edited:
-        st.markdown("### Remix 결과 비교")
-        original = st.session_state["generated_logo"]
-        col_original, col_remix = st.columns(2)
-        with col_original:
-            st.image(
-                original["image_url"], caption="원본 로고", use_column_width=True
-            )
-        with col_remix:
-            st.image(
-                edited["image_url"], caption="Remix 로고", use_column_width=True
-            )
+else:
+    st.markdown("### 이미지 → 이미지 (Remix / Edit)")
+    uploaded_image = sidebar.file_uploader("원본 이미지 업로드", type=["png", "jpg", "jpeg", "webp"]) 
 
-        st.markdown("#### 프롬프트 비교")
-        st.markdown("**기존(base_prompt)**")
-        st.code(
-            original.get("base_prompt") or original.get("prompt"), language="markdown"
-        )
-        st.markdown("**Remix Prompt**")
-        st.code(
-            edited.get("prompt") or "No remix prompt returned.", language="markdown"
-        )
-
-    if generated and not st.session_state.get("edited_logo"):
-        st.markdown("#### 현재 프롬프트")
-        st.code(generated.get("prompt") or "No prompt returned.", language="markdown")
-
-elif mode == MODE_IMAGE_TO_IMAGE:
-    st.markdown("### 이미지 기반 리믹스")
-    if uploaded_image:
-        st.image(
-            uploaded_image,
-            caption="업로드 이미지 미리보기 (전송 전 확인용)",
-            use_container_width=True,
-        )
-
-    edit_instruction = st.text_area(
-        "수정 지시문",
-        "원본 이미지를 유지하면서 브랜드 텍스트를 좀 더 굵고 선명하게 만들어 주세요.",
-    )
-
-    generate_from_image = st.button("🖼️ 이미지에서 생성하기", use_container_width=True)
-
-    if generate_from_image:
+    if st.button("이미지 기반 생성", use_container_width=True):
         if not uploaded_image:
-            st.error("이미지를 업로드해주세요.")
-        elif not edit_instruction.strip():
-            st.error("수정 지시문을 입력해주세요.")
+            st.error("이미지를 업로드해 주세요.")
         else:
-            image_path = save_uploaded_image(uploaded_image)
-            with st.spinner("이미지 기반 리믹스 중..."):
-                payload = {
-                    "brand_name": brand,
-                    "description": description,
-                    "style": style,
-                    "edit_instruction": edit_instruction.strip(),
-                    "edit_image_url": str(image_path),
-                    "negative_prompt": negative_payload,
-                    "cfg_scale": cfg_scale,
-                    "skip_prompt_refine": True,
-                    "auto_retry_remix": True,
-                    "remix_max_retries": 1,
-                }
-                if seed_value is not None:
-                    payload["seed"] = seed_value
-                if style_type_payload:
-                    payload["style_type"] = style_type_payload
-                if image_weight is not None:
-                    payload["image_weight"] = image_weight
-
+            base_path = save_uploaded_image(uploaded_image)
+            base_prompt_payload = st.session_state.get("base_prompt")
+            instruction = (user_prompt or "").strip() or "업로드된 로고를 개선해주세요."
+            task_mode = st.session_state.get("image_task_mode", "remix")
+            if task_mode == "edit":
+                st.warning("Edit 모드는 아래 Edit 탭에서 마스크를 설정한 뒤 실행해 주세요.")
+            else:
+                payload = apply_image_options(
+                    {
+                        "brand_name": brand,
+                        "description": description,
+                        "style": style,
+                        "edit_instruction": instruction,
+                        "edit_image_url": str(base_path),
+                        "base_prompt": base_prompt_payload,
+                        "negative_prompt": (negative_input.strip() or None),
+                        "cfg_scale": cfg_scale,
+                        "seed": seed_value,
+                        "style_type": (style_type or None),
+                        "prompt_keywords": prompt_keywords or None,
+                        "user_prompt": (user_prompt or None),
+                    },
+                    force_mode=task_mode,
+                )
                 result = post_to_pipeline(payload)
                 if result:
                     st.session_state["generated_logo"] = result
-                    st.session_state["base_prompt"] = result.get(
-                        "base_prompt"
-                    ) or result.get("prompt")
-                    st.session_state.pop("edited_logo", None)
-                    st.session_state["last_image_to_image_prompt"] = payload[
-                        "edit_instruction"
-                    ]
-                    st.session_state["last_image_to_image_source"] = str(image_path)
-                    st.success("✅ 이미지 리믹스 완료!")
+                    st.session_state["last_image_to_image_source"] = str(base_path)
+                    st.success("이미지 기반 생성 완료!")
+                    if result.get("image_url"):
+                        st.image(result["image_url"], caption="이미지 기반 생성 결과", use_column_width=True)
 
-    generated = st.session_state.get("generated_logo")
-    if generated:
-        st.image(
-            generated["image_url"], caption="리믹스 결과", use_column_width=True
+    tabs = st.tabs([FOLLOW_UP_REMX, FOLLOW_UP_EDIT])
+
+    # Remix tab
+    with tabs[0]:
+        remix_instruction = st.text_area(
+            "Remix 지시",
+            value=st.session_state.get(
+                "last_remix_instruction",
+                "구도는 유지하고, 텍스트 가독성 개선, 아이콘 단순화"
+            ),
         )
-        if generated.get("final_logo"):
-            st.image(
-                generated["final_logo"],
-                caption="한글 폰트 적용 버전",
-                use_column_width=True,
-            )
-
-        st.markdown("#### 프롬프트")
-        st.code(generated.get("prompt") or "No prompt returned.", language="markdown")
-
-    if st.session_state.get("last_image_to_image_prompt"):
-        st.markdown("#### 전송 프롬프트 (이미지→이미지)")
-        st.code(
-            st.session_state["last_image_to_image_prompt"],
-            language="markdown",
-        )
-    if st.session_state.get("last_image_to_image_source"):
-        st.image(
-            st.session_state["last_image_to_image_source"],
-            caption="전송에 사용된 원본 이미지",
-            use_container_width=True,
-        )
-
- 
-
-    st.markdown("---")
-    st.subheader("마스크 기반 Edit (이미지 → 이미지)")
-    st.caption("검은색(또는 불투명) 영역이 수정 대상입니다. PNG 권장")
-    mask_mode_img = st.radio("마스크 입력 방식", ["파일 업로드", "직접 그리기"], horizontal=True, key="mask_mode_image")
-    edit_instruction2 = st.text_area(
-        "Edit 지시문",
-        value=st.session_state.get(
-            "last_edit_instruction",
-            "원본 로고는 유지하고 배경만 교체해 주세요.",
-        ),
-    )
-
-    mask_path2: Path | None = None
-    if mask_mode_img == "파일 업로드":
-        mask_upload2 = st.file_uploader(
-            "마스크 이미지 업로드",
-            type=["png", "jpg", "jpeg", "webp"],
-            key="mask_upload_image_mode",
-        )
-        if mask_upload2 is not None:
-            mask_path2 = sanitize_mask_file(save_uploaded_image(mask_upload2))
-            st.session_state["last_mask_path"] = str(mask_path2)
-    else:
-        if uploaded_image is not None:
-            base_preview = Image.open(uploaded_image)
-            with st.form("mask_form_image"):
-                hide_bg2 = st.checkbox(
-                    "배경 숨기기(정확도↑, 가이드↓)", value=False, help="배경을 숨기면 검출은 더 정확해지지만, 가이드는 보이지 않습니다.")
-                st.caption("분홍색으로 칠한 영역이 편집 대상입니다. 원하는 부위를 '꽉 채워서' 칠하세요.")
-                canvas_result2 = draw_mask_canvas_with_fallback(
-                    bg_image=None if hide_bg2 else base_preview,
-                    width=base_preview.width,
-                    height=base_preview.height,
-                    key="mask_canvas_image_mode",
-                    update_streamlit=True,
+        if st.button("Remix 실행", use_container_width=True):
+            if not uploaded_image:
+                st.error("이미지를 업로드해 주세요.")
+            else:
+                base_path = save_uploaded_image(uploaded_image)
+                payload = apply_image_options(
+                    {
+                        "brand_name": brand,
+                        "description": description,
+                        "style": style,
+                        "edit_instruction": remix_instruction.strip(),
+                        "edit_image_url": str(base_path),
+                        "base_prompt": st.session_state.get("base_prompt"),
+                        "negative_prompt": (negative_input.strip() or None),
+                        "cfg_scale": cfg_scale,
+                        "auto_retry_remix": True,
+                        "remix_max_retries": 1,
+                        "seed": seed_value,
+                        "style_type": (style_type or None),
+                        "prompt_keywords": prompt_keywords or None,
+                        "user_prompt": (user_prompt or None),
+                    },
+                    force_mode="remix",
                 )
-                applied_image_mask = st.form_submit_button("🖌️ 마스크 적용")
-            if applied_image_mask and canvas_result2.image_data is not None:
-                st.session_state["mask_canvas_image_data"] = canvas_result2.image_data
-                # Build and preview a sanitized mask image immediately for image mode
-                preview_path2 = OUTPUT_DIR / f"mask_preview_{uuid.uuid4().hex}.png"
-                preview_path2 = sanitize_mask_file(
-                    build_mask_from_canvas(canvas_result2.image_data, preview_path2)
-                )
-                st.session_state["last_mask_path"] = str(preview_path2)
-                col_c, col_d = st.columns(2)
-                with col_c:
-                    st.image(base_preview, caption="원본 미리보기", use_column_width=True)
-                with col_d:
-                    st.image(str(preview_path2), caption="마스크 미리보기", use_column_width=True)
-                    try:
-                        import numpy as _np
-                        from PIL import Image as _PILImage
-                        _arr2 = _np.array(_PILImage.open(preview_path2).convert("L"))
-                        coverage2 = 100.0 * (1.0 - (_arr2 == 255).mean())
-                        st.caption(f"마스크 커버리지: {coverage2:.1f}% (검정=수정 영역)")
-                    except Exception:
-                        pass
+                remix_result = post_to_pipeline(payload)
+                if remix_result:
+                    st.session_state["edited_logo"] = remix_result
+                    st.session_state["last_remix_instruction"] = remix_instruction
+                    st.success("Remix 완료!")
+                if remix_result and remix_result.get("image_url"):
+                    st.image(remix_result["image_url"], caption="Remix 결과", use_column_width=True)
 
-    edit_btn = st.button("✏️ Edit 실행", use_container_width=True)
-    if edit_btn:
-        if not uploaded_image:
-            st.error("원본 이미지를 먼저 업로드해주세요.")
-        elif mask_mode_img == "직접 그리기":
-            canvas_data2 = st.session_state.get("mask_canvas_image_data")
-            if canvas_data2 is None and mask_path2 is None:
-                st.error("마스크를 업로드하거나 직접 그려주세요.")
-                st.stop()
-            if canvas_data2 is not None and mask_path2 is None:
-                out_path2 = OUTPUT_DIR / f"user_mask_{uuid.uuid4().hex}.png"
-                mask_path2 = sanitize_mask_file(build_mask_from_canvas(canvas_data2, out_path2))
-                st.session_state["last_mask_path"] = str(mask_path2)
-        elif mask_path2 is None:
-            st.error("마스크를 업로드하거나 직접 그려주세요.")
-        elif not edit_instruction2.strip():
-            st.error("Edit 지시문을 입력해주세요.")
+    # Edit tab
+    with tabs[1]:
+        st.caption("마스크: 검정=수정, 흰색=보존 (PNG)")
+        mask_mode = st.radio("마스크 입력", ["업로드", "그리기"], horizontal=True)
+        mask_path: Path | None = None
+
+        if mask_mode == "업로드":
+            mask_upload = st.file_uploader("마스크 업로드", type=["png", "jpg", "jpeg", "webp"], key="mask_upload_img")
+            if mask_upload is not None:
+                mask_path = sanitize_mask_file(save_uploaded_image(mask_upload))
+                st.session_state["last_mask_path"] = str(mask_path)
         else:
-            base_path = save_uploaded_image(uploaded_image)
-            with st.spinner("Edit 작업 중..."):
-                payload = {
-                    "brand_name": brand,
-                    "description": description,
-                    "style": style,
-                    "edit_instruction": edit_instruction2.strip(),
-                    "edit_image_url": str(base_path),
-                    "mask_image_url": str(mask_path2),
-                    "cfg_scale": cfg_scale,
-                }
-                if style_type_payload:
-                    payload["style_type"] = style_type_payload
+            if uploaded_image is not None:
+                base_path = save_uploaded_image(uploaded_image)
+                base_bytes = load_image_bytes(str(base_path))
+                bg_img = Image.open(BytesIO(base_bytes))
+                canvas_result = draw_mask_canvas_with_fallback(
+                    bg_image=bg_img, width=bg_img.width, height=bg_img.height, key="mask_canvas_img", update_streamlit=True
+                )
+                if st.button("마스크 적용") and canvas_result.image_data is not None:
+                    out_path = OUTPUT_DIR / f"user_mask_{uuid.uuid4().hex}.png"
+                    mask_path = sanitize_mask_file(build_mask_from_canvas(canvas_result.image_data, out_path))
+                    st.session_state["last_mask_path"] = str(mask_path)
+                    st.success("Mask applied")
+            else:
+                st.info("먼저 이미지를 업로드해 주세요.")
+
+        edit_inst2 = st.text_area("Edit 지시", value="문구 산세리프, 배경 단색")
+        if st.button("Edit 실행", use_container_width=True):
+            if not uploaded_image:
+                st.error("이미지를 업로드해 주세요.")
+            elif not st.session_state.get("last_mask_path") and mask_path is None:
+                st.error("마스크를 업로드하거나 그려주세요.")
+            elif not edit_inst2.strip():
+                st.error("Edit 지시를 입력해 주세요.")
+            else:
+                base_path = save_uploaded_image(uploaded_image)
+                mask_final = mask_path or Path(st.session_state["last_mask_path"]) 
+                payload = apply_image_options(
+                    {
+                        "brand_name": brand,
+                        "description": description,
+                        "style": style,
+                        "edit_instruction": edit_inst2.strip(),
+                        "edit_image_url": str(base_path),
+                        "mask_image_url": str(mask_final),
+                        "cfg_scale": cfg_scale,
+                        "style_type": (style_type or None),
+                        "prompt_keywords": prompt_keywords or None,
+                        "user_prompt": (user_prompt or None),
+                    },
+                    force_mode="edit",
+                )
                 edited2 = post_to_pipeline(payload)
                 if edited2:
                     st.session_state["generated_logo"] = edited2
                     st.session_state["last_image_to_image_prompt"] = payload["edit_instruction"]
                     st.session_state["last_image_to_image_source"] = str(base_path)
-                    st.success("✨ Edit 완료!")
-
-    # Debug section for mask validation
-    with st.expander("디버그: 마스크 점검"):
-        last_mask = st.session_state.get("last_mask_path")
-        if last_mask and Path(last_mask).exists():
-            try:
-                mimg = Image.open(last_mask)
-                st.image(last_mask, caption=f"마스크 미리보기 ({mimg.mode} {mimg.size})")
-                arr = np.array(mimg.convert("L"))
-                uniques = np.unique(arr)
-                st.write({"mode": mimg.mode, "size": mimg.size, "unique": uniques.tolist()[:10]})
-                st.write(
-                    f"검정 비율: {(arr==0).mean():.2%}, 흰색 비율: {(arr==255).mean():.2%}"
-                )
-            except Exception as e:
-                st.warning(f"마스크 분석 실패: {e}")
-        else:
-            st.info("최근 생성된 마스크가 없습니다. (적용/실행 후 표시)")
+                    st.success("Edit 완료!")
+                if edited2 and edited2.get("image_url"):
+                    st.image(edited2["image_url"], caption="Edit 결과", use_column_width=True)
