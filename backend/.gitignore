@@ -53,5 +53,6 @@ yarn.lock
 
 .chroma/
 .faiss/
+vectordb/
 index.faiss
 index.pkl
