@@ -34,7 +34,7 @@ backend/
 │   │   └── auth_service.py           # ✅ 인증 서비스
 │   │
 │   ├── agents/                       # 필수 에이전트
-│   │   ├── brand_agent.py            # ⭐ 브랜드 정보 수집 에이전트
+│   │   ├── brandbot/                 # ✅ Brandbot LangGraph 에이전트
 │   │   └── strategy_agent.py         # ⭐ 전략 제안 에이전트 (선택)
 │   │
 │   ├── graphs/                       # LangGraph 워크플로우
@@ -100,3 +100,40 @@ backend/
 │   │
 │   └── services/
 │       └── guardrail_service.py        # 가드레일 서비스
+
+## Brandbot 에이전트 통합 (2025-11-07)
+
+- `app/agents/brandbot` 디렉터리에 LangGraph 기반 Brandbot 패키지를 벤더링했습니다.
+- `app/services/brandbot_service.py`가 세션/그래프 생명주기를 관리하며, 다른 에이전트와 구분된 서비스 계층을 제공합니다.
+- `app/api/brandbot.py` 라우터를 통해 FastAPI로 노출되며 Swagger에서 별도 Tag(`Brandbot Agent`)로 확인할 수 있습니다.
+
+### 환경 변수
+
+Brandbot은 OpenAI 및 Tavily API를 사용하므로 `.env`(또는 시스템 환경 변수)에 아래 값을 설정하세요.
+
+```
+OPENAI_API_KEY=sk-...
+OPENAI_MODEL_CHAT=gpt-4o-mini
+OPENAI_MODEL_EMBED=text-embedding-3-small
+TAVILY_API_KEY=tvly-...
+SQLITE_PATH=brandbot.db          # 프로젝트 메타 저장용 (기본값: brandbot.db)
+VECTOR_BACKEND=chroma            # 또는 faiss
+```
+
+> Tavily 키가 없으면 트렌드 추천 단계에서 폴백 메시지가 반환됩니다. OpenAI 키가 없으면 대부분의 노드가 정상 동작하지 않습니다.
+
+### 설치 및 실행
+
+```
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
+
+### Swagger 테스트 플로우
+
+1. `POST /brandbot/sessions` – 새 세션을 생성하거나 `session_id`와 `reset=true`로 초기화.
+2. `POST /brandbot/sessions/{session_id}/messages` – 사용자 발화 전달.
+3. `GET /brandbot/sessions/{session_id}` – 현재 수집 상태/스냅샷 확인.
+4. `POST /brandbot/sessions/{session_id}/reset` – 동일 세션을 초기 상태로 되돌림.
+
+응답에는 `brand_draft`, `trend_recos`, `snapshot_text`, `messages`(LangChain 메시지 직렬화) 등이 포함되며, 추후 다른 에이전트도 동일 패턴으로 확장할 수 있도록 분리된 모듈 구조를 유지합니다.
