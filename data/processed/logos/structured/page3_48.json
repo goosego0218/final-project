@@ -1,0 +1,83 @@
+{
+  "source_image": "page3_48.jpg",
+  "text_elements": {
+    "primary_text": "백의곶감",
+    "secondary_text": "상주 프리미엄 곶감",
+    "language": "Korean",
+    "font_style": "serif",
+    "typography_notes": "The text is clear and readable with a traditional feel.",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "A branch with persimmons above stylized waves within a circle.",
+    "category": "emblem",
+    "meanings": [
+      "nature",
+      "tradition",
+      "fruit"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#4B2E2A",
+        "common_name": "brown",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "Good contrast between the brown and white enhances readability.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "traditional",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "natural",
+    "authentic"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "The circular emblem is well-centered above the text.",
+    "spacing_notes": "Adequate spacing between elements ensures clarity.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "nature",
+      "tradition",
+      "premium"
+    ],
+    "values": [
+      "authenticity",
+      "quality"
+    ],
+    "audience_hint": "consumers interested in traditional and premium products",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "traditional"
+    ],
+    "score": 0.85,
+    "notes": "Aligns with trends favoring minimal and authentic designs."
+  },
+  "analysis_timestamp": "2025-11-10T06:09:42.543853Z"
+}

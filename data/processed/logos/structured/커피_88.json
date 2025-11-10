@@ -1,0 +1,89 @@
+{
+  "source_image": "커피_88.jpg",
+  "text_elements": {
+    "primary_text": "fmCoffee",
+    "secondary_text": "Exquisite flavors crafted from specialty coffee beans to delight your senses.",
+    "language": "Latin",
+    "font_style": "modern sans-serif",
+    "typography_notes": "Readable with a unique twist in the 'e' character.",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized letter 'G' with a star-like accent",
+    "category": "lettermark",
+    "meanings": [
+      "initial",
+      "star",
+      "quality"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "High contrast between black and white.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "sophisticated",
+    "elegant"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "3:4",
+    "balance_notes": "Well-balanced with central alignment.",
+    "spacing_notes": "Adequate white space for readability.",
+    "confidence": 0.85
+  },
+  "brand_message": {
+    "keywords": [
+      "coffee",
+      "quality",
+      "flavor"
+    ],
+    "values": [
+      "excellence",
+      "craftsmanship"
+    ],
+    "audience_hint": "coffee enthusiasts",
+    "confidence": 0.9
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a third accent color for depth.",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "modern"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current trends in minimalistic design."
+  },
+  "analysis_timestamp": "2025-11-10T07:52:14.361783Z"
+}

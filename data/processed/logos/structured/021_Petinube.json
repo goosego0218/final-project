@@ -1,0 +1,94 @@
+{
+  "source_image": "021_Petinube.jpg",
+  "text_elements": {
+    "primary_text": "Petinube",
+    "secondary_text": "Everything for the baby",
+    "language": "Latin",
+    "font_style": "rounded sans-serif",
+    "typography_notes": "Highly readable with playful curves",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Smiling baby face with a curl of hair",
+    "category": "emblem",
+    "meanings": [
+      "child-friendly",
+      "happiness"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#8EC6E6",
+        "common_name": "light blue",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#F4A6C1",
+        "common_name": "light pink",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Soft contrast suitable for baby products",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "playful",
+    "modern"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "approachable"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "4:3",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space for clarity",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "baby",
+      "care",
+      "friendly"
+    ],
+    "values": [
+      "safety",
+      "comfort"
+    ],
+    "audience_hint": "parents of young children",
+    "confidence": 0.9
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "low",
+  "issues": [
+    {
+      "type": "contrast",
+      "description": "Soft colors may reduce visibility on some backgrounds",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "contrast",
+      "suggestion": "Increase color saturation for better visibility",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "playful"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current trends in baby product branding"
+  },
+  "analysis_timestamp": "2025-11-10T04:49:03.424178Z"
+}

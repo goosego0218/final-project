@@ -1,0 +1,94 @@
+{
+  "source_image": "027_소중한식사.jpg",
+  "text_elements": {
+    "primary_text": "소중한식사",
+    "secondary_text": "delicious food",
+    "language": "Korean",
+    "font_style": "handwritten",
+    "typography_notes": "Readable with a casual and friendly style",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "A fork with a balloon",
+    "category": "abstract",
+    "meanings": [
+      "food",
+      "celebration"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFD700",
+        "common_name": "gold",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "playful"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "inviting"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "2:3",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.8
+  },
+  "brand_message": {
+    "keywords": [
+      "food",
+      "celebration",
+      "quality"
+    ],
+    "values": [
+      "enjoyment",
+      "taste"
+    ],
+    "audience_hint": "food enthusiasts",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Abstract symbol may not be immediately clear",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "symbol clarity",
+      "suggestion": "Simplify or clarify the symbol",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "playful"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends of playful and inviting branding"
+  },
+  "analysis_timestamp": "2025-11-10T05:06:04.570323Z"
+}

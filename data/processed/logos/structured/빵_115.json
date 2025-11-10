@@ -1,0 +1,89 @@
+{
+  "source_image": "빵_115.jpg",
+  "text_elements": {
+    "primary_text": "동네빵네",
+    "secondary_text": "협동조합",
+    "language": "Korean",
+    "font_style": "bold sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Chef hat with stylized people",
+    "category": "abstract",
+    "meanings": [
+      "community",
+      "baking",
+      "collaboration"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#8B4513",
+        "common_name": "brown",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFA500",
+        "common_name": "orange",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "friendly"
+  ],
+  "tone_descriptors": [
+    "community-focused",
+    "welcoming"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "community",
+      "baking",
+      "collaboration"
+    ],
+    "values": [
+      "togetherness",
+      "quality"
+    ],
+    "audience_hint": "local community",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a third color for depth",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "community"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current trends of community-focused branding"
+  },
+  "analysis_timestamp": "2025-11-10T07:05:35.796750Z"
+}

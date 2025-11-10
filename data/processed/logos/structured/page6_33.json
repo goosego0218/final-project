@@ -1,0 +1,88 @@
+{
+  "source_image": "page6_33.jpg",
+  "text_elements": {
+    "primary_text": "지지네농원",
+    "secondary_text": "Jiji's Apple",
+    "language": "Korean",
+    "font_style": "rounded sans-serif",
+    "typography_notes": "The text is clear and legible with a friendly appearance.",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "A smiling red apple with a leaf",
+    "category": "emblem",
+    "meanings": [
+      "freshness",
+      "happiness"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FF0000",
+        "common_name": "red",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#008000",
+        "common_name": "green",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "playful"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "approachable"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:3",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol.",
+    "spacing_notes": "Adequate spacing between elements.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "apple",
+      "farm",
+      "fresh"
+    ],
+    "values": [
+      "freshness",
+      "happiness"
+    ],
+    "audience_hint": "families and health-conscious individuals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [],
+  "trend_alignment": {
+    "tags": [
+      "playful",
+      "minimal"
+    ],
+    "score": 0.85,
+    "notes": "Aligns with current trends of simplicity and friendliness."
+  },
+  "analysis_timestamp": "2025-11-10T06:36:18.479191Z"
+}

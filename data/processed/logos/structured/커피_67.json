@@ -1,0 +1,83 @@
+{
+  "source_image": "커피_67.jpg",
+  "text_elements": {
+    "primary_text": null,
+    "secondary_text": null,
+    "language": null,
+    "font_style": null,
+    "typography_notes": null,
+    "confidence": 1.0
+  },
+  "symbol": {
+    "description": "Abstract symmetrical shape resembling leaves or feathers forming a central star",
+    "category": "abstract",
+    "meanings": [
+      "nature",
+      "balance",
+      "harmony"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "High contrast between black symbol and white background",
+    "confidence": 1.0
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "elegant",
+    "sophisticated"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "2:1",
+    "balance_notes": "Symmetrical and centered composition",
+    "spacing_notes": "Adequate white space around the symbol",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "nature",
+      "balance",
+      "elegance"
+    ],
+    "values": [
+      "harmony",
+      "sophistication"
+    ],
+    "audience_hint": "environmentally conscious consumers",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [],
+  "trend_alignment": {
+    "tags": [
+      "minimalist",
+      "nature-inspired"
+    ],
+    "score": 0.9,
+    "notes": "Aligns well with current trends favoring minimalism and nature themes"
+  },
+  "analysis_timestamp": "2025-11-10T07:49:35.085161Z"
+}

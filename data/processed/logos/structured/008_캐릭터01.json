@@ -1,0 +1,104 @@
+{
+  "source_image": "008_캐릭터01.jpg",
+  "text_elements": {
+    "primary_text": "The Arc",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "Sans-serif, playful",
+    "typography_notes": "Clear and readable with a playful touch",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Cartoon otter with a hat and vest",
+    "category": "animal",
+    "meanings": [
+      "playfulness",
+      "friendliness"
+    ],
+    "confidence": 0.95
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#0000FF",
+        "common_name": "blue",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#00FF00",
+        "common_name": "green",
+        "usage": "accent"
+      },
+      {
+        "hex": "#FFFF00",
+        "common_name": "yellow",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "playful",
+    "youthful"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "approachable"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:3",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.85
+  },
+  "brand_message": {
+    "keywords": [
+      "fun",
+      "community",
+      "youth"
+    ],
+    "values": [
+      "inclusivity",
+      "joy"
+    ],
+    "audience_hint": "families and children",
+    "confidence": 0.9
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Complexity of the character might not scale well",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "scalability",
+      "suggestion": "Simplify the character design for smaller sizes",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "playful",
+      "youthful"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current trends in playful and friendly branding"
+  },
+  "analysis_timestamp": "2025-11-10T04:28:15.114875Z"
+}

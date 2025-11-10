@@ -1,0 +1,87 @@
+{
+  "source_image": "089_AgeLoc.jpg",
+  "text_elements": {
+    "primary_text": "AgeLoc",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "bold sans-serif",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Abstract droplet shape",
+    "category": "abstract",
+    "meanings": [
+      "freshness",
+      "purity"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#0072C6",
+        "common_name": "blue",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#4D4D4D",
+        "common_name": "gray",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "professional",
+    "trustworthy"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with centered elements",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "innovation",
+      "youth",
+      "health"
+    ],
+    "values": [
+      "freshness",
+      "reliability"
+    ],
+    "audience_hint": "health-conscious consumers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Introduce a secondary accent color",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends in simplicity and clarity"
+  },
+  "analysis_timestamp": "2025-11-10T05:39:07.870760Z"
+}

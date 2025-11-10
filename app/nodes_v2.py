@@ -488,6 +488,12 @@ def image_operator_node(state: LogoState) -> LogoState:
     """Call the appropriate Ideogram endpoint based on task_type."""
     task = state.get("task_type") or TaskType.GENERATE.value
     prompt = state.get("enhanced_prompt") or ""
+    logo_type = state.get("logo_type")
+    style_preferences = state.get("style_preferences") or []
+    trend_highlights = state.get("trend_highlights") or []
+    reference_logo = state.get("reference_logo") or {}
+    reference_image = reference_logo.get("image_url")
+    reference_styles = reference_logo.get("style_tags") or []
     negative = state.get("negative_prompt")
     aspect_ratio = state.get("aspect_ratio")
     style_preset = state.get("style_preset")
@@ -496,6 +502,27 @@ def image_operator_node(state: LogoState) -> LogoState:
     seed = state.get("seed")
     input_images = state.get("input_image_urls")
     input_mask = state.get("input_mask_url")
+
+    combined_styles: List[str] = []
+    for seq in (style_preferences, state.get("style_tags") or [], reference_styles):
+        for tag in seq:
+            if tag and tag not in combined_styles:
+                combined_styles.append(tag)
+
+    prompt_bits: List[str] = [prompt.strip()] if prompt else []
+    if logo_type:
+        prompt_bits.append(f"Logo type emphasis: {logo_type}")
+    if combined_styles:
+        prompt_bits.append("Style cues: " + ", ".join(combined_styles))
+    if trend_highlights:
+        prompt_bits.append("Trend inspiration: " + ", ".join(trend_highlights))
+    prompt = " | ".join(bit for bit in prompt_bits if bit)
+
+    if reference_image and task == TaskType.GENERATE.value:
+        task = TaskType.REMIX.value
+        input_images = [reference_image]
+    elif reference_image and not input_images:
+        input_images = [reference_image]
 
     headers = {"Api-Key": IDEOGRAM_API_KEY}
 

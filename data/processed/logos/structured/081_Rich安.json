@@ -1,0 +1,99 @@
+{
+  "source_image": "081_Rich安.jpg",
+  "text_elements": {
+    "primary_text": "Rich",
+    "secondary_text": "Consulting",
+    "language": "Latin and Chinese",
+    "font_style": "script and sans-serif",
+    "typography_notes": "The script font is elegant but may reduce readability at smaller sizes.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Chinese character next to a stylized letter 'R' with a circle",
+    "category": "lettermark",
+    "meanings": [
+      "wealth",
+      "stability"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#4B2E2B",
+        "common_name": "dark brown",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#D4A373",
+        "common_name": "light brown",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "elegant"
+  ],
+  "tone_descriptors": [
+    "luxury",
+    "professional"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:3",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol.",
+    "spacing_notes": "Adequate spacing between elements.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "wealth",
+      "consulting",
+      "stability"
+    ],
+    "values": [
+      "trust",
+      "expertise"
+    ],
+    "audience_hint": "business professionals",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Script font may be hard to read at smaller sizes.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "typography",
+      "suggestion": "Consider a more readable font for smaller sizes.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "elegant"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current trends in luxury branding."
+  },
+  "analysis_timestamp": "2025-11-10T05:36:48.002451Z"
+}

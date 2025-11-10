@@ -1,0 +1,92 @@
+{
+  "source_image": "056_일리움_.jpg",
+  "text_elements": {
+    "primary_text": "ILIUM",
+    "secondary_text": "Realize Your Imagination",
+    "language": "Latin",
+    "font_style": "Bold sans-serif",
+    "typography_notes": "Clear and legible with a modern feel",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Paper airplane",
+    "category": "abstract",
+    "meanings": [
+      "creativity",
+      "innovation"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFA500",
+        "common_name": "orange",
+        "usage": "accent"
+      },
+      {
+        "hex": "#1E90FF",
+        "common_name": "dodger blue",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "innovative",
+    "professional"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with symbol complementing text",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "innovation",
+      "creativity"
+    ],
+    "values": [
+      "imagination",
+      "forward-thinking"
+    ],
+    "audience_hint": "creative professionals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding more color variations for versatility",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current trends in simplicity and modern design"
+  },
+  "analysis_timestamp": "2025-11-10T05:26:59.498121Z"
+}

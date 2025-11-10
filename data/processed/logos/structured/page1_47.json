@@ -1,0 +1,88 @@
+{
+  "source_image": "page1_47.jpg",
+  "text_elements": {
+    "primary_text": "행심당",
+    "secondary_text": "행복을 심는 나무",
+    "language": "Korean",
+    "font_style": "handwritten",
+    "typography_notes": "The text is clear and legible with a friendly style.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "A tree with clover leaves inside a crescent shape",
+    "category": "abstract",
+    "meanings": [
+      "nature",
+      "growth",
+      "luck"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FFD700",
+        "common_name": "gold",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#008000",
+        "common_name": "green",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between gold and green against the white background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "natural"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol.",
+    "spacing_notes": "Adequate spacing between elements for clarity.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "happiness",
+      "growth",
+      "nature"
+    ],
+    "values": [
+      "positivity",
+      "sustainability"
+    ],
+    "audience_hint": "environmentally conscious consumers",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth.",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "eco-friendly",
+      "minimalist"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with trends focusing on sustainability and simplicity."
+  },
+  "analysis_timestamp": "2025-11-10T05:48:58.635136Z"
+}

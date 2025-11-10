@@ -1,0 +1,81 @@
+{
+  "source_image": "page4_3.jpg",
+  "text_elements": {
+    "primary_text": "유시",
+    "secondary_text": null,
+    "language": "Korean",
+    "font_style": "modern sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Circular emblem with abstract lines and shapes",
+    "category": "abstract",
+    "meanings": [
+      "harmony",
+      "balance"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#4A4A4A",
+        "common_name": "dark gray",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "elegant",
+    "calm"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced circular design",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "harmony",
+      "modern"
+    ],
+    "values": [
+      "balance",
+      "simplicity"
+    ],
+    "audience_hint": "design-conscious consumers",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimalist",
+      "modern"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current minimalist design trends"
+  },
+  "analysis_timestamp": "2025-11-10T06:15:56.993446Z"
+}

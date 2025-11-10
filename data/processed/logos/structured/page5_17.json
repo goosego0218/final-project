@@ -1,0 +1,95 @@
+{
+  "source_image": "page5_17.jpg",
+  "text_elements": {
+    "primary_text": "Dóno wrapping",
+    "secondary_text": "for giver's mind",
+    "language": "Latin and Hangul",
+    "font_style": "modern sans-serif",
+    "typography_notes": "Clear and readable with a slight emphasis on the accent in 'Dóno'.",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "A stylized gift box with a ribbon",
+    "category": "emblem",
+    "meanings": [
+      "gift",
+      "present",
+      "giving"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#F4B400",
+        "common_name": "gold",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#34A853",
+        "common_name": "green",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "inviting"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "4:3",
+    "balance_notes": "Well-balanced with central alignment.",
+    "spacing_notes": "Adequate white space around elements.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "gift",
+      "wrapping",
+      "thoughtful"
+    ],
+    "values": [
+      "generosity",
+      "care"
+    ],
+    "audience_hint": "gift-givers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [
+    {
+      "type": "contrast",
+      "description": "Slight risk of low contrast in certain lighting.",
+      "severity": "low"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "contrast",
+      "suggestion": "Enhance color contrast for better visibility.",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.9,
+    "notes": "Aligns well with current minimalistic design trends."
+  },
+  "analysis_timestamp": "2025-11-10T06:23:03.486259Z"
+}

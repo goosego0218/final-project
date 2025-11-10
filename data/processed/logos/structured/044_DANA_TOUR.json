@@ -1,0 +1,87 @@
+{
+  "source_image": "044_DANA_TOUR.jpg",
+  "text_elements": {
+    "primary_text": "DANA",
+    "secondary_text": "TOUR",
+    "language": "Latin",
+    "font_style": "modern sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized letter D with an airplane silhouette",
+    "category": "lettermark",
+    "meanings": [
+      "travel",
+      "aviation"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#A7CBE3",
+        "common_name": "light blue",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#E8A19B",
+        "common_name": "light red",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.85
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "professional",
+    "friendly"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "travel",
+      "adventure",
+      "exploration"
+    ],
+    "values": [
+      "innovation",
+      "accessibility"
+    ],
+    "audience_hint": "travel enthusiasts",
+    "confidence": 0.9
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary accent color for depth",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "modern"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current minimalistic design trends"
+  },
+  "analysis_timestamp": "2025-11-10T05:20:55.071784Z"
+}

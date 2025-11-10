@@ -1,0 +1,93 @@
+{
+  "source_image": "061_Open___Search.jpg",
+  "text_elements": {
+    "primary_text": "Open & Search",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "Sans-serif with bold emphasis",
+    "typography_notes": "Clear and readable with contrasting colors",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "A blue square outline partially enclosing the text",
+    "category": "abstract",
+    "meanings": [
+      "openness",
+      "search"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#0073B1",
+        "common_name": "blue",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#A6192E",
+        "common_name": "red",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between blue and red for emphasis",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "professional",
+    "dynamic"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with equal emphasis on both words",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "open",
+      "search",
+      "connect"
+    ],
+    "values": [
+      "innovation",
+      "accessibility"
+    ],
+    "audience_hint": "tech-savvy professionals",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [
+    {
+      "type": "color",
+      "description": "Limited color palette",
+      "severity": "low"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Introduce a secondary color for depth",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current minimalistic design trends"
+  },
+  "analysis_timestamp": "2025-11-10T05:28:39.731231Z"
+}

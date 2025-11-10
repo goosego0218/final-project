@@ -1,0 +1,88 @@
+{
+  "source_image": "page6_42.jpg",
+  "text_elements": {
+    "primary_text": "SUJIP AVENUE",
+    "secondary_text": "화폐수집.com",
+    "language": "Korean and English",
+    "font_style": "bold sans-serif",
+    "typography_notes": "Clear and readable with a modern touch",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized paper currency with 'SA' initials",
+    "category": "abstract",
+    "meanings": [
+      "currency",
+      "finance"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#2F4F4F",
+        "common_name": "dark slate gray",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "professional",
+    "trustworthy"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with equal weight on text and symbol",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "currency",
+      "collection",
+      "avenue"
+    ],
+    "values": [
+      "trust",
+      "expertise"
+    ],
+    "audience_hint": "currency collectors",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Symbol may be too abstract for some audiences",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "symbol",
+      "suggestion": "Consider simplifying or clarifying the symbol",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current minimalistic design trends"
+  },
+  "analysis_timestamp": "2025-11-10T06:38:32.904087Z"
+}

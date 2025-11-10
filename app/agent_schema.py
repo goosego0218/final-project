@@ -29,6 +29,14 @@ class CandidateImage(TypedDict, total=False):
     variant_id: Optional[str]
 
 
+class ReferenceLogo(TypedDict, total=False):
+    image_url: str
+    logo_type: Optional[str]
+    style_tags: Optional[List[str]]
+    source_image: Optional[str]
+    notes: Optional[str]
+
+
 class LogoState(TypedDict, total=False):
     # 0. Request meta
     request_id: str
@@ -40,6 +48,9 @@ class LogoState(TypedDict, total=False):
     brand_description: str
     brand_tone: str
     target_usage: List[str]
+    logo_type: Optional[str]
+    style_preferences: Optional[List[str]]
+    trend_highlights: Optional[List[str]]
 
     # 2. Task routing
     task_type: Literal[
@@ -74,6 +85,7 @@ class LogoState(TypedDict, total=False):
     candidate_images: List[CandidateImage]
     last_generated_image_url: Optional[str]
     is_image_safe: Optional[bool]
+    reference_logo: Optional[ReferenceLogo]
 
      # 5. Evaluation / feedback
     eval_score: Optional[float]
@@ -119,6 +131,8 @@ class PromptPlannerIn(BaseModel):
     brand_description: str
     brand_tone: Optional[str] = None
     target_usage: Optional[List[str]] = None
+    logo_type: Optional[str] = None
+    style_preferences: Optional[List[str]] = None
     # Sidebar + main prompt inputs
     prompt_keywords: Optional[List[str]] = None
     user_prompt: Optional[str] = None

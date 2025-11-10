@@ -1,0 +1,88 @@
+{
+  "source_image": "page3_38.jpg",
+  "text_elements": {
+    "primary_text": "AI솜사탕",
+    "secondary_text": "COOTTONCANDY",
+    "language": "Korean and English",
+    "font_style": "bold sans-serif",
+    "typography_notes": "Clear and readable, though the English text has a spelling error.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Smiling cotton candy icon",
+    "category": "abstract",
+    "meanings": [
+      "fun",
+      "sweetness"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#00AEEF",
+        "common_name": "sky blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast against white background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "playful"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "fun"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with equal weight on text and symbol.",
+    "spacing_notes": "Adequate spacing between elements.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "cotton candy",
+      "AI",
+      "sweet"
+    ],
+    "values": [
+      "innovation",
+      "enjoyment"
+    ],
+    "audience_hint": "youth and tech-savvy individuals",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Spelling error in English text.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "typography",
+      "suggestion": "Correct spelling in English text.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "playful"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with trends in playful and tech-oriented branding."
+  },
+  "analysis_timestamp": "2025-11-10T06:07:30.154405Z"
+}

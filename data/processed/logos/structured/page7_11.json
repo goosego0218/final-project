@@ -1,0 +1,82 @@
+{
+  "source_image": "page7_11.jpg",
+  "text_elements": {
+    "primary_text": "YOUR DAY STUDY CAFE",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "Bold sans-serif",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "A desk lamp shining light on an open book",
+    "category": "emblem",
+    "meanings": [
+      "study",
+      "focus",
+      "learning"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "High contrast with background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "educational"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "study",
+      "cafe",
+      "focus"
+    ],
+    "values": [
+      "education",
+      "comfort"
+    ],
+    "audience_hint": "students, professionals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Introduce a secondary color for visual interest",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current minimalistic design trends"
+  },
+  "analysis_timestamp": "2025-11-10T06:42:20.112018Z"
+}

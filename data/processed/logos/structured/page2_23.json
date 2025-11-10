@@ -1,0 +1,98 @@
+{
+  "source_image": "page2_23.jpg",
+  "text_elements": {
+    "primary_text": "초여로예",
+    "secondary_text": "choyeo",
+    "language": "Korean",
+    "font_style": "calligraphic",
+    "typography_notes": "The primary text is artistic but legible, while the secondary text is clear and simple.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "A circular emblem with abstract shapes in red, blue, green, and brown.",
+    "category": "abstract",
+    "meanings": [
+      "unity",
+      "balance",
+      "nature"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FF0000",
+        "common_name": "red",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#0000FF",
+        "common_name": "blue",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#008000",
+        "common_name": "green",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#A52A2A",
+        "common_name": "brown",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between colors and background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "artistic"
+  ],
+  "tone_descriptors": [
+    "creative",
+    "harmonious"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with equal distribution of elements.",
+    "spacing_notes": "Adequate white space around the symbol and text.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "creativity",
+      "balance",
+      "nature"
+    ],
+    "values": [
+      "harmony",
+      "innovation"
+    ],
+    "audience_hint": "creative professionals",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "typography",
+      "suggestion": "Consider simplifying the primary text for better readability.",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "artistic"
+    ],
+    "score": 0.8,
+    "notes": "The logo aligns well with current trends in artistic and abstract design."
+  },
+  "analysis_timestamp": "2025-11-10T05:53:54.955140Z"
+}

@@ -1,0 +1,109 @@
+{
+  "source_image": "030_Gelaeto.jpg",
+  "text_elements": {
+    "primary_text": "Gelato",
+    "secondary_text": "icecreamForpets",
+    "language": "Latin",
+    "font_style": "playful, rounded",
+    "typography_notes": "Readable with a whimsical touch",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Dog face with ice cream cone",
+    "category": "emblem",
+    "meanings": [
+      "pet-friendly",
+      "fun",
+      "treat"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#6EC1E4",
+        "common_name": "light blue",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#A3D9C5",
+        "common_name": "mint green",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#F9A825",
+        "common_name": "yellow",
+        "usage": "accent"
+      },
+      {
+        "hex": "#8E44AD",
+        "common_name": "purple",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.8
+  },
+  "style_tags": [
+    "playful",
+    "modern",
+    "fun"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "inviting",
+    "joyful"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:3",
+    "balance_notes": "Well-balanced with central focus",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "pets",
+      "ice cream",
+      "fun"
+    ],
+    "values": [
+      "joy",
+      "care",
+      "innovation"
+    ],
+    "audience_hint": "pet owners",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Secondary text may be too small",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "typography",
+      "suggestion": "Increase size of secondary text",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "playful"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current trends in pet products"
+  },
+  "analysis_timestamp": "2025-11-10T05:09:06.297040Z"
+}

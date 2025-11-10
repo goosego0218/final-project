@@ -1,0 +1,99 @@
+{
+  "source_image": "003_캐릭터07.jpg",
+  "text_elements": {
+    "primary_text": "THE ARC",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "rounded sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Green character with a swirl on the head holding a wand",
+    "category": "abstract",
+    "meanings": [
+      "playful",
+      "friendly"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#00FF00",
+        "common_name": "green",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#0000FF",
+        "common_name": "blue",
+        "usage": "accent"
+      },
+      {
+        "hex": "#FFFF00",
+        "common_name": "yellow",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "playful"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "cheerful"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central character",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.85
+  },
+  "brand_message": {
+    "keywords": [
+      "fun",
+      "community"
+    ],
+    "values": [
+      "inclusivity",
+      "joy"
+    ],
+    "audience_hint": "families and children",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Character may not be universally recognized",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "symbol",
+      "suggestion": "Consider adding more context to the character",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "playful",
+      "modern"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current playful and friendly design trends"
+  },
+  "analysis_timestamp": "2025-11-10T04:21:38.122396Z"
+}

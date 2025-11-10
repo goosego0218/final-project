@@ -1,0 +1,96 @@
+{
+  "source_image": "page2_44.jpg",
+  "text_elements": {
+    "primary_text": "HA",
+    "secondary_text": "하움에스테틱 피부·두피·탈모 관리",
+    "language": "Korean",
+    "font_style": "serif",
+    "typography_notes": "The text is clear and legible with a classic serif style.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Profile of a face with leaves integrated into the letters HA",
+    "category": "abstract",
+    "meanings": [
+      "nature",
+      "health",
+      "beauty"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#8B5E3C",
+        "common_name": "brown",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "Good contrast between the brown text and white background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "elegant"
+  ],
+  "tone_descriptors": [
+    "natural",
+    "professional"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol.",
+    "spacing_notes": "Adequate spacing around elements for clarity.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "beauty",
+      "health",
+      "nature"
+    ],
+    "values": [
+      "wellness",
+      "care",
+      "natural beauty"
+    ],
+    "audience_hint": "health-conscious individuals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Complex integration of elements may reduce clarity at smaller sizes.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "symbol",
+      "suggestion": "Simplify the symbol for better clarity at smaller sizes.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "natural",
+      "minimalist"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current trends focusing on natural and minimalist aesthetics."
+  },
+  "analysis_timestamp": "2025-11-10T05:58:35.159619Z"
+}

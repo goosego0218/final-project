@@ -1,0 +1,87 @@
+{
+  "source_image": "018_adelviche.jpg",
+  "text_elements": {
+    "primary_text": "Adeluiche",
+    "secondary_text": "DRESS ETERNITY",
+    "language": "Latin",
+    "font_style": "cursive and sans-serif",
+    "typography_notes": "The cursive font is elegant but may affect readability at smaller sizes.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Stylized script with flourishes",
+    "category": "lettermark",
+    "meanings": [
+      "elegance",
+      "timelessness"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#4A2C2A",
+        "common_name": "brown",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with white background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "elegant",
+    "classic"
+  ],
+  "tone_descriptors": [
+    "luxury",
+    "timeless"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with symmetrical flourishes.",
+    "spacing_notes": "Adequate white space around text.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "elegance",
+      "eternity",
+      "fashion"
+    ],
+    "values": [
+      "timelessness",
+      "luxury"
+    ],
+    "audience_hint": "fashion-conscious adults",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Cursive font may be hard to read at smaller sizes.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Consider a bolder font for better readability.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "classic"
+    ],
+    "score": 0.7,
+    "notes": "Aligns with timeless and classic design trends."
+  },
+  "analysis_timestamp": "2025-11-10T04:44:50.428622Z"
+}

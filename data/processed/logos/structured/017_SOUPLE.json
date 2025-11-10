@@ -1,0 +1,81 @@
+{
+  "source_image": "017_SOUPLE.jpg",
+  "text_elements": {
+    "primary_text": "SOUPEL",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "Serif",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Safety pin integrated with text",
+    "category": "abstract",
+    "meanings": [
+      "safety",
+      "protection"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "High contrast with white background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "secure",
+    "innovative"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with equal weight on both sides",
+    "spacing_notes": "Adequate spacing around text",
+    "confidence": 0.85
+  },
+  "brand_message": {
+    "keywords": [
+      "safety",
+      "innovation"
+    ],
+    "values": [
+      "protection",
+      "creativity"
+    ],
+    "audience_hint": "general consumers",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding an accent color for emphasis",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "modern"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current minimalistic design trends"
+  },
+  "analysis_timestamp": "2025-11-10T04:40:11.146845Z"
+}

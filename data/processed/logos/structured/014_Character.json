@@ -1,0 +1,95 @@
+{
+  "source_image": "014_Character.jpg",
+  "text_elements": {
+    "primary_text": null,
+    "secondary_text": null,
+    "language": null,
+    "font_style": null,
+    "typography_notes": null,
+    "confidence": 0.0
+  },
+  "symbol": {
+    "description": "Four cartoon-style dog illustrations",
+    "category": "animal",
+    "meanings": [
+      "playful",
+      "friendly",
+      "cute"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#4A4A4A",
+        "common_name": "dark gray",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#D2B48C",
+        "common_name": "tan",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      },
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between characters and background.",
+    "confidence": 0.8
+  },
+  "style_tags": [
+    "cute",
+    "cartoon",
+    "playful"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "approachable",
+    "fun"
+  ],
+  "layout": {
+    "orientation": "square",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Balanced distribution of elements.",
+    "spacing_notes": "Adequate spacing between elements.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "pets",
+      "fun",
+      "friendly"
+    ],
+    "values": [
+      "playfulness",
+      "companionship"
+    ],
+    "audience_hint": "pet owners, children",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [],
+  "trend_alignment": {
+    "tags": [
+      "cute",
+      "cartoon"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends in playful and friendly design."
+  },
+  "analysis_timestamp": "2025-11-10T04:35:54.421994Z"
+}

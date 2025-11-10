@@ -1,0 +1,109 @@
+{
+  "source_image": "007_캐릭터02.jpg",
+  "text_elements": {
+    "primary_text": "YEONG SAN RIVER",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "Bold sans-serif",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Cartoon character with a droplet head and scarf",
+    "category": "other",
+    "meanings": [
+      "water",
+      "playful",
+      "friendly"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#007BA7",
+        "common_name": "Teal",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#FFFFFF",
+        "common_name": "White",
+        "usage": "background"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFA500",
+        "common_name": "Orange",
+        "usage": "accent"
+      },
+      {
+        "hex": "#FF4500",
+        "common_name": "Red-Orange",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.8
+  },
+  "style_tags": [
+    "playful",
+    "youthful",
+    "colorful"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "approachable",
+    "fun"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central character",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.8
+  },
+  "brand_message": {
+    "keywords": [
+      "water",
+      "river",
+      "fun"
+    ],
+    "values": [
+      "environment",
+      "community",
+      "engagement"
+    ],
+    "audience_hint": "families and children",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Character may not be universally recognized",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "symbol",
+      "suggestion": "Consider adding a more universally recognized element",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "playful",
+      "youth-oriented"
+    ],
+    "score": 0.7,
+    "notes": "Aligns with trends towards friendly and approachable branding"
+  },
+  "analysis_timestamp": "2025-11-10T04:26:59.338507Z"
+}

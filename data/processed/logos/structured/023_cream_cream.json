@@ -1,0 +1,87 @@
+{
+  "source_image": "023_cream_cream.jpg",
+  "text_elements": {
+    "primary_text": "cream&cream",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "sans-serif, bold",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Interlocking double 'C' design",
+    "category": "lettermark",
+    "meanings": [
+      "connection",
+      "continuity"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#00A9CE",
+        "common_name": "blue",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#2E2E56",
+        "common_name": "dark blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "professional"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with equal emphasis on symbol and text",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "cream",
+      "quality",
+      "connection"
+    ],
+    "values": [
+      "innovation",
+      "trust"
+    ],
+    "audience_hint": "general consumers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current minimalistic design trends"
+  },
+  "analysis_timestamp": "2025-11-10T04:57:47.549998Z"
+}

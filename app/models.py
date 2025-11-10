@@ -1,6 +1,14 @@
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel
+
+
+class ReferenceLogoPayload(BaseModel):
+    image_url: str
+    logo_type: Optional[str] = None
+    style_tags: Optional[List[str]] = None
+    source_image: Optional[str] = None
+    notes: Optional[str] = None
 
 
 class LogoRequest(BaseModel):
@@ -29,6 +37,11 @@ class LogoRequest(BaseModel):
     remix_num_images: Optional[int] = None
     edit_inpaint_strength: Optional[float] = None
     edit_keep_background: Optional[bool] = None
+    target_usage: Optional[List[str]] = None
+    logo_type: Optional[str] = None
+    style_preferences: Optional[List[str]] = None
+    trend_highlights: Optional[List[str]] = None
+    reference_logo: Optional[ReferenceLogoPayload] = None
 
 
 # v1 state definitions removed; v2 uses app.agent_schema.LogoState

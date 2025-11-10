@@ -1,0 +1,93 @@
+{
+  "source_image": "015_BANCHAN.jpg",
+  "text_elements": {
+    "primary_text": "BANCHAN",
+    "secondary_text": "1995",
+    "language": "Latin and Korean",
+    "font_style": "Bold sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Red and blue curved lines resembling a roof",
+    "category": "abstract",
+    "meanings": [
+      "roof",
+      "protection",
+      "home"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FF0000",
+        "common_name": "red",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#0000FF",
+        "common_name": "blue",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "text"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "professional",
+    "trustworthy"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "Korean",
+      "food",
+      "tradition"
+    ],
+    "values": [
+      "quality",
+      "heritage"
+    ],
+    "audience_hint": "consumers interested in Korean cuisine",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "cultural"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with trends in cultural branding and minimalism"
+  },
+  "analysis_timestamp": "2025-11-10T04:37:08.173142Z"
+}

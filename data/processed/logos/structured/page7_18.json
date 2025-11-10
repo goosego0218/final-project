@@ -1,0 +1,93 @@
+{
+  "source_image": "page7_18.jpg",
+  "text_elements": {
+    "primary_text": "예맥",
+    "secondary_text": "Yemaek Food\nBarley Research Institute",
+    "language": "Korean",
+    "font_style": "bold serif",
+    "typography_notes": "Clear and legible with a traditional feel",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Stylized letter B with barley stalks",
+    "category": "emblem",
+    "meanings": [
+      "agriculture",
+      "growth"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#D4AF37",
+        "common_name": "gold",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#008000",
+        "common_name": "green",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between gold and green",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "traditional",
+    "agricultural"
+  ],
+  "tone_descriptors": [
+    "professional",
+    "trustworthy"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:3",
+    "balance_notes": "Well-balanced with symmetrical elements",
+    "spacing_notes": "Adequate spacing around text and symbols",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "barley",
+      "research",
+      "food"
+    ],
+    "values": [
+      "innovation",
+      "quality"
+    ],
+    "audience_hint": "agricultural industry professionals",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Small text may be hard to read at smaller sizes",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Increase font size for smaller text",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "classic",
+      "agricultural"
+    ],
+    "score": 0.7,
+    "notes": "Aligns with traditional agricultural branding trends"
+  },
+  "analysis_timestamp": "2025-11-10T06:44:01.604261Z"
+}

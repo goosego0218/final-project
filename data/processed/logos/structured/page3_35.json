@@ -1,0 +1,88 @@
+{
+  "source_image": "page3_35.jpg",
+  "text_elements": {
+    "primary_text": "pupuzly",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "rounded, italic",
+    "typography_notes": "The text is clear and legible with a playful curve.",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "A dot above the letter 'y' resembling a person or a playful element.",
+    "category": "abstract",
+    "meanings": [
+      "playfulness",
+      "personification"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#2B2B6F",
+        "common_name": "dark blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with the white background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "playful"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "approachable"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with a slight emphasis on the end.",
+    "spacing_notes": "Adequate spacing between letters.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "playful",
+      "friendly",
+      "modern"
+    ],
+    "values": [
+      "approachability",
+      "youthfulness"
+    ],
+    "audience_hint": "young adults, families",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "The abstract symbol may not be immediately recognizable.",
+      "severity": "low"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "symbol",
+      "suggestion": "Consider making the symbol more distinct.",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "playful"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current trends of simplicity and playfulness."
+  },
+  "analysis_timestamp": "2025-11-10T06:06:54.560620Z"
+}

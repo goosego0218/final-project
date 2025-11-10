@@ -1,0 +1,99 @@
+{
+  "source_image": "002_아트크레오.jpg",
+  "text_elements": {
+    "primary_text": "아트크레오",
+    "secondary_text": "생각을 그려 낼 줄 아는 아이",
+    "language": "Korean",
+    "font_style": "modern sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Abstract shape with a smiling face and number 1989",
+    "category": "abstract",
+    "meanings": [
+      "creativity",
+      "happiness"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#005BAC",
+        "common_name": "blue",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#F5A623",
+        "common_name": "orange",
+        "usage": "accent"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#00A99D",
+        "common_name": "teal",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "playful"
+  ],
+  "tone_descriptors": [
+    "creative",
+    "friendly"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "art",
+      "creativity",
+      "youth"
+    ],
+    "values": [
+      "innovation",
+      "expression"
+    ],
+    "audience_hint": "young creatives",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Abstract symbol may not be immediately recognizable",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "symbol",
+      "suggestion": "Simplify or clarify the abstract symbol",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "playful"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current trends in playful and modern design"
+  },
+  "analysis_timestamp": "2025-11-10T04:19:48.396100Z"
+}

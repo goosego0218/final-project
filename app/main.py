@@ -1,12 +1,14 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from datetime import datetime
+from typing import Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 
 from .graph_v2 import compiled_graph_v2
 from .models import LogoRequest
 from .agent_schema import LogoState
+from .library import query_logo_library
 
 
 app = FastAPI(title="AI Logo Maker LangGraph", version="v2 (Ideogram + Reasoning)")
@@ -24,6 +26,9 @@ def run_logo_pipeline(req: LogoRequest):
         if req.reference_images:
             input_images.extend(req.reference_images)
 
+        reference_logo = req.reference_logo.model_dump() if req.reference_logo else None
+        targets = req.target_usage or ["generic"]
+
         v2_state: LogoState = {
             "request_id": "st-v2",
             "created_at": now,
@@ -31,16 +36,19 @@ def run_logo_pipeline(req: LogoRequest):
             "brand_name": req.brand_name,
             "brand_description": req.description,
             "brand_tone": req.style or (req.style_type or ""),
-            "target_usage": ["generic"],
+            "target_usage": targets,
+            "logo_type": req.logo_type,
+            "style_preferences": req.style_preferences,
+            "trend_highlights": req.trend_highlights,
             "input_image_urls": input_images,
             "input_mask_url": req.mask_image_url or None,
             "requested_task_type": req.image_task_mode or None,
             # Sidebar/Main prompt inputs from UI (optional)
             "prompt_keywords": req.prompt_keywords or None,
             "user_prompt": req.user_prompt or (req.base_prompt or ""),
-            # 초기에는 사용자 스타일 텍스트를 그대로 프롬프트로 쓰지 않고,
-            # PromptPlanner가 브랜드/설명/톤을 결합해 최종 프롬프트를 만들게 한다.
-            # 사용자가 명시적으로 base_prompt를 준 경우에만 초기 프롬프트로 사용.
+            # 珥덇린?먮뒗 ?ъ슜???ㅽ????띿뒪?몃? 洹몃?濡??꾨＼?꾪듃濡??곗? ?딄퀬,
+            # PromptPlanner媛 釉뚮옖???ㅻ챸/?ㅼ쓣 寃고빀??理쒖쥌 ?꾨＼?꾪듃瑜?留뚮뱾寃??쒕떎.
+            # ?ъ슜?먭? 紐낆떆?곸쑝濡?base_prompt瑜?以 寃쎌슦?먮쭔 珥덇린 ?꾨＼?꾪듃濡??ъ슜.
             "enhanced_prompt": req.base_prompt or "",
             "negative_prompt": req.negative_prompt,
             "style_tags": None,
@@ -57,6 +65,7 @@ def run_logo_pipeline(req: LogoRequest):
             "candidate_images": [],
             "last_generated_image_url": None,
             "is_image_safe": None,
+            "reference_logo": reference_logo,
             "eval_score": None,
             "eval_feedback": None,
             "human_feedback": req.edit_instruction or None,
@@ -101,4 +110,18 @@ def run_logo_pipeline(req: LogoRequest):
 
 @app.get("/")
 def root():
-    return {"message": "🚀 AI Logo Maker (v2) is running!"}
+    return {"message": "AI Logo Maker (v2) is running!"}
+
+
+@app.get("/logo_library")
+def logo_library(
+    logo_type: Optional[str] = Query(None, description="Filter by symbol/category"),
+    style_tag: Optional[str] = Query(None, description="Filter by style tag"),
+    limit: int = Query(24, ge=1, le=200),
+    refresh: bool = Query(False, description="Force reload from disk"),
+):
+    entries = query_logo_library(
+        logo_type=logo_type, style_tag=style_tag, limit=limit, refresh=refresh
+    )
+    return {"items": [entry.model_dump() for entry in entries]}
+

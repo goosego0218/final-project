@@ -1,0 +1,97 @@
+{
+  "source_image": "page7_12.jpg",
+  "text_elements": {
+    "primary_text": "PANABODA",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "Bold sans-serif",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Three vertical bars in blue, orange, and gray",
+    "category": "abstract",
+    "meanings": [
+      "stability",
+      "modernity"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#0073E6",
+        "common_name": "blue",
+        "usage": "accent"
+      },
+      {
+        "hex": "#FF6600",
+        "common_name": "orange",
+        "usage": "accent"
+      },
+      {
+        "hex": "#A0A0A0",
+        "common_name": "gray",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "professional",
+    "contemporary"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "innovation",
+      "reliability"
+    ],
+    "values": [
+      "trust",
+      "efficiency"
+    ],
+    "audience_hint": "business professionals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider using a more vibrant color palette for increased impact",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimalist"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current minimalist design trends"
+  },
+  "analysis_timestamp": "2025-11-10T06:42:35.410598Z"
+}

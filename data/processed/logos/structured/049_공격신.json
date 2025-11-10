@@ -1,0 +1,79 @@
+{
+  "source_image": "049_공격신.jpg",
+  "text_elements": {
+    "primary_text": "공격신",
+    "secondary_text": "공무원 합격의 신",
+    "language": "Korean",
+    "font_style": "bold sans-serif",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Red pentagon with a star and chevron",
+    "category": "emblem",
+    "meanings": [
+      "authority",
+      "achievement"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#C8102E",
+        "common_name": "red",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "text"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "bold"
+  ],
+  "tone_descriptors": [
+    "authoritative",
+    "professional"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "success",
+      "excellence"
+    ],
+    "values": [
+      "achievement",
+      "professionalism"
+    ],
+    "audience_hint": "aspiring professionals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [],
+  "trend_alignment": {
+    "tags": [
+      "modern"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends of bold and clear designs"
+  },
+  "analysis_timestamp": "2025-11-10T05:23:47.788564Z"
+}

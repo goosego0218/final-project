@@ -1,0 +1,82 @@
+{
+  "source_image": "베이커리_92.jpg",
+  "text_elements": {
+    "primary_text": "fatsia garden",
+    "secondary_text": "팻시아가든",
+    "language": "Latin and Hangul",
+    "font_style": "modern serif",
+    "typography_notes": "Readable with a stylish flair",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "A stylized leaf",
+    "category": "abstract",
+    "meanings": [
+      "nature",
+      "growth"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#2F4F4F",
+        "common_name": "dark green",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with the background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "natural",
+    "elegant"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "nature",
+      "garden",
+      "elegance"
+    ],
+    "values": [
+      "sustainability",
+      "beauty"
+    ],
+    "audience_hint": "nature enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "eco-friendly"
+    ],
+    "score": 0.9,
+    "notes": "Aligns well with current trends in sustainability and minimalism"
+  },
+  "analysis_timestamp": "2025-11-10T07:02:24.172591Z"
+}

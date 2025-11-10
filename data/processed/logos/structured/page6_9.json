@@ -1,0 +1,100 @@
+{
+  "source_image": "page6_9.jpg",
+  "text_elements": {
+    "primary_text": "파스타에 빠지다",
+    "secondary_text": null,
+    "language": "Korean",
+    "font_style": "modern sans-serif",
+    "typography_notes": "Legible with a playful style",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "A plate of pasta with a fork and heart shapes",
+    "category": "emblem",
+    "meanings": [
+      "food",
+      "love",
+      "Italian cuisine"
+    ],
+    "confidence": 0.95
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FFD700",
+        "common_name": "gold",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#FF4500",
+        "common_name": "orange red",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "text"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "playful"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "inviting"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "pasta",
+      "love",
+      "food"
+    ],
+    "values": [
+      "passion",
+      "taste"
+    ],
+    "audience_hint": "food enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "color",
+      "description": "Potential color clash with certain backgrounds",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider a more neutral background",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "playful"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current playful and modern design trends"
+  },
+  "analysis_timestamp": "2025-11-10T06:41:31.840913Z"
+}

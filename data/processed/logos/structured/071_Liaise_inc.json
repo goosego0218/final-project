@@ -1,0 +1,92 @@
+{
+  "source_image": "071_Liaise_inc.jpg",
+  "text_elements": {
+    "primary_text": "Liaise inc",
+    "secondary_text": "Human resource management",
+    "language": "Latin",
+    "font_style": "Sans-serif, italic",
+    "typography_notes": "Readable with a modern touch",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Curved line above text",
+    "category": "abstract",
+    "meanings": [
+      "connection",
+      "growth"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#1E73BE",
+        "common_name": "blue",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#6DC067",
+        "common_name": "green",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "professional"
+  ],
+  "tone_descriptors": [
+    "trustworthy",
+    "corporate"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol",
+    "spacing_notes": "Adequate spacing for readability",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "liaise",
+      "management",
+      "resources"
+    ],
+    "values": [
+      "efficiency",
+      "connection"
+    ],
+    "audience_hint": "business professionals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Abstract symbol may lack immediate recognition",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "symbol",
+      "suggestion": "Consider a more recognizable symbol",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends of simplicity and professionalism"
+  },
+  "analysis_timestamp": "2025-11-10T05:32:42.497069Z"
+}

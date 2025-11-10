@@ -1,0 +1,83 @@
+{
+  "source_image": "커피_16.jpg",
+  "text_elements": {
+    "primary_text": "SOUTH COFFEE",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "Bold sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Abstract waves with a sun",
+    "category": "abstract",
+    "meanings": [
+      "nature",
+      "calm",
+      "sunrise"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#6A7BA2",
+        "common_name": "blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "calm",
+    "natural"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with equal weight",
+    "spacing_notes": "Adequate white space",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "coffee",
+      "nature",
+      "calm"
+    ],
+    "values": [
+      "quality",
+      "serenity"
+    ],
+    "audience_hint": "coffee enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "nature-inspired"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current minimal and nature-inspired design trends"
+  },
+  "analysis_timestamp": "2025-11-10T07:40:45.131545Z"
+}

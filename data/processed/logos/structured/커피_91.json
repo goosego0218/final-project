@@ -1,0 +1,94 @@
+{
+  "source_image": "커피_91.jpg",
+  "text_elements": {
+    "primary_text": "FOUND COFFEE",
+    "secondary_text": "미각커피 전문점 - 아이파운드",
+    "language": "English and Korean",
+    "font_style": "bold, rounded",
+    "typography_notes": "The primary text is bold and eye-catching, but the arrangement may affect readability.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Stylized text with playful arrangement",
+    "category": "lettermark",
+    "meanings": [
+      "discovery",
+      "playfulness"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "High contrast between text and background ensures readability.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "playful"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "inviting"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "2:3",
+    "balance_notes": "The text is centered, creating a balanced look.",
+    "spacing_notes": "Adequate white space around the text enhances readability.",
+    "confidence": 0.8
+  },
+  "brand_message": {
+    "keywords": [
+      "coffee",
+      "discovery",
+      "specialty"
+    ],
+    "values": [
+      "quality",
+      "exploration"
+    ],
+    "audience_hint": "coffee enthusiasts",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "packaging",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "The playful arrangement may hinder quick reading.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Consider simplifying the text arrangement for clarity.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "playful"
+    ],
+    "score": 0.8,
+    "notes": "The design aligns well with current trends in playful and modern branding."
+  },
+  "analysis_timestamp": "2025-11-10T07:52:47.763530Z"
+}

@@ -1,0 +1,94 @@
+{
+  "source_image": "page5_23.jpg",
+  "text_elements": {
+    "primary_text": "HARU THEBOM",
+    "secondary_text": "하루더봄",
+    "language": "Latin and Hangul",
+    "font_style": "Sans-serif with a modern touch",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "A stylized house outline with a leaf and sprout inside",
+    "category": "abstract",
+    "meanings": [
+      "growth",
+      "nature",
+      "home"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#D4A55D",
+        "common_name": "gold",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#6B8E23",
+        "common_name": "olive green",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "natural"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "nature",
+      "growth",
+      "home"
+    ],
+    "values": [
+      "sustainability",
+      "comfort"
+    ],
+    "audience_hint": "eco-conscious consumers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "color",
+      "description": "Limited color palette",
+      "severity": "low"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Introduce a complementary accent color",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "eco-friendly"
+    ],
+    "score": 0.9,
+    "notes": "Aligns well with current eco-friendly and minimalist trends"
+  },
+  "analysis_timestamp": "2025-11-10T06:24:23.496905Z"
+}

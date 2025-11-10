@@ -1,0 +1,87 @@
+{
+  "source_image": "카페_16.jpg",
+  "text_elements": {
+    "primary_text": "Ugly Delicious",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "handwritten",
+    "typography_notes": "The text is legible but has a casual, informal style.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Minimalist face drawing",
+    "category": "abstract",
+    "meanings": [
+      "simplicity",
+      "playfulness"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "High contrast between black text and white background.",
+    "confidence": 0.95
+  },
+  "style_tags": [
+    "minimal",
+    "modern"
+  ],
+  "tone_descriptors": [
+    "playful",
+    "quirky"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Centered layout with balanced spacing.",
+    "spacing_notes": "Adequate white space around elements.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "simplicity",
+      "fun"
+    ],
+    "values": [
+      "authenticity",
+      "creativity"
+    ],
+    "audience_hint": "young, trendy consumers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Handwritten style may affect readability at smaller sizes.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "typography",
+      "suggestion": "Consider a slightly bolder font for better readability.",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "quirky"
+    ],
+    "score": 0.9,
+    "notes": "Aligns well with current trends favoring minimalism and playful designs."
+  },
+  "analysis_timestamp": "2025-11-10T07:20:15.429720Z"
+}

@@ -1,0 +1,89 @@
+{
+  "source_image": "빵_22.jpg",
+  "text_elements": {
+    "primary_text": "장발장, 빵집",
+    "secondary_text": "Bakery & Dessert store Fresh · Clean · Healthy",
+    "language": "Korean",
+    "font_style": "bold sans-serif",
+    "typography_notes": "Clear and legible with a modern touch",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Bread and wheat icons integrated with text",
+    "category": "emblem",
+    "meanings": [
+      "bakery",
+      "freshness",
+      "health"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#8B5E3C",
+        "common_name": "brown",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "clean"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with equal weight on text and symbols",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "bakery",
+      "fresh",
+      "healthy"
+    ],
+    "values": [
+      "quality",
+      "cleanliness"
+    ],
+    "audience_hint": "health-conscious consumers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "color",
+      "description": "Limited color palette",
+      "severity": "low"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Introduce a secondary color for accents",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current minimalist design trends"
+  },
+  "analysis_timestamp": "2025-11-10T07:07:44.990768Z"
+}

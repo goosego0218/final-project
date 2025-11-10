@@ -1,0 +1,87 @@
+{
+  "source_image": "018_ANGELOOMING.jpg",
+  "text_elements": {
+    "primary_text": "angelooming",
+    "secondary_text": "ANGELOOMING",
+    "language": "Latin",
+    "font_style": "cursive",
+    "typography_notes": "The cursive script is elegant but may reduce readability at smaller sizes.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "A feather",
+    "category": "abstract",
+    "meanings": [
+      "creativity",
+      "lightness"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "High contrast with the white background ensures readability.",
+    "confidence": 0.95
+  },
+  "style_tags": [
+    "elegant",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "sophisticated",
+    "creative"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "5:1",
+    "balance_notes": "The feather symbol balances the text effectively.",
+    "spacing_notes": "Adequate white space enhances the minimalist design.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "creativity",
+      "elegance"
+    ],
+    "values": [
+      "artistry",
+      "refinement"
+    ],
+    "audience_hint": "creative professionals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Cursive text may be hard to read at smaller sizes.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "typography",
+      "suggestion": "Consider a more legible font for smaller applications.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "elegant"
+    ],
+    "score": 0.9,
+    "notes": "Aligns well with current trends favoring minimalistic and elegant designs."
+  },
+  "analysis_timestamp": "2025-11-10T04:45:07.195915Z"
+}

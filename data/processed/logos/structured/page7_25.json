@@ -1,0 +1,95 @@
+{
+  "source_image": "page7_25.jpg",
+  "text_elements": {
+    "primary_text": "Door",
+    "secondary_text": "FOLLOW US",
+    "language": "Latin",
+    "font_style": "Sans-serif",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Circular abstract design with lines",
+    "category": "abstract",
+    "meanings": [
+      "modern",
+      "unity"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "High contrast for readability",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "elegant",
+    "contemporary"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:2",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space for clarity",
+    "confidence": 0.8
+  },
+  "brand_message": {
+    "keywords": [
+      "fashion",
+      "style",
+      "modern"
+    ],
+    "values": [
+      "simplicity",
+      "elegance"
+    ],
+    "audience_hint": "fashion-conscious individuals",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "low",
+  "issues": [
+    {
+      "type": "layout",
+      "description": "Limited space for additional information",
+      "severity": "low"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "layout",
+      "suggestion": "Consider more space for secondary text",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimalist",
+      "modern"
+    ],
+    "score": 0.9,
+    "notes": "Aligns well with current minimalist design trends"
+  },
+  "analysis_timestamp": "2025-11-10T06:46:10.776223Z"
+}

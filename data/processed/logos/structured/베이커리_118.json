@@ -1,0 +1,96 @@
+{
+  "source_image": "베이커리_118.jpg",
+  "text_elements": {
+    "primary_text": "MONSTER CRAB",
+    "secondary_text": "KINGCRAB SEAFOOD",
+    "language": "Latin",
+    "font_style": "Serif, elegant",
+    "typography_notes": "Clear and readable with a classic touch",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Two stylized crab claws",
+    "category": "abstract",
+    "meanings": [
+      "seafood",
+      "crab",
+      "freshness"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#D4AF37",
+        "common_name": "gold",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "Good contrast between gold and black",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "elegant",
+    "classic"
+  ],
+  "tone_descriptors": [
+    "luxury",
+    "premium"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with centered text and symbol",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "seafood",
+      "quality",
+      "luxury"
+    ],
+    "values": [
+      "freshness",
+      "premium"
+    ],
+    "audience_hint": "upscale seafood consumers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "contrast",
+      "description": "Potential glare on reflective surfaces",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "visibility",
+      "suggestion": "Use matte finish to reduce glare",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "classic",
+      "luxury"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with luxury branding trends"
+  },
+  "analysis_timestamp": "2025-11-10T06:51:50.152521Z"
+}

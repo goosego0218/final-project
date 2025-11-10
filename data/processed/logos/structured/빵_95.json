@@ -1,0 +1,86 @@
+{
+  "source_image": "빵_95.jpg",
+  "text_elements": {
+    "primary_text": "50SHADES",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "modern sans-serif",
+    "typography_notes": "Clear and legible with a stylish twist.",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "A stylized masquerade mask",
+    "category": "abstract",
+    "meanings": [
+      "mystery",
+      "intrigue"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FF0050",
+        "common_name": "red",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "sleek"
+  ],
+  "tone_descriptors": [
+    "mysterious",
+    "sophisticated"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol.",
+    "spacing_notes": "Adequate spacing around elements.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "mystery",
+      "style"
+    ],
+    "values": [
+      "intrigue",
+      "elegance"
+    ],
+    "audience_hint": "young adults",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary accent color for depth.",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "sleek"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current trends in minimalistic and stylish design."
+  },
+  "analysis_timestamp": "2025-11-10T07:16:53.250144Z"
+}

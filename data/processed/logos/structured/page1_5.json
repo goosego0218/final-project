@@ -1,0 +1,96 @@
+{
+  "source_image": "page1_5.jpg",
+  "text_elements": {
+    "primary_text": "고율당",
+    "secondary_text": "떡케이크 & 한식디저트",
+    "language": "Korean",
+    "font_style": "bold sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Stylized bean with Korean characters and a wheat stalk",
+    "category": "emblem",
+    "meanings": [
+      "natural",
+      "organic",
+      "traditional"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#2E4D3C",
+        "common_name": "dark green",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "traditional",
+    "organic"
+  ],
+  "tone_descriptors": [
+    "natural",
+    "authentic"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central focus",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "natural",
+      "traditional",
+      "authentic"
+    ],
+    "values": [
+      "quality",
+      "heritage"
+    ],
+    "audience_hint": "consumers interested in traditional and organic products",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Complexity in emblem may reduce scalability",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "scalability",
+      "suggestion": "Simplify emblem for smaller sizes",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "organic",
+      "traditional"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with trends favoring natural and authentic branding"
+  },
+  "analysis_timestamp": "2025-11-10T05:49:39.901321Z"
+}

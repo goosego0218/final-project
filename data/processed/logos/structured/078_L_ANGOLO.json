@@ -1,0 +1,109 @@
+{
+  "source_image": "078_L_ANGOLO.jpg",
+  "text_elements": {
+    "primary_text": "L'ANGOLO",
+    "secondary_text": "BISTROT ITALIANO",
+    "language": "Latin",
+    "font_style": "Sans-serif with a stylized 'A'",
+    "typography_notes": "Readable with a creative touch on the 'A'",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized letter 'A' resembling a star",
+    "category": "lettermark",
+    "meanings": [
+      "creativity",
+      "uniqueness"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#5A7BBF",
+        "common_name": "blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "accent"
+      },
+      {
+        "hex": "#FF0000",
+        "common_name": "red",
+        "usage": "accent"
+      },
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      },
+      {
+        "hex": "#008000",
+        "common_name": "green",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "elegant",
+    "sophisticated"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "4:3",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space for readability",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "Italian",
+      "bistro",
+      "elegance"
+    ],
+    "values": [
+      "authenticity",
+      "quality"
+    ],
+    "audience_hint": "food enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Stylized 'A' may be misinterpreted",
+      "severity": "low"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "symbol",
+      "suggestion": "Clarify the 'A' to avoid confusion",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimalist"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current minimalist design trends"
+  },
+  "analysis_timestamp": "2025-11-10T05:35:20.259207Z"
+}

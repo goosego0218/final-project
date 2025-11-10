@@ -1,0 +1,88 @@
+{
+  "source_image": "page3_19.jpg",
+  "text_elements": {
+    "primary_text": "MD",
+    "secondary_text": "민들맨들\n스킨 · 바디 · 왁싱",
+    "language": "Korean",
+    "font_style": "serif",
+    "typography_notes": "The text is clear and legible with a classic serif style.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "A stylized lettermark 'MD' with a circular leaf motif.",
+    "category": "lettermark",
+    "meanings": [
+      "nature",
+      "growth"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#8B8B8B",
+        "common_name": "gray",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "The gray color provides a subtle contrast against the white background.",
+    "confidence": 0.8
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "elegant",
+    "natural"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "The logo is well-balanced with equal emphasis on text and symbol.",
+    "spacing_notes": "Adequate white space around elements enhances readability.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "nature",
+      "beauty",
+      "care"
+    ],
+    "values": [
+      "elegance",
+      "purity"
+    ],
+    "audience_hint": "beauty and skincare enthusiasts",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [
+    {
+      "type": "contrast",
+      "description": "The gray color might not stand out on all backgrounds.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "contrast",
+      "suggestion": "Consider using a darker shade for better visibility.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "natural"
+    ],
+    "score": 0.9,
+    "notes": "The logo aligns well with current trends favoring minimal and nature-inspired designs."
+  },
+  "analysis_timestamp": "2025-11-10T06:03:10.994163Z"
+}

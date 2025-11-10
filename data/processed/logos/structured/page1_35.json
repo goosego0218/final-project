@@ -1,0 +1,98 @@
+{
+  "source_image": "page1_35.jpg",
+  "text_elements": {
+    "primary_text": "정담은과일",
+    "secondary_text": null,
+    "language": "Korean",
+    "font_style": "bold sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "A bowl with fruit including an apple, lemon, and orange",
+    "category": "emblem",
+    "meanings": [
+      "freshness",
+      "health",
+      "natural"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FFCC00",
+        "common_name": "yellow",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#FF0000",
+        "common_name": "red",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#FFA500",
+        "common_name": "orange",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#008000",
+        "common_name": "green",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between colors",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "colorful"
+  ],
+  "tone_descriptors": [
+    "fresh",
+    "friendly"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "fruit",
+      "fresh",
+      "natural"
+    ],
+    "values": [
+      "health",
+      "quality"
+    ],
+    "audience_hint": "health-conscious consumers",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Ensure color consistency across media",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends in health and wellness branding"
+  },
+  "analysis_timestamp": "2025-11-10T05:46:15.493489Z"
+}

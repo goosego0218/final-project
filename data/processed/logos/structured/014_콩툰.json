@@ -1,0 +1,89 @@
+{
+  "source_image": "014_콩툰.jpg",
+  "text_elements": {
+    "primary_text": "TOY",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "Bold, geometric",
+    "typography_notes": "Text is vertically oriented and may be challenging to read at first glance.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "A gift box with rabbit ears",
+    "category": "abstract",
+    "meanings": [
+      "playfulness",
+      "gift",
+      "surprise"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#9B89B3",
+        "common_name": "lavender",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with white background.",
+    "confidence": 0.8
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "playful",
+    "friendly"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:2",
+    "balance_notes": "Well-balanced with central alignment.",
+    "spacing_notes": "Adequate white space around the symbol.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "play",
+      "gift",
+      "fun"
+    ],
+    "values": [
+      "joy",
+      "creativity"
+    ],
+    "audience_hint": "children and families",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Vertical text orientation may affect readability.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Consider horizontal text orientation.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "playful"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current trends favoring simplicity and playfulness."
+  },
+  "analysis_timestamp": "2025-11-10T04:36:44.590800Z"
+}

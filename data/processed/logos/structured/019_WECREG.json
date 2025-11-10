@@ -1,0 +1,81 @@
+{
+  "source_image": "019_WECREG.jpg",
+  "text_elements": {
+    "primary_text": "wecref",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "rounded, lowercase",
+    "typography_notes": "The text is clear and legible with a modern, friendly appearance.",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized text with a unique crossing line through the letters.",
+    "category": "lettermark",
+    "meanings": [
+      "modernity",
+      "connection"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#00CFCF",
+        "common_name": "cyan",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast against a white background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "innovative"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Centered with ample white space.",
+    "spacing_notes": "Adequate spacing between letters enhances readability.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "connection",
+      "innovation"
+    ],
+    "values": [
+      "community",
+      "technology"
+    ],
+    "audience_hint": "tech-savvy individuals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth.",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "modern"
+    ],
+    "score": 0.9,
+    "notes": "Aligns well with current trends favoring simplicity and clarity."
+  },
+  "analysis_timestamp": "2025-11-10T04:46:31.592916Z"
+}

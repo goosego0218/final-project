@@ -1,0 +1,98 @@
+{
+  "source_image": "page5_27.jpg",
+  "text_elements": {
+    "primary_text": "waikiki",
+    "secondary_text": "gift & toy",
+    "language": "Latin",
+    "font_style": "rounded, playful",
+    "typography_notes": "Easy to read with a fun, casual style",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Two stylized palm trees with smiley faces",
+    "category": "abstract",
+    "meanings": [
+      "tropical",
+      "fun",
+      "relaxation"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#A3C4F3",
+        "common_name": "light blue",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#E3A3F3",
+        "common_name": "light pink",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Soft pastel colors provide a gentle contrast",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "playful",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "joyful",
+    "inviting"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "4:5",
+    "balance_notes": "Well-balanced with centered elements",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "fun",
+      "tropical",
+      "gifts",
+      "toys"
+    ],
+    "values": [
+      "joy",
+      "creativity",
+      "relaxation"
+    ],
+    "audience_hint": "families, children",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [
+    {
+      "type": "contrast",
+      "description": "Pastel colors may lack contrast on some backgrounds",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "contrast",
+      "suggestion": "Consider using slightly bolder colors for better visibility",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "playful"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current trends in playful and minimal design"
+  },
+  "analysis_timestamp": "2025-11-10T06:25:06.855195Z"
+}

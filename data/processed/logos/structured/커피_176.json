@@ -1,0 +1,89 @@
+{
+  "source_image": "커피_176.jpg",
+  "text_elements": {
+    "primary_text": "VINTAGRANCE",
+    "secondary_text": "CAFE",
+    "language": "Latin",
+    "font_style": "Sans-serif, uppercase",
+    "typography_notes": "Clear and legible with good spacing",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Interlocking circles",
+    "category": "abstract",
+    "meanings": [
+      "unity",
+      "connection"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "High contrast between text and background",
+    "confidence": 0.95
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "elegant",
+    "sophisticated"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with centered text and symbol",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "cafe",
+      "vintage",
+      "elegance"
+    ],
+    "values": [
+      "quality",
+      "community"
+    ],
+    "audience_hint": "urban professionals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a third accent color for variety",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "elegant"
+    ],
+    "score": 0.9,
+    "notes": "Aligns well with current trends favoring simplicity and elegance"
+  },
+  "analysis_timestamp": "2025-11-10T07:43:44.691359Z"
+}

@@ -1,0 +1,93 @@
+{
+  "source_image": "013_Nanoglia.jpg",
+  "text_elements": {
+    "primary_text": "Nanoglia",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "cursive",
+    "typography_notes": "The cursive style is elegant but may affect readability at smaller sizes.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "A molecular structure symbol in blue",
+    "category": "abstract",
+    "meanings": [
+      "science",
+      "innovation"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#00AEEF",
+        "common_name": "blue",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "scientific"
+  ],
+  "tone_descriptors": [
+    "innovative",
+    "professional"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "The symbol adds a dynamic element to the text.",
+    "spacing_notes": "Adequate white space around the logo.",
+    "confidence": 0.85
+  },
+  "brand_message": {
+    "keywords": [
+      "nanotechnology",
+      "innovation"
+    ],
+    "values": [
+      "cutting-edge",
+      "precision"
+    ],
+    "audience_hint": "scientific community",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Cursive font may reduce readability.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "typography",
+      "suggestion": "Consider a more legible font style.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "scientific"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current trends in scientific branding."
+  },
+  "analysis_timestamp": "2025-11-10T04:34:21.717066Z"
+}

@@ -1,0 +1,87 @@
+{
+  "source_image": "page3_24.jpg",
+  "text_elements": {
+    "primary_text": "JDJ 컴퍼니",
+    "secondary_text": "MARKETING",
+    "language": "Korean and English",
+    "font_style": "bold sans-serif",
+    "typography_notes": "Clear and legible with a modern style",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized letter J and D in a square",
+    "category": "lettermark",
+    "meanings": [
+      "initials",
+      "branding"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#F4A300",
+        "common_name": "orange",
+        "usage": "background"
+      },
+      {
+        "hex": "#009A44",
+        "common_name": "green",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "professional"
+  ],
+  "tone_descriptors": [
+    "dynamic",
+    "trustworthy"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "marketing",
+      "innovation",
+      "growth"
+    ],
+    "values": [
+      "professionalism",
+      "creativity"
+    ],
+    "audience_hint": "businesses seeking marketing services",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimalist"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current minimalist design trends"
+  },
+  "analysis_timestamp": "2025-11-10T06:04:21.545352Z"
+}

@@ -1,0 +1,82 @@
+{
+  "source_image": "page5_43.jpg",
+  "text_elements": {
+    "primary_text": "오소돈 생선구이",
+    "secondary_text": "제주바탕 계절생선",
+    "language": "Korean",
+    "font_style": "handwritten",
+    "typography_notes": "The text is clear and legible, with a traditional feel.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "A stylized fish above the text",
+    "category": "animal",
+    "meanings": [
+      "freshness",
+      "seafood"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#4A2C2A",
+        "common_name": "brown",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast against the light background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "traditional",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "authentic",
+    "natural"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:3",
+    "balance_notes": "Well-balanced with the symbol integrated into the text.",
+    "spacing_notes": "Adequate spacing between elements.",
+    "confidence": 0.8
+  },
+  "brand_message": {
+    "keywords": [
+      "fresh",
+      "seafood",
+      "Korean"
+    ],
+    "values": [
+      "authenticity",
+      "quality"
+    ],
+    "audience_hint": "Korean-speaking seafood lovers",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for emphasis.",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "authentic"
+    ],
+    "score": 0.7,
+    "notes": "Aligns with trends favoring simplicity and authenticity."
+  },
+  "analysis_timestamp": "2025-11-10T06:28:39.452915Z"
+}

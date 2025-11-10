@@ -1,0 +1,90 @@
+{
+  "source_image": "page5_7.jpg",
+  "text_elements": {
+    "primary_text": "HI! JASU",
+    "secondary_text": "하이! 자수",
+    "language": "English and Korean",
+    "font_style": "Sans-serif, bold",
+    "typography_notes": "Clear and readable with a playful touch",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Sewing machine inside a tag shape",
+    "category": "emblem",
+    "meanings": [
+      "craftsmanship",
+      "sewing",
+      "personalization"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#D98C5A",
+        "common_name": "Light Brown",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "White",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "creative"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "sewing",
+      "craft",
+      "personalization"
+    ],
+    "values": [
+      "creativity",
+      "quality"
+    ],
+    "audience_hint": "DIY enthusiasts, crafters",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a contrasting accent color",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current minimalistic and craft-focused trends"
+  },
+  "analysis_timestamp": "2025-11-10T06:30:27.394393Z"
+}

@@ -1,0 +1,88 @@
+{
+  "source_image": "page4_20.jpg",
+  "text_elements": {
+    "primary_text": "맛있는 식사",
+    "secondary_text": null,
+    "language": "Korean",
+    "font_style": "handwritten",
+    "typography_notes": "Legible with a casual, inviting style",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Chopsticks and spoon with a circular emblem",
+    "category": "emblem",
+    "meanings": [
+      "food",
+      "dining"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#D32F2F",
+        "common_name": "red",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "traditional",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "authentic"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:3",
+    "balance_notes": "Well-balanced with central focus",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "dining",
+      "authentic",
+      "Korean"
+    ],
+    "values": [
+      "tradition",
+      "taste"
+    ],
+    "audience_hint": "food enthusiasts",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding more color variety",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "authentic"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with trends favoring simplicity and authenticity"
+  },
+  "analysis_timestamp": "2025-11-10T06:13:59.681021Z"
+}

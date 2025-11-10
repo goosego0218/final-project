@@ -1,0 +1,94 @@
+{
+  "source_image": "page6_30.jpg",
+  "text_elements": {
+    "primary_text": "Loveplanb",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "cursive",
+    "typography_notes": "Legible with a playful touch",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Heart shape integrated into the letter L",
+    "category": "lettermark",
+    "meanings": [
+      "love",
+      "romance"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#808080",
+        "common_name": "gray",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFB6C1",
+        "common_name": "light pink",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "romantic"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with emphasis on the heart symbol",
+    "spacing_notes": "Adequate white space around text",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "love",
+      "plan",
+      "romance"
+    ],
+    "values": [
+      "creativity",
+      "affection"
+    ],
+    "audience_hint": "young adults",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [
+    {
+      "type": "contrast",
+      "description": "Slightly low contrast for light pink on white",
+      "severity": "low"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "contrast",
+      "suggestion": "Use a darker shade of pink for better visibility",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends of simplicity and elegance"
+  },
+  "analysis_timestamp": "2025-11-10T06:35:38.617307Z"
+}

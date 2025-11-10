@@ -1,0 +1,87 @@
+{
+  "source_image": "017_artesans.jpg",
+  "text_elements": {
+    "primary_text": "artesans",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "rounded, playful",
+    "typography_notes": "Highly readable with a friendly appearance",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Cartoon character of a girl",
+    "category": "other",
+    "meanings": [
+      "playful",
+      "childlike"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FF4D5A",
+        "common_name": "red",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#F5A623",
+        "common_name": "orange",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "playful",
+    "childlike"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "approachable"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "playful",
+      "creative"
+    ],
+    "values": [
+      "fun",
+      "imagination"
+    ],
+    "audience_hint": "children and families",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding more color variety for depth",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "playful",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends in child-focused branding"
+  },
+  "analysis_timestamp": "2025-11-10T04:39:35.674664Z"
+}

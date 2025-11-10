@@ -1,0 +1,88 @@
+{
+  "source_image": "040_UB.jpg",
+  "text_elements": {
+    "primary_text": "UB",
+    "secondary_text": "어반 스타일러",
+    "language": "Latin and Korean",
+    "font_style": "brush script",
+    "typography_notes": "The brush script style gives a dynamic and artistic feel, but may affect readability at smaller sizes.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Stylized lettering with Korean characters",
+    "category": "lettermark",
+    "meanings": [
+      "creativity",
+      "urban"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "High contrast with white background ensures readability.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "artistic"
+  ],
+  "tone_descriptors": [
+    "creative",
+    "urban"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "The composition is balanced with equal emphasis on both text elements.",
+    "spacing_notes": "Adequate white space around the elements enhances focus.",
+    "confidence": 0.8
+  },
+  "brand_message": {
+    "keywords": [
+      "urban",
+      "style",
+      "creativity"
+    ],
+    "values": [
+      "innovation",
+      "artistry"
+    ],
+    "audience_hint": "young, creative professionals",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Brush script may be hard to read at small sizes.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Consider a more readable font for smaller applications.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "artistic"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current trends favoring artistic and creative designs."
+  },
+  "analysis_timestamp": "2025-11-10T05:18:51.892389Z"
+}

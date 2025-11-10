@@ -1,0 +1,87 @@
+{
+  "source_image": "012_Character.jpg",
+  "text_elements": {
+    "primary_text": "englisheye",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "rounded sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Cartoonish eye with antenna",
+    "category": "abstract",
+    "meanings": [
+      "vision",
+      "communication"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FFD700",
+        "common_name": "gold",
+        "usage": "background"
+      },
+      {
+        "hex": "#00BFFF",
+        "common_name": "deep sky blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "playful"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "educational"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "16:9",
+    "balance_notes": "Well-balanced with central focus",
+    "spacing_notes": "Adequate white space",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "education",
+      "fun",
+      "learning"
+    ],
+    "values": [
+      "innovation",
+      "accessibility"
+    ],
+    "audience_hint": "children and young learners",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary accent color for depth",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "playful",
+      "educational"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with trends in educational branding"
+  },
+  "analysis_timestamp": "2025-11-10T04:32:40.913084Z"
+}

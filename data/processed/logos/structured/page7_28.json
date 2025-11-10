@@ -1,0 +1,92 @@
+{
+  "source_image": "page7_28.jpg",
+  "text_elements": {
+    "primary_text": "Alpha",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "Sans-serif",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Abstract letter A with gradient colors",
+    "category": "lettermark",
+    "meanings": [
+      "beginning",
+      "innovation"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FF7F50",
+        "common_name": "Coral",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#A9A9A9",
+        "common_name": "Dark Gray",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#F5F5DC",
+        "common_name": "Beige",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "innovative",
+    "professional"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "innovation",
+      "start"
+    ],
+    "values": [
+      "progress",
+      "leadership"
+    ],
+    "audience_hint": "tech-savvy professionals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider more vibrant colors for impact",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current minimalistic design trends"
+  },
+  "analysis_timestamp": "2025-11-10T06:46:59.261760Z"
+}

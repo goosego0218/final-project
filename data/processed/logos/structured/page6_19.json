@@ -1,0 +1,95 @@
+{
+  "source_image": "page6_19.jpg",
+  "text_elements": {
+    "primary_text": "당나귀여행사",
+    "secondary_text": "Donkey Tour",
+    "language": "Korean",
+    "font_style": "bold sans-serif",
+    "typography_notes": "Clear and legible with a modern touch",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Illustration of a donkey's head with decorative elements",
+    "category": "animal",
+    "meanings": [
+      "travel",
+      "adventure",
+      "fun"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#4A2C2A",
+        "common_name": "brown",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#F4A300",
+        "common_name": "yellow",
+        "usage": "accent"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "playful"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "adventurous"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:3",
+    "balance_notes": "Well-balanced with central focus",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "travel",
+      "donkey",
+      "tour"
+    ],
+    "values": [
+      "adventure",
+      "fun",
+      "exploration"
+    ],
+    "audience_hint": "travel enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "contrast",
+      "description": "Slightly low contrast in some areas",
+      "severity": "low"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "contrast",
+      "suggestion": "Enhance color contrast for better visibility",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "playful"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current playful and modern design trends"
+  },
+  "analysis_timestamp": "2025-11-10T06:33:02.370305Z"
+}

@@ -1,0 +1,88 @@
+{
+  "source_image": "036_SNU_SSE.jpg",
+  "text_elements": {
+    "primary_text": "SNU SSE",
+    "secondary_text": "Social Studies Education",
+    "language": "Latin",
+    "font_style": "Brush script",
+    "typography_notes": "The primary text is bold and artistic, while the secondary text is smaller and more formal.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Stylized brush script text",
+    "category": "lettermark",
+    "meanings": [
+      "education",
+      "creativity"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "High contrast between text and background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "artistic"
+  ],
+  "tone_descriptors": [
+    "educational",
+    "creative"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with emphasis on primary text.",
+    "spacing_notes": "Adequate spacing between elements.",
+    "confidence": 0.8
+  },
+  "brand_message": {
+    "keywords": [
+      "education",
+      "social studies",
+      "creativity"
+    ],
+    "values": [
+      "knowledge",
+      "innovation"
+    ],
+    "audience_hint": "students, educators",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Brush script may be hard to read at smaller sizes.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Consider a clearer font for smaller sizes.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "artistic"
+    ],
+    "score": 0.7,
+    "notes": "Aligns with current trends in creative educational branding."
+  },
+  "analysis_timestamp": "2025-11-10T05:15:59.589804Z"
+}

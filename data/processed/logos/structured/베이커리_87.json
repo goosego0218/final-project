@@ -1,0 +1,94 @@
+{
+  "source_image": "베이커리_87.jpg",
+  "text_elements": {
+    "primary_text": "Blanc de Bakery",
+    "secondary_text": "Premium Bagel\nYou can't do eat with bagles",
+    "language": "Latin",
+    "font_style": "bold serif for primary, cursive for secondary",
+    "typography_notes": "Primary text is bold and clear; secondary text is less legible due to cursive style.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "A cartoon bagel character with arms and legs, giving a thumbs up.",
+    "category": "emblem",
+    "meanings": [
+      "playful",
+      "friendly"
+    ],
+    "confidence": 0.95
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000080",
+        "common_name": "navy blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#F5F5DC",
+        "common_name": "beige",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background.",
+    "confidence": 0.85
+  },
+  "style_tags": [
+    "playful",
+    "cartoonish"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "approachable"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "4:5",
+    "balance_notes": "Well-balanced with central character and surrounding text.",
+    "spacing_notes": "Adequate spacing around elements.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "bakery",
+      "bagel",
+      "fun"
+    ],
+    "values": [
+      "quality",
+      "enjoyment"
+    ],
+    "audience_hint": "families, casual diners",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Secondary text is hard to read.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "typography",
+      "suggestion": "Use a clearer font for secondary text.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "retro",
+      "playful"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends of nostalgic and playful branding."
+  },
+  "analysis_timestamp": "2025-11-10T07:01:19.560566Z"
+}

@@ -1,0 +1,95 @@
+{
+  "source_image": "011_강호수산.jpg",
+  "text_elements": {
+    "primary_text": "강호산",
+    "secondary_text": "양식장직판장",
+    "language": "Korean",
+    "font_style": "brush script",
+    "typography_notes": "The brush script style gives a traditional and artistic feel, but may affect readability at smaller sizes.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "A stylized fish integrated into the text",
+    "category": "abstract",
+    "meanings": [
+      "fish",
+      "tradition",
+      "nature"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FF4500",
+        "common_name": "orange red",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "The black and orange-red contrast well, ensuring visibility.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "traditional",
+    "artistic"
+  ],
+  "tone_descriptors": [
+    "authentic",
+    "cultural"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "The design is well-balanced with the symbol integrated into the text.",
+    "spacing_notes": "Adequate white space around the elements enhances readability.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "tradition",
+      "quality",
+      "authenticity"
+    ],
+    "values": [
+      "heritage",
+      "craftsmanship"
+    ],
+    "audience_hint": "cultural enthusiasts, traditional food lovers",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Brush script may reduce readability at smaller sizes.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "typography",
+      "suggestion": "Consider a more legible font for smaller applications.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "traditional",
+      "cultural"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with trends emphasizing cultural heritage and authenticity."
+  },
+  "analysis_timestamp": "2025-11-10T04:32:08.988988Z"
+}

@@ -1,0 +1,94 @@
+{
+  "source_image": "page2_16.jpg",
+  "text_elements": {
+    "primary_text": "우리동네 지옥짬뽕",
+    "secondary_text": "Chinese Restaurant",
+    "language": "Korean",
+    "font_style": "bold sans-serif",
+    "typography_notes": "Readable with clear contrast",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "A bowl with flames and chopsticks",
+    "category": "abstract",
+    "meanings": [
+      "spicy",
+      "Asian cuisine"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#D32F2F",
+        "common_name": "red",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "Good contrast between red and white",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "bold"
+  ],
+  "tone_descriptors": [
+    "spicy",
+    "energetic"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Centered with equal weight",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "spicy",
+      "Asian",
+      "restaurant"
+    ],
+    "values": [
+      "flavorful",
+      "authentic"
+    ],
+    "audience_hint": "food enthusiasts",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Abstract symbol may not be immediately clear",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "symbol clarity",
+      "suggestion": "Simplify the symbol for better recognition",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "bold"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends in bold and minimal design"
+  },
+  "analysis_timestamp": "2025-11-10T05:52:13.540575Z"
+}

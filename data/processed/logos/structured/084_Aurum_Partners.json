@@ -1,0 +1,122 @@
+{
+  "source_image": "084_Aurum_Partners.jpg",
+  "text_elements": {
+    "primary_text": "AURUM PARTNERS",
+    "secondary_text": "(주)아우룸 파트너스",
+    "language": "English, Korean",
+    "font_style": "Bold sans-serif",
+    "typography_notes": "The primary text is bold and clear, while the secondary text is smaller and less prominent.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Abstract geometric shape resembling an upward arrow",
+    "category": "abstract",
+    "meanings": [
+      "growth",
+      "progress",
+      "direction"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FF0000",
+        "common_name": "red",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#FF7F00",
+        "common_name": "orange",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#FFFF00",
+        "common_name": "yellow",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#00FF00",
+        "common_name": "green",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#0000FF",
+        "common_name": "blue",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#4B0082",
+        "common_name": "indigo",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#9400D3",
+        "common_name": "violet",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "The vibrant colors create a strong visual impact against the white background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "vibrant",
+    "geometric"
+  ],
+  "tone_descriptors": [
+    "dynamic",
+    "innovative",
+    "professional"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "The logo is well-balanced with the symbol above the text.",
+    "spacing_notes": "Adequate white space around the elements ensures clarity.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "growth",
+      "partnership",
+      "innovation"
+    ],
+    "values": [
+      "progress",
+      "collaboration",
+      "creativity"
+    ],
+    "audience_hint": "business professionals, partners",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "color",
+      "description": "Potential color clash in certain contexts",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider simplifying the color palette for better versatility",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "vibrant"
+    ],
+    "score": 0.8,
+    "notes": "The use of vibrant colors and geometric shapes aligns well with current design trends."
+  },
+  "analysis_timestamp": "2025-11-10T05:37:50.151430Z"
+}

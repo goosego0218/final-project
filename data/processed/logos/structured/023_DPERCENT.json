@@ -1,0 +1,76 @@
+{
+  "source_image": "023_DPERCENT.jpg",
+  "text_elements": {
+    "primary_text": "D/percent",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "Sans-serif, modern",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Letter D combined with a slash",
+    "category": "lettermark",
+    "meanings": [
+      "division",
+      "percentage"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#C8A9A9",
+        "common_name": "Dusty Rose",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Sufficient contrast against white background",
+    "confidence": 0.85
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "approachable"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with ample white space",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "division",
+      "percentage",
+      "modern"
+    ],
+    "values": [
+      "clarity",
+      "simplicity"
+    ],
+    "audience_hint": "young professionals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.9,
+    "notes": "Aligns well with current minimalistic design trends"
+  },
+  "analysis_timestamp": "2025-11-10T04:57:58.258717Z"
+}

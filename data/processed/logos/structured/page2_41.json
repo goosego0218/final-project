@@ -1,0 +1,82 @@
+{
+  "source_image": "page2_41.jpg",
+  "text_elements": {
+    "primary_text": "제주속골집",
+    "secondary_text": "초밥&찜 전문점",
+    "language": "Korean",
+    "font_style": "serif",
+    "typography_notes": "Clear and legible with traditional styling",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Abstract representation of a bowl with chopsticks and food elements",
+    "category": "abstract",
+    "meanings": [
+      "food",
+      "Asian cuisine"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#D4AF37",
+        "common_name": "gold",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with the background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "traditional",
+    "elegant"
+  ],
+  "tone_descriptors": [
+    "luxury",
+    "authentic"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "sushi",
+      "traditional",
+      "quality"
+    ],
+    "values": [
+      "authenticity",
+      "culinary expertise"
+    ],
+    "audience_hint": "food enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimalist",
+      "cultural"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends in cultural and minimalist design"
+  },
+  "analysis_timestamp": "2025-11-10T05:58:03.935163Z"
+}

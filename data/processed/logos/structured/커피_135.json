@@ -1,0 +1,90 @@
+{
+  "source_image": "커피_135.jpg",
+  "text_elements": {
+    "primary_text": "Vital Coffee",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "Sans-serif",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Coffee cup with a heartbeat line",
+    "category": "abstract",
+    "meanings": [
+      "energy",
+      "vitality",
+      "coffee"
+    ],
+    "confidence": 0.95
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#B0B0B0",
+        "common_name": "light gray",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.85
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "energetic",
+    "inviting"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:3",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "energy",
+      "coffee",
+      "vitality"
+    ],
+    "values": [
+      "health",
+      "alertness"
+    ],
+    "audience_hint": "coffee enthusiasts",
+    "confidence": 0.9
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a contrasting accent color",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.9,
+    "notes": "Aligns well with current minimalistic design trends"
+  },
+  "analysis_timestamp": "2025-11-10T07:37:10.965821Z"
+}
