@@ -15,6 +15,8 @@ from brandbot.nodes import (
     confirm_guard,                # Node
     persist_project,              # Tool
     error_handler,                # Node
+    edit_confirm,
+    edit_choice,
 )
 from brandbot.graph.routes import route_after_scope
 
@@ -35,6 +37,8 @@ def build_graph():
     g.add_node("snapshot_review", snapshot_review)
     g.add_node("confirm_guard", confirm_guard)
     g.add_node("persist_project", persist_project)
+    g.add_node("edit_confirm", edit_confirm)
+    g.add_node("edit_choice", edit_choice)
     g.add_node("error_handler", error_handler)
 
     # 흐름
@@ -60,12 +64,20 @@ def build_graph():
             "review": "snapshot_review",
             "confirm": "confirm_guard",
             "opt_reco": "optional_recommend",
+            "edit_choice": "edit_choice",
             "end": END,
         },
     )
 
     # 수집 → 검증 → 스냅샷
-    g.add_edge("brand_collect", "validate_required")
+    g.add_conditional_edges(
+        "brand_collect",
+        lambda s: "edit" if s.get("pending_edit") else "collect",
+        {
+            "edit": "edit_confirm",
+            "collect": "validate_required",
+        },
+    )
     g.add_edge("validate_required", "snapshot_review")
 
     # 트렌드 관련
@@ -89,5 +101,15 @@ def build_graph():
 
     g.add_edge("persist_project", END)
     g.add_edge("error_handler", END)
+    g.add_edge("edit_confirm", END)
+    g.add_conditional_edges(
+        "edit_choice",
+        lambda s: "more" if s.get("pending_edit") else ("retry" if s.get("edit_choice_retry") else "done"),
+        {
+            "more": "edit_confirm",
+            "retry": END,
+            "done": "validate_required",
+        },
+    )
 
     return g.compile()

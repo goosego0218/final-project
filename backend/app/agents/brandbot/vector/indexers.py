@@ -107,10 +107,21 @@ def save_state_to_chroma(
             settings=Settings(anonymized_telemetry=False)
         )
         
-        # state를 JSON으로 직렬화 (비정형 데이터)
+        # state를 필요한 필드만 포함하여 직렬화
+        draft = state.get("brand_draft") or {}
         state_to_save = {
-            k: v for k, v in state.items() 
-            if not k.startswith("_")  # 내부 필드는 제외
+            "brand": {
+                "name": draft.get("name"),
+                "industry": draft.get("industry"),
+                "tone": draft.get("tone"),
+                "keywords": draft.get("keywords"),
+                "target_age": draft.get("target_age"),
+                "target_gender": draft.get("target_gender"),
+                "avoid_trends": draft.get("avoid_trends"),
+                "slogan": draft.get("slogan"),
+                "colors": draft.get("colors"),
+            },
+            "created_at": state.get("created_at"),
         }
         state_text = json.dumps(state_to_save, ensure_ascii=False, default=str)
         

@@ -15,6 +15,8 @@ from .confirm_guard import confirm_guard
 from .react_agent import react_agent
 from .trend_edit import trend_edit
 from .trend_apply import trend_apply
+from .edit_confirm import edit_confirm
+from .edit_choice import edit_choice
 
 __all__ = [
     "ensure_scope",
@@ -34,4 +36,6 @@ __all__ = [
     "react_agent",
     "trend_edit",
     "trend_apply",
+    "edit_confirm",
+    "edit_choice",
 ]

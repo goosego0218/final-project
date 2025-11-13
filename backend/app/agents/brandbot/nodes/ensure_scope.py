@@ -4,6 +4,11 @@ from brandbot.utils.llm import LLM
 from brandbot.utils.tracing import log_state
 
 async def ensure_scope(state: SessionState) -> SessionState:
+    pending = state.get("pending_edit") or {}
+    if pending.get("status") == "awaiting_choice":
+        log_state(state, "ensure_scope", scope="in", user=last_user_text(state) or "", note="pending_edit_choice")
+        return {"_intent": "edit_choice"}
+
     text = last_user_text(state) or ""
     llm = LLM()
     tag = await llm.classify_scope(text)  # "in" | "out"

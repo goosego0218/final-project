@@ -48,6 +48,11 @@ All colors MUST be HSL.
     
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Header */
+    --header-background: 0 0% 100%;
+    --header-foreground: 0 0% 9%;
+    --header-hover: 0 0% 96%;
 
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 0 0% 9%;
@@ -95,6 +100,11 @@ All colors MUST be HSL.
     /* Shadows */
     --shadow-glow: 0 0 40px hsl(263 70% 50% / 0.2);
     --shadow-card: 0 4px 20px hsl(240 10% 3.9% / 0.5);
+    
+    /* Header - dark mode */
+    --header-background: 0 0% 10%;
+    --header-foreground: 0 0% 98%;
+    --header-hover: 0 0% 15%;
 
     --sidebar-background: 0 0% 7%;
     --sidebar-foreground: 0 0% 98%;

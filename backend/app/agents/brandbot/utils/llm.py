@@ -1,6 +1,6 @@
 # src/brandbot/utils/llm.py
 from __future__ import annotations
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Literal
 import asyncio
 import random
 
@@ -11,6 +11,7 @@ from brandbot.config import SETTINGS
 from brandbot.prompts import (
     CLASSIFY_INTENT_PROMPT,
     CLASSIFY_SCOPE_PROMPT,
+    EDIT_TARGET_PROMPT,
     EXTRACT_KEYWORDS_FROM_SLOGAN_PROMPT,
     EXTRACT_REQUIRED_PROMPT,
     MAP_DOC_TO_BRIEF_PROMPT,
@@ -92,6 +93,16 @@ class _BriefAgg(BaseModel):
     reco_colors: List[str] = []
     reco_slogan: str = ""
     notes: List[str] = []
+
+
+class EditTarget(BaseModel):
+    field: str
+    action: Literal["replace", "append", "remove", "clarify"]
+    value: Any = None
+
+
+class EditTargetList(BaseModel):
+    edits: List[EditTarget] = []
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -241,6 +252,13 @@ class LLM:
                     keywords = fallback_keywords
                     print(f"[DBG][extract_keywords_from_slogan:fallback] fallback_keywords={fallback_keywords}")
             
+            # 원문에 등장한 키워드만 유지
+            slogan_norm = slogan.strip().replace(" ", "").lower()
+            keywords = [
+                kw for kw in keywords
+                if (kw or "").strip() and (kw or "").strip().replace(" ", "").lower() in slogan_norm
+            ]
+
             # 중복 제거 및 정리
             cleaned = []
             seen = set()
@@ -289,6 +307,34 @@ class LLM:
             })
         structured = self.llm.with_structured_output(_BriefAgg, method="function_calling")
         return await (REDUCE_DOCS_TO_RECOS_PROMPT | structured).ainvoke({"seed": seed, "briefs": comp})
+
+    # 수정 대상 추출
+    async def detect_edit_targets(self, text: str, draft: Dict[str, Any]) -> List[Dict[str, Any]]:
+        try:
+            structured = self.llm.with_structured_output(EditTargetList, method="function_calling")
+            res: EditTargetList = await (EDIT_TARGET_PROMPT | structured).ainvoke(
+                {"text": text or "", "draft": draft or {}}
+            )
+            edits = res.edits or []
+        except Exception as e:
+            print(f"[DBG][detect_edit_targets:error] {type(e).__name__}: {e}")
+            edits = []
+
+        normalized: List[Dict[str, Any]] = []
+        for edit in edits:
+            field = (edit.field or "").strip()
+            if field not in {"name", "industry", "tone", "keywords", "target_age", "target_gender", "avoid_trends", "slogan", "colors"}:
+                continue
+            action = edit.action or "clarify"
+            value = edit.value
+            if value is None:
+                normalized.append({"field": field, "action": action, "value": None})
+                continue
+            if isinstance(value, list):
+                normalized.append({"field": field, "action": action, "value": [str(v).strip() for v in value if str(v).strip()]})
+            else:
+                normalized.append({"field": field, "action": action, "value": str(value).strip()})
+        return normalized
 
     # 검색결과 요약 → 추천 생성(토큰 예산/백오프 포함)
     async def summarize_recos_from_web(self, seed: dict, items: List[Dict[str, Any]]) -> dict:

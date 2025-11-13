@@ -62,6 +62,11 @@ def _required_ok(state: SessionState) -> bool:
     return bool(draft.get("name")) and bool(draft.get("industry"))
 
 async def trend_gate(state: SessionState) -> SessionState:
+    pending = state.get("pending_edit") or {}
+    if pending.get("status") == "awaiting_choice":
+        log_state(state, "intent_gate", scope="in", intent="edit_choice", reason="pending_edit_choice")
+        return {"_intent": "edit_choice"}
+
     text = (last_user_text(state) or "").strip()
 
     # 0) 필드 업데이트로 보이면 수집 우선

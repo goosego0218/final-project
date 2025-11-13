@@ -61,6 +61,8 @@ class SessionState(TypedDict, total=False):
     brand_strategy: Dict[str, Any]                        # 전략(콘셉트/핵심가치/톤앤매너 등)
     trend_brief: Dict[str, Any]                           # 트렌드 요약(JSON)
     snapshot_text: str                                    # 사용자에게 보여줄 요약 문장
+    pending_edit: Annotated[Dict[str, Any], deep_merge]   # 수정 확인 대기 항목
+    edit_choice_retry: bool                               # 수정 옵션 안내 재요청 여부
 
     # 2) 리서치(검색) 계획/결과
     research_plan: List[Dict[str, Any]]                   # 생성된 쿼리 계획
@@ -118,9 +120,11 @@ def initial_state() -> SessionState:
         "brand_profile": {},
         "brand_strategy": {},
         "trend_brief": {},
-        "trend_recos": {},        
-        "_trend_ready": False,            
+        "trend_recos": {},
+        "_trend_ready": False,
         "snapshot_text": "",
+        "pending_edit": {},
+        "edit_choice_retry": False,
 
         # 리서치
         "research_plan": [],

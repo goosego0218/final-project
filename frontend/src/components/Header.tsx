@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, Image, Video, FolderKanban, User, Menu, CreditCard } from "lucide-react";
+import { Home, Image, Video, FolderKanban, User, Menu, CreditCard, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import LoginModal from "./LoginModal";
 import ProfileDropdown from "./ProfileDropdown";
@@ -20,78 +20,111 @@ const Header = () => {
   const navigate = useNavigate();
 
   const menuItems = [
-    { icon: Home, label: "홈", path: "/" },
-    { icon: Image, label: "로고 갤러리", path: "/logos" },
-    { icon: Video, label: "숏폼 갤러리", path: "/shorts" },
-    { icon: FolderKanban, label: "내 프로젝트", path: "/dashboard" },
-    { icon: CreditCard, label: "플랜관리", path: "/plan-management" },
-    { icon: User, label: "프로필", path: "/profile-setup" },
+    { label: "홈", path: "/", hasDropdown: false },
+    { label: "로고 갤러리", path: "/logos", hasDropdown: true },
+    { label: "숏폼 갤러리", path: "/shorts", hasDropdown: true },
+    { label: "내 프로젝트", path: "/dashboard", hasDropdown: false },
+    { label: "플랜관리", path: "/plan-management", hasDropdown: false },
   ];
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between px-4">
-          <div className="flex items-center gap-6">
-            <Link to="/" className="flex items-center space-x-2">
-              <span className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                Makary
+      <header className="sticky top-0 z-50 w-full bg-header border-b border-header-hover/30">
+        <div className="container mx-auto">
+          <div className="flex h-14 items-center justify-between px-6">
+            {/* Logo */}
+            <Link to="/" className="flex items-center shrink-0">
+              <span className="text-xl font-bold text-header-foreground hover:opacity-80 transition-opacity tracking-wide">
+                MAKARY
               </span>
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-2">
+            <nav className="hidden lg:flex items-center gap-2">
               {menuItems.map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
                   className={cn(
-                    "flex items-center gap-2 px-5 py-2 rounded-md text-sm font-medium transition-all duration-200",
-                    "hover:bg-accent hover:text-accent-foreground",
+                    "flex items-center gap-1 px-4 py-2 text-xs font-medium uppercase tracking-wider transition-colors",
+                    "hover:bg-header-hover",
                     location.pathname === item.path
-                      ? "bg-accent text-accent-foreground"
-                      : "text-muted-foreground"
+                      ? "text-header-foreground"
+                      : "text-header-foreground/80"
                   )}
                 >
-                  <item.icon className="h-4 w-4" />
                   {item.label}
+                  {item.hasDropdown && <ChevronDown className="h-3 w-3" />}
                 </Link>
               ))}
             </nav>
 
-            {/* Mobile Navigation */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild className="md:hidden">
-                <Button variant="ghost" size="icon">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56">
-                {menuItems.map((item) => (
-                  <DropdownMenuItem
-                    key={item.path}
-                    onClick={() => navigate(item.path)}
-                    className="cursor-pointer"
+            {/* Right Actions */}
+            <div className="flex items-center gap-3 shrink-0">
+              {/* Mobile Menu */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild className="lg:hidden">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-10 w-10 text-header-foreground hover:bg-header-hover hover:text-header-foreground"
                   >
-                    <item.icon className="h-4 w-4 mr-2" />
-                    {item.label}
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 bg-header border-header-hover">
+                  {menuItems.map((item) => (
+                    <DropdownMenuItem
+                      key={item.path}
+                      onClick={() => navigate(item.path)}
+                      className="cursor-pointer text-header-foreground hover:bg-header-hover focus:bg-header-hover"
+                    >
+                      {item.label}
+                    </DropdownMenuItem>
+                  ))}
+                  <DropdownMenuItem
+                    onClick={() => navigate("/profile")}
+                    className="cursor-pointer text-header-foreground hover:bg-header-hover focus:bg-header-hover"
+                  >
+                    프로필
                   </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-          <div className="flex items-center gap-4">
-            {isAuthenticated ? (
-              <ProfileDropdown />
-            ) : (
-              <Button
-                onClick={() => setIsLoginModalOpen(true)}
-                className="bg-primary hover:bg-primary/90"
-              >
-                사용하기
-              </Button>
-            )}
+              {/* Auth / Profile */}
+              <div className="hidden lg:flex items-center gap-2">
+                {isAuthenticated ? (
+                  <>
+                    <Link
+                      to="/profile"
+                      className="px-4 py-2 text-xs font-medium uppercase tracking-wider text-header-foreground/80 hover:text-header-foreground hover:bg-header-hover transition-colors"
+                    >
+                      프로필
+                    </Link>
+                    <ProfileDropdown />
+                  </>
+                ) : (
+                  <Button
+                    onClick={() => setIsLoginModalOpen(true)}
+                    variant="ghost"
+                    className="px-6 py-2 text-xs font-medium uppercase tracking-wider text-header-foreground bg-header-hover hover:bg-header-foreground/10 border border-header-foreground/20"
+                  >
+                    사용하기
+                  </Button>
+                )}
+              </div>
+
+              {/* Mobile Auth */}
+              {!isAuthenticated && (
+                <Button
+                  onClick={() => setIsLoginModalOpen(true)}
+                  variant="ghost"
+                  className="lg:hidden px-4 py-2 text-xs font-medium uppercase tracking-wider text-header-foreground bg-header-hover hover:bg-header-foreground/10 border border-header-foreground/20"
+                >
+                  사용하기
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </header>

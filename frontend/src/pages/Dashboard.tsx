@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Image, Video, Plus, FolderPlus } from "lucide-react";
+import { Image, Video, Plus, FolderPlus, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 interface Creation {
@@ -72,6 +72,79 @@ const Dashboard = () => {
     navigate(`/project/${newProject.id}`);
   };
 
+  const handleCreateSampleData = () => {
+    // Create sample projects
+    const sampleProjects: Project[] = [
+      {
+        id: `project-${Date.now()}-1`,
+        name: "브랜드 C",
+        description: "신규 브랜드 로고 및 숏폼 제작",
+        createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
+      },
+      {
+        id: `project-${Date.now()}-2`,
+        name: "브랜드 D",
+        description: "리브랜딩 프로젝트",
+        createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
+      },
+      {
+        id: `project-${Date.now()}-3`,
+        name: "브랜드 E",
+        description: "마케팅 캠페인",
+        createdAt: new Date(Date.now() - 86400000 * 1).toISOString(),
+      },
+    ];
+
+    const updatedProjects = [...projects, ...sampleProjects];
+    setProjects(updatedProjects);
+    localStorage.setItem("projects", JSON.stringify(updatedProjects));
+
+    // Create sample creations for these projects
+    const savedCreations = localStorage.getItem("creations");
+    const existingCreations = savedCreations ? JSON.parse(savedCreations) : { logos: [], shorts: [] };
+
+    const sampleLogos: Creation[] = [];
+    const sampleShorts: Creation[] = [];
+
+    sampleProjects.forEach((project, projectIndex) => {
+      // Create 3-4 logos per project
+      for (let i = 0; i < 3 + projectIndex; i++) {
+        sampleLogos.push({
+          id: `logo-${Date.now()}-${projectIndex}-${i}`,
+          title: `${project.name} 로고 ${i + 1}`,
+          image: `https://images.unsplash.com/photo-${1550000000000 + projectIndex * 10000 + i * 1000}?w=400&h=400&fit=crop`,
+          date: new Date(Date.now() - 86400000 * (5 - projectIndex)).toLocaleDateString('ko-KR'),
+          projectId: project.id,
+          isPublic: i % 2 === 0, // 절반은 공개
+          views: Math.floor(Math.random() * 2000) + 100,
+          likes: Math.floor(Math.random() * 200) + 10,
+        });
+      }
+
+      // Create 2-3 shorts per project
+      for (let i = 0; i < 2 + projectIndex; i++) {
+        sampleShorts.push({
+          id: `short-${Date.now()}-${projectIndex}-${i}`,
+          title: `${project.name} 숏폼 ${i + 1}`,
+          image: `https://images.unsplash.com/photo-${1560000000000 + projectIndex * 10000 + i * 1000}?w=400&h=600&fit=crop`,
+          date: new Date(Date.now() - 86400000 * (5 - projectIndex)).toLocaleDateString('ko-KR'),
+          projectId: project.id,
+          isPublic: i % 2 === 1, // 절반은 공개
+          views: Math.floor(Math.random() * 5000) + 500,
+          likes: Math.floor(Math.random() * 500) + 50,
+        });
+      }
+    });
+
+    const updatedCreations = {
+      logos: [...existingCreations.logos, ...sampleLogos],
+      shorts: [...existingCreations.shorts, ...sampleShorts],
+    };
+
+    localStorage.setItem("creations", JSON.stringify(updatedCreations));
+    toast.success("샘플 프로젝트와 작품이 추가되었습니다!");
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -85,7 +158,12 @@ const Dashboard = () => {
                       <CardTitle className="text-2xl">내 프로젝트</CardTitle>
                       <CardDescription>AI로 생성한 로고와 숏폼</CardDescription>
                     </div>
-                    <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" onClick={handleCreateSampleData}>
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        샘플 데이터 생성
+                      </Button>
+                      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                       <DialogTrigger asChild>
                         <Button>
                           <FolderPlus className="mr-2 h-4 w-4" />
@@ -127,6 +205,7 @@ const Dashboard = () => {
                         </DialogFooter>
                       </DialogContent>
                     </Dialog>
+                    </div>
                   </div>
                 </div>
               </CardHeader>

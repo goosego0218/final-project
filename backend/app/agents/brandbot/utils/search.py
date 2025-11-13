@@ -1,43 +1,5 @@
 # src/brandbot/utils/search.py
 from __future__ import annotations
-from typing import List, Dict, Any
-import os
-
-try:
-    from tavily import TavilyClient
-except Exception:
-    TavilyClient = None  # 설치 전에도 임포트 에러 안 나게
-
-class TavilySearch:
-    def __init__(self, api_key: str | None = None):
-        key = api_key or os.getenv("TAVILY_API_KEY")
-        if not key:
-            raise RuntimeError("TAVILY_API_KEY 가 설정되지 않았습니다 (.env 확인).")
-        if TavilyClient is None:
-            raise RuntimeError("tavily-python 패키지가 설치되어야 합니다. (pip/uv 설치)")
-        self.client = TavilyClient(api_key=key)
-
-    def search(self, query: str, k: int = 5) -> List[Dict[str, Any]]:
-        """
-        반환 형식: [{title, url, content}, ...]
-        """
-        resp = self.client.search(
-            query=query,
-            search_depth="advanced",
-            max_results=int(k),
-            include_domains=None,
-            include_answer=False,
-            include_raw_content=True,
-            include_images=False,
-        )
-        results = []
-        for r in resp.get("results", []):
-            results.append({
-                "title": r.get("title"),
-                "url": r.get("url"),
-                "content": r.get("raw_content") or r.get("content") or "",
-            })
-        return results
 
 def build_trend_query(draft: dict) -> str:
     """

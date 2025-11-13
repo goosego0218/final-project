@@ -1,11 +1,11 @@
 # src/brandbot/nodes/trend_search_recommend.py
 from __future__ import annotations
-from typing import Dict, Any, List
+from typing import Dict, Any
 
 from brandbot.state import SessionState
-from brandbot.utils.llm import LLM
-from brandbot.utils.search import TavilySearch, build_trend_query
+from brandbot.utils.search import build_trend_query
 from brandbot.utils.tracing import log_state
+from brandbot.subagents.trend_curator import generate_trend_recommendations
 
 async def trend_search_recommend(state: SessionState) -> SessionState:
     """
@@ -37,44 +37,10 @@ async def trend_search_recommend(state: SessionState) -> SessionState:
         "slogan": draft.get("slogan"),
     }
     query = build_trend_query(seed)
-    tav = TavilySearch()
-    try:
-        # Tavily 결과는 보수적으로 k 제한
-        results = tav.search(query, k=8)
-        # 결과는 다양한 필드가 있을 수 있어도 일단 모두 전달
-        # (llm.summarize_recos_from_web 내부에서 title/snippet로 슬림화)
-        log_state(state, "trend_search", query=query, found=len(results or []))
-    except Exception as e:
-        log_state(state, "trend_search:error", query=query, error=type(e).__name__)
-        return {
-            "trend_recos": {
-                "notes": [f"트렌드 검색 오류: {type(e).__name__}. 잠시 후 다시 시도해주세요."]
-            },
-            "_trend_ready": True
-        }
+    log_state(state, "trend_search", query=query, note="subagent_trend_curator")
 
-    # 2) LLM 요약(추천 4종) — 내부에서 토큰 가드 + 백오프 + 폴백
-    llm = LLM()
-    corpus: List[Dict[str, Any]] = [
-        {
-            "title": r.get("title") or "",
-            "url": r.get("url") or "",
-            "snippet": r.get("snippet") or "",
-            "content": r.get("content") or "",  # 일부 결과만 content 존재
-        }
-        for r in (results or [])
-    ]
-    try:
-        recos = await llm.summarize_recos_from_web(seed, corpus)
-    except Exception as e:
-        # LLM 요약 단계에서의 예외도 폴백
-        recos = {
-            "reco_tone": seed.get("tone") or "친근하고 부드러운",
-            "reco_keywords": (seed.get("keywords") or [])[:4] or ["심플", "포근함", "내추럴", "미니멀"],
-            "reco_colors": ["크림", "브라운", "세이지", "딥그린"],
-            "reco_slogan": "하루를 부드럽게 시작하는 한 잔",
-            "notes": [f"요약 실패: {type(e).__name__}"]
-        }
+    # 2) 서브 에이전트가 기본 트렌드 추천 구성
+    recos = generate_trend_recommendations(seed)
 
     # 3) 상태 저장 + 로그
     log_state(state, "trend_search:recos", recos=recos)

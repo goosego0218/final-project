@@ -190,3 +190,22 @@ REDUCE_DOCS_TO_RECOS_PROMPT = ChatPromptTemplate.from_messages(
     ]
 )
 
+# 수정 대상 추출 --------------------------------------------------------------
+EDIT_TARGET_PROMPT = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            "너는 브랜드 정보 편집 보조 에이전트다. 사용자의 발화와 현재 수집된 draft를 보고 "
+            "어떤 필드를 수정(혹은 추가)하려는지 판정해라. "
+            "출력은 JSON edits[] 배열이며 각 항목은 {field, action, value}로 구성한다.\n"
+            "- field: name | industry | tone | keywords | target_age | target_gender | avoid_trends | slogan | colors 중 하나\n"
+            "- action: replace | append | remove | clarify\n"
+            "- value: 사용자가 제안한 새 값 (replace/append 시 문자열 또는 문자열 배열). remove면 제거할 값이 있으면 명시, 없으면 빈 배열.\n"
+            "- 사용자가 특정 항목을 언급하지 않으면 edits에 포함하지 않는다.\n"
+            "- 새 값을 명확히 알 수 없거나 먼저 확인이 필요하면 action을 'clarify'로 설정하고 value를 사용자가 말한 표현을 그대로 넣어라.\n"
+            "- 여러 항목을 언급하면 순서를 유지한 채 여러 edit을 반환해라."
+        ),
+        ("user", "현재 draft: {draft}\n사용자 발화: {text}"),
+    ]
+)
+

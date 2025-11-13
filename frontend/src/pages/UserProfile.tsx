@@ -1,5 +1,6 @@
-import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +21,8 @@ interface Creation {
 }
 
 const UserProfile = () => {
-  const { userId } = useParams<{ userId: string }>();
+  const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [publicCreations, setPublicCreations] = useState<{ logos: Creation[]; shorts: Creation[] }>({
     logos: [],
     shorts: [],
@@ -32,6 +34,11 @@ const UserProfile = () => {
   const ITEMS_PER_PAGE = 5;
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/");
+      return;
+    }
+
     // Load public creations from localStorage
     const savedCreations = localStorage.getItem("creations");
     if (savedCreations) {
@@ -43,19 +50,11 @@ const UserProfile = () => {
         shorts: allCreations.shorts.filter(short => short.isPublic),
       });
     }
-  }, [userId]);
+  }, [isAuthenticated, navigate]);
 
-  // Mock user data - in real app, fetch from backend
-  const user = {
-    id: userId,
-    name: userId === "user1" ? "김철수" : userId === "user2" ? "이영희" : "박민수",
-    avatar: userId === "user1" 
-      ? "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100" 
-      : userId === "user2" 
-      ? "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100" 
-      : "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100",
-    bio: "AI 크리에이터",
-  };
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -67,11 +66,11 @@ const UserProfile = () => {
               <div className="flex items-start gap-6">
                 <Avatar className="w-24 h-24">
                   <AvatarImage src={user.avatar} />
-                  <AvatarFallback>{user.name[0]}</AvatarFallback>
+                  <AvatarFallback>{user.name?.[0] || 'U'}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
-                  <h1 className="text-3xl font-bold mb-2">{user.name}</h1>
-                  <p className="text-muted-foreground mb-4">{user.bio}</p>
+                  <h1 className="text-3xl font-bold mb-2">{user.name || '사용자'}</h1>
+                  <p className="text-muted-foreground mb-4">{user.bio || 'Makary 크리에이터'}</p>
                   <div className="flex gap-4">
                     <div className="text-center">
                       <div className="text-2xl font-bold">

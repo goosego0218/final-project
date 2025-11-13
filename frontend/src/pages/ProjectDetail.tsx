@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Image, Video, ArrowLeft, Trash2, Eye, Heart, Globe, Lock } from "lucide-react";
+import { Image, Video, ArrowLeft, Trash2, Eye, Heart, Globe, Lock, Plus } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -91,6 +91,39 @@ const ProjectDetail = () => {
     }
   };
 
+  const handleAddSampleData = () => {
+    const sampleLogos: Creation[] = Array.from({ length: 8 }, (_, i) => ({
+      id: `sample-logo-${Date.now()}-${i}`,
+      title: `샘플 로고 ${i + 1}`,
+      image: `https://images.unsplash.com/photo-${1550000000000 + i * 1000}-${Math.random().toString(36).substring(7)}?w=400&h=400&fit=crop`,
+      date: new Date().toLocaleDateString('ko-KR'),
+      projectId: projectId || '',
+      isPublic: Math.random() > 0.5,
+      views: Math.floor(Math.random() * 1000),
+      likes: Math.floor(Math.random() * 100),
+    }));
+
+    const sampleShorts: Creation[] = Array.from({ length: 8 }, (_, i) => ({
+      id: `sample-short-${Date.now()}-${i}`,
+      title: `샘플 숏폼 ${i + 1}`,
+      image: `https://images.unsplash.com/photo-${1560000000000 + i * 1000}-${Math.random().toString(36).substring(7)}?w=400&h=600&fit=crop`,
+      date: new Date().toLocaleDateString('ko-KR'),
+      projectId: projectId || '',
+      isPublic: Math.random() > 0.5,
+      views: Math.floor(Math.random() * 5000),
+      likes: Math.floor(Math.random() * 500),
+    }));
+
+    const updatedCreations = {
+      logos: [...creations.logos, ...sampleLogos],
+      shorts: [...creations.shorts, ...sampleShorts],
+    };
+
+    setCreations(updatedCreations);
+    localStorage.setItem("creations", JSON.stringify(updatedCreations));
+    toast.success("테스트 데이터가 추가되었습니다");
+  };
+
   const filteredCreations = {
     logos: creations.logos.filter(logo => logo.projectId === projectId),
     shorts: creations.shorts.filter(short => short.projectId === projectId),
@@ -120,26 +153,32 @@ const ProjectDetail = () => {
               )}
             </div>
           </div>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive" size="sm">
-                <Trash2 className="mr-2 h-4 w-4" />
-                프로젝트 삭제
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>프로젝트를 삭제하시겠습니까?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  이 작업은 취소할 수 없습니다. 프로젝트와 관련된 모든 데이터가 삭제됩니다.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>취소</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDeleteProject}>삭제</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={handleAddSampleData}>
+              <Plus className="mr-2 h-4 w-4" />
+              테스트 데이터 추가
+            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="sm">
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  프로젝트 삭제
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>프로젝트를 삭제하시겠습니까?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    이 작업은 취소할 수 없습니다. 프로젝트와 관련된 모든 데이터가 삭제됩니다.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>취소</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDeleteProject}>삭제</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

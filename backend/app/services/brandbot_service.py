@@ -104,6 +104,8 @@ class BrandbotAgentService:
             "project_id": state.get("project_id"),
             "created_at": state.get("created_at"),
             "updated_at": state.get("updated_at"),
+            "pending_edit": state.get("pending_edit", {}),
+            "edit_choice_retry": bool(state.get("edit_choice_retry")),
         }
 
         messages = state.get("messages") or []
