@@ -6,9 +6,11 @@ from typing import Optional
 from fastapi import FastAPI, HTTPException, Query
 
 from .graph_v2 import compiled_graph_v2
-from .models import LogoRequest
+from .models import LogoRequest, TaskModeRequest
 from .agent_schema import LogoState
 from .library import query_logo_library
+from .recommendations import recommend_logos
+from .task_classifier import classify_task_mode
 
 
 app = FastAPI(title="AI Logo Maker LangGraph", version="v2 (Ideogram + Reasoning)")
@@ -103,6 +105,8 @@ def run_logo_pipeline(req: LogoRequest):
             "eval_scores": eval_scores,
             "next_prompt_hint": state.get("next_prompt_hint"),
             "image_weight": None,
+            "task_type": state.get("task_type"),
+            "task_reason": state.get("task_reason"),
         }
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
@@ -124,4 +128,30 @@ def logo_library(
         logo_type=logo_type, style_tag=style_tag, limit=limit, refresh=refresh
     )
     return {"items": [entry.model_dump() for entry in entries]}
+
+
+@app.get("/logo_recommendations")
+def logo_recommendations(
+    seed_id: str = Query(..., description="ID or filename stem of the reference logo"),
+    limit: int = Query(8, ge=1, le=40),
+    offset: int = Query(0, ge=0),
+):
+    """
+    Return semantically similar logos based on the precomputed JSON+RAG embeddings.
+    Requires running `scripts/build_logo_embeddings.py` at least once (or rely on
+    the fallback bag-of-words vectors).
+    """
+    result = recommend_logos(seed_id=seed_id, limit=limit, offset=offset)
+    return result
+
+
+@app.post("/task_mode")
+def task_mode(req: TaskModeRequest):
+    mode, reason = classify_task_mode(
+        req.prompt,
+        has_reference=req.has_reference,
+        has_mask=req.has_mask,
+        has_recent_reuse=req.recent_image_reuse,
+    )
+    return {"mode": mode, "reason": reason}
 

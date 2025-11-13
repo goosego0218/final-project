@@ -1,0 +1,84 @@
+{
+  "source_image": "베이커리_100.jpg",
+  "text_elements": {
+    "primary_text": "WEST GIN",
+    "secondary_text": "BAKERY",
+    "language": "Latin",
+    "font_style": "Serif",
+    "typography_notes": "Clear and readable with a classic touch.",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "A stylized wheat stalk within a circular shape.",
+    "category": "abstract",
+    "meanings": [
+      "agriculture",
+      "bread",
+      "growth"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#D4AF37",
+        "common_name": "gold",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "Good contrast between gold and black.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "luxury",
+    "traditional"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment.",
+    "spacing_notes": "Adequate spacing between elements.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "bakery",
+      "quality",
+      "tradition"
+    ],
+    "values": [
+      "heritage",
+      "craftsmanship"
+    ],
+    "audience_hint": "premium bakery customers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [],
+  "trend_alignment": {
+    "tags": [
+      "classic",
+      "elegant"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with trends favoring minimalist and elegant designs."
+  },
+  "analysis_timestamp": "2025-11-10T06:50:07.757649Z"
+}

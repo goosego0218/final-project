@@ -1,0 +1,89 @@
+{
+  "source_image": "page2_15.jpg",
+  "text_elements": {
+    "primary_text": "골목짬뽕",
+    "secondary_text": "Chinese Restaurant",
+    "language": "Korean",
+    "font_style": "bold serif",
+    "typography_notes": "Readable with clear contrast",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Abstract maze-like design with a sun and waves",
+    "category": "abstract",
+    "meanings": [
+      "navigation",
+      "journey",
+      "culinary"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#8B0000",
+        "common_name": "dark red",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "traditional",
+    "elegant"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "3:4",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "authentic",
+      "culinary",
+      "journey"
+    ],
+    "values": [
+      "tradition",
+      "quality"
+    ],
+    "audience_hint": "food enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary accent color",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "cultural"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with trends favoring simplicity and cultural motifs"
+  },
+  "analysis_timestamp": "2025-11-10T05:52:01.775322Z"
+}

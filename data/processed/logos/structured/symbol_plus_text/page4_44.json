@@ -1,0 +1,95 @@
+{
+  "source_image": "page4_44.jpg",
+  "text_elements": {
+    "primary_text": "원플로링",
+    "secondary_text": "NO.1 INTERIOR MARKET",
+    "language": "Korean",
+    "font_style": "bold sans-serif",
+    "typography_notes": "Readable with clear contrast",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized roof and floor design",
+    "category": "abstract",
+    "meanings": [
+      "home",
+      "interior",
+      "protection"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#F4B400",
+        "common_name": "yellow",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "text"
+      }
+    ],
+    "contrast_notes": "Good contrast between yellow and black",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "professional",
+    "trustworthy"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "interior",
+      "market",
+      "quality"
+    ],
+    "values": [
+      "innovation",
+      "reliability"
+    ],
+    "audience_hint": "homeowners",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Abstract symbol may not be immediately recognizable",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "symbol",
+      "suggestion": "Consider simplifying the symbol for clarity",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends in simplicity and bold colors"
+  },
+  "analysis_timestamp": "2025-11-10T06:19:05.527835Z"
+}

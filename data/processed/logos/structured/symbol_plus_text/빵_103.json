@@ -1,0 +1,77 @@
+{
+  "source_image": "빵_103.jpg",
+  "text_elements": {
+    "primary_text": "SALT ON BREAD",
+    "secondary_text": "SALTED BUTTER ROLLS ONLY",
+    "language": "Latin",
+    "font_style": "Sans-serif, handwritten",
+    "typography_notes": "Clear and readable with a casual touch",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "A simple bread icon",
+    "category": "emblem",
+    "meanings": [
+      "bread",
+      "freshness",
+      "baking"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#A0522D",
+        "common_name": "sienna",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with the background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "vintage",
+    "rustic"
+  ],
+  "tone_descriptors": [
+    "warm",
+    "inviting"
+  ],
+  "layout": {
+    "orientation": "square",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Centered and balanced",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "bread",
+      "salt",
+      "butter"
+    ],
+    "values": [
+      "quality",
+      "tradition"
+    ],
+    "audience_hint": "food enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "packaging",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [],
+  "trend_alignment": {
+    "tags": [
+      "vintage",
+      "handcrafted"
+    ],
+    "score": 0.85,
+    "notes": "Aligns with current trends in artisanal branding"
+  },
+  "analysis_timestamp": "2025-11-10T07:04:03.525427Z"
+}

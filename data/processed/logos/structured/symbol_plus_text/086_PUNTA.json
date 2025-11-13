@@ -1,0 +1,82 @@
+{
+  "source_image": "086_PUNTA.jpg",
+  "text_elements": {
+    "primary_text": "PUNTA",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "Sans-serif, bold",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Abstract chair-like shape",
+    "category": "abstract",
+    "meanings": [
+      "furniture",
+      "design"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#4B3B2B",
+        "common_name": "brown",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with white background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "elegant",
+    "sophisticated"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with centered text and symbol",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "furniture",
+      "design",
+      "elegance"
+    ],
+    "values": [
+      "quality",
+      "style"
+    ],
+    "audience_hint": "design-conscious consumers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "modern"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current minimalistic design trends"
+  },
+  "analysis_timestamp": "2025-11-10T05:38:36.218493Z"
+}

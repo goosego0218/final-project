@@ -1,0 +1,86 @@
+{
+  "source_image": "page2_43.jpg",
+  "text_elements": {
+    "primary_text": "Burger Only",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "rounded sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Minimalist burger icon",
+    "category": "abstract",
+    "meanings": [
+      "food",
+      "simplicity"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#00B3B3",
+        "common_name": "teal",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#FFC107",
+        "common_name": "amber",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "casual"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Centered and balanced",
+    "spacing_notes": "Adequate white space",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "burger",
+      "exclusive"
+    ],
+    "values": [
+      "simplicity",
+      "focus"
+    ],
+    "audience_hint": "fast food enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "modern"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current minimalistic design trends"
+  },
+  "analysis_timestamp": "2025-11-10T05:58:24.570261Z"
+}

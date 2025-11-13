@@ -1,0 +1,100 @@
+{
+  "source_image": "033_골든에잇투어.jpg",
+  "text_elements": {
+    "primary_text": "GOLDEN EIGHT TOUR",
+    "secondary_text": "(유) 골든 에잇 투어",
+    "language": "English and Korean",
+    "font_style": "Serif",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized number eight with an airplane",
+    "category": "abstract",
+    "meanings": [
+      "travel",
+      "infinity",
+      "global"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#8B0000",
+        "common_name": "dark red",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#A9A9A9",
+        "common_name": "dark gray",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "professional",
+    "adventurous"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central focus",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "travel",
+      "adventure",
+      "global"
+    ],
+    "values": [
+      "exploration",
+      "luxury"
+    ],
+    "audience_hint": "travel enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Abstract symbol may not be immediately clear",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "symbol clarity",
+      "suggestion": "Simplify or clarify the abstract symbol",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current trends in minimalistic design"
+  },
+  "analysis_timestamp": "2025-11-10T05:13:34.528431Z"
+}

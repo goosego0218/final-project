@@ -1,0 +1,100 @@
+{
+  "source_image": "004_인천교육청_읽걷쓰.jpg",
+  "text_elements": {
+    "primary_text": "일러스트",
+    "secondary_text": null,
+    "language": "Korean",
+    "font_style": "playful, rounded",
+    "typography_notes": "The text is colorful and stylized, which may affect readability at smaller sizes.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Stylized Korean text with decorative elements",
+    "category": "lettermark",
+    "meanings": [
+      "creativity",
+      "artistic"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FF7F00",
+        "common_name": "orange",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#008000",
+        "common_name": "green",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#0000FF",
+        "common_name": "blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between colors, enhancing visual appeal.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "playful",
+    "colorful"
+  ],
+  "tone_descriptors": [
+    "creative",
+    "friendly",
+    "vibrant"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:3",
+    "balance_notes": "Well-balanced with even distribution of colors.",
+    "spacing_notes": "Adequate white space around elements.",
+    "confidence": 0.8
+  },
+  "brand_message": {
+    "keywords": [
+      "creativity",
+      "art",
+      "design"
+    ],
+    "values": [
+      "innovation",
+      "expression"
+    ],
+    "audience_hint": "artists, designers",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Stylized text may be hard to read at smaller sizes.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Simplify text elements for better readability.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "playful"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current trends in playful and colorful design."
+  },
+  "analysis_timestamp": "2025-11-10T04:22:20.488908Z"
+}

@@ -1,0 +1,88 @@
+{
+  "source_image": "010_K_Security.jpg",
+  "text_elements": {
+    "primary_text": "K-Security",
+    "secondary_text": "Series",
+    "language": "Latin",
+    "font_style": "Bold sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Shield with a castle top and letter K",
+    "category": "emblem",
+    "meanings": [
+      "protection",
+      "strength"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "High contrast between text and background",
+    "confidence": 0.95
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "secure",
+    "professional"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "security",
+      "protection",
+      "reliability"
+    ],
+    "values": [
+      "trust",
+      "safety"
+    ],
+    "audience_hint": "businesses and individuals seeking security solutions",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current trends in simplicity and clarity"
+  },
+  "analysis_timestamp": "2025-11-10T04:30:32.053925Z"
+}

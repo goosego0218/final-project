@@ -1,0 +1,82 @@
+{
+  "source_image": "009_카페.jpg",
+  "text_elements": {
+    "primary_text": "GOCORO",
+    "secondary_text": "마음을 담은 고코로커피",
+    "language": "Latin and Korean",
+    "font_style": "simple sans-serif",
+    "typography_notes": "Readable with clear spacing",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Illustration of a person brewing coffee",
+    "category": "emblem",
+    "meanings": [
+      "craftsmanship",
+      "artisanal"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#4B2E2E",
+        "common_name": "brown",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with white background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "minimal",
+    "artistic"
+  ],
+  "tone_descriptors": [
+    "craft",
+    "warm"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "3:4",
+    "balance_notes": "Centered and balanced",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "coffee",
+      "artisanal",
+      "craft"
+    ],
+    "values": [
+      "quality",
+      "tradition"
+    ],
+    "audience_hint": "coffee enthusiasts",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "artisanal",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends in artisanal branding"
+  },
+  "analysis_timestamp": "2025-11-10T04:29:44.814395Z"
+}

@@ -1,0 +1,105 @@
+{
+  "source_image": "025_잉글리쉬_교육.jpg",
+  "text_elements": {
+    "primary_text": "라운드컬러",
+    "secondary_text": null,
+    "language": "Korean",
+    "font_style": "modern sans-serif",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Red cartoon character with geometric shapes",
+    "category": "abstract",
+    "meanings": [
+      "playful",
+      "creative"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FF6B6B",
+        "common_name": "red",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#4ECDC4",
+        "common_name": "teal",
+        "usage": "accent"
+      },
+      {
+        "hex": "#FFE66D",
+        "common_name": "yellow",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "playful",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "creative"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "3:4",
+    "balance_notes": "Well-balanced with ample white space",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.8
+  },
+  "brand_message": {
+    "keywords": [
+      "creativity",
+      "fun",
+      "colorful"
+    ],
+    "values": [
+      "innovation",
+      "youthfulness"
+    ],
+    "audience_hint": "young, creative individuals",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Character may not be universally recognizable",
+      "severity": "low"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "symbol",
+      "suggestion": "Consider simplifying the character for clarity",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "playful"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current trends in playful and minimal design"
+  },
+  "analysis_timestamp": "2025-11-10T05:02:54.941396Z"
+}

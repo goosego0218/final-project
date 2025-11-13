@@ -1,0 +1,88 @@
+{
+  "source_image": "022_앙포레_헤드_스파.jpg",
+  "text_elements": {
+    "primary_text": "EN FORET HEAD SPA",
+    "secondary_text": "앙포레 헤드스파",
+    "language": "Latin and Korean",
+    "font_style": "Serif",
+    "typography_notes": "Clear and elegant",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized letter 'e' with a wave-like design",
+    "category": "lettermark",
+    "meanings": [
+      "elegance",
+      "nature"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#8B3E45",
+        "common_name": "Burgundy",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#D9A5A5",
+        "common_name": "Light Pink",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "elegant"
+  ],
+  "tone_descriptors": [
+    "luxury",
+    "calm"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "spa",
+      "relaxation",
+      "nature"
+    ],
+    "values": [
+      "tranquility",
+      "luxury"
+    ],
+    "audience_hint": "upscale spa-goers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a contrasting color for emphasis",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current trends in luxury branding"
+  },
+  "analysis_timestamp": "2025-11-10T04:57:22.065653Z"
+}

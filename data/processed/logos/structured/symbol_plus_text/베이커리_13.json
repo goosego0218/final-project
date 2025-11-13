@@ -1,0 +1,103 @@
+{
+  "source_image": "베이커리_13.jpg",
+  "text_elements": {
+    "primary_text": "구르미 베이커리",
+    "secondary_text": "rice bread & vegan rice bread",
+    "language": "Korean",
+    "font_style": "rounded sans-serif",
+    "typography_notes": "Readable with a friendly appearance",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Smiling bread and rice ball characters",
+    "category": "emblem",
+    "meanings": [
+      "friendliness",
+      "food",
+      "comfort"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#F4D03F",
+        "common_name": "yellow",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#D35400",
+        "common_name": "orange",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "friendly",
+    "playful",
+    "modern"
+  ],
+  "tone_descriptors": [
+    "welcoming",
+    "cheerful"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "4:5",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "bread",
+      "vegan",
+      "friendly"
+    ],
+    "values": [
+      "health",
+      "sustainability",
+      "community"
+    ],
+    "audience_hint": "health-conscious consumers",
+    "confidence": 0.9
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Small secondary text",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Increase secondary text size",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "playful",
+      "minimalist"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with trends favoring simplicity and friendliness"
+  },
+  "analysis_timestamp": "2025-11-10T06:53:04.976294Z"
+}

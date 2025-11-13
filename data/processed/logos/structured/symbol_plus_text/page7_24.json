@@ -1,0 +1,94 @@
+{
+  "source_image": "page7_24.jpg",
+  "text_elements": {
+    "primary_text": "PETITFOX",
+    "secondary_text": "쁘띠폭스",
+    "language": "Latin and Korean",
+    "font_style": "Sans-serif, bold",
+    "typography_notes": "Readable with a modern touch",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Stylized fox tail",
+    "category": "animal",
+    "meanings": [
+      "cunning",
+      "playful"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FF6F3C",
+        "common_name": "orange",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "text"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "playful",
+    "friendly"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:3",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "fox",
+      "petit",
+      "playful"
+    ],
+    "values": [
+      "cuteness",
+      "approachability"
+    ],
+    "audience_hint": "youthful, trendy audience",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Small text may be hard to read at a distance",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Increase font size for better readability",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current minimalistic design trends"
+  },
+  "analysis_timestamp": "2025-11-10T06:45:57.182224Z"
+}

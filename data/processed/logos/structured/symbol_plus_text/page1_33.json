@@ -1,0 +1,88 @@
+{
+  "source_image": "page1_33.jpg",
+  "text_elements": {
+    "primary_text": "비료가게",
+    "secondary_text": "우주최저가 농자재 쇼핑몰",
+    "language": "Korean",
+    "font_style": "bold sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Circle with sun and wheat",
+    "category": "emblem",
+    "meanings": [
+      "agriculture",
+      "growth",
+      "nature"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#3A6B35",
+        "common_name": "green",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#F1C40F",
+        "common_name": "yellow",
+        "usage": "background"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.8
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "natural",
+    "friendly"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central emblem",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "agriculture",
+      "affordable",
+      "nature"
+    ],
+    "values": [
+      "sustainability",
+      "economy"
+    ],
+    "audience_hint": "farmers, agricultural businesses",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary accent color for depth",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "eco-friendly",
+      "minimalist"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with eco-friendly and minimalist design trends"
+  },
+  "analysis_timestamp": "2025-11-10T05:45:51.400429Z"
+}

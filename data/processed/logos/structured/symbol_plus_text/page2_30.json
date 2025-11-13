@@ -1,0 +1,93 @@
+{
+  "source_image": "page2_30.jpg",
+  "text_elements": {
+    "primary_text": "별빛나루도서관",
+    "secondary_text": "Byeolbichnalu Library",
+    "language": "Korean",
+    "font_style": "modern sans-serif",
+    "typography_notes": "Readable with clear distinction between characters",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Open book with stars",
+    "category": "emblem",
+    "meanings": [
+      "knowledge",
+      "imagination"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#4A4A9D",
+        "common_name": "blue",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#F2E205",
+        "common_name": "yellow",
+        "usage": "accent"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "educational"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "inviting"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate spacing around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "library",
+      "knowledge",
+      "community"
+    ],
+    "values": [
+      "education",
+      "accessibility"
+    ],
+    "audience_hint": "general public, students",
+    "confidence": 0.9
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Enhance color vibrancy for digital use",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "educational"
+    ],
+    "score": 0.85,
+    "notes": "Aligns with current trends in educational branding"
+  },
+  "analysis_timestamp": "2025-11-10T05:55:37.631136Z"
+}

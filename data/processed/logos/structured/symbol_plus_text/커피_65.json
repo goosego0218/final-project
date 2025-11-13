@@ -1,0 +1,82 @@
+{
+  "source_image": "커피_65.jpg",
+  "text_elements": {
+    "primary_text": "mooa coffee",
+    "secondary_text": "無我",
+    "language": "Latin and Chinese",
+    "font_style": "sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "An owl sitting on a branch within an arch",
+    "category": "animal",
+    "meanings": [
+      "wisdom",
+      "calm"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#1A2A3A",
+        "common_name": "dark blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast against white background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "calm",
+    "inviting"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with centered elements",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "coffee",
+      "wisdom",
+      "calm"
+    ],
+    "values": [
+      "quality",
+      "serenity"
+    ],
+    "audience_hint": "coffee enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for accents",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "modern"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current minimalistic design trends"
+  },
+  "analysis_timestamp": "2025-11-10T07:49:22.671065Z"
+}

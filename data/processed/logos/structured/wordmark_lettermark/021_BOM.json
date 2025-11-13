@@ -1,0 +1,81 @@
+{
+  "source_image": "021_BOM.jpg",
+  "text_elements": {
+    "primary_text": "bom",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "rounded sans-serif",
+    "typography_notes": "Clean and modern with good readability",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Smiling face integrated into text",
+    "category": "lettermark",
+    "meanings": [
+      "friendly",
+      "approachable"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#0056A6",
+        "common_name": "blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with white background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "approachable"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Centered and balanced",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "friendly",
+      "modern"
+    ],
+    "values": [
+      "approachability",
+      "simplicity"
+    ],
+    "audience_hint": "general consumers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.9,
+    "notes": "Aligns well with current minimalistic design trends"
+  },
+  "analysis_timestamp": "2025-11-10T04:48:49.647707Z"
+}

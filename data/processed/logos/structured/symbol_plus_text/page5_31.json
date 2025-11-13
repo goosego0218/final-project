@@ -1,0 +1,94 @@
+{
+  "source_image": "page5_31.jpg",
+  "text_elements": {
+    "primary_text": "Enjoy your life",
+    "secondary_text": "하람이즘",
+    "language": "English and Korean",
+    "font_style": "rounded sans-serif",
+    "typography_notes": "The text is clear and readable with a friendly style.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "A stylized arch with a moon, stars, and shooting stars",
+    "category": "abstract",
+    "meanings": [
+      "night",
+      "dream",
+      "aspiration"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#4A90E2",
+        "common_name": "blue",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#7ED321",
+        "common_name": "green",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "aspirational"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "4:5",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol.",
+    "spacing_notes": "Adequate white space around elements.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "dream",
+      "life",
+      "enjoyment"
+    ],
+    "values": [
+      "positivity",
+      "aspiration"
+    ],
+    "audience_hint": "young adults",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding more color variations for depth.",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current minimalistic and aspirational design trends."
+  },
+  "analysis_timestamp": "2025-11-10T06:25:57.520698Z"
+}

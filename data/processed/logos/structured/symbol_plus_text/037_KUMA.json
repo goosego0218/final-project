@@ -1,0 +1,88 @@
+{
+  "source_image": "037_KUMA.jpg",
+  "text_elements": {
+    "primary_text": "KUMA",
+    "secondary_text": "Korea Used Mobile Association",
+    "language": "Korean and English",
+    "font_style": "bold sans-serif for primary, regular sans-serif for secondary",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Abstract geometric shape with gradient",
+    "category": "abstract",
+    "meanings": [
+      "modernity",
+      "technology"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#002060",
+        "common_name": "navy blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#00A651",
+        "common_name": "green",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "corporate"
+  ],
+  "tone_descriptors": [
+    "professional",
+    "trustworthy"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with equal weight on text and symbol",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "technology",
+      "association",
+      "mobile"
+    ],
+    "values": [
+      "innovation",
+      "collaboration"
+    ],
+    "audience_hint": "business professionals in the mobile industry",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding more color variations for versatility",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "corporate"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends in corporate branding with a focus on technology"
+  },
+  "analysis_timestamp": "2025-11-10T05:16:40.520615Z"
+}

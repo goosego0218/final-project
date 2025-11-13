@@ -1,0 +1,99 @@
+{
+  "source_image": "010_Dr_Donkey.jpg",
+  "text_elements": {
+    "primary_text": "Dr.Donkey",
+    "secondary_text": "INTENSIVE LOTION",
+    "language": "Latin",
+    "font_style": "Sans-serif, playful",
+    "typography_notes": "Clear and readable with a friendly tone",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Cartoon donkey in a lab coat",
+    "category": "animal",
+    "meanings": [
+      "humor",
+      "approachability"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#00A86B",
+        "common_name": "green",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFA500",
+        "common_name": "orange",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.8
+  },
+  "style_tags": [
+    "playful",
+    "modern"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "approachable"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "2:3",
+    "balance_notes": "Well-balanced with central focus",
+    "spacing_notes": "Adequate white space for clarity",
+    "confidence": 0.8
+  },
+  "brand_message": {
+    "keywords": [
+      "fun",
+      "care",
+      "health"
+    ],
+    "values": [
+      "approachability",
+      "humor"
+    ],
+    "audience_hint": "families, children",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "packaging",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Cartoon style may not appeal to all demographics",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "symbol",
+      "suggestion": "Consider a more neutral symbol for broader appeal",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "playful",
+      "modern"
+    ],
+    "score": 0.7,
+    "notes": "Aligns with trends favoring approachable and fun branding"
+  },
+  "analysis_timestamp": "2025-11-10T04:30:08.582447Z"
+}

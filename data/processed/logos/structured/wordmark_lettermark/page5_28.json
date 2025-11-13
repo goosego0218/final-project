@@ -1,0 +1,81 @@
+{
+  "source_image": "page5_28.jpg",
+  "text_elements": {
+    "primary_text": "FERVENT",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "Serif with a unique drop element",
+    "typography_notes": "Clear and readable with a distinctive drop shape in the letter 'V'",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Drop shape integrated into the letter 'V'",
+    "category": "abstract",
+    "meanings": [
+      "purity",
+      "liquid"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "High contrast with white background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "elegant",
+    "sophisticated"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate spacing between letters",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "purity",
+      "elegance"
+    ],
+    "values": [
+      "quality",
+      "refinement"
+    ],
+    "audience_hint": "premium consumers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimalist",
+      "elegant"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current minimalist and elegant design trends"
+  },
+  "analysis_timestamp": "2025-11-10T06:25:16.355427Z"
+}

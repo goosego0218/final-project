@@ -1,0 +1,94 @@
+{
+  "source_image": "page7_7.jpg",
+  "text_elements": {
+    "primary_text": "대한 진삼",
+    "secondary_text": "korea original ginseng",
+    "language": "Korean",
+    "font_style": "traditional calligraphy",
+    "typography_notes": "The primary text is stylized and may be challenging for non-native readers.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Square frame with traditional Korean design elements",
+    "category": "emblem",
+    "meanings": [
+      "heritage",
+      "authenticity"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#8B0000",
+        "common_name": "dark red",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "traditional",
+    "cultural"
+  ],
+  "tone_descriptors": [
+    "authentic",
+    "heritage"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "The layout is centered and balanced.",
+    "spacing_notes": "Adequate white space around elements.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "ginseng",
+      "Korean",
+      "original"
+    ],
+    "values": [
+      "authenticity",
+      "tradition"
+    ],
+    "audience_hint": "consumers interested in traditional Korean products",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Non-native readers may find the primary text challenging.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Consider adding a transliteration for non-native readers.",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "traditional"
+    ],
+    "score": 0.7,
+    "notes": "Aligns with trends emphasizing cultural heritage and authenticity."
+  },
+  "analysis_timestamp": "2025-11-10T06:49:30.990184Z"
+}

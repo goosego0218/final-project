@@ -1,0 +1,87 @@
+{
+  "source_image": "page3_45.jpg",
+  "text_elements": {
+    "primary_text": "DO10",
+    "secondary_text": "두두텐",
+    "language": "Latin and Korean",
+    "font_style": "bold, rounded",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Combination of letters and numbers",
+    "category": "lettermark",
+    "meanings": [
+      "playful",
+      "modern"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#F39C12",
+        "common_name": "orange",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#E74C3C",
+        "common_name": "red",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between colors",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "playful"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "energetic"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "playful",
+      "modern",
+      "dynamic"
+    ],
+    "values": [
+      "innovation",
+      "youthfulness"
+    ],
+    "audience_hint": "young adults",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "playful"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current trends in playful and modern design"
+  },
+  "analysis_timestamp": "2025-11-10T06:09:06.219621Z"
+}

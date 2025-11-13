@@ -13,7 +13,6 @@ class TaskType(str, Enum):
     EDIT = "edit"
     REMIX = "remix"
     REPLACE_BG = "replace_bg"
-    DESCRIBE = "describe"
 
 
 class RenderingSpeed(str, Enum):
@@ -58,16 +57,23 @@ class LogoState(TypedDict, total=False):
         "edit",
         "remix",
         "replace_bg",
-        "describe",
     ]
     requested_task_type: Optional[str]
     input_image_urls: List[str]
     input_mask_url: Optional[str]
+    upload_image_path: Optional[str]
+    style_reference_images: Optional[List[str]]
+    style_reference_prompt: Optional[str]
+    style_reference_urls: Optional[List[str]]
+    remix_mode: Optional[str]
+    style_ref_mode: Optional[bool]
 
     # 3. Prompt planning
     # Sidebar/Main prompt inputs
     prompt_keywords: Optional[List[str]]
     user_prompt: Optional[str]
+    base_prompt: Optional[str]
+    merged_prompt: Optional[str]
     enhanced_prompt: str
     negative_prompt: Optional[str]
     style_tags: Optional[List[str]]
@@ -107,7 +113,7 @@ class LogoState(TypedDict, total=False):
 
     # 7. Debug/trace (optional)
     task_reason: Optional[str]  # why router chose this task
-    api_endpoint: Optional[str]  # generate|remix|edit|describe
+    api_endpoint: Optional[str]  # generate|remix|edit
     mask_source: Optional[str]  # upload|canvas|server_sanitized
     mask_size: Optional[List[int]]  # [width, height]
     image_operator_error: Optional[str]
@@ -201,25 +207,17 @@ class ResultPackagerOut(BaseModel):
 # -------- Helpers for routing --------
 
 
-def choose_task_type(
-    text: str, has_image: bool, has_mask: bool, describe_only: bool = False
-) -> TaskType:
+def choose_task_type(text: str, has_image: bool, has_mask: bool) -> TaskType:
     """Heuristic intent routing.
 
     Priority:
-    1) explicit describe flag/keywords → describe
-    2) presence of mask → edit
-    3) image present + mood/variant cues → remix
-    4) default → generate
+    1) presence of mask → edit
+    2) image present + mood/variant cues → remix
+    3) default → generate
     """
-    if describe_only:
-        return TaskType.DESCRIBE
     lowered = (text or "").lower()
-    describe_keywords = ["describe", "explain", "요약", "설명", "무슨 느낌"]
-    remix_keywords = ["remix", "mood", "tone", "variant", "분위기", "톤", "버전"]
+    remix_keywords = ["remix", "mood", "tone", "variant", "느낌", "비슷", "버전"]
 
-    if any(k in lowered for k in describe_keywords):
-        return TaskType.DESCRIBE
     if has_mask:
         return TaskType.EDIT
     if has_image and any(k in lowered for k in remix_keywords):

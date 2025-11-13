@@ -1,0 +1,95 @@
+{
+  "source_image": "page2_37.jpg",
+  "text_elements": {
+    "primary_text": "동주",
+    "secondary_text": "Wine & Highball",
+    "language": "Korean and English",
+    "font_style": "serif with modern elements",
+    "typography_notes": "Readable with a blend of traditional and modern styles",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "A stylized building with a wine glass",
+    "category": "emblem",
+    "meanings": [
+      "traditional",
+      "wine",
+      "architecture"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#4A2C2A",
+        "common_name": "dark brown",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#B03A3A",
+        "common_name": "wine red",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "traditional",
+    "modern"
+  ],
+  "tone_descriptors": [
+    "elegant",
+    "sophisticated"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "wine",
+      "tradition",
+      "elegance"
+    ],
+    "values": [
+      "quality",
+      "heritage"
+    ],
+    "audience_hint": "adult consumers interested in wine and cocktails",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Small text may be hard to read at smaller sizes",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Increase font size for better readability",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "traditional"
+    ],
+    "score": 0.8,
+    "notes": "Combines traditional elements with a modern twist"
+  },
+  "analysis_timestamp": "2025-11-10T05:57:05.544555Z"
+}

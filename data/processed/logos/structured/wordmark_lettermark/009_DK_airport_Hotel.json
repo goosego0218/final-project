@@ -1,0 +1,82 @@
+{
+  "source_image": "009_DK_airport_Hotel.jpg",
+  "text_elements": {
+    "primary_text": "DK Airport Hotel",
+    "secondary_text": "DK AIRPORT HOTEL",
+    "language": "Latin",
+    "font_style": "serif and script",
+    "typography_notes": "Readable with a mix of formal and elegant script",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized script initials 'DK'",
+    "category": "lettermark",
+    "meanings": [
+      "initials",
+      "elegance"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "High contrast with white background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "elegant",
+    "formal"
+  ],
+  "tone_descriptors": [
+    "luxury",
+    "professional"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Centered and balanced with equal spacing",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "airport",
+      "hotel",
+      "luxury"
+    ],
+    "values": [
+      "comfort",
+      "convenience"
+    ],
+    "audience_hint": "travelers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "classic",
+      "timeless"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with classic and timeless design trends"
+  },
+  "analysis_timestamp": "2025-11-10T04:28:57.001801Z"
+}

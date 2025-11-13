@@ -1,0 +1,88 @@
+{
+  "source_image": "019_소개팅APP.jpg",
+  "text_elements": {
+    "primary_text": "TM",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "Sans-serif",
+    "typography_notes": "Simple and clear",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Interlocking red and blue ribbons forming a heart shape",
+    "category": "abstract",
+    "meanings": [
+      "unity",
+      "care",
+      "partnership"
+    ],
+    "confidence": 0.95
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FF0000",
+        "common_name": "red",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#0000FF",
+        "common_name": "blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between colors",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "trustworthy"
+  ],
+  "layout": {
+    "orientation": "square",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Symmetrical and balanced",
+    "spacing_notes": "Adequate white space around the symbol",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "care",
+      "unity",
+      "trust"
+    ],
+    "values": [
+      "partnership",
+      "support"
+    ],
+    "audience_hint": "general public",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current minimalistic design trends"
+  },
+  "analysis_timestamp": "2025-11-10T04:46:43.845662Z"
+}

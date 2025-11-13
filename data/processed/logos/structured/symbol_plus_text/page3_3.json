@@ -1,0 +1,93 @@
+{
+  "source_image": "page3_3.jpg",
+  "text_elements": {
+    "primary_text": "곰렉스",
+    "secondary_text": "GOMLEX",
+    "language": "Korean",
+    "font_style": "bold sans-serif",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Cute bear face with a leaf",
+    "category": "animal",
+    "meanings": [
+      "cuteness",
+      "nature"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#D3C5B0",
+        "common_name": "beige",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#A4C639",
+        "common_name": "green",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "cute"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "approachable"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with centered elements",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "cute",
+      "nature",
+      "friendly"
+    ],
+    "values": [
+      "approachability",
+      "environmental"
+    ],
+    "audience_hint": "young audience",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Enhance color vibrancy",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "cute",
+      "eco-friendly"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with trends in eco-friendly and cute design"
+  },
+  "analysis_timestamp": "2025-11-10T06:05:38.823845Z"
+}

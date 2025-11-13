@@ -1,0 +1,88 @@
+{
+  "source_image": "043_Mibe.jpg",
+  "text_elements": {
+    "primary_text": "mibe",
+    "secondary_text": "MIBE BABY EXPO",
+    "language": "Latin",
+    "font_style": "rounded sans-serif",
+    "typography_notes": "Clear and playful, suitable for a family-oriented audience.",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Green speech bubble",
+    "category": "abstract",
+    "meanings": [
+      "communication",
+      "interaction"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#E40046",
+        "common_name": "red",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#00A99D",
+        "common_name": "green",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "playful"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "inviting"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:3",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol.",
+    "spacing_notes": "Adequate white space for readability.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "baby",
+      "expo",
+      "communication"
+    ],
+    "values": [
+      "family",
+      "interaction"
+    ],
+    "audience_hint": "parents and families",
+    "confidence": 0.9
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider using a softer color palette for a more soothing effect.",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "playful"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current trends in family-oriented branding."
+  },
+  "analysis_timestamp": "2025-11-10T05:20:21.617631Z"
+}

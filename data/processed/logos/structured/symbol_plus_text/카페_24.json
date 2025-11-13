@@ -1,0 +1,77 @@
+{
+  "source_image": "카페_24.jpg",
+  "text_elements": {
+    "primary_text": "커피흐름",
+    "secondary_text": "THE COFFEE SHOP",
+    "language": "Korean and English",
+    "font_style": "modern sans-serif",
+    "typography_notes": "The text is clear and legible, with a modern touch.",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Abstract coffee cup with a droplet",
+    "category": "abstract",
+    "meanings": [
+      "coffee",
+      "fluidity",
+      "modernity"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000080",
+        "common_name": "navy blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with the white background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "inviting"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol.",
+    "spacing_notes": "Adequate white space around elements.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "coffee",
+      "flow",
+      "modern"
+    ],
+    "values": [
+      "quality",
+      "simplicity"
+    ],
+    "audience_hint": "coffee enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "modern"
+    ],
+    "score": 0.9,
+    "notes": "Aligns well with current minimalistic and modern design trends."
+  },
+  "analysis_timestamp": "2025-11-10T07:22:04.208325Z"
+}

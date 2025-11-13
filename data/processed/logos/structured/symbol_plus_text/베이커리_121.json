@@ -1,0 +1,90 @@
+{
+  "source_image": "베이커리_121.jpg",
+  "text_elements": {
+    "primary_text": "동양염전",
+    "secondary_text": "BAKERY CAFE",
+    "language": "Korean",
+    "font_style": "simple sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Outline of a house with a crescent moon",
+    "category": "abstract",
+    "meanings": [
+      "home",
+      "night",
+      "comfort"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "High contrast between text and background",
+    "confidence": 0.95
+  },
+  "style_tags": [
+    "minimal",
+    "modern"
+  ],
+  "tone_descriptors": [
+    "cozy",
+    "inviting"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "bakery",
+      "comfort",
+      "night"
+    ],
+    "values": [
+      "warmth",
+      "community"
+    ],
+    "audience_hint": "local customers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a warm accent color",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "cozy"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current minimalistic and cozy design trends"
+  },
+  "analysis_timestamp": "2025-11-10T06:52:01.212936Z"
+}

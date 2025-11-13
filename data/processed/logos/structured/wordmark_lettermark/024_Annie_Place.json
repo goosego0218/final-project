@@ -1,0 +1,94 @@
+{
+  "source_image": "024_Annie_Place.jpg",
+  "text_elements": {
+    "primary_text": "AnniePlace.com",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "cursive",
+    "typography_notes": "The cursive style is elegant but may affect readability at smaller sizes.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "No distinct symbol, text-based logo",
+    "category": "lettermark",
+    "meanings": [
+      "personalization",
+      "online presence"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "elegant",
+    "modern"
+  ],
+  "tone_descriptors": [
+    "luxury",
+    "personal"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with centered alignment.",
+    "spacing_notes": "Adequate spacing between letters enhances readability.",
+    "confidence": 0.8
+  },
+  "brand_message": {
+    "keywords": [
+      "elegance",
+      "online",
+      "personal"
+    ],
+    "values": [
+      "sophistication",
+      "accessibility"
+    ],
+    "audience_hint": "online shoppers",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Cursive font may reduce readability at smaller sizes.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Consider a bolder font for smaller applications.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.7,
+    "notes": "Aligns with current trends of simplicity and elegance."
+  },
+  "analysis_timestamp": "2025-11-10T04:58:44.512498Z"
+}

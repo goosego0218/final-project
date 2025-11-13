@@ -1,0 +1,82 @@
+{
+  "source_image": "page2_11.jpg",
+  "text_elements": {
+    "primary_text": "마인홀딩스",
+    "secondary_text": "Mine Holdings",
+    "language": "Korean",
+    "font_style": "modern sans-serif",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized letter M",
+    "category": "lettermark",
+    "meanings": [
+      "initial",
+      "corporate identity"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#D4AF37",
+        "common_name": "gold",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "luxury",
+    "professional"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with equal spacing",
+    "spacing_notes": "Adequate white space",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "corporate",
+      "trust",
+      "luxury"
+    ],
+    "values": [
+      "professionalism",
+      "prestige"
+    ],
+    "audience_hint": "business professionals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current minimalistic design trends"
+  },
+  "analysis_timestamp": "2025-11-10T05:51:13.129852Z"
+}

@@ -1,0 +1,101 @@
+{
+  "source_image": "page4_24.jpg",
+  "text_elements": {
+    "primary_text": "COFFEE ISLAND",
+    "secondary_text": "HAWAIIAN KONA ROASTERS",
+    "language": "Latin",
+    "font_style": "Serif, uppercase",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Two palm trees with birds and a sunset",
+    "category": "emblem",
+    "meanings": [
+      "tropical",
+      "relaxation",
+      "exotic"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#1A3A5F",
+        "common_name": "Navy Blue",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#F5A89D",
+        "common_name": "Peach",
+        "usage": "background"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#F5D6A1",
+        "common_name": "Light Orange",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "vintage",
+    "tropical"
+  ],
+  "tone_descriptors": [
+    "relaxing",
+    "inviting"
+  ],
+  "layout": {
+    "orientation": "square",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central emblem",
+    "spacing_notes": "Adequate spacing around text",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "coffee",
+      "island",
+      "Hawaii"
+    ],
+    "values": [
+      "quality",
+      "authenticity"
+    ],
+    "audience_hint": "coffee enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "contrast",
+      "description": "Slightly low contrast in emblem details",
+      "severity": "low"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "contrast",
+      "suggestion": "Enhance emblem detail contrast",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "vintage",
+      "tropical"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with retro and tropical design trends"
+  },
+  "analysis_timestamp": "2025-11-10T06:14:47.882702Z"
+}

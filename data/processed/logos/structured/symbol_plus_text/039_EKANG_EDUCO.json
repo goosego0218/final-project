@@ -1,0 +1,93 @@
+{
+  "source_image": "039_EKANG_EDUCO.jpg",
+  "text_elements": {
+    "primary_text": "EKANG EDUCO",
+    "secondary_text": "Education Community Instructs Self-learning",
+    "language": "English",
+    "font_style": "Bold sans-serif",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Tree with falling leaves",
+    "category": "abstract",
+    "meanings": [
+      "growth",
+      "knowledge"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#8B004F",
+        "common_name": "dark magenta",
+        "usage": "accent"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "educational",
+    "professional"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well balanced with symbol and text",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "education",
+      "community",
+      "self-learning"
+    ],
+    "values": [
+      "growth",
+      "knowledge"
+    ],
+    "audience_hint": "students, educators",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Abstract symbol may not be immediately clear",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "symbol clarity",
+      "suggestion": "Simplify or clarify the tree symbol",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current trends in educational branding"
+  },
+  "analysis_timestamp": "2025-11-10T05:18:05.983722Z"
+}

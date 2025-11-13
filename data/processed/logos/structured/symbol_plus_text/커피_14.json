@@ -1,0 +1,95 @@
+{
+  "source_image": "커피_14.jpg",
+  "text_elements": {
+    "primary_text": "Utensils",
+    "secondary_text": "Vacation in my day",
+    "language": "Latin",
+    "font_style": "handwritten",
+    "typography_notes": "The primary text is stylized and may be slightly difficult to read at a glance.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Abstract black shape behind text",
+    "category": "abstract",
+    "meanings": [
+      "creativity",
+      "uniqueness"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "High contrast between black text and white background.",
+    "confidence": 0.95
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "casual"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "The logo is well-balanced with central alignment.",
+    "spacing_notes": "Adequate white space around the text enhances readability.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "relaxation",
+      "daily life",
+      "creativity"
+    ],
+    "values": [
+      "comfort",
+      "ease"
+    ],
+    "audience_hint": "general consumers seeking casual and creative products",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "low",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Primary text may be hard to read quickly.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Consider using a clearer font for the primary text.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "handcrafted"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends favoring simplicity and handmade aesthetics."
+  },
+  "analysis_timestamp": "2025-11-10T07:37:32.441019Z"
+}

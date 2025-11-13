@@ -1,0 +1,82 @@
+{
+  "source_image": "030_IRON_GYM.jpg",
+  "text_elements": {
+    "primary_text": "IRON GYM",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "bold, geometric",
+    "typography_notes": "Highly readable with strong emphasis",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized muscular arms forming part of the text",
+    "category": "lettermark",
+    "meanings": [
+      "strength",
+      "fitness"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#C8102E",
+        "common_name": "red",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with white background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "bold",
+    "modern"
+  ],
+  "tone_descriptors": [
+    "strong",
+    "energetic"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well balanced with symmetrical design",
+    "spacing_notes": "Tight spacing enhances boldness",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "strength",
+      "fitness",
+      "power"
+    ],
+    "values": [
+      "health",
+      "endurance"
+    ],
+    "audience_hint": "fitness enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "bold"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current fitness branding trends"
+  },
+  "analysis_timestamp": "2025-11-10T05:09:22.389033Z"
+}

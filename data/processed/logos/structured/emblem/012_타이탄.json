@@ -1,0 +1,98 @@
+{
+  "source_image": "012_타이탄.jpg",
+  "text_elements": {
+    "primary_text": "TITAN",
+    "secondary_text": "SUPPORT SYSTEMS, INC.",
+    "language": "Latin",
+    "font_style": "Bold, block letters",
+    "typography_notes": "Highly readable with strong emphasis",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized face within a shield",
+    "category": "emblem",
+    "meanings": [
+      "strength",
+      "protection"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FFCC00",
+        "common_name": "yellow",
+        "usage": "background"
+      },
+      {
+        "hex": "#0000FF",
+        "common_name": "blue",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#FF0000",
+        "common_name": "red",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Strong contrast between colors enhances visibility",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "bold",
+    "dynamic"
+  ],
+  "tone_descriptors": [
+    "strong",
+    "protective"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "3:4",
+    "balance_notes": "Centered composition with balanced elements",
+    "spacing_notes": "Adequate spacing around text and symbol",
+    "confidence": 0.85
+  },
+  "brand_message": {
+    "keywords": [
+      "strength",
+      "support",
+      "protection"
+    ],
+    "values": [
+      "reliability",
+      "durability"
+    ],
+    "audience_hint": "industrial and athletic markets",
+    "confidence": 0.9
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "color",
+      "description": "Potential color clash for colorblind users",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "color accessibility",
+      "suggestion": "Consider alternative color schemes for better accessibility",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "bold",
+      "emblematic"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends favoring bold and emblematic designs"
+  },
+  "analysis_timestamp": "2025-11-10T04:33:55.917889Z"
+}

@@ -1,0 +1,83 @@
+{
+  "source_image": "075_DAMA_calendar.jpg",
+  "text_elements": {
+    "primary_text": "31",
+    "secondary_text": "CALENDAR",
+    "language": "Korean",
+    "font_style": "rounded sans-serif",
+    "typography_notes": "Clear and legible with playful elements",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "A calendar page with a smiling face",
+    "category": "emblem",
+    "meanings": [
+      "calendar",
+      "date",
+      "friendly"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#E94E31",
+        "common_name": "red-orange",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with white background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "playful"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "approachable"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "calendar",
+      "date",
+      "fun"
+    ],
+    "values": [
+      "organization",
+      "simplicity"
+    ],
+    "audience_hint": "general public",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current trends of simplicity and friendliness"
+  },
+  "analysis_timestamp": "2025-11-10T05:34:24.066722Z"
+}

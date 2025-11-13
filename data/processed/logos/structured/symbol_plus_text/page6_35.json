@@ -1,0 +1,90 @@
+{
+  "source_image": "page6_35.jpg",
+  "text_elements": {
+    "primary_text": "치킨",
+    "secondary_text": "CHICKEN",
+    "language": "Korean",
+    "font_style": "bold sans-serif",
+    "typography_notes": "Clear and bold, good readability",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Chicken drumstick with a heart",
+    "category": "emblem",
+    "meanings": [
+      "food",
+      "love",
+      "chicken"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FFA500",
+        "common_name": "orange",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast against white background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "playful"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "approachable"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "3:1",
+    "balance_notes": "Well-balanced with central symbol",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "chicken",
+      "love",
+      "food"
+    ],
+    "values": [
+      "quality",
+      "taste"
+    ],
+    "audience_hint": "food lovers",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Small text might be hard to read",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Increase size of smaller text",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "friendly"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends of simplicity and friendliness"
+  },
+  "analysis_timestamp": "2025-11-10T06:36:45.050031Z"
+}

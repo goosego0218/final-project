@@ -1,0 +1,94 @@
+{
+  "source_image": "027_sent.jpg",
+  "text_elements": {
+    "primary_text": "Scent",
+    "secondary_text": "BY LONDON",
+    "language": "Latin",
+    "font_style": "script for primary, sans-serif for secondary",
+    "typography_notes": "The primary text is elegant and readable; the secondary text is clear and modern.",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "A stylized monkey in a suit holding an umbrella",
+    "category": "emblem",
+    "meanings": [
+      "sophistication",
+      "playfulness"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "High contrast between text and background ensures readability.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "elegant"
+  ],
+  "tone_descriptors": [
+    "luxury",
+    "playful"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment.",
+    "spacing_notes": "Adequate spacing around elements enhances clarity.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "sophistication",
+      "style"
+    ],
+    "values": [
+      "quality",
+      "elegance"
+    ],
+    "audience_hint": "fashion-conscious individuals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "The symbol may not be immediately recognizable.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "symbol",
+      "suggestion": "Simplify the symbol for better recognition.",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "elegant"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current trends in luxury branding."
+  },
+  "analysis_timestamp": "2025-11-10T05:05:35.760015Z"
+}

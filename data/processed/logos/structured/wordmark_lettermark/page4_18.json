@@ -1,0 +1,93 @@
+{
+  "source_image": "page4_18.jpg",
+  "text_elements": {
+    "primary_text": "Fate",
+    "secondary_text": "페이트 탄생",
+    "language": "English and Korean",
+    "font_style": "brush script",
+    "typography_notes": "The primary text is stylish and legible, while the secondary text is smaller but clear.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Paint roller with gradient green paint",
+    "category": "abstract",
+    "meanings": [
+      "creativity",
+      "transformation"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#00A651",
+        "common_name": "green",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFD700",
+        "common_name": "gold",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "artistic"
+  ],
+  "tone_descriptors": [
+    "creative",
+    "dynamic"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:3",
+    "balance_notes": "Well-balanced with emphasis on the text.",
+    "spacing_notes": "Adequate white space around the elements.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "creativity",
+      "innovation"
+    ],
+    "values": [
+      "artistic expression",
+      "transformation"
+    ],
+    "audience_hint": "creative professionals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Secondary text may be too small in some contexts.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Increase size of secondary text for better readability.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "artistic"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current trends in creative industries."
+  },
+  "analysis_timestamp": "2025-11-10T06:13:22.777291Z"
+}

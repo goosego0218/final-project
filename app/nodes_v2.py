@@ -4,6 +4,7 @@ import base64
 import mimetypes
 import re
 from datetime import datetime
+from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 import requests
@@ -16,12 +17,21 @@ from langchain_core.runnables import RunnableConfig
 from langchain_openai import ChatOpenAI
 
 from .config import (
-    IDEOGRAM_API_KEY,
     LANGCHAIN_PROJECT,
     OPENAI_API_KEY,
 )
+from .agent_schema import LogoState, TaskType
+from .task_classifier import classify_task_mode
+from .ideogram_tools import (
+    IdeogramGenerateTool,
+    IdeogramRemixTool,
+    IdeogramEditTool,
+)
 
-from .agent_schema import LogoState, TaskType, choose_task_type
+
+_generate_tool = IdeogramGenerateTool()
+_remix_tool = IdeogramRemixTool()
+_edit_tool = IdeogramEditTool()
 
 
 _PLANNER_PROMPT = ChatPromptTemplate.from_messages(
@@ -338,15 +348,13 @@ def _attach_image_to_messages(messages: List, image_url: str) -> List:
     return messages
 
 
-def intent_router_node(state: LogoState) -> LogoState:
-    # Prefer explicit main prompt, then existing enhanced, then brand description
-    user_text = (
+def task_classifier_node(state: LogoState) -> LogoState:
+    prompt_text = (
         state.get("user_prompt")
         or state.get("enhanced_prompt")
         or state.get("brand_description")
         or ""
     )
-    has_image = bool(state.get("input_image_urls"))
     has_mask = bool(state.get("input_mask_url"))
     requested = state.get("requested_task_type")
     if requested:
@@ -359,21 +367,160 @@ def intent_router_node(state: LogoState) -> LogoState:
             }
         except ValueError:
             pass
-    # If image present and human/edit instruction present, prefer remix (no mask) or edit (mask)
-    if has_mask:
-        task = TaskType.EDIT
-        reason = "mask_present"
-    elif has_image and (state.get("human_feedback") or state.get("next_prompt_hint")):
-        task = TaskType.REMIX
-        reason = "image_and_feedback_present"
-    else:
-        task = choose_task_type(user_text, has_image=has_image, has_mask=has_mask)
-        reason = "heuristic"
+
+    image_sources = state.get("input_image_urls") or []
+    reference_logo = state.get("reference_logo") or {}
+    has_reference = bool(image_sources or reference_logo.get("image_url"))
+    reuse_flag = bool(image_sources)
+
+    mode, reason = classify_task_mode(
+        prompt_text,
+        has_reference=has_reference,
+        has_mask=has_mask,
+        has_recent_reuse=reuse_flag,
+    )
+    try:
+        task = TaskType(mode)
+    except ValueError:
+        task = TaskType.GENERATE
+        reason = reason or "LLM fallback classification"
+
     return {
         "task_type": task.value,
-        "task_reason": reason,
+        "task_reason": reason or "LLM classification",
         "updated_at": datetime.utcnow(),
     }
+
+
+def _prepare_image_for_api(source: Optional[str]) -> Optional[str]:
+    if not source:
+        return None
+    source = str(source)
+    if source.startswith(("http://", "https://", "data:")):
+        return source
+    path = Path(source)
+    if not path.exists():
+        return None
+    mime, _ = mimetypes.guess_type(path.name)
+    if not mime:
+        mime = "image/png"
+    encoded = base64.b64encode(path.read_bytes()).decode("utf-8")
+    return f"data:{mime};base64,{encoded}"
+
+
+def prompt_merge_node(state: LogoState) -> LogoState:
+    """Merge user prompt, style references, and brand cues."""
+
+    style_prompt = (state.get("style_reference_prompt") or "").strip()
+    user_prompt = (state.get("user_prompt") or "").strip()
+    human_feedback = (state.get("human_feedback") or "").strip()
+    next_hint = (state.get("next_prompt_hint") or "").strip()
+    brand_desc = (state.get("brand_description") or "").strip()
+    brand_tone = (state.get("brand_tone") or "").strip()
+    trend_highlights = state.get("trend_highlights") or []
+
+    lines: List[str] = []
+    if style_prompt:
+        lines.append(f"Style inspiration: {style_prompt}")
+    if user_prompt:
+        lines.append(f"Transform request: {user_prompt}")
+    if brand_desc:
+        lines.append(f"Brand story: {brand_desc}")
+    if brand_tone:
+        lines.append(f"Brand tone: {brand_tone}")
+    if trend_highlights:
+        lines.append("Trend cues: " + ", ".join(trend_highlights))
+    if human_feedback:
+        lines.append(f"Human feedback: {human_feedback}")
+    if next_hint:
+        lines.append(f"Evaluator hint: {next_hint}")
+
+    merged_prompt = "\n".join(line for line in lines if line).strip()
+    if not merged_prompt:
+        merged_prompt = user_prompt or brand_desc
+
+    planner_out = PromptPlannerOut(enhanced_prompt=merged_prompt or "")
+    updates: LogoState = planner_out.model_dump(exclude_none=True)
+    updates["merged_prompt"] = merged_prompt
+    updates["updated_at"] = datetime.utcnow()
+    return updates
+
+
+def _dedupe_preserve(items: List[str]) -> List[str]:
+    seen = set()
+    ordered: List[str] = []
+    for item in items:
+        if not item:
+            continue
+        if item in seen:
+            continue
+        seen.add(item)
+        ordered.append(item)
+    return ordered
+
+
+def generation_router_node(state: LogoState) -> LogoState:
+    """Decide final Ideogram mode (generate/remix/edit/style) and prep inputs."""
+
+    current_task = state.get("task_type") or TaskType.GENERATE.value
+    try:
+        task_enum = TaskType(current_task)
+    except ValueError:
+        task_enum = TaskType.GENERATE
+
+    prepared_inputs: List[str] = []
+    if state.get("input_image_urls"):
+        for raw in state["input_image_urls"]:
+            resolved = _prepare_image_for_api(raw) or str(raw)
+            prepared_inputs.append(resolved)
+
+    upload_prepared = _prepare_image_for_api(state.get("upload_image_path"))
+    if upload_prepared:
+        prepared_inputs.insert(0, upload_prepared)
+
+    reference_logo = state.get("reference_logo") or {}
+    reference_image = _prepare_image_for_api(reference_logo.get("image_url"))
+    if reference_image:
+        prepared_inputs.insert(0, reference_image)
+
+    prepared_inputs = _dedupe_preserve(prepared_inputs)
+
+    style_ref_mode = bool(state.get("style_ref_mode"))
+    remix_mode = (state.get("remix_mode") or "").lower()
+    style_refs = state.get("style_reference_images") or []
+    presented_style_refs: List[str] = []
+    for raw in style_refs:
+        resolved = _prepare_image_for_api(raw)
+        if resolved:
+            presented_style_refs.append(resolved)
+
+    updates: LogoState = {}
+    if prepared_inputs:
+        updates["input_image_urls"] = prepared_inputs
+
+    if presented_style_refs:
+        updates["style_reference_urls"] = presented_style_refs
+
+    reason = state.get("task_reason") or "heuristic"
+    if task_enum == TaskType.GENERATE:
+        if remix_mode == "remix":
+            task_enum = TaskType.REMIX
+            reason = "remix_mode"
+        elif prepared_inputs:
+            task_enum = TaskType.REMIX
+            reason = "reference_present"
+        elif style_ref_mode and presented_style_refs:
+            task_enum = TaskType.REMIX
+            reason = "style_reference_mode"
+    if task_enum == TaskType.REMIX and not prepared_inputs:
+        # Fallback to generate if remix has no base image
+        task_enum = TaskType.GENERATE
+        reason = "remix_without_image"
+
+    updates["task_type"] = task_enum.value
+    updates["task_reason"] = reason
+    updates["updated_at"] = datetime.utcnow()
+    return updates
 
 
 def prompt_planner_node(state: LogoState) -> LogoState:
@@ -394,8 +541,11 @@ def prompt_planner_node(state: LogoState) -> LogoState:
     kw_text = _keyword_string(keywords)
     base_prompt = _task_base_prompt(task, user_prompt, kw_text)
 
-    if not base_prompt:
-        base_prompt = state.get("enhanced_prompt") or ""
+    merged_prompt = state.get("merged_prompt")
+    if merged_prompt:
+        base_prompt = merged_prompt
+    elif not base_prompt:
+        base_prompt = state.get("enhanced_prompt") or state.get("base_prompt") or ""
 
     planner_inputs = {
         "task": task,
@@ -437,23 +587,18 @@ def _first_url(urls: Optional[List[str] | List[HttpUrl]]) -> Optional[str]:
     return str(urls[0])
 
 
-def _post_json(url: str, headers: dict, json: dict) -> dict:
-    resp = requests.post(url, headers=headers, json=json, timeout=90)
-    if resp.status_code >= 400:
-        raise HTTPException(status_code=resp.status_code, detail=resp.text)
-    return resp.json()
-
-
-def _post_multipart(url: str, headers: dict, data: dict, files: dict) -> dict:
-    resp = requests.post(url, headers=headers, data=data, files=files, timeout=90)
-    if resp.status_code >= 400:
-        raise HTTPException(status_code=resp.status_code, detail=resp.text)
-    return resp.json()
-
-
 def _load_bytes(source: str) -> bytes:
     if source.startswith("http://") or source.startswith("https://"):
         return requests.get(source, timeout=90).content
+    if source.startswith("data:"):
+        header, _, payload = source.partition(",")
+        if ";base64" in header:
+            if isinstance(payload, str):
+                payload_bytes = payload.encode("utf-8")
+            else:
+                payload_bytes = payload
+            return base64.b64decode(payload_bytes)
+        return payload.encode("utf-8")
     from pathlib import Path
 
     return Path(source).read_bytes()
@@ -502,6 +647,10 @@ def image_operator_node(state: LogoState) -> LogoState:
     seed = state.get("seed")
     input_images = state.get("input_image_urls")
     input_mask = state.get("input_mask_url")
+    style_reference_prompt = state.get("style_reference_prompt") or ""
+    style_reference_urls = state.get("style_reference_urls") or []
+    if style_reference_urls and not style_reference_prompt:
+        style_reference_prompt = "Mirror palette, brushwork, and finish from supplied style references."
 
     combined_styles: List[str] = []
     for seq in (style_preferences, state.get("style_tags") or [], reference_styles):
@@ -516,6 +665,8 @@ def image_operator_node(state: LogoState) -> LogoState:
         prompt_bits.append("Style cues: " + ", ".join(combined_styles))
     if trend_highlights:
         prompt_bits.append("Trend inspiration: " + ", ".join(trend_highlights))
+    if style_reference_prompt:
+        prompt_bits.append(f"Style inspiration: {style_reference_prompt}")
     prompt = " | ".join(bit for bit in prompt_bits if bit)
 
     if reference_image and task == TaskType.GENERATE.value:
@@ -524,82 +675,38 @@ def image_operator_node(state: LogoState) -> LogoState:
     elif reference_image and not input_images:
         input_images = [reference_image]
 
-    headers = {"Api-Key": IDEOGRAM_API_KEY}
-
-    # DESCRIBE
-    if task == TaskType.DESCRIBE.value:
-        img = _first_url(input_images)
-        if not img:
-            # If no image, return empty and mark done
-            return {
-                "candidate_images": [],
-                "last_generated_image_url": None,
-                "api_endpoint": "describe",
-                "updated_at": datetime.utcnow(),
-            }
-        data = {"image_url": img}
-        body = _post_json(
-            "https://api.ideogram.ai/v1/ideogram-v3/describe", headers, data
-        )
-        description = body.get("data", [{}])[0].get("description", "")
-        # Store as feedback to influence next planning
-        return {
-            "eval_feedback": f"Image description: {description}",
-            "candidate_images": [],
-            "last_generated_image_url": img,
-            "api_endpoint": "describe",
-            "updated_at": datetime.utcnow(),
-        }
-
-    # GENERATE / REMIX / EDIT
     api_ep = None
     if task == TaskType.GENERATE.value:
-        # Default to DESIGN style for initial logo generation if not specified
         if not style_type:
             style_type = "DESIGN"
-        payload = {"prompt": prompt, "rendering_speed": rendering_speed}
-        if negative:
-            payload["negative_prompt"] = negative
-        if aspect_ratio:
-            payload["aspect_ratio"] = aspect_ratio
-        # Ideogram spec commonly uses style_type; keep style_preset as fallback
-        if style_type:
-            payload["style_type"] = style_type
-        elif style_preset:
-            payload["style_type"] = style_preset
-        if seed is not None:
-            payload["seed"] = seed
-        body = _post_json(
-            "https://api.ideogram.ai/v1/ideogram-v3/generate", headers, payload
+        body = _generate_tool.run(
+            prompt=prompt,
+            rendering_speed=rendering_speed,
+            negative_prompt=negative,
+            aspect_ratio=aspect_ratio,
+            style_type=style_type,
+            style_preset=None if style_type else style_preset,
+            seed=seed,
         )
         api_ep = "generate"
     elif task == TaskType.REMIX.value:
         base_img = _first_url(input_images)
         if not base_img:
             raise ValueError("remix requires at least one input_image_urls")
-        files = {"image": ("image.png", _load_bytes(base_img), "image/png")}
-        data = {"prompt": prompt, "rendering_speed": rendering_speed}
-        if negative:
-            data["negative_prompt"] = negative
-        if style_type:
-            data["style_type"] = style_type
-        elif style_preset:
-            data["style_type"] = style_preset
-        if seed is not None:
-            data["seed"] = str(seed)
-        if aspect_ratio:
-            data["aspect_ratio"] = aspect_ratio
-        remix_strength = state.get("remix_strength")
-        if remix_strength is not None:
-            data["strength"] = str(remix_strength)
-        remix_num_images = state.get("remix_num_images")
-        if remix_num_images:
-            data["num_images"] = str(remix_num_images)
-        body = _post_multipart(
-            "https://api.ideogram.ai/v1/ideogram-v3/remix", headers, data, files
+        body = _remix_tool.run(
+            prompt=prompt,
+            rendering_speed=rendering_speed,
+            negative_prompt=negative,
+            aspect_ratio=aspect_ratio,
+            style_type=style_type,
+            style_preset=None if style_type else style_preset,
+            seed=seed,
+            strength=state.get("remix_strength"),
+            num_images=state.get("remix_num_images"),
+            image_bytes=_load_bytes(base_img),
         )
         api_ep = "remix"
-    elif task == TaskType.EDIT.value or task == TaskType.REPLACE_BG.value:
+    elif task in (TaskType.EDIT.value, TaskType.REPLACE_BG.value):
         base_img = _first_url(input_images)
         if not base_img or not input_mask:
             raise ValueError("edit requires input_image_urls[0] and input_mask_url")
@@ -614,29 +721,18 @@ def image_operator_node(state: LogoState) -> LogoState:
         except Exception:
             target_size = None
         sanitized_mask = _sanitize_mask_bytes(_load_bytes(str(input_mask)), target_size)
-        files = {
-            "image": ("image.png", base_bytes, "image/png"),
-            "mask": ("mask.png", sanitized_mask, "image/png"),
-        }
-        data = {"prompt": prompt, "rendering_speed": rendering_speed}
-        if negative:
-            data["negative_prompt"] = negative
-        if style_type:
-            data["style_type"] = style_type
-        elif style_preset:
-            data["style_type"] = style_preset
-        if seed is not None:
-            data["seed"] = str(seed)
-        if aspect_ratio:
-            data["aspect_ratio"] = aspect_ratio
-        inpaint_strength = state.get("edit_inpaint_strength")
-        if inpaint_strength is not None:
-            data["inpaint_strength"] = str(inpaint_strength)
-        keep_background = state.get("edit_keep_background")
-        if keep_background is not None:
-            data["keep_original_background"] = "true" if keep_background else "false"
-        body = _post_multipart(
-            "https://api.ideogram.ai/v1/ideogram-v3/edit", headers, data, files
+        body = _edit_tool.run(
+            prompt=prompt,
+            rendering_speed=rendering_speed,
+            negative_prompt=negative,
+            aspect_ratio=aspect_ratio,
+            style_type=style_type,
+            style_preset=None if style_type else style_preset,
+            seed=seed,
+            keep_background=state.get("edit_keep_background"),
+            edit_inpaint_strength=state.get("edit_inpaint_strength"),
+            image_bytes=base_bytes,
+            mask_bytes=sanitized_mask,
         )
         api_ep = "edit"
     else:
@@ -655,13 +751,15 @@ def image_operator_node(state: LogoState) -> LogoState:
             {"url": url, "source": "ideogram", "variant_id": item.get("id")}
         )
 
-    return {
-        "candidate_images": candidates,
-        "last_generated_image_url": last_url,
-        "is_image_safe": True,
-        "api_endpoint": api_ep,
-        "updated_at": datetime.utcnow(),
-    }
+    operator_out = ImageOperatorOut(
+        candidate_images=candidates,
+        last_generated_image_url=last_url,
+        is_image_safe=body.get("is_image_safe", True),
+    )
+    updates: LogoState = operator_out.model_dump(exclude_none=True)
+    updates["api_endpoint"] = api_ep
+    updates["updated_at"] = datetime.utcnow()
+    return updates
 
 
 def evaluator_node(state: LogoState) -> LogoState:

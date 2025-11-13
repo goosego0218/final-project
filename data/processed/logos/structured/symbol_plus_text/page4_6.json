@@ -1,0 +1,99 @@
+{
+  "source_image": "page4_6.jpg",
+  "text_elements": {
+    "primary_text": "찬란한맥주",
+    "secondary_text": "생맥주 전문점",
+    "language": "Korean",
+    "font_style": "bold sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "A stylized beer mug with foam and sparkles",
+    "category": "emblem",
+    "meanings": [
+      "refreshment",
+      "celebration"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FFD700",
+        "common_name": "gold",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "text"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "playful"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "inviting"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "beer",
+      "fresh",
+      "specialty"
+    ],
+    "values": [
+      "quality",
+      "enjoyment"
+    ],
+    "audience_hint": "beer enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Symbol may be too detailed for small sizes",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "symbol",
+      "suggestion": "Simplify the beer mug design for scalability",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "playful"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends in playful and inviting branding"
+  },
+  "analysis_timestamp": "2025-11-10T06:20:40.144001Z"
+}

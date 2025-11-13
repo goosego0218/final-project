@@ -20,6 +20,33 @@ except ImportError:  # pragma: no cover - fallback for direct script use
 
 SUPPORTED_EXTS = {".png", ".jpg", ".jpeg", ".webp"}
 DEFAULT_MODEL = "gpt-4o"
+STRUCTURED_CATEGORIES = [
+    "wordmark_lettermark",
+    "symbol_centric",
+    "symbol_plus_text",
+    "emblem",
+    "other",
+]
+EMBLEM_STYLE_KEYWORDS = {"emblem", "badge", "crest", "shield", "seal", "insignia"}
+EMBLEM_DESC_KEYWORDS = {
+    "emblem",
+    "badge",
+    "crest",
+    "shield",
+    "seal",
+    "coat of arms",
+    "medallion",
+    "insignia",
+}
+WORDMARK_CATEGORIES = {"lettermark", "wordmark", "logotype", "monogram", "text"}
+WORDMARK_DESC_KEYWORDS = {
+    "text-based",
+    "text only",
+    "wordmark",
+    "lettermark",
+    "typographic",
+    "lettering",
+}
 SYSTEM_PROMPT = (
     "You are a senior brand analyst specializing in logo breakdowns."
     " You must output strict JSON that matches the requested schema."
@@ -80,6 +107,37 @@ ANALYSIS_INSTRUCTIONS = """Analyze the provided logo and respond with JSON using
 }
 Use null for unknown scalar fields and [] for arrays with no data. Keep JSON on a single object, no extra commentary.
 """
+
+
+def classify_logo_structure(payload: dict) -> str:
+    """Derive the output subdirectory based on logo composition cues."""
+    symbol = payload.get("symbol") or {}
+    text_elements = payload.get("text_elements") or {}
+    style_tags = [tag.lower() for tag in (payload.get("style_tags") or [])]
+    desc = (symbol.get("description") or "").lower()
+    category = (symbol.get("category") or "").lower()
+    has_text = bool((text_elements.get("primary_text") or "").strip())
+
+    if (
+        category == "emblem"
+        or any(keyword in style_tags for keyword in EMBLEM_STYLE_KEYWORDS)
+        or any(keyword in desc for keyword in EMBLEM_DESC_KEYWORDS)
+    ):
+        return "emblem"
+
+    if category in WORDMARK_CATEGORIES or any(keyword in desc for keyword in WORDMARK_DESC_KEYWORDS):
+        return "wordmark_lettermark"
+
+    if has_text and not desc:
+        return "wordmark_lettermark"
+
+    if desc and not has_text:
+        return "symbol_centric"
+
+    if desc and has_text:
+        return "symbol_plus_text"
+
+    return "other"
 
 
 def parse_args() -> argparse.Namespace:
@@ -167,6 +225,22 @@ def ensure_output_dirs(dirs: Iterable[Path]) -> None:
         directory.mkdir(parents=True, exist_ok=True)
 
 
+def ensure_structured_categories(root: Path) -> None:
+    for category in STRUCTURED_CATEGORIES:
+        (root / category).mkdir(parents=True, exist_ok=True)
+
+
+def find_existing_structured_file(root: Path, stem: str) -> Path | None:
+    for category in STRUCTURED_CATEGORIES:
+        candidate = root / category / f"{stem}.json"
+        if candidate.exists():
+            return candidate
+    legacy = root / f"{stem}.json"
+    if legacy.exists():
+        return legacy
+    return None
+
+
 def save_outputs(structured: dict, summary_path: Path, json_path: Path) -> None:
     rag_summary = structured.pop("rag_summary", "").strip()
     timestamp = datetime.utcnow().isoformat() + "Z"
@@ -179,6 +253,7 @@ def save_outputs(structured: dict, summary_path: Path, json_path: Path) -> None:
 def main() -> int:
     args = parse_args()
     ensure_output_dirs([args.structured_dir, args.summary_dir])
+    ensure_structured_categories(args.structured_dir)
 
     files = iter_logo_files(args.logo_dir)
     if args.limit:
@@ -190,9 +265,9 @@ def main() -> int:
     processed = 0
     for idx, logo_path in enumerate(files, start=1):
         stem = logo_path.stem
-        json_path = args.structured_dir / f"{stem}.json"
         summary_path = args.summary_dir / f"{stem}.txt"
-        if not args.overwrite and json_path.exists() and summary_path.exists():
+        existing_json = find_existing_structured_file(args.structured_dir, stem)
+        if not args.overwrite and existing_json and summary_path.exists():
             print(f"[skip] {stem} already analyzed.")
             continue
 
@@ -204,6 +279,12 @@ def main() -> int:
             continue
 
         result["source_image"] = logo_path.name
+        category = classify_logo_structure(result)
+        category_dir = args.structured_dir / category
+        category_dir.mkdir(parents=True, exist_ok=True)
+        json_path = category_dir / f"{stem}.json"
+        if existing_json and existing_json != json_path and existing_json.exists():
+            existing_json.unlink()
         save_outputs(result, summary_path, json_path)
         processed += 1
         print(f"[ok] {stem} ({idx}/{len(files)})")

@@ -22,6 +22,37 @@ class LogoLibraryEntry(BaseModel):
     layout_orientation: Optional[str] = None
 
 
+def _resolve_image_path(file_name: str, json_path: Path) -> str:
+    """
+    Locate the matching logo image, accounting for the nested category folders
+    under `logos/`. Falls back to the root directory for legacy layouts.
+    """
+    # Prefer the category inferred from the JSON directory structure.
+    image_path: Optional[Path] = None
+    try:
+        relative = json_path.relative_to(STRUCTURED_DIR)
+        category = relative.parts[0] if len(relative.parts) > 1 else None
+    except ValueError:
+        category = None
+
+    if category:
+        candidate = LOGO_DIR / category / file_name
+        if candidate.exists():
+            image_path = candidate
+
+    if image_path is None:
+        # Look for matches anywhere under logos/ to handle migrated files.
+        matches = list(LOGO_DIR.rglob(file_name))
+        if matches:
+            image_path = matches[0]
+
+    if image_path is None:
+        # Final fallback to the legacy flat layout so older installs still work.
+        image_path = LOGO_DIR / file_name
+
+    return str(image_path)
+
+
 def _load_entry(path: Path) -> Optional[LogoLibraryEntry]:
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -29,7 +60,7 @@ def _load_entry(path: Path) -> Optional[LogoLibraryEntry]:
         return None
 
     file_name = data.get("source_image") or f"{path.stem}.png"
-    image_path = str(LOGO_DIR / file_name)
+    image_path = _resolve_image_path(file_name, path)
     logo_type = data.get("symbol", {}).get("category")
     style_tags = data.get("style_tags") or []
     tone_descriptors = data.get("tone_descriptors") or []
@@ -51,7 +82,7 @@ def _cached_library() -> List[LogoLibraryEntry]:
     entries: List[LogoLibraryEntry] = []
     if not STRUCTURED_DIR.exists():
         return entries
-    for json_path in sorted(STRUCTURED_DIR.glob("*.json")):
+    for json_path in sorted(STRUCTURED_DIR.rglob("*.json")):
         entry = _load_entry(json_path)
         if entry:
             entries.append(entry)

@@ -1,0 +1,81 @@
+{
+  "source_image": "page4_41.jpg",
+  "text_elements": {
+    "primary_text": "FREE WOMAN",
+    "secondary_text": "Be professional with us",
+    "language": "Latin",
+    "font_style": "Serif",
+    "typography_notes": "Clear and readable with elegant styling",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized letter F with loops",
+    "category": "lettermark",
+    "meanings": [
+      "freedom",
+      "elegance"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "High contrast with white background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "elegant"
+  ],
+  "tone_descriptors": [
+    "professional",
+    "sophisticated"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "3:4",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space for readability",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "freedom",
+      "professionalism"
+    ],
+    "values": [
+      "empowerment",
+      "elegance"
+    ],
+    "audience_hint": "professional women",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends in minimalistic and elegant design"
+  },
+  "analysis_timestamp": "2025-11-10T06:18:30.969950Z"
+}

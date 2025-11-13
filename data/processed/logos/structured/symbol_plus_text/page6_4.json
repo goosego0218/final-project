@@ -1,0 +1,76 @@
+{
+  "source_image": "page6_4.jpg",
+  "text_elements": {
+    "primary_text": "H",
+    "secondary_text": "Hongga Hair",
+    "language": "Latin and Hangul",
+    "font_style": "serif",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Letter H with a plant motif",
+    "category": "lettermark",
+    "meanings": [
+      "growth",
+      "nature"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "High contrast with background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "elegant",
+    "natural"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "hair",
+      "nature",
+      "growth"
+    ],
+    "values": [
+      "elegance",
+      "natural beauty"
+    ],
+    "audience_hint": "fashion-conscious individuals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "nature-inspired"
+    ],
+    "score": 0.9,
+    "notes": "Aligns with current trends in minimal and nature-inspired design"
+  },
+  "analysis_timestamp": "2025-11-10T06:37:38.958214Z"
+}

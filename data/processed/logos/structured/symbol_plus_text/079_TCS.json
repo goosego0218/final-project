@@ -1,0 +1,92 @@
+{
+  "source_image": "079_TCS.jpg",
+  "text_elements": {
+    "primary_text": "TCS",
+    "secondary_text": "(주)티씨에스",
+    "language": "English, Korean",
+    "font_style": "Bold, Sans-serif",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Stylized lettermark with a partial circle",
+    "category": "lettermark",
+    "meanings": [
+      "technology",
+      "connection"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#002147",
+        "common_name": "navy blue",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#C8102E",
+        "common_name": "red",
+        "usage": "accent"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "corporate"
+  ],
+  "tone_descriptors": [
+    "professional",
+    "trustworthy"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "innovation",
+      "technology",
+      "global"
+    ],
+    "values": [
+      "reliability",
+      "efficiency"
+    ],
+    "audience_hint": "business professionals",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Complexity in letter integration",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "simplicity",
+      "suggestion": "Simplify the letter integration for clarity",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern"
+    ],
+    "score": 0.7,
+    "notes": "Aligns with current corporate branding trends"
+  },
+  "analysis_timestamp": "2025-11-10T05:35:53.319548Z"
+}

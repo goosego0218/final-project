@@ -1,0 +1,90 @@
+{
+  "source_image": "092_심볼_로고.jpg",
+  "text_elements": {
+    "primary_text": "Ma Crème",
+    "secondary_text": "CUSTOM ICE CREAM\nMy Ice Dream",
+    "language": "Latin",
+    "font_style": "Serif",
+    "typography_notes": "Clear and readable with a classic touch",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Ice cream stick with stars",
+    "category": "emblem",
+    "meanings": [
+      "sweetness",
+      "customization",
+      "premium"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#A67C00",
+        "common_name": "golden brown",
+        "usage": "background"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "foreground"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "classic",
+    "elegant"
+  ],
+  "tone_descriptors": [
+    "luxury",
+    "friendly"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate spacing around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "custom",
+      "ice cream",
+      "dream"
+    ],
+    "values": [
+      "quality",
+      "personalization"
+    ],
+    "audience_hint": "premium ice cream lovers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider a more vibrant background color for digital use",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "classic",
+      "elegant"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with timeless elegance and premium branding trends"
+  },
+  "analysis_timestamp": "2025-11-10T05:39:39.245481Z"
+}

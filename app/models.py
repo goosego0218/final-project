@@ -44,4 +44,11 @@ class LogoRequest(BaseModel):
     reference_logo: Optional[ReferenceLogoPayload] = None
 
 
+class TaskModeRequest(BaseModel):
+    prompt: str
+    has_reference: bool = False
+    has_mask: bool = False
+    recent_image_reuse: bool = False
+
+
 # v1 state definitions removed; v2 uses app.agent_schema.LogoState

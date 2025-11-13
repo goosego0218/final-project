@@ -7,6 +7,10 @@ aiprojects.egg-info/top_level.txt
 app/agent_schema.py
 app/config.py
 app/graph_v2.py
+app/ideogram_tools.py
+app/library.py
 app/main.py
 app/models.py
 app/nodes_v2.py
+app/recommendations.py
+app/task_classifier.py

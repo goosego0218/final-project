@@ -1,0 +1,81 @@
+{
+  "source_image": "022_UMTS.jpg",
+  "text_elements": {
+    "primary_text": "umtr",
+    "secondary_text": "Hydrophilic Membranes",
+    "language": "Latin",
+    "font_style": "modern sans-serif",
+    "typography_notes": "The text is clear and legible with a modern touch.",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized lowercase letters with a dot.",
+    "category": "lettermark",
+    "meanings": [
+      "technology",
+      "fluidity"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#00AEEF",
+        "common_name": "blue",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#7D7D7D",
+        "common_name": "gray",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between blue and gray.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "innovative",
+    "professional"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol.",
+    "spacing_notes": "Adequate white space around elements.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "technology",
+      "innovation",
+      "membranes"
+    ],
+    "values": [
+      "efficiency",
+      "modernity"
+    ],
+    "audience_hint": "industry professionals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current trends in clean and minimal design."
+  },
+  "analysis_timestamp": "2025-11-10T04:56:27.416091Z"
+}

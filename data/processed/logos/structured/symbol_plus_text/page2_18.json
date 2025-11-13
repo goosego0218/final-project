@@ -1,0 +1,101 @@
+{
+  "source_image": "page2_18.jpg",
+  "text_elements": {
+    "primary_text": "엄마고집",
+    "secondary_text": "엄마의 마음으로",
+    "language": "Korean",
+    "font_style": "bold sans-serif",
+    "typography_notes": "The text is clear and legible with a strong presence.",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Circular design with spoon and leaf elements",
+    "category": "abstract",
+    "meanings": [
+      "food",
+      "nature",
+      "homemade"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FF5733",
+        "common_name": "orange",
+        "usage": "accent"
+      },
+      {
+        "hex": "#28A745",
+        "common_name": "green",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "natural"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment.",
+    "spacing_notes": "Adequate white space around elements.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "homemade",
+      "natural",
+      "family"
+    ],
+    "values": [
+      "authenticity",
+      "care"
+    ],
+    "audience_hint": "families, health-conscious individuals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "color",
+      "description": "Limited color palette",
+      "severity": "low"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Introduce more color variations",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimalist",
+      "eco-friendly"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current trends in simplicity and sustainability."
+  },
+  "analysis_timestamp": "2025-11-10T05:52:39.491058Z"
+}

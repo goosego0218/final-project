@@ -1,0 +1,88 @@
+{
+  "source_image": "014_리라피부과.jpg",
+  "text_elements": {
+    "primary_text": "리라 피부과",
+    "secondary_text": null,
+    "language": "Korean",
+    "font_style": "modern sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Abstract orange circle with white lines",
+    "category": "abstract",
+    "meanings": [
+      "unity",
+      "continuity"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#F58220",
+        "common_name": "orange",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#8C8C8C",
+        "common_name": "gray",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "professional"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "health",
+      "care",
+      "skin"
+    ],
+    "values": [
+      "trust",
+      "expertise"
+    ],
+    "audience_hint": "health-conscious individuals",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a complementary color for more depth",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "modern"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current minimalistic design trends"
+  },
+  "analysis_timestamp": "2025-11-10T04:36:32.045167Z"
+}

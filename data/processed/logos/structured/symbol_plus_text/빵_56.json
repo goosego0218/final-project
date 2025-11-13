@@ -1,0 +1,104 @@
+{
+  "source_image": "빵_56.jpg",
+  "text_elements": {
+    "primary_text": "민트씨 빵가게",
+    "secondary_text": "Healthy Bakery",
+    "language": "Korean",
+    "font_style": "playful and bold",
+    "typography_notes": "The text is clear and easy to read, with a friendly style.",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "A cartoon bear holding bread with a leaf on its head.",
+    "category": "animal",
+    "meanings": [
+      "friendly",
+      "natural",
+      "healthy"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#A5C48C",
+        "common_name": "green",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#F5F5DC",
+        "common_name": "beige",
+        "usage": "background"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#8B4513",
+        "common_name": "brown",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "The colors provide a natural and earthy feel with good contrast.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "playful",
+    "friendly",
+    "natural"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "healthy",
+    "approachable"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "4:5",
+    "balance_notes": "The layout is well-balanced with a central focus on the bear.",
+    "spacing_notes": "Adequate white space around the elements enhances readability.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "healthy",
+      "bakery",
+      "friendly"
+    ],
+    "values": [
+      "health",
+      "nature",
+      "approachability"
+    ],
+    "audience_hint": "families and health-conscious individuals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "contrast",
+      "description": "Slightly low contrast between text and background.",
+      "severity": "low"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "contrast",
+      "suggestion": "Increase text contrast for better readability.",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "friendly",
+      "natural"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with trends focusing on health and nature."
+  },
+  "analysis_timestamp": "2025-11-10T07:11:42.335255Z"
+}

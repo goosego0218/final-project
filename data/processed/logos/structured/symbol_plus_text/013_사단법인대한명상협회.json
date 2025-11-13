@@ -1,0 +1,87 @@
+{
+  "source_image": "013_사단법인대한명상협회.jpg",
+  "text_elements": {
+    "primary_text": "사단법인대한명상협회",
+    "secondary_text": "Korea Meditation Association",
+    "language": "Korean and English",
+    "font_style": "Sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Circular emblem with abstract human figures",
+    "category": "abstract",
+    "meanings": [
+      "unity",
+      "harmony",
+      "community"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#3B5998",
+        "common_name": "blue",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#FFD700",
+        "common_name": "gold",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#32CD32",
+        "common_name": "lime green",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "calm",
+    "inclusive"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "meditation",
+      "peace",
+      "community"
+    ],
+    "values": [
+      "harmony",
+      "well-being"
+    ],
+    "audience_hint": "Individuals interested in meditation and mindfulness",
+    "confidence": 0.9
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current trends in simplicity and clarity"
+  },
+  "analysis_timestamp": "2025-11-10T04:35:19.770034Z"
+}

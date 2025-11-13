@@ -1,0 +1,93 @@
+{
+  "source_image": "060_SUTITE.jpg",
+  "text_elements": {
+    "primary_text": "SUTITE",
+    "secondary_text": "DESSERT ATELIER",
+    "language": "Latin",
+    "font_style": "handwritten",
+    "typography_notes": "Readable with a playful touch",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Three colorful macarons",
+    "category": "abstract",
+    "meanings": [
+      "sweetness",
+      "creativity",
+      "variety"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FF6F61",
+        "common_name": "coral",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#6B5B95",
+        "common_name": "purple",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#FFD700",
+        "common_name": "gold",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.8
+  },
+  "style_tags": [
+    "playful",
+    "modern"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "creative"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "dessert",
+      "atelier",
+      "creative"
+    ],
+    "values": [
+      "creativity",
+      "quality"
+    ],
+    "audience_hint": "dessert enthusiasts",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "playful"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current playful and modern design trends"
+  },
+  "analysis_timestamp": "2025-11-10T05:28:28.872767Z"
+}

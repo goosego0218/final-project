@@ -1,0 +1,83 @@
+{
+  "source_image": "베이커리_41.jpg",
+  "text_elements": {
+    "primary_text": "포곤포곤",
+    "secondary_text": null,
+    "language": "Korean",
+    "font_style": "rounded sans-serif",
+    "typography_notes": "The text is clear and legible with a friendly appearance.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "A smiling cloud-like shape",
+    "category": "abstract",
+    "meanings": [
+      "friendly",
+      "softness"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#4A4A4A",
+        "common_name": "dark gray",
+        "usage": "foreground"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "approachable"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment.",
+    "spacing_notes": "Adequate white space around elements.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "friendly",
+      "soft",
+      "approachable"
+    ],
+    "values": [
+      "comfort",
+      "warmth"
+    ],
+    "audience_hint": "general public, families",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "friendly"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current trends of simplicity and friendliness."
+  },
+  "analysis_timestamp": "2025-11-10T06:58:17.659679Z"
+}
