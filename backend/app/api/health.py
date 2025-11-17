@@ -1,3 +1,9 @@
+# 서버 테스트
+# 작성자: 황민준
+# 작성일: 2025-10-28
+# 수정내역
+# - 2025-10-28: 초기 작성
+
 from fastapi import APIRouter
 from app.core.config import settings
 
