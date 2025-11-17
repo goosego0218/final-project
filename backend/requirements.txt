@@ -4,3 +4,9 @@ pydantic==2.9.2
 pydantic-settings==2.5.2
 python-dotenv==1.0.1
 oracledb==2.4.1
+
+# JWT token encode/decode
+python-jose[cryptography]
+# password hashing
+bcrypt
+SQLAlchemy>=2.0
