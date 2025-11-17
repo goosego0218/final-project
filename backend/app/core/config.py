@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     app_version: str = "0.0.1"
 
     openai_api_key: str = ""
-    openai_model: str = "gpt-4o-mini"
+    openai_model: str = "gpt-5-nano"
 
     oracle_user: str = ""
     oracle_password: str = ""
