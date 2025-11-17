@@ -26,7 +26,6 @@ def get_optional_user(
     token: Optional[str] = Depends(bearer_scheme),
     db: Session = Depends(get_orm_session),
 ) -> Optional[UserInfo]:
-    print(token)
     # 토큰 없으면 비로그인
     if not token:
         return None
