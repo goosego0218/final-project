@@ -1,5 +1,6 @@
 import { Heart, MessageCircle, Share2, Sparkles } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+<<<<<<< HEAD
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,6 +10,12 @@ import { projectStorage, type Project } from "@/lib/projectStorage";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+=======
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+>>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
 
 interface Logo {
   id: number;
@@ -59,7 +66,10 @@ const LogoCard = ({ logo, onClick }: { logo: Logo; onClick: () => void }) => {
 };
 
 const PopularLogosHomeSection = () => {
+<<<<<<< HEAD
   const navigate = useNavigate();
+=======
+>>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const [selectedLogo, setSelectedLogo] = useState<Logo | null>(null);
@@ -67,12 +77,15 @@ const PopularLogosHomeSection = () => {
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState<Array<{ author: string; content: string; time: string }>>([]);
   const { toast } = useToast();
+<<<<<<< HEAD
   const [isCreateNewModalOpen, setIsCreateNewModalOpen] = useState(false);
   const [isProjectSelectModalOpen, setIsProjectSelectModalOpen] = useState(false);
   const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
   const [projects, setProjects] = useState<Project[]>([]);
+=======
+>>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
 
   // Duplicate logos for seamless infinite scroll
   const duplicatedLogos = [...mockLogos, ...mockLogos, ...mockLogos];
@@ -139,6 +152,7 @@ const PopularLogosHomeSection = () => {
   };
 
   const handleCreateNew = () => {
+<<<<<<< HEAD
     setIsCreateNewModalOpen(true);
   };
 
@@ -173,6 +187,9 @@ const PopularLogosHomeSection = () => {
       // ChatPage로 이동 (로고 업로드 단계 제외 플래그)
       navigate(`/chat?project=${newProject.id}&skipLogoUpload=true`);
     }
+=======
+    toast({ description: "스튜디오로 이동합니다" });
+>>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
   };
 
   return (
@@ -264,6 +281,7 @@ const PopularLogosHomeSection = () => {
         </div>
       </DialogContent>
     </Dialog>
+<<<<<<< HEAD
 
     {/* 새로운 작품 만들기 선택 모달 */}
     <Dialog open={isCreateNewModalOpen} onOpenChange={setIsCreateNewModalOpen}>
@@ -393,6 +411,8 @@ const PopularLogosHomeSection = () => {
         </DialogFooter>
       </DialogContent>
     </Dialog>
+=======
+>>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
   </>
   );
 };

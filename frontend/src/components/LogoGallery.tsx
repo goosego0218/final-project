@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 import { useState, useEffect } from "react";
 import { Heart, MessageCircle, Share2, Sparkles } from "lucide-react";
+=======
+import { useState, useEffect, useRef } from "react";
+import { Heart, MessageCircle, Search, Share2, Sparkles } from "lucide-react";
+>>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
 import {
   Select,
   SelectContent,
@@ -10,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+<<<<<<< HEAD
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +23,11 @@ import Footer from "@/components/Footer";
 import { useNavigate } from "react-router-dom";
 import { projectStorage, type Project } from "@/lib/projectStorage";
 import { Label } from "@/components/ui/label";
+=======
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+>>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
 
 interface Logo {
   id: number;
@@ -66,6 +77,7 @@ const generateMockLogos = (): Logo[] => {
 
 type SortOption = "latest" | "likes" | "comments" | "oldest";
 
+<<<<<<< HEAD
 interface LogoGalleryProps {
   searchQuery?: string;
 }
@@ -77,11 +89,23 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
   const [sortBy, setSortBy] = useState<SortOption>("latest");
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
+=======
+const LogoGallery = () => {
+  const [allLogos] = useState<Logo[]>(generateMockLogos());
+  const [displayedLogos, setDisplayedLogos] = useState<Logo[]>([]);
+  const [sortBy, setSortBy] = useState<SortOption>("latest");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+>>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
   const [selectedLogo, setSelectedLogo] = useState<Logo | null>(null);
   const [isLiked, setIsLiked] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState<Array<{ author: string; content: string; time: string }>>([]);
   const { toast } = useToast();
+<<<<<<< HEAD
   const [isCreateNewModalOpen, setIsCreateNewModalOpen] = useState(false);
   const [isProjectSelectModalOpen, setIsProjectSelectModalOpen] = useState(false);
   const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
@@ -90,6 +114,10 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
   const [projects, setProjects] = useState<Project[]>([]);
 
   const ITEMS_PER_PAGE = 12;
+=======
+
+  const ITEMS_PER_PAGE = 8;
+>>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
 
   // Filter and sort logos
   const getFilteredAndSortedLogos = () => {
@@ -124,6 +152,7 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
     return sorted;
   };
 
+<<<<<<< HEAD
   // Reset when sort or search changes
   useEffect(() => {
     const sortedLogos = getFilteredAndSortedLogos();
@@ -141,6 +170,58 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
     setPage(nextPage);
     setHasMore(nextItems.length < sortedLogos.length);
   };
+=======
+  // Load more items
+  const loadMore = () => {
+    if (loading) return;
+
+    setLoading(true);
+    setTimeout(() => {
+      const sortedLogos = getFilteredAndSortedLogos();
+      const nextItems = sortedLogos.slice(0, page * ITEMS_PER_PAGE);
+      setDisplayedLogos(nextItems);
+      setPage((prev) => prev + 1);
+      setLoading(false);
+    }, 500);
+  };
+
+  // Reset when sort or search changes
+  useEffect(() => {
+    setPage(1);
+    const sortedLogos = getFilteredAndSortedLogos();
+    setDisplayedLogos(sortedLogos.slice(0, ITEMS_PER_PAGE));
+    setPage(2);
+  }, [sortBy, searchQuery]);
+
+  // Infinite scroll observer
+  useEffect(() => {
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !loading) {
+          const sortedLogos = getFilteredAndSortedLogos();
+          if (displayedLogos.length < sortedLogos.length) {
+            loadMore();
+          }
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (loadMoreRef.current) {
+      observerRef.current.observe(loadMoreRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [loading, displayedLogos.length, sortBy, searchQuery]);
+>>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
 
   const formatDate = (date: Date) => {
     const now = new Date();
@@ -177,6 +258,7 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
   };
 
   const handleCreateNew = () => {
+<<<<<<< HEAD
     setIsCreateNewModalOpen(true);
   };
 
@@ -211,10 +293,38 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
       // ChatPage로 이동 (로고 업로드 단계 제외 플래그)
       navigate(`/chat?project=${newProject.id}&skipLogoUpload=true`);
     }
+=======
+    toast({ description: "스튜디오로 이동합니다" });
+>>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
   };
 
   return (
     <div className="w-full bg-background">
+<<<<<<< HEAD
+=======
+      {/* Search Section */}
+      <div className="max-w-7xl mx-auto px-8 py-12 bg-secondary/20">
+        <div className="max-w-xl mx-auto">
+          <h2 className="text-2xl font-bold text-foreground mb-4 text-center">
+            트렌드 검색
+          </h2>
+          <div className="relative">
+            <Input
+              type="text"
+              placeholder="찾고 싶은 트렌드를 검색하세요 (예: 축제, 음식 등)"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-12 text-base pr-24"
+            />
+            <Button size="sm" className="absolute right-1.5 top-1.5 h-9">
+              <Search className="h-4 w-4 mr-1" />
+              검색
+            </Button>
+          </div>
+        </div>
+      </div>
+
+>>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
       {/* Sort Bar */}
       <div className="max-w-7xl mx-auto px-8 py-6 flex justify-end border-b border-border/50">
         <div className="flex items-center gap-3">
@@ -272,6 +382,7 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
           ))}
         </div>
 
+<<<<<<< HEAD
         {hasMore && (
           <div className="text-center mt-8">
             <Button variant="outline" onClick={handleLoadMore}>
@@ -279,6 +390,17 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
             </Button>
           </div>
         )}
+=======
+        {/* Loading indicator */}
+        {loading && (
+          <div className="text-center py-8">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        )}
+
+        {/* Intersection observer target */}
+        <div ref={loadMoreRef} className="h-4" />
+>>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
       </div>
 
       {/* Logo Detail Modal */}
@@ -337,6 +459,7 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
           </div>
         </DialogContent>
       </Dialog>
+<<<<<<< HEAD
 
       {/* 새로운 작품 만들기 선택 모달 */}
       <Dialog open={isCreateNewModalOpen} onOpenChange={setIsCreateNewModalOpen}>
@@ -467,6 +590,8 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
         </DialogContent>
       </Dialog>
       <Footer />
+=======
+>>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
     </div>
   );
 };

@@ -14,10 +14,13 @@ export interface Project {
   messages: Message[];
   lastUpdated: string;
   pinned?: boolean;
+<<<<<<< HEAD
   logo?: {
     url: string;
     uploadedAt: string;
   };
+=======
+>>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
 }
 
 const PROJECTS_KEY = 'makery_projects';

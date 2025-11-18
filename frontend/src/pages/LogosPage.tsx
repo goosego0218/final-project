@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import LogoGallery from "@/components/LogoGallery";
@@ -8,6 +9,12 @@ import { Search } from "lucide-react";
 const LogosPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
+=======
+import Navigation from "@/components/Navigation";
+import LogoGallery from "@/components/LogoGallery";
+
+const LogosPage = () => {
+>>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
   return (
     <div className="min-h-screen">
       <Navigation />
@@ -17,6 +24,7 @@ const LogosPage = () => {
             <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
               로고 갤러리
             </h1>
+<<<<<<< HEAD
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
               MAKERY로 생성된 모든 로고 작품들을 둘러보세요.
             </p>
@@ -40,6 +48,14 @@ const LogosPage = () => {
           </div>
         </div>
         <LogoGallery searchQuery={searchQuery} />
+=======
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              MAKERY로 생성된 모든 로고 작품들을 둘러보세요.
+            </p>
+          </div>
+        </div>
+        <LogoGallery />
+>>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
       </div>
     </div>
   );

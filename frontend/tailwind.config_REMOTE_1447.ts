@@ -53,12 +53,6 @@ export default {
         section: {
           bg: "hsl(var(--section-bg))",
         },
-<<<<<<< HEAD
-        "studio-chat-panel": {
-          DEFAULT: "hsl(var(--studio-chat-panel))",
-        },
-=======
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
       },
       fontSize: {
         'hero': ['4.5rem', { lineHeight: '1.1', letterSpacing: '-0.02em', fontWeight: '700' }],
