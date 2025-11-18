@@ -3,62 +3,43 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider, useAuth } from "./contexts/AuthContext";
-import SignupModal from "./components/SignupModal";
-import { useState, useEffect } from "react";
+import { ThemeProvider } from "next-themes";
 import Index from "./pages/Index";
-import LogosGallery from "./pages/LogosGallery";
-import ShortsGallery from "./pages/ShortsGallery";
-import ProfileSetup from "./pages/ProfileSetup";
-import Dashboard from "./pages/Dashboard";
-import ProjectDetail from "./pages/ProjectDetail";
-import UserProfile from "./pages/UserProfile";
-import PlanManagement from "./pages/PlanManagement";
+import LogosPage from "./pages/LogosPage";
+import ShortsPage from "./pages/ShortsPage";
+import ProjectsPage from "./pages/ProjectsPage";
+import PlansPage from "./pages/PlansPage";
+import StudioPage from "./pages/StudioPage";
+import AccountPage from "./pages/AccountPage";
+import MyPage from "./pages/MyPage";
+import ChatPage from "./pages/ChatPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const AppContent = () => {
-  const { isNewUser } = useAuth();
-  const [signupModalOpen, setSignupModalOpen] = useState(false);
-
-  // Show signup modal for new users
-  useEffect(() => {
-    if (isNewUser) {
-      setSignupModalOpen(true);
-    }
-  }, [isNewUser]);
-
-  return (
-    <>
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/logos" element={<LogosGallery />} />
-        <Route path="/shorts" element={<ShortsGallery />} />
-        <Route path="/profile-setup" element={<ProfileSetup />} />
-        <Route path="/profile/:userId" element={<UserProfile />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/project/:projectId" element={<ProjectDetail />} />
-        <Route path="/plan-management" element={<PlanManagement />} />
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-      <SignupModal open={signupModalOpen} onOpenChange={setSignupModalOpen} />
-    </>
-  );
-};
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
       <TooltipProvider>
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <AppContent />
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/logos" element={<LogosPage />} />
+            <Route path="/shorts" element={<ShortsPage />} />
+            <Route path="/projects" element={<ProjectsPage />} />
+            <Route path="/plans" element={<PlansPage />} />
+            <Route path="/chat" element={<ChatPage />} />
+            <Route path="/studio" element={<StudioPage />} />
+            <Route path="/mypage" element={<MyPage />} />
+            <Route path="/account" element={<AccountPage />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
         </BrowserRouter>
       </TooltipProvider>
-    </AuthProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
