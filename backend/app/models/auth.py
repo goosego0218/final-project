@@ -19,16 +19,14 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.orm import Base
 
+
 class Role(Base):
     """
-    권한 테이블 (role_mst)
-    - role_id: PK
-    - role_nm: 권한명
-    - del_yn: 삭제 여부 (기본값 'N')
+    권한 마스터 테이블 (role_mst)
     """
     __tablename__ = "role_mst"
 
-    role_id: Mapped[str] = mapped_column(
+    role_id: Mapped[int] = mapped_column(
         Integer,
         primary_key=True,
         comment="권한ID",
@@ -45,29 +43,30 @@ class Role(Base):
         comment="삭제여부",
     )
 
-    # user_info와 1:N 관계
+    # user_info와 1:N
     users: Mapped[list["UserInfo"]] = relationship(
         back_populates="role",
         lazy="selectin",
     )
 
+    # role_menu와 1:N (권한별 메뉴 매핑)
+    role_menus: Mapped[list["RoleMenu"]] = relationship(
+        back_populates="role",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+
+
 class UserInfo(Base):
     """
     유저 정보 테이블 (user_info)
-    - id: PK (NUMBER, 시퀀스로 1씩 증가한다고 가정)
-    - login_id: 아이디 (unique)
-    - password_hash: 비밀번호 해시
-    - nickname: 닉네임
-    - status: 상태 (Y/N)
-    - create_dt / update_dt: 생성/수정일 (sysdate)
-    - role_id: Role.role_id FK (NUMBER)
+    - id는 NUMBER, 시퀀스+트리거로 자동 증가
     """
     __tablename__ = "user_info"
 
     id: Mapped[int] = mapped_column(
         Integer,
         primary_key=True,
-        autoincrement=True,
         comment="유저번호",
     )
     login_id: Mapped[str] = mapped_column(
@@ -114,19 +113,16 @@ class UserInfo(Base):
         comment="권한ID",
     )
 
+    # 권한 관계 (N:1)
     role: Mapped[Role] = relationship(
         back_populates="users",
         lazy="joined",
     )
 
+
 class Menu(Base):
     """
     메뉴 테이블 (menu)
-    - menu_id: PK (NUMBER)
-    - menu_nm: 메뉴명
-    - up_menu_id: 상위 메뉴 ID (루트 메뉴면 NULL)
-    - menu_path: 메뉴 경로 (URL, 라우트 등)
-    - del_yn: 삭제 여부 (기본값 'N')
     """
     __tablename__ = "menu"
 
@@ -157,18 +153,19 @@ class Menu(Base):
         comment="삭제여부",
     )
 
+    # role_menu와 1:N (이 메뉴를 쓰는 권한들)
     role_menus: Mapped[list["RoleMenu"]] = relationship(
         back_populates="menu",
         cascade="all, delete-orphan",
         lazy="selectin",
     )
-    roles: Mapped[list["Role"]] = relationship(
-        secondary="role_menu",
-        back_populates="menus",
-        lazy="selectin",
-    )
+
 
 class RoleMenu(Base):
+    """
+    권한별 메뉴 매핑 테이블 (role_menu)
+    - role_id + menu_id 복합 PK
+    """
     __tablename__ = "role_menu"
 
     role_id: Mapped[int] = mapped_column(
@@ -184,6 +181,7 @@ class RoleMenu(Base):
         comment="메뉴ID",
     )
 
+    # 각각 role_mst, menu 쪽과 N:1
     role: Mapped[Role] = relationship(
         back_populates="role_menus",
         lazy="joined",

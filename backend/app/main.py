@@ -11,6 +11,7 @@ from app.core.config import settings
 from app.api.health import router as health_router
 from app.api.dbcheck import router as db_router
 from app.api.auth import router as auth_router
+from app.api.menu import router as menu_router
 from app.db.session import oracle_db
 
 # 앱 라이프사이클 관리 
@@ -40,6 +41,7 @@ def create_app() -> FastAPI:
     app.include_router(health_router)
     app.include_router(db_router)
     app.include_router(auth_router)
+    app.include_router(menu_router)
     return app
 
 

@@ -13,6 +13,7 @@ class Settings(BaseSettings):
 
     openai_api_key: str = ""
     openai_model: str = "gpt-5-nano"
+    openai_temperature: float = 0.0
 
     oracle_user: str = ""
     oracle_password: str = ""
