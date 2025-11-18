@@ -19,6 +19,10 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.orm import Base
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.project import ProdGroup
 
 class Role(Base):
     """
@@ -114,11 +118,16 @@ class UserInfo(Base):
     )
 
     # 권한 관계 (N:1)
-    role: Mapped[Role] = relationship(
+    role: Mapped["Role"] = relationship(
         back_populates="users",
         lazy="joined",
     )
 
+    # 이 유저가 생성한 프로젝트 그룹들 (1:N)
+    project_groups: Mapped[list["ProdGroup"]] = relationship(
+        back_populates="creator",
+        lazy="selectin",
+    )
 
 class Menu(Base):
     """
