@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from app.core.deps import get_current_user
 from app.db.orm import get_orm_session
 from app.models.auth import UserInfo
-from app.schemas.project import ProjectGRP
+from app.schemas.project import ProjectGrp
 from app.services.project_service import create_project_group
 
 router = APIRouter(
@@ -20,11 +20,11 @@ router = APIRouter(
 
 @router.post(
     "/groups",
-    response_model=ProjectGRP,   # create / response 둘 다 ProjectGRP 사용
+    response_model=ProjectGrp,   # create / response 둘 다 ProjectGRP 사용
     status_code=status.HTTP_201_CREATED,
 )
 def create_project_group_endpoint(
-    payload: ProjectGRP,
+    payload: ProjectGrp,
     db: Session = Depends(get_orm_session),
     current_user: UserInfo = Depends(get_current_user),
 ):
@@ -41,7 +41,7 @@ def create_project_group_endpoint(
     )
 
     # 응답에 creator_id 도 찍어주기
-    return ProjectGRP(
+    return ProjectGrp(
         grp_id=group.grp_id,
         grp_nm=group.grp_nm,
         grp_desc=group.grp_desc,
