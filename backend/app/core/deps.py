@@ -14,23 +14,40 @@ from app.core.security import decode_access_token
 from app.db.orm import get_orm_session
 from app.models.auth import UserInfo
 
-# Authorization 헤더에서 토큰 가져오기
 bearer_scheme = APIKeyHeader(
     name="Authorization",
-    auto_error=False,   # 토큰 없어도 에러 안 냄
+    auto_error=False,
 )
 
 GUEST_ROLE_ID = 3
+
+
+def _extract_raw_token(token: Optional[str]) -> Optional[str]:
+    """
+    Authorization 헤더 문자열에서 실제 JWT 토큰만 뽑아낸다.
+
+    - "Bearer x.y.z"  -> "x.y.z"
+    - "bearer x.y.z"  -> "x.y.z"
+    - "x.y.z"         -> "x.y.z"
+    - None / 빈문자열 -> None
+    """
+    if not token:
+        return None
+
+    token = token.strip()
+    if token.lower().startswith("bearer "):
+        return token[7:].strip()
+    return token or None
+
 
 def get_optional_user(
     token: Optional[str] = Depends(bearer_scheme),
     db: Session = Depends(get_orm_session),
 ) -> Optional[UserInfo]:
-    # 토큰 없으면 비로그인
-    if not token:
+    raw_token = _extract_raw_token(token)
+    if not raw_token:
+        # 토큰 없으면 비로그인
         return None
-
-    raw_token = token.strip()
 
     try:
         payload = decode_access_token(raw_token)
@@ -49,14 +66,12 @@ def get_current_user(
     token: Optional[str] = Depends(bearer_scheme),
     db: Session = Depends(get_orm_session),
 ) -> UserInfo:
-
-    if not token or not token.startswith("Bearer "):
+    raw_token = _extract_raw_token(token)
+    if not raw_token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="인증 토큰이 필요합니다.",
         )
-
-    raw_token = token.strip()
 
     try:
         payload = decode_access_token(raw_token)
