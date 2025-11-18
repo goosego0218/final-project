@@ -12,12 +12,18 @@ class Settings(BaseSettings):
     app_version: str = "0.0.1"
 
     openai_api_key: str = ""
-    openai_model: str = "gpt-4o-mini"
+    openai_model: str = "gpt-5-nano"
+    openai_embedding_model: str = "text-embedding-3-small"
+    openai_temperature: float = 0.0
 
     oracle_user: str = ""
     oracle_password: str = ""
     oracle_dsn: str = ""
     oracle_schema: str = ""
+
+    jwt_secret_key: str = "" 
+    jwt_algorithm: str = "HS256"
+    access_token_expire_minutes: int = 60
 
     model_config = SettingsConfigDict(
         env_file=".env",
