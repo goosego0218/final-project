@@ -49,7 +49,7 @@ class AppState(MessagesState):
     """
 
     # 현재 대화 모드 (어느 챗봇이 메인인지)
-    mode: Literal["brand", "logo", "shorts"]
+    mode: Literal["brand", "logo", "shorts"] 
 
     # 프로젝트/브랜드 식별자
     # - 아직 DB에 생성 전이면 None일 수 있음
