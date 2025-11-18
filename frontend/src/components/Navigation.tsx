@@ -131,6 +131,7 @@ const Navigation = () => {
           {/* Logo */}
           <Link 
             to="/"
+<<<<<<< HEAD
             className="flex items-center gap-2 text-2xl font-bold tracking-tight text-foreground hover:text-primary transition-colors"
           >
             <img 
@@ -138,6 +139,10 @@ const Navigation = () => {
               alt="Makery Logo" 
               className="h-8 w-8 flex-shrink-0"
             />
+=======
+            className="text-2xl font-bold tracking-tight text-foreground hover:text-primary transition-colors"
+          >
+>>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
             MAKERY
           </Link>
 

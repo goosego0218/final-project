@@ -1,5 +1,11 @@
+<<<<<<< HEAD
 import { useState, useEffect } from "react";
 import { Heart, MessageCircle, Play, Share2, Sparkles } from "lucide-react";
+=======
+import { useState, useEffect, useRef } from "react";
+import { Heart, MessageCircle, Play, Search, Share2, Sparkles } from "lucide-react";
+import { Input } from "@/components/ui/input";
+>>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
 import {
   Select,
   SelectContent,
@@ -11,7 +17,10 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+<<<<<<< HEAD
 import Footer from "@/components/Footer";
+=======
+>>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
 
 interface ShortForm {
   id: number;
@@ -66,6 +75,7 @@ const generateMockShortForms = (): ShortForm[] => {
   });
 };
 
+<<<<<<< HEAD
 interface ShortFormGalleryProps {
   searchQuery?: string;
 }
@@ -76,13 +86,27 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
   const [sortBy, setSortBy] = useState<string>("latest");
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
+=======
+const ShortFormGallery = () => {
+  const [allShortForms] = useState<ShortForm[]>(generateMockShortForms());
+  const [displayedShortForms, setDisplayedShortForms] = useState<ShortForm[]>([]);
+  const [sortBy, setSortBy] = useState<string>("latest");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const observerRef = useRef<HTMLDivElement>(null);
+>>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
   const [selectedShort, setSelectedShort] = useState<ShortForm | null>(null);
   const [isLiked, setIsLiked] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState<Array<{ author: string; content: string; time: string }>>([]);
   const { toast } = useToast();
 
+<<<<<<< HEAD
   const ITEMS_PER_PAGE = 12;
+=======
+  const ITEMS_PER_PAGE = 9;
+>>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
 
   const getFilteredAndSortedShortForms = () => {
     let filtered = allShortForms;
@@ -115,6 +139,7 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
     return sorted;
   };
 
+<<<<<<< HEAD
   // Reset when sort or search changes
   useEffect(() => {
     const sortedData = getFilteredAndSortedShortForms();
@@ -132,6 +157,50 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
     setPage(nextPage);
     setHasMore(nextItems.length < sortedData.length);
   };
+=======
+  const loadMore = () => {
+    if (loading) return;
+
+    setLoading(true);
+    const sortedData = getFilteredAndSortedShortForms();
+    const nextItems = sortedData.slice(0, page * ITEMS_PER_PAGE);
+    setDisplayedShortForms(nextItems);
+    setLoading(false);
+  };
+
+  // Reset when sort or search changes
+  useEffect(() => {
+    setPage(1);
+    const sortedData = getFilteredAndSortedShortForms();
+    setDisplayedShortForms(sortedData.slice(0, ITEMS_PER_PAGE));
+  }, [sortBy, searchQuery]);
+
+  // Load more on scroll
+  useEffect(() => {
+    loadMore();
+  }, [page]);
+
+  // Infinite scroll observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !loading) {
+          const sortedData = getFilteredAndSortedShortForms();
+          if (displayedShortForms.length < sortedData.length) {
+            setPage((prev) => prev + 1);
+          }
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (observerRef.current) {
+      observer.observe(observerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [loading, displayedShortForms.length]);
+>>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
 
   const formatDate = (date: Date) => {
     const today = new Date();
@@ -173,6 +242,31 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
 
   return (
     <div className="w-full bg-background">
+<<<<<<< HEAD
+=======
+      {/* Search Section */}
+      <div className="max-w-7xl mx-auto px-8 py-12 bg-secondary/20">
+        <div className="max-w-xl mx-auto">
+          <h2 className="text-2xl font-bold text-foreground mb-4 text-center">
+            트렌드 검색
+          </h2>
+          <div className="relative">
+            <Input
+              type="text"
+              placeholder="찾고 싶은 트렌드를 검색하세요 (예: 축제, 음식 등)"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-12 text-base pr-24"
+            />
+            <Button size="sm" className="absolute right-1.5 top-1.5 h-9">
+              <Search className="h-4 w-4 mr-1" />
+              검색
+            </Button>
+          </div>
+        </div>
+      </div>
+
+>>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
       {/* Sort Bar */}
       <div className="max-w-7xl mx-auto px-8 py-6 flex justify-end border-b border-border/50">
         <div className="flex items-center gap-3">
@@ -245,6 +339,7 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
           ))}
         </div>
 
+<<<<<<< HEAD
         {hasMore && (
           <div className="text-center mt-8">
             <Button variant="outline" onClick={handleLoadMore}>
@@ -252,6 +347,17 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
             </Button>
           </div>
         )}
+=======
+        {/* Loading indicator */}
+        {loading && (
+          <div className="text-center py-8">
+            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
+          </div>
+        )}
+
+        {/* Intersection observer target */}
+        <div ref={observerRef} className="h-4" />
+>>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
       </div>
 
       {/* Short Form Detail Modal */}
@@ -310,7 +416,10 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
           </div>
         </DialogContent>
       </Dialog>
+<<<<<<< HEAD
       <Footer />
+=======
+>>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
     </div>
   );
 };

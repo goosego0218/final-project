@@ -11,12 +11,16 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-12 pb-8 border-b border-border">
           {/* Logo Section */}
           <div className="space-y-4">
+<<<<<<< HEAD
             <Link to="/" className="inline-flex items-center gap-2">
               <img 
                 src="/makery-logo.png" 
                 alt="Makery Logo" 
                 className="h-8 w-8 flex-shrink-0"
               />
+=======
+            <Link to="/" className="inline-block">
+>>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
               <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
                 MAKERY
               </h2>
