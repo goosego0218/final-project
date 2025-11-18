@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from app.core.deps import get_current_user
 from app.db.orm import get_orm_session
 from app.models.auth import UserInfo
-from app.schemas.project import ProjectGroupCreate, ProjectGroupResponse
+from app.schemas.project import ProjectGRP
 from app.services.project_service import create_project_group
 
 router = APIRouter(
@@ -20,21 +20,30 @@ router = APIRouter(
 
 @router.post(
     "/groups",
-    response_model=ProjectGroupResponse,
+    response_model=ProjectGRP,   # create / response 둘 다 ProjectGRP 사용
     status_code=status.HTTP_201_CREATED,
 )
 def create_project_group_endpoint(
-    payload: ProjectGroupCreate,
+    payload: ProjectGRP,
     db: Session = Depends(get_orm_session),
     current_user: UserInfo = Depends(get_current_user),
 ):
     """
     프로젝트 그룹 생성 API
 
-    - Swagger에서 테스트용으로 사용
-    - body: { "grp_nm": "...", "grp_desc": "..." }
-    - 현재는 생성자 정보는 따로 저장하지 않고,
-      단순히 prod_grp 에 한 줄 INSERT만 진행.
+    - body: { "grp_nm": "...", "grp_desc": "..." } 만 보내면 됨
+    - grp_id / creator_id 는 서버에서 채워서 응답으로 내려줌
     """
-    group = create_project_group(db, payload)
-    return group
+    group = create_project_group(
+        db=db,
+        payload=payload,
+        creator_id=current_user.id,
+    )
+
+    # 응답에 creator_id 도 찍어주기
+    return ProjectGRP(
+        grp_id=group.grp_id,
+        grp_nm=group.grp_nm,
+        grp_desc=group.grp_desc,
+        creator_id=group.creator_id,
+    )
