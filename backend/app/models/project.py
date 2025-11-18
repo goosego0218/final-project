@@ -1,49 +1,29 @@
-# 프로젝트 그룹 모델
-# 작성일: 2025-11-17
+# 프로젝트 관련 모델
+# 작성일: 2025-11-18
 # 수정내역
-# - 2025-11-17: 초기 작성
+# - 2025-11-18: 초기 작성
 
 from __future__ import annotations
 
-from datetime import datetime
-
-from sqlalchemy import String, Integer, DateTime, Text, func
-from sqlalchemy.orm import Mapped, mapped_column
-
+from sqlalchemy import Column, Integer, String, text
 from app.db.orm import Base
 
 
-class ProdGrp(Base):
+class ProdGroup(Base):
     """
-    생성물 프로젝트 그룹 테이블 (prod_grp)
-    - 브랜드봇 세션이 완료되면 이 테이블에 프로젝트로 저장됨
+    생성물 프로젝트 그룹 (prod_grp)
+
+    - grp_id   : 프로젝트 그룹 ID (PK)
+    - grp_nm   : 그룹명 (사용자가 입력)
+    - grp_desc : 그룹 설명
+    - del_yn   : 삭제 여부 (기본 'N')
     """
     __tablename__ = "prod_grp"
 
-    grp_id: Mapped[int] = mapped_column(
-        Integer,
-        primary_key=True,
-        comment="그룹ID",
-    )
-    grp_name: Mapped[str] = mapped_column(
-        String(255),
-        nullable=False,
-        comment="그룹명",
-    )
-    grp_desc: Mapped[str | None] = mapped_column(
-        Text,
-        nullable=True,
-        comment="그룹 설명",
-    )
-    create_dt: Mapped[datetime] = mapped_column(
-        DateTime,
-        server_default=func.sysdate(),
-        nullable=False,
-        comment="생성일",
-    )
-    del_yn: Mapped[str] = mapped_column(
-        String(1),
-        nullable=False,
-        default="N",
-        comment="삭제여부",
-    )
+    grp_id = Column(Integer, primary_key=True, index=True)
+    grp_nm = Column(String(200), nullable=False)
+    grp_desc = Column(String(1000), nullable=True)
+
+    # Oracle 컬럼: DEL_YN CHAR(1) or VARCHAR2(1)
+    # DB 기본값이 'N'으로 잡혀있으면 server_default만 지정해도 됨
+    del_yn = Column(String(1), nullable=False, server_default=text("'N'"))
