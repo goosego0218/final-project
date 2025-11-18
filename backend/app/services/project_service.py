@@ -6,12 +6,12 @@
 from sqlalchemy.orm import Session
 
 from app.models.project import ProdGroup
-from app.schemas.project import ProjectGRP
+from app.schemas.project import ProjectGrp
 
 
 def create_project_group(
     db: Session,
-    payload: ProjectGRP,
+    payload: ProjectGrp,
     creator_id: int,
 ) -> ProdGroup:
     """
