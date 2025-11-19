@@ -19,6 +19,8 @@ llm = get_chat_model()
 
 checkpointer = MemorySaver()
 
+# 이 부분은 현재 LangGraph 예시 코드입니다.
+
 def logo_node(state: AppState) -> AppState:
     """
     로고 콘셉트/디자인 브리프를 잡아주는 기본 노드.
