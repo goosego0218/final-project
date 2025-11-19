@@ -3,7 +3,6 @@
 # 작성일: 2025-11-17
 # 수정내역
 # - 2025-11-17: 초기 작성
-# - 2025-11-19: LangChain AgentState 적용
 
 from __future__ import annotations
 
