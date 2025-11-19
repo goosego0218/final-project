@@ -46,6 +46,7 @@ def chat_brand(
         "messages": [],
         "mode": "brand",
         "project_id": req.project_id,
+        "project_draft": {},
         "brand_profile": {},
         "trend_context": {},
         "meta": {},
