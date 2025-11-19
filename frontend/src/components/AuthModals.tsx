@@ -14,7 +14,7 @@ interface AuthModalsProps {
   onSignUpClose: () => void;
   onSwitchToSignUp: () => void;
   onSwitchToLogin: () => void;
-  onLoginSuccess: () => void;
+  onLoginSuccess: (rememberMe: boolean) => void;
 }
 
 export const AuthModals = ({
@@ -43,7 +43,7 @@ export const AuthModals = ({
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    onLoginSuccess();
+    onLoginSuccess(rememberMe);
   };
 
   const handleContinueToStep2 = (e: React.FormEvent) => {
@@ -74,7 +74,8 @@ export const AuthModals = ({
     setSignUpStep(1);
     setSignUpEmail("");
     setSignUpNickname("");
-    onLoginSuccess();
+    // 회원가입 시에는 자동로그인으로 처리
+    onLoginSuccess(true);
   };
 
   const handleSignUpClose = () => {
