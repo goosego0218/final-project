@@ -14,8 +14,10 @@ from app.core.deps import get_current_user
 from app.models.auth import UserInfo
 
 from langchain_core.messages import HumanMessage
-from app.agents.state import BrandState
+from app.agents.state import AppState 
 from app.agents.brand_agent import build_brand_graph
+from app.agents.logo_agent import build_logo_graph
+from app.agents.shorts_agent import build_shorts_graph
 
 router = APIRouter(
     prefix="/chat",
@@ -23,6 +25,8 @@ router = APIRouter(
 )
 
 brand_graph = build_brand_graph()
+logo_graph = build_logo_graph()
+shorts_graph = build_shorts_graph()
 
 @router.post("/brand", response_model=ChatResponse)
 def chat_brand(
@@ -38,7 +42,7 @@ def chat_brand(
     """
 
     # TODO: BrandGraph 연결 지점
-    state: BrandState = {
+    state: AppState = {
         "messages": [],
         "mode": "brand",
         "project_id": req.project_id,
@@ -48,9 +52,11 @@ def chat_brand(
     }
 
     if req.project_id is None and req.grp_nm:
-        state["draft_grp_nm"] = req.grp_nm
-        state["draft_grp_desc"] = req.grp_desc
-        state["draft_creator_id"] = current_user.id
+        state["project_draft"] = {
+            "grp_nm": req.grp_nm,
+            "grp_desc": req.grp_desc,
+            "creator_id": current_user.id,
+        }
 
     # 기존 프로젝트가 있다면 브랜드 정보 로드
     ## 현재 로직 상 프로젝트 수정은 없어서 실행되진 않음
@@ -100,18 +106,28 @@ def chat_logo(
             detail="logo 챗봇 호출 시 project_id 는 필수입니다.",
         )
     
-    # TODO:
-    #  1) 해당 project_id 의 브랜드 정보(brand_info) 를 DB 에서 로드해서
-    #     AppState.brand_profile 에 미리 채워 넣기
-    #  2) 이전 로고 대화 state 가 있다면 불러오기
-    #  3) state["messages"] 에 HumanMessage(req.message) 추가
-    #  4) LogoGraph 실행
-    #  5) 마지막 AIMessage content 를 reply 로 반환
+    # TODO: logo 에이전트 호출
+    from app.services.project_service import load_brand_profile_for_agent
+    brand_profile = load_brand_profile_for_agent(db, req.project_id)
 
-    reply = "[logo] AI의 답변입니다."
+    state: AppState = {
+        "messages": [HumanMessage(content=req.message)],
+        "mode": "logo",
+        "project_id": req.project_id,
+        "project_draft": {},         
+        "brand_profile": brand_profile,
+        "trend_context": {},
+        "meta": {},
+    }
+
+    new_state = logo_graph.invoke(state)
+
+    messages = new_state["messages"]
+    last_msg = messages[-1]
+    reply_text = getattr(last_msg, "content", str(last_msg))
 
     return ChatResponse(
-        reply=reply,
+        reply=reply_text,
         project_id=req.project_id,
     )
 
@@ -135,16 +151,28 @@ def chat_shorts(
             detail="shorts 챗봇 호출 시 project_id 는 필수입니다.",
         )
     
-    # TODO:
-    #  1) project_id 기준 BrandInfo 로부터 브랜드 컨텍스트 로드
-    #  2) 이전 숏폼 대화 state 있으면 불러오기
-    #  3) state["messages"] 에 HumanMessage(req.message) 추가
-    #  4) ShortsGraph 실행
-    #  5) 마지막 AIMessage content 를 reply 로 반환
+    # TODO: shorts 에이전트 호출
+    from app.services.project_service import load_brand_profile_for_agent
 
-    reply = "[shorts] AI의 답변입니다."
+    brand_profile = load_brand_profile_for_agent(db, req.project_id)
+
+    state: AppState = {
+        "messages": [HumanMessage(content=req.message)],
+        "mode": "shorts",
+        "project_id": req.project_id,
+        "project_draft": {},         
+        "brand_profile": brand_profile,
+        "trend_context": {},
+        "meta": {},
+    }
+
+    new_state = shorts_graph.invoke(state)
+
+    messages = new_state["messages"]
+    last_msg = messages[-1]
+    reply_text = getattr(last_msg, "content", str(last_msg))
 
     return ChatResponse(
-        reply=reply,
+        reply=reply_text,
         project_id=req.project_id,
     )
