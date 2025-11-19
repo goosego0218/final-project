@@ -10,7 +10,11 @@ from __future__ import annotations
 from typing import Literal, Optional, Dict, Any
 from typing_extensions import TypedDict
 
+<<<<<<< HEAD
 # from langgraph.graph import MessagesState
+=======
+from langgraph.graph import MessagesState
+>>>>>>> e62ecbc4100ab360ddc806c7f0e747302cbb9499
 from langchain.agents import AgentState
 
 class BrandProfile(TypedDict, total=False):
