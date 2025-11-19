@@ -126,6 +126,7 @@ class UserInfo(Base):
     # 이 유저가 생성한 프로젝트 그룹들 (1:N)
     project_groups: Mapped[list["ProdGroup"]] = relationship(
         back_populates="creator",
+        cascade="all, delete-orphan",
         lazy="selectin",
     )
 

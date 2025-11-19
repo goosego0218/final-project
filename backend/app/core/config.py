@@ -11,19 +11,28 @@ class Settings(BaseSettings):
     app_name: str = "brand-ai-backend"
     app_version: str = "0.0.1"
 
+    # LLM
     openai_api_key: str = ""
     openai_model: str = "gpt-5-nano"
     openai_embedding_model: str = "text-embedding-3-small"
     openai_temperature: float = 0.0
 
+    # Oracle
     oracle_user: str = ""
     oracle_password: str = ""
     oracle_dsn: str = ""
     oracle_schema: str = ""
 
+    # JWT
     jwt_secret_key: str = "" 
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
+
+    # Trend / RAG / Search
+    tavily_api_key: str = ""        
+    jina_api_key: str = ""
+    jina_model: str = ""          
+    vector_store: str = "chroma_db"
 
     model_config = SettingsConfigDict(
         env_file=".env",
