@@ -4,6 +4,15 @@ export interface Message {
   images?: string[];
 }
 
+export interface SavedItem {
+  id: string;
+  url: string;
+  type: "logo" | "short";
+  index: number;
+  title: string;
+  createdAt: string;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -18,6 +27,7 @@ export interface Project {
     url: string;
     uploadedAt: string;
   };
+  savedItems?: SavedItem[];
 }
 
 const PROJECTS_KEY = 'makery_projects';
