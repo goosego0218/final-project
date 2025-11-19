@@ -20,7 +20,7 @@ const HeroSection = () => {
   const [projectDescription, setProjectDescription] = useState("");
 
   const handleStartChat = () => {
-    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
     
     if (isLoggedIn) {
       setIsProjectDialogOpen(true);
@@ -39,12 +39,8 @@ const HeroSection = () => {
     }
   };
 
-  const handleLoginSuccess = (rememberMe: boolean) => {
-    if (rememberMe) {
-      localStorage.setItem('isLoggedIn', 'true');
-    } else {
-      sessionStorage.setItem('isLoggedIn', 'true');
-    }
+  const handleLoginSuccess = () => {
+    localStorage.setItem('isLoggedIn', 'true');
     setIsLoginOpen(false);
     setIsSignUpOpen(false);
     toast({
@@ -134,17 +130,17 @@ const HeroSection = () => {
           MAKERY,<br />당신 브랜드의 첫 AI 크리에이터
         </h1>
         
-        <p className="text-xl text-foreground/90 mb-4 max-w-3xl mx-auto leading-relaxed dark:drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
+        <p className="text-xl text-foreground/90 mb-4 max-w-3xl mx-auto leading-relaxed drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
           브랜드 아이덴티티를 AI가 이해하고, 로고와 숏폼 영상을 자동으로 생성합니다.
         </p>
-        <p className="text-xl text-foreground/90 mb-16 max-w-3xl mx-auto leading-relaxed dark:drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
+        <p className="text-xl text-foreground/90 mb-16 max-w-3xl mx-auto leading-relaxed drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
           인스타그램, 유튜브 등 주요 플랫폼에 원클릭으로 업로드하고,<br />트렌드에 맞는 콘텐츠로 브랜드를 성장시키세요.
         </p>
 
         <div className="flex justify-center">
           <Button 
             size="lg" 
-            className="rounded-full px-12 py-6 text-lg bg-primary hover:bg-primary/90 text-primary-foreground dark:shadow-lg"
+            className="rounded-full px-12 py-6 text-lg bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg"
             onClick={handleStartChat}
           >
             MAKERY 시작하기

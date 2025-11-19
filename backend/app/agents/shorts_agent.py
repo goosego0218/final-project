@@ -19,8 +19,6 @@ llm = get_chat_model()
 
 checkpointer = MemorySaver()
 
-# 이 부분은 현재 LangGraph 예시 코드입니다.
-
 def shorts_node(state: AppState) -> AppState:
     """
     숏폼(쇼츠/릴스/틱톡) 아이디어 및 스크립트 초안을 만드는 노드.

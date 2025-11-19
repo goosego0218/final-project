@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import {
   ChevronLeft,
@@ -17,8 +17,6 @@ import {
   Heart,
   MoreVertical,
   User,
-  Instagram,
-  Youtube,
 } from "lucide-react";
 
 interface StudioTopBarProps {
@@ -29,9 +27,6 @@ interface StudioTopBarProps {
   userEmail: string;
   tokensUsed: number;
   tokensTotal: number;
-  userAvatar?: string | null;
-  instagramConnected?: boolean;
-  youtubeConnected?: boolean;
 }
 
 const StudioTopBar = ({
@@ -42,9 +37,6 @@ const StudioTopBar = ({
   userEmail,
   tokensUsed,
   tokensTotal,
-  userAvatar,
-  instagramConnected = false,
-  youtubeConnected = false,
 }: StudioTopBarProps) => {
   const userInitials = userName?.charAt(0) || "U";
 
@@ -80,9 +72,6 @@ const StudioTopBar = ({
             <DropdownMenuContent align="end" className="w-64">
               <div className="px-2 py-3 flex items-center gap-3">
                 <Avatar className="h-10 w-10">
-                  {userAvatar ? (
-                    <AvatarImage src={userAvatar} alt={userName} />
-                  ) : null}
                   <AvatarFallback className="bg-primary text-primary-foreground">
                     {userInitials}
                   </AvatarFallback>
@@ -90,22 +79,6 @@ const StudioTopBar = ({
                 <div className="flex-1">
                   <p className="text-sm font-medium text-foreground">{userName}</p>
                   <p className="text-xs text-muted-foreground">{userEmail}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Instagram 
-                    className={`h-5 w-5 ${
-                      instagramConnected 
-                        ? "text-pink-600 fill-pink-600" 
-                        : "text-muted-foreground/30"
-                    }`}
-                  />
-                  <Youtube 
-                    className={`h-5 w-5 ${
-                      youtubeConnected 
-                        ? "text-red-600 fill-red-600" 
-                        : "text-muted-foreground/30"
-                    }`}
-                  />
                 </div>
               </div>
 

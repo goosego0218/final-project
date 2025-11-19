@@ -19,8 +19,6 @@ llm = get_chat_model()
 
 checkpointer = MemorySaver()
 
-# 이 부분은 현재 LangGraph 예시 코드입니다.
-
 def brand_node(state: AppState) -> AppState:
     """
     브랜드 정보 수집/컨설팅을 담당하는 기본 노드.
@@ -38,6 +36,7 @@ def brand_node(state: AppState) -> AppState:
 
     ai_msg = llm.invoke(messages)
 
+    # MessagesState 규칙에 맞게 messages 필드에만 append 해주면 됨
     return {
         "messages": [ai_msg],  # add_messages가 있으니 이렇게 반환해도 merge 됨
     }

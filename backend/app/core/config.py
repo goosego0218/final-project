@@ -15,11 +15,6 @@ class Settings(BaseSettings):
     openai_model: str = "gpt-5-nano"
     openai_embedding_model: str = "text-embedding-3-small"
     openai_temperature: float = 0.0
-    
-    langsmith_tracing: bool
-    langsmith_endpoint: str
-    langsmith_api_key: str
-    langsmith_project: str
 
     oracle_user: str = ""
     oracle_password: str = ""

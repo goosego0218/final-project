@@ -76,7 +76,7 @@ def chat_brand(
     new_state = brand_graph.invoke(
         state,
         config={"configurable": {
-            "thread_id": f"user-{current_user.id}-project-brand-{brand_session_id}"
+            "thread_id": f"user-{current_user.id}-project-{req.project_id}-brand-{brand_session_id}"
         }},
     )
 

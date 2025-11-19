@@ -9,6 +9,7 @@ from __future__ import annotations
 from typing import Literal, Optional, Dict, Any
 from typing_extensions import TypedDict
 
+from langgraph.graph import MessagesState
 from langchain.agents import AgentState
 
 class BrandProfile(TypedDict, total=False):
