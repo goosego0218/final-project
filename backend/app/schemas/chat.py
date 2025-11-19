@@ -9,7 +9,7 @@ from typing import List, Optional, Literal
 from pydantic import BaseModel
 
 class ChatRequest(BaseModel):
-    project_id: Optional[int]          # 어떤 프로젝트(브랜드)인가
+    project_id: Optional[int] = None         # 어떤 프로젝트(브랜드)인가
     message: str                       # 이번 턴 유저 발화 한 줄
     grp_nm: Optional[str] = None
     grp_desc: Optional[str] = None
