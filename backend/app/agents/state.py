@@ -10,6 +10,7 @@ from typing import Literal, Optional, Dict, Any
 from typing_extensions import TypedDict
 
 from langgraph.graph import MessagesState
+from langchain.agents import AgentState
 
 class BrandProfile(TypedDict, total=False):
     """
@@ -50,7 +51,7 @@ class TrendContext(TypedDict, total=False):
     # 필요하면 키워드별 캐시, 플랫폼별 트렌드 등 확장 가능
     # e.g. "by_platform": {"instagram": "...", "tiktok": "..."}
 
-class AppState(MessagesState):
+class AppState(AgentState):
     """
     전체 그래프 공유할 공통 상태 스키마.
     LangGraph의 MessagesState를 상속하면

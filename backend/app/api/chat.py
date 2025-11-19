@@ -19,6 +19,8 @@ from app.agents.brand_agent import build_brand_graph
 from app.agents.logo_agent import build_logo_graph
 from app.agents.shorts_agent import build_shorts_graph
 
+from uuid import uuid4
+
 router = APIRouter(
     prefix="/chat",
     tags=["chat"],
@@ -69,10 +71,13 @@ def chat_brand(
     
     state["messages"].append(HumanMessage(content=req.message))
 
+    brand_session_id = req.brand_session_id or str(uuid4())
+
     new_state = brand_graph.invoke(
         state,
-        # config는 일단 비워둬도 되고, 나중에 user_id/thread_id 등 넣어도 됨
-        # config={"configurable": {"user_id": current_user.id}},
+        config={"configurable": {
+            "thread_id": f"user-{current_user.id}-project-{req.project_id}-brand-{brand_session_id}"
+        }},
     )
 
     messages = new_state["messages"]
@@ -107,9 +112,12 @@ def chat_logo(
             detail="logo 챗봇 호출 시 project_id 는 필수입니다.",
         )
     
+    
     # TODO: logo 에이전트 호출
     from app.services.project_service import load_brand_profile_for_agent
     brand_profile = load_brand_profile_for_agent(db, req.project_id)
+
+    logo_session_id = req.logo_session_id or str(uuid4())
 
     state: AppState = {
         "messages": [HumanMessage(content=req.message)],
@@ -121,7 +129,12 @@ def chat_logo(
         "meta": {},
     }
 
-    new_state = logo_graph.invoke(state)
+    new_state = logo_graph.invoke(
+        state,
+        config={"configurable": {
+            "thread_id": f"user-{current_user.id}-project-{req.project_id}-logo-{logo_session_id}"
+        }},
+    )
 
     messages = new_state["messages"]
     last_msg = messages[-1]
@@ -157,6 +170,8 @@ def chat_shorts(
 
     brand_profile = load_brand_profile_for_agent(db, req.project_id)
 
+    shorts_session_id = req.shorts_session_id or str(uuid4())
+
     state: AppState = {
         "messages": [HumanMessage(content=req.message)],
         "mode": "shorts",
@@ -167,7 +182,12 @@ def chat_shorts(
         "meta": {},
     }
 
-    new_state = shorts_graph.invoke(state)
+    new_state = shorts_graph.invoke(
+        state,
+        config={"configurable": {
+            "thread_id": f"user-{current_user.id}-project-{req.project_id}-shorts-{shorts_session_id}"
+        }},
+    )
 
     messages = new_state["messages"]
     last_msg = messages[-1]
