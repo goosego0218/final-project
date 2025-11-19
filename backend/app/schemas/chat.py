@@ -13,7 +13,13 @@ class ChatRequest(BaseModel):
     message: str                       # 이번 턴 유저 발화 한 줄
     grp_nm: Optional[str] = None
     grp_desc: Optional[str] = None
+    brand_session_id: Optional[str] = None
+    logo_session_id: Optional[str] = None
+    shorts_session_id: Optional[str] = None
 
 class ChatResponse(BaseModel):
     reply: str                               # 이번 턴 모델 답변
     project_id: Optional[int] = None         # 프로젝트 id -> 브랜드 챗봇은 대화 끝나면 id가 새로 생성되기 때문
+    brand_session_id: Optional[str] = None
+    logo_session_id: Optional[str] = None
+    shorts_session_id: Optional[str] = None
