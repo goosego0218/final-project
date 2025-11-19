@@ -37,7 +37,8 @@ class Settings(BaseSettings):
     tavily_api_key: str = ""        
     jina_api_key: str = ""
     jina_model: str = ""          
-    vector_store: str = "chroma_db"
+    vector_store_dir: str = "vector_store/chroma_db"  # 상대 경로 (프로젝트 루트 기준)
+    vector_store_collection: str = "RAG_md"            # 기본 컬렉션 이름
 
     model_config = SettingsConfigDict(
         env_file=".env",
