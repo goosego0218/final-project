@@ -42,6 +42,12 @@ All colors MUST be HSL.
     --hero-text: 0 0% 5%;
     --section-bg: 0 0% 98%;
     --card-hover: 0 0% 96%;
+<<<<<<< HEAD
+    
+    /* Studio chat panel - slightly darker than background */
+    --studio-chat-panel: 0 0% 95%;
+=======
+>>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
     
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -72,6 +78,12 @@ All colors MUST be HSL.
     --hero-text: 0 0% 98%;
     --section-bg: 0 0% 8%;
     --card-hover: 0 0% 15%;
+<<<<<<< HEAD
+    
+    /* Studio chat panel - slightly lighter than background */
+    --studio-chat-panel: 0 0% 13%;
+=======
+>>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
   }
 }
 
