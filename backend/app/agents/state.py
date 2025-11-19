@@ -65,7 +65,7 @@ class AppState(MessagesState):
     project_id: Optional[int]
 
     # 프로젝트 폴더 정보
-    # 프로젝트명, 프로젝트 설명
+    # 프로젝트명, 프로젝트 설명 -> 로고와 쇼츠 에이전트에선 쓰지 않는다.
     project_draft: ProjectDraft
 
     # 브랜드 기본 정보 (브랜드 챗봇이 채운다)
@@ -76,13 +76,3 @@ class AppState(MessagesState):
 
     # 추가로 메타데이터 보관용 (필요 시 확장)
     meta: Dict[str, Any]
-
-class BrandState(AppState, total=False):
-    """
-    브랜드 챗봇에서만 쓰는 추가 필드.
-    - 폴더(prod_grp) 생성에 필요한 초안 정보.
-    - 로고/숏폼 그래프에서는 전혀 사용하지 않는다.
-    """
-    draft_grp_nm: str                  # 프로젝트 폴더명
-    draft_grp_desc: Optional[str]      # 폴더 설명
-    draft_creator_id: int              # 만든 유저 id
