@@ -1,0 +1,86 @@
+{
+  "source_image": "079_SEUNGSIN.jpg",
+  "text_elements": {
+    "primary_text": "SEUNGSIN",
+    "secondary_text": "T&C Inc",
+    "language": "Latin",
+    "font_style": "Sans-serif, bold",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Abstract globe with stylized 'S' shapes",
+    "category": "abstract",
+    "meanings": [
+      "global",
+      "unity"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#0073E6",
+        "common_name": "blue",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#00A3E0",
+        "common_name": "light blue",
+        "usage": "background"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "corporate"
+  ],
+  "tone_descriptors": [
+    "professional",
+    "trustworthy"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central focus",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "global",
+      "innovation"
+    ],
+    "values": [
+      "integrity",
+      "excellence"
+    ],
+    "audience_hint": "business professionals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Introduce a secondary accent color for depth",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "corporate"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current corporate branding trends"
+  },
+  "analysis_timestamp": "2025-11-10T05:35:42.238868Z"
+}

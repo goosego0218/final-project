@@ -1,0 +1,109 @@
+{
+  "source_image": "카페_89.jpg",
+  "text_elements": {
+    "primary_text": "Liebe Liebe",
+    "secondary_text": "cafe",
+    "language": "Latin",
+    "font_style": "modern sans-serif",
+    "typography_notes": "The text is clear and legible with a playful touch.",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "An abstract design with a sun, waves, and a coffee cup.",
+    "category": "abstract",
+    "meanings": [
+      "relaxation",
+      "nature",
+      "coffee"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFB6C1",
+        "common_name": "light pink",
+        "usage": "accent"
+      },
+      {
+        "hex": "#98FB98",
+        "common_name": "pale green",
+        "usage": "accent"
+      },
+      {
+        "hex": "#ADD8E6",
+        "common_name": "light blue",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "The pastel colors provide a soft contrast against the white background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal",
+    "playful"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "inviting",
+    "calm"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "3:4",
+    "balance_notes": "The logo is well-balanced with equal emphasis on text and symbol.",
+    "spacing_notes": "Adequate white space enhances readability and focus.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "coffee",
+      "relaxation",
+      "nature"
+    ],
+    "values": [
+      "comfort",
+      "community",
+      "serenity"
+    ],
+    "audience_hint": "cafe-goers, young adults",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "contrast",
+      "description": "Pastel colors may not stand out on all backgrounds.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "contrast",
+      "suggestion": "Consider using slightly bolder colors for better visibility.",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "pastel"
+    ],
+    "score": 0.85,
+    "notes": "The logo aligns well with current trends favoring minimalistic and pastel designs."
+  },
+  "analysis_timestamp": "2025-11-10T07:29:53.793061Z"
+}

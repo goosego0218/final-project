@@ -1,0 +1,82 @@
+{
+  "source_image": "카페_77.jpg",
+  "text_elements": {
+    "primary_text": "잠시커피",
+    "secondary_text": null,
+    "language": "Korean",
+    "font_style": "simple sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Stylized coffee cup with steam lines and a comma",
+    "category": "abstract",
+    "meanings": [
+      "coffee",
+      "pause",
+      "relaxation"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#F0F0F0",
+        "common_name": "light gray",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "minimal",
+    "modern"
+  ],
+  "tone_descriptors": [
+    "calm",
+    "inviting"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "coffee",
+      "pause",
+      "relax"
+    ],
+    "values": [
+      "comfort",
+      "simplicity"
+    ],
+    "audience_hint": "coffee enthusiasts",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [],
+  "trend_alignment": {
+    "tags": [
+      "minimalist"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current minimalist design trends"
+  },
+  "analysis_timestamp": "2025-11-10T07:28:12.287736Z"
+}

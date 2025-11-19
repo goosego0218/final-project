@@ -1,0 +1,92 @@
+{
+  "source_image": "032_CHROMA_VAPE.jpg",
+  "text_elements": {
+    "primary_text": "CHROMA VAPE",
+    "secondary_text": "EST 2015",
+    "language": "Latin",
+    "font_style": "Bold sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Geometric bird made of triangles",
+    "category": "abstract",
+    "meanings": [
+      "modern",
+      "dynamic"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#8B5E3C",
+        "common_name": "brown",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "geometric"
+  ],
+  "tone_descriptors": [
+    "contemporary",
+    "professional"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:3",
+    "balance_notes": "Well-balanced with equal weight on text and symbol",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "innovation",
+      "style"
+    ],
+    "values": [
+      "quality",
+      "modernity"
+    ],
+    "audience_hint": "young adults",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Abstract symbol might be unclear to some",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "symbol clarity",
+      "suggestion": "Simplify the geometric design",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "geometric"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current geometric design trends"
+  },
+  "analysis_timestamp": "2025-11-10T05:11:49.531257Z"
+}

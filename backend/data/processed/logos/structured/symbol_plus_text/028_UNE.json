@@ -1,0 +1,93 @@
+{
+  "source_image": "028_UNE.jpg",
+  "text_elements": {
+    "primary_text": "UNE",
+    "secondary_text": "by. D.seoeun",
+    "language": "Latin",
+    "font_style": "handwritten",
+    "typography_notes": "The primary text is stylized and artistic, which may affect readability.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Floral illustration",
+    "category": "abstract",
+    "meanings": [
+      "nature",
+      "elegance"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#808080",
+        "common_name": "gray",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFF00",
+        "common_name": "yellow",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "The gray and yellow provide a subtle contrast.",
+    "confidence": 0.8
+  },
+  "style_tags": [
+    "elegant",
+    "artistic"
+  ],
+  "tone_descriptors": [
+    "sophisticated",
+    "natural"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "3:4",
+    "balance_notes": "The floral design balances the text.",
+    "spacing_notes": "Adequate white space around elements.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "elegance",
+      "nature"
+    ],
+    "values": [
+      "artistry",
+      "individuality"
+    ],
+    "audience_hint": "artistic and nature-loving individuals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Handwritten style affects readability",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Consider a clearer font style",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "artistic",
+      "nature-inspired"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with trends favoring natural and artistic designs."
+  },
+  "analysis_timestamp": "2025-11-10T05:06:47.827123Z"
+}

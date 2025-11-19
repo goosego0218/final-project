@@ -1,0 +1,98 @@
+{
+  "source_image": "page4_10.jpg",
+  "text_elements": {
+    "primary_text": "마음",
+    "secondary_text": "플라워 떡 케이크",
+    "language": "Korean",
+    "font_style": "bold sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "A cute rabbit holding a cake",
+    "category": "animal",
+    "meanings": [
+      "playful",
+      "sweetness",
+      "celebration"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#D4A373",
+        "common_name": "tan",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      },
+      {
+        "hex": "#F4C2C2",
+        "common_name": "light pink",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.8
+  },
+  "style_tags": [
+    "cute",
+    "playful",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "warm",
+    "inviting"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central focus",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "cake",
+      "rabbit",
+      "sweet"
+    ],
+    "values": [
+      "joy",
+      "celebration",
+      "quality"
+    ],
+    "audience_hint": "families, children",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Enhance color contrast for better visibility",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "cute",
+      "minimalist"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with trends in playful and minimalist design"
+  },
+  "analysis_timestamp": "2025-11-10T06:11:40.618240Z"
+}

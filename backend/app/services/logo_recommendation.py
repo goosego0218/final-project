@@ -8,15 +8,23 @@ from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 from fastapi import HTTPException
+from urllib.parse import unquote
 
-from app.services.logo_library import _resolve_image_path  # reuse existing helper
+from app.services.logo_library import (
+    LOGO_CANDIDATES,
+    _resolve_image_path,
+)  # reuse existing helper
 
-STRUCTURED_DIR = Path("data/processed/logos/structured")
-RAG_DIR = Path("data/processed/logos/rag")
-LOGO_DIR = Path("logos")
-EMBEDDING_PATH = Path("data/cache/logo_embeddings.jsonl")
+BACKEND_ROOT = Path(__file__).resolve().parents[2]
+WORKSPACE_ROOT = Path(__file__).resolve().parents[3]
+DATA_DIR = BACKEND_ROOT / "data"
+PROCESSED_LOGO_DIR = DATA_DIR / "processed" / "logos"
+STRUCTURED_DIR = PROCESSED_LOGO_DIR / "structured"
+RAG_DIR = PROCESSED_LOGO_DIR / "rag"
+EMBEDDING_PATH = DATA_DIR / "cache" / "logo_embeddings.jsonl"
 TOKEN_PATTERN = re.compile(r"[0-9a-zA-Z가-힣_]+")
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = BACKEND_ROOT
+LOGO_SEARCH_ROOTS = tuple(Path(path) for path in LOGO_CANDIDATES)
 
 
 class RecommendationIndex:
@@ -25,28 +33,76 @@ class RecommendationIndex:
         self.vectors = vectors.astype(np.float32)
         norms = np.linalg.norm(self.vectors, axis=1)
         self.norms = np.where(norms == 0, 1e-9, norms)
-        self.id_to_idx = {record["id"]: idx for idx, record in enumerate(records)}
+        self.id_to_idx = {
+            _normalize(record.get("id", "")): idx
+            for idx, record in enumerate(records)
+        }
 
 
 def _normalize(value: str) -> str:
+    if not value:
+        return ""
+    value = unquote(value)
     value = value.lower().replace(" ", "_").replace("-", "_")
     value = re.sub(r"[^0-9a-z가-힣_]+", "_", value)
     return re.sub(r"_+", "_", value).strip("_")
 
 
+@lru_cache(maxsize=1)
+def _logo_filename_index() -> Dict[str, Path]:
+    """
+    Build a lookup table so legacy paths stored in cached embeddings can be
+    mapped to the current workspace copies of the logo images.
+    """
+    mapping: Dict[str, Path] = {}
+    for root in LOGO_SEARCH_ROOTS:
+        if not root.exists():
+            continue
+        for file in root.rglob("*"):
+            if file.is_file():
+                mapping.setdefault(file.name.lower(), file)
+    return mapping
+
+
+def _is_within_workspace(path: Path) -> bool:
+    for anchor in (WORKSPACE_ROOT, ROOT):
+        try:
+            path.relative_to(anchor)
+            return True
+        except ValueError:
+            continue
+    return False
+
+
+def _locate_existing_path(path: Path) -> Path:
+    if path.exists() and _is_within_workspace(path):
+        return path
+    filename = path.name.lower()
+    if not filename:
+        return path
+    mapping = _logo_filename_index()
+    return mapping.get(filename, path)
+
+
+def _materialize_path(raw_path: str) -> Path:
+    path = Path(raw_path)
+    if path.is_absolute():
+        return _locate_existing_path(path)
+    # Try interpreting relative strings against the workspace roots.
+    for anchor in (WORKSPACE_ROOT, ROOT):
+        candidate = (anchor / path).resolve()
+        if candidate.exists():
+            return candidate
+    return _locate_existing_path((WORKSPACE_ROOT / path).resolve())
+
+
 def _presentable_path(raw_path: str) -> str:
     """
-    Convert absolute filesystem paths into workspace-relative POSIX strings so
-    API consumers don't depend on the server's mount layout.
+    Normalize logo paths so API consumers always receive a concrete path inside
+    the current workspace, avoiding stale absolute paths from other machines.
     """
-    path = Path(raw_path)
-    if not path.is_absolute():
-        return path.as_posix()
-    try:
-        rel = path.relative_to(ROOT)
-        return rel.as_posix()
-    except ValueError:
-        return path.as_posix()
+    path = _materialize_path(raw_path)
+    return str(path)
 
 
 def _load_semantic_text(entry_id: str, data: dict) -> str:
@@ -155,10 +211,17 @@ def _lookup_record(index: RecommendationIndex, seed_id: str) -> int:
     normalized = _normalize(seed_id)
     if normalized in index.id_to_idx:
         return index.id_to_idx[normalized]
-    for record_id, idx in index.id_to_idx.items():
-        if normalized == _normalize(record_id):
-            return idx
-    raise HTTPException(status_code=404, detail=f"Logo '{seed_id}' not found in semantic index.")
+    for idx, record in enumerate(index.records):
+        candidates = [
+            record.get("id"),
+            Path(record.get("image_path", "")).stem,
+        ]
+        for candidate in candidates:
+            if candidate and _normalize(candidate) == normalized:
+                return idx
+    raise HTTPException(
+        status_code=404, detail=f"Logo '{seed_id}' not found in semantic index."
+    )
 
 
 def recommend_logos(seed_id: str, limit: int, offset: int) -> dict:

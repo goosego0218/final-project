@@ -1,0 +1,83 @@
+{
+  "source_image": "page1_50.jpg",
+  "text_elements": {
+    "primary_text": "지니루",
+    "secondary_text": "JINIROO",
+    "language": "Korean",
+    "font_style": "rounded sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Two cartoon characters holding a bowl",
+    "category": "emblem",
+    "meanings": [
+      "family",
+      "care",
+      "food"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#4C9A73",
+        "common_name": "green",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with background",
+    "confidence": 0.8
+  },
+  "style_tags": [
+    "friendly",
+    "playful"
+  ],
+  "tone_descriptors": [
+    "warm",
+    "inviting"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "family",
+      "comfort",
+      "food"
+    ],
+    "values": [
+      "community",
+      "nurturing"
+    ],
+    "audience_hint": "families, young adults",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "playful",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends of simplicity and warmth"
+  },
+  "analysis_timestamp": "2025-11-10T05:49:52.068524Z"
+}

@@ -1,0 +1,82 @@
+{
+  "source_image": "카페_70.jpg",
+  "text_elements": {
+    "primary_text": "sleepy mug",
+    "secondary_text": "COFFEE & DESSERT",
+    "language": "Latin",
+    "font_style": "bold, rounded",
+    "typography_notes": "Highly readable with a playful style",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "A mug with a sleepy face",
+    "category": "abstract",
+    "meanings": [
+      "relaxation",
+      "comfort"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#3B3BFF",
+        "common_name": "blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with the background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "playful"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "casual"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol",
+    "spacing_notes": "Adequate white space for clarity",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "coffee",
+      "dessert",
+      "relaxation"
+    ],
+    "values": [
+      "comfort",
+      "enjoyment"
+    ],
+    "audience_hint": "young adults, casual coffee drinkers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current minimalist and playful design trends"
+  },
+  "analysis_timestamp": "2025-11-10T07:27:11.869015Z"
+}

@@ -1,0 +1,81 @@
+{
+  "source_image": "083_ANUDWA.jpg",
+  "text_elements": {
+    "primary_text": "ANUDWA",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "modern sans-serif",
+    "typography_notes": "The text is clear and legible with a unique twist on the letter 'D'.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Stylized letter 'D' resembling a bow tie",
+    "category": "lettermark",
+    "meanings": [
+      "creativity",
+      "uniqueness"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "High contrast with the white background enhances readability.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "elegant",
+    "innovative"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with equal spacing between letters.",
+    "spacing_notes": "Adequate white space around the text.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "innovation",
+      "style"
+    ],
+    "values": [
+      "creativity",
+      "modernity"
+    ],
+    "audience_hint": "young professionals",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "symbol",
+      "suggestion": "Consider adding a subtle color accent to enhance visual interest.",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimalist"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current trends favoring simplicity and elegance."
+  },
+  "analysis_timestamp": "2025-11-10T05:37:24.490318Z"
+}

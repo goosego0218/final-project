@@ -19,7 +19,11 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from app.logo_service.library import query_logo_library
+BACKEND_DIR = ROOT / "backend"
+if str(BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(BACKEND_DIR))
+
+from app.services.logo_library import query_logo_library
 
 
 API_URL = os.getenv("PIPELINE_API_URL", "http://localhost:8000/logo_pipeline")
@@ -143,6 +147,28 @@ def resolve_logo_image(name: str) -> Optional[str]:
     return None
 
 
+def ensure_local_logo_path(raw_path: str, fallback_name: str) -> Optional[str]:
+    """
+    Normalize remote logo paths returned by the API into ones that exist on this
+    Streamlit host so the images can be read from disk.
+    """
+    if raw_path:
+        candidate = Path(raw_path)
+        search_targets = [candidate]
+        if not candidate.is_absolute():
+            search_targets.append((ROOT / candidate).resolve())
+            search_targets.append((Path.cwd() / candidate).resolve())
+        for path in search_targets:
+            if path.exists():
+                return str(path)
+    fallback_name = fallback_name or Path(raw_path or "").stem
+    if fallback_name:
+        resolved = resolve_logo_image(fallback_name)
+        if resolved:
+            return resolved
+    return raw_path or None
+
+
 def find_entry_by_name(entries: List[Dict], name: str) -> Optional[Dict]:
     target = normalize_stem(name)
     for entry in entries:
@@ -166,9 +192,16 @@ def fetch_recommendations(seed_id: str, limit: int, offset: int) -> Optional[dic
         )
         resp.raise_for_status()
     except requests.RequestException as exc:
-        st.error(f"유사 로고 추천 호출 실패: {exc}")
+        st.error(f"???? ??? ??o ??? ????: {exc}")
         return None
-    return resp.json()
+    payload = resp.json()
+    for item in payload.get(
+        "items", []
+    ):
+        item["image_path"] = ensure_local_logo_path(
+            item.get("image_path", ""), item.get("id", "")
+        )
+    return payload
 
 
 def start_recommendations(seed_entry: Dict) -> None:
@@ -485,7 +518,14 @@ if similar_seed and similar_items:
         for idx, item in enumerate(similar_items[row : row + 4]):
             col = cols[idx]
             with col:
-                st.image(item["image_path"], use_column_width=True)
+                image_path = item.get("image_path") or ""
+                image_bytes = load_image_bytes(image_path) if image_path else None
+                if image_bytes:
+                    st.image(image_bytes, use_column_width=True)
+                else:
+                    st.warning("이미지를 찾지 못했어요.", icon="⚠️")
+                    if image_path:
+                        st.caption(image_path)
                 if st.button(
                     "이 로고 선택",
                     key=f"similar_select_{item['id']}_{row}_{idx}",

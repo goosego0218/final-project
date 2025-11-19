@@ -1,0 +1,99 @@
+{
+  "source_image": "022_교토돈부리.jpg",
+  "text_elements": {
+    "primary_text": "교토 돈부리",
+    "secondary_text": "きょうと",
+    "language": "Korean",
+    "font_style": "brush script",
+    "typography_notes": "The text is stylized and artistic, which may affect readability at smaller sizes.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "An owl holding chopsticks",
+    "category": "animal",
+    "meanings": [
+      "wisdom",
+      "Japanese cuisine"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#4A2C2A",
+        "common_name": "dark brown",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      },
+      {
+        "hex": "#D32F2F",
+        "common_name": "red",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "cultural"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "authentic"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:3",
+    "balance_notes": "Balanced with central alignment of text and symbol.",
+    "spacing_notes": "Adequate white space around elements.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "Japanese",
+      "cuisine",
+      "owl"
+    ],
+    "values": [
+      "authenticity",
+      "wisdom"
+    ],
+    "audience_hint": "food enthusiasts",
+    "confidence": 0.9
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Brush script may be hard to read at small sizes.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "typography",
+      "suggestion": "Consider a more legible font for smaller applications.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "cultural",
+      "modern"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with trends in cultural and modern design aesthetics."
+  },
+  "analysis_timestamp": "2025-11-10T04:56:41.867461Z"
+}

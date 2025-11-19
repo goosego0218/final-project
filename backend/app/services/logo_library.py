@@ -8,8 +8,25 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 
-STRUCTURED_DIR = Path("data/processed/logos/structured")
-LOGO_DIR = Path("logos")
+BACKEND_ROOT = Path(__file__).resolve().parents[2]
+WORKSPACE_ROOT = Path(__file__).resolve().parents[3]
+DATA_DIR = BACKEND_ROOT / "data"
+STRUCTURED_DIR = DATA_DIR / "processed" / "logos" / "structured"
+LOGO_CANDIDATES = [
+    BACKEND_ROOT / "logos",
+    WORKSPACE_ROOT / "logos",
+    WORKSPACE_ROOT / "frontend" / "logos",
+]
+
+
+def _resolve_logo_root() -> Path:
+    for candidate in LOGO_CANDIDATES:
+        if candidate.exists():
+            return candidate
+    return LOGO_CANDIDATES[-1]
+
+
+LOGO_DIR = _resolve_logo_root()
 
 
 class LogoLibraryEntry(BaseModel):

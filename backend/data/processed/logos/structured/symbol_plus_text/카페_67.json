@@ -1,0 +1,83 @@
+{
+  "source_image": "카페_67.jpg",
+  "text_elements": {
+    "primary_text": "Jaena",
+    "secondary_text": "재나 양과자점",
+    "language": "Latin and Korean",
+    "font_style": "script",
+    "typography_notes": "Readable with a playful script style",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Cupcake outline with a dot on top",
+    "category": "emblem",
+    "meanings": [
+      "bakery",
+      "sweet",
+      "dessert"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#E57373",
+        "common_name": "pink",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast against dark background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "playful"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "inviting"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Centered and balanced",
+    "spacing_notes": "Adequate spacing around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "bakery",
+      "dessert",
+      "sweet"
+    ],
+    "values": [
+      "quality",
+      "delight"
+    ],
+    "audience_hint": "dessert lovers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "playful"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current playful and modern design trends"
+  },
+  "analysis_timestamp": "2025-11-10T07:26:42.579072Z"
+}

@@ -1,0 +1,89 @@
+{
+  "source_image": "041_THE_FORGE_TAP_HOUSE.jpg",
+  "text_elements": {
+    "primary_text": "THE FORGE TAP HOUSE",
+    "secondary_text": "CRAFT BEER",
+    "language": "Latin",
+    "font_style": "Bold, sans-serif",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Anvil with a cloud of foam",
+    "category": "emblem",
+    "meanings": [
+      "strength",
+      "craftsmanship",
+      "beer"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "High contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "craft",
+    "bold"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central emblem",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "craft",
+      "beer",
+      "strength"
+    ],
+    "values": [
+      "quality",
+      "tradition"
+    ],
+    "audience_hint": "beer enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a third color for accent",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends in minimalistic design"
+  },
+  "analysis_timestamp": "2025-11-10T05:19:26.084992Z"
+}

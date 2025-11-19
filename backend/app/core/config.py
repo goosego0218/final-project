@@ -6,6 +6,7 @@
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+
 class Settings(BaseSettings):
     app_env: str = "local"
     app_name: str = "brand-ai-backend"
@@ -16,12 +17,18 @@ class Settings(BaseSettings):
     openai_embedding_model: str = "text-embedding-3-small"
     openai_temperature: float = 0.0
 
+    ideogram_api_key: str = ""
+
+    langchain_api_key: str = ""
+    langchain_tracing_v2: bool = True
+    langchain_project: str = "logo"
+
     oracle_user: str = ""
     oracle_password: str = ""
     oracle_dsn: str = ""
     oracle_schema: str = ""
 
-    jwt_secret_key: str = "" 
+    jwt_secret_key: str = ""
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
 
@@ -30,5 +37,6 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         extra="forbid",
     )
+
 
 settings = Settings()

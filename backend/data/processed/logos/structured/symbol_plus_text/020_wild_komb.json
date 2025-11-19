@@ -1,0 +1,90 @@
+{
+  "source_image": "020_wild_komb.jpg",
+  "text_elements": {
+    "primary_text": "WILD KÖMB",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "Decorative serif",
+    "typography_notes": "Legible with a unique flair due to the umlaut and serif style.",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Hot air balloon with floral elements",
+    "category": "emblem",
+    "meanings": [
+      "adventure",
+      "nature",
+      "freedom"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#B85C5C",
+        "common_name": "dusty rose",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with white background, ensuring readability.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "vintage",
+    "artistic"
+  ],
+  "tone_descriptors": [
+    "adventurous",
+    "natural"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central emblem and text below.",
+    "spacing_notes": "Adequate white space around elements for clarity.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "wild",
+      "kombucha",
+      "nature",
+      "adventure"
+    ],
+    "values": [
+      "exploration",
+      "natural ingredients"
+    ],
+    "audience_hint": "adventurous and health-conscious individuals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "color",
+      "description": "Limited color palette might not stand out on all backgrounds.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Introduce a secondary color for more versatility.",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "vintage",
+      "nature-inspired"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current trends favoring natural and vintage aesthetics."
+  },
+  "analysis_timestamp": "2025-11-10T04:48:09.002197Z"
+}

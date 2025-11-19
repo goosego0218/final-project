@@ -1,0 +1,94 @@
+{
+  "source_image": "page7_5.jpg",
+  "text_elements": {
+    "primary_text": "SAENARU",
+    "secondary_text": "SAENARU TAEKWONDO",
+    "language": "Latin and Korean",
+    "font_style": "modern sans-serif",
+    "typography_notes": "Readable with a futuristic touch",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Hexagonal outline with gradient lines",
+    "category": "abstract",
+    "meanings": [
+      "strength",
+      "unity"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FF00FF",
+        "common_name": "magenta",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#0000FF",
+        "common_name": "blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal",
+    "futuristic"
+  ],
+  "tone_descriptors": [
+    "dynamic",
+    "energetic"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "taekwondo",
+      "martial arts",
+      "strength"
+    ],
+    "values": [
+      "discipline",
+      "focus"
+    ],
+    "audience_hint": "martial arts enthusiasts",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "color",
+      "description": "Gradient may not print well",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider solid colors for print",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "futuristic",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with modern design trends"
+  },
+  "analysis_timestamp": "2025-11-10T06:49:03.038603Z"
+}

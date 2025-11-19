@@ -1,0 +1,75 @@
+{
+  "source_image": "커피_150.jpg",
+  "text_elements": {
+    "primary_text": "cónsocio",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "bold, rounded",
+    "typography_notes": "The text is clear and legible with a modern, friendly appearance.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "A croissant partially visible above the text",
+    "category": "other",
+    "meanings": [
+      "bakery",
+      "freshness"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#8B4513",
+        "common_name": "saddle brown",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "The brown text contrasts well with the light background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "approachable"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "The layout is balanced with the text centered below the croissant.",
+    "spacing_notes": "Adequate white space around the text and symbol.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "bakery",
+      "fresh",
+      "artisan"
+    ],
+    "values": [
+      "quality",
+      "community"
+    ],
+    "audience_hint": "food enthusiasts",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "packaging"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "modern"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends of simplicity and clarity in design."
+  },
+  "analysis_timestamp": "2025-11-10T07:38:51.443990Z"
+}

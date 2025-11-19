@@ -1,0 +1,82 @@
+{
+  "source_image": "067_관세법인_광교.jpg",
+  "text_elements": {
+    "primary_text": "관세법인 광교",
+    "secondary_text": "KWANGKYO customs service Inc.",
+    "language": "Korean",
+    "font_style": "modern sans-serif",
+    "typography_notes": "Clear and readable with a professional appearance",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Stylized building or structure with horizontal lines",
+    "category": "abstract",
+    "meanings": [
+      "structure",
+      "stability",
+      "corporate"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#4A3F35",
+        "common_name": "dark brown",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with white background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "corporate"
+  ],
+  "tone_descriptors": [
+    "professional",
+    "trustworthy"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol",
+    "spacing_notes": "Adequate white space for clarity",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "customs",
+      "service",
+      "professional"
+    ],
+    "values": [
+      "reliability",
+      "expertise"
+    ],
+    "audience_hint": "business clients",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends in corporate branding"
+  },
+  "analysis_timestamp": "2025-11-10T05:31:14.775308Z"
+}

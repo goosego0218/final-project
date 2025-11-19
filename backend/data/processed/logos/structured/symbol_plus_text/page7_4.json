@@ -1,0 +1,95 @@
+{
+  "source_image": "page7_4.jpg",
+  "text_elements": {
+    "primary_text": "백가네 부대찌개",
+    "secondary_text": "Korea Soul Food",
+    "language": "Korean",
+    "font_style": "handwritten",
+    "typography_notes": "Legible with a casual and friendly appearance",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "A stylized pot lid with steam clouds",
+    "category": "abstract",
+    "meanings": [
+      "cooking",
+      "warmth"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FF0000",
+        "common_name": "red",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "authentic"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:3",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.8
+  },
+  "brand_message": {
+    "keywords": [
+      "Korean",
+      "food",
+      "traditional"
+    ],
+    "values": [
+      "authenticity",
+      "warmth"
+    ],
+    "audience_hint": "food enthusiasts",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Small secondary text",
+      "severity": "low"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "typography",
+      "suggestion": "Increase size of secondary text",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends of simplicity and authenticity"
+  },
+  "analysis_timestamp": "2025-11-10T06:48:49.576306Z"
+}

@@ -1,0 +1,88 @@
+{
+  "source_image": "040_명동보리밥.jpg",
+  "text_elements": {
+    "primary_text": "명동보리밥",
+    "secondary_text": "KOREAN TRADITIONAL RESTAURANT",
+    "language": "Korean",
+    "font_style": "serif",
+    "typography_notes": "The text is clear and legible with a traditional feel.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Circular emblem with Korean characters and wheat motif",
+    "category": "emblem",
+    "meanings": [
+      "tradition",
+      "heritage"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#8B5A2B",
+        "common_name": "brown",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with the background, ensuring readability.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "traditional",
+    "classic"
+  ],
+  "tone_descriptors": [
+    "authentic",
+    "heritage"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol.",
+    "spacing_notes": "Adequate spacing between elements for clarity.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "traditional",
+      "Korean",
+      "restaurant"
+    ],
+    "values": [
+      "authenticity",
+      "heritage"
+    ],
+    "audience_hint": "cultural enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "color",
+      "description": "Limited color palette may affect visual interest.",
+      "severity": "low"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Introduce a secondary color for accents.",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "classic",
+      "heritage"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with trends favoring authenticity and tradition."
+  },
+  "analysis_timestamp": "2025-11-10T05:19:02.081764Z"
+}

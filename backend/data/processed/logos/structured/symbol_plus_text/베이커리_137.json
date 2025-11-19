@@ -1,0 +1,78 @@
+{
+  "source_image": "베이커리_137.jpg",
+  "text_elements": {
+    "primary_text": "DYNATECH",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "Sans-serif, modern",
+    "typography_notes": "Clear and readable with a slight tech feel",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Abstract globe with circuit-like lines",
+    "category": "abstract",
+    "meanings": [
+      "technology",
+      "global",
+      "innovation"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#00BFFF",
+        "common_name": "Deep Sky Blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal",
+    "tech"
+  ],
+  "tone_descriptors": [
+    "innovative",
+    "professional"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "technology",
+      "innovation",
+      "global"
+    ],
+    "values": [
+      "cutting-edge",
+      "connectivity"
+    ],
+    "audience_hint": "tech-savvy professionals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [],
+  "trend_alignment": {
+    "tags": [
+      "futuristic",
+      "minimal"
+    ],
+    "score": 0.9,
+    "notes": "Aligns well with current tech branding trends"
+  },
+  "analysis_timestamp": "2025-11-10T06:54:09.494623Z"
+}

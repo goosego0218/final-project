@@ -1,0 +1,93 @@
+{
+  "source_image": "051_마스노스.jpg",
+  "text_elements": {
+    "primary_text": "MASNOS",
+    "secondary_text": "BEYOND LIMITS",
+    "language": "Latin",
+    "font_style": "bold, italic",
+    "typography_notes": "The text is bold and italicized, enhancing readability and conveying a sense of motion.",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized letter 'M' with dynamic curves",
+    "category": "lettermark",
+    "meanings": [
+      "movement",
+      "progress"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#FFD700",
+        "common_name": "gold",
+        "usage": "accent"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Strong contrast between black and gold enhances visibility.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "dynamic"
+  ],
+  "tone_descriptors": [
+    "energetic",
+    "bold"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol.",
+    "spacing_notes": "Adequate spacing between elements ensures clarity.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "innovation",
+      "limitless",
+      "strength"
+    ],
+    "values": [
+      "progress",
+      "excellence"
+    ],
+    "audience_hint": "active lifestyle enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "contrast",
+      "description": "Potential legibility issues in low-light conditions.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "contrast",
+      "suggestion": "Increase brightness of gold for better visibility.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "dynamic"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current trends favoring bold and dynamic designs."
+  },
+  "analysis_timestamp": "2025-11-10T05:24:49.618172Z"
+}

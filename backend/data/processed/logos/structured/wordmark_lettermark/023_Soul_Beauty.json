@@ -1,0 +1,88 @@
+{
+  "source_image": "023_Soul_Beauty.jpg",
+  "text_elements": {
+    "primary_text": "Soul Beauty",
+    "secondary_text": "Sunshine of your love",
+    "language": "Latin",
+    "font_style": "cursive and bold",
+    "typography_notes": "The cursive style is elegant but may affect readability at smaller sizes.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "No distinct symbol, primarily text-based",
+    "category": "lettermark",
+    "meanings": [
+      "elegance",
+      "beauty"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with the background, ensuring readability.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "elegant"
+  ],
+  "tone_descriptors": [
+    "luxury",
+    "friendly"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "4:3",
+    "balance_notes": "Well-balanced with text alignment and spacing.",
+    "spacing_notes": "Adequate white space around text elements.",
+    "confidence": 0.8
+  },
+  "brand_message": {
+    "keywords": [
+      "beauty",
+      "soul",
+      "love"
+    ],
+    "values": [
+      "elegance",
+      "warmth"
+    ],
+    "audience_hint": "young adults, beauty enthusiasts",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Cursive font may be hard to read at smaller sizes.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Consider a simpler font for smaller applications.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "elegant"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current trends in beauty branding."
+  },
+  "analysis_timestamp": "2025-11-10T04:58:33.842748Z"
+}

@@ -1,0 +1,90 @@
+{
+  "source_image": "018_Boston_Mentor.jpg",
+  "text_elements": {
+    "primary_text": "BOSTON MENTOR",
+    "secondary_text": "AMERICAN EDUCATION",
+    "language": "Latin",
+    "font_style": "Serif, bold",
+    "typography_notes": "Highly readable with a classic look",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Circular emblem with a book and torch",
+    "category": "emblem",
+    "meanings": [
+      "education",
+      "knowledge",
+      "guidance"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#800000",
+        "common_name": "maroon",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with white background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "classic",
+    "formal"
+  ],
+  "tone_descriptors": [
+    "educational",
+    "trustworthy"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "3:1",
+    "balance_notes": "Well-balanced with emblem on the left",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "education",
+      "mentorship",
+      "American"
+    ],
+    "values": [
+      "knowledge",
+      "guidance",
+      "tradition"
+    ],
+    "audience_hint": "students, educators",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Complex emblem may reduce scalability",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "scalability",
+      "suggestion": "Simplify emblem for smaller sizes",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "classic",
+      "timeless"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with traditional educational branding"
+  },
+  "analysis_timestamp": "2025-11-10T04:45:21.663441Z"
+}

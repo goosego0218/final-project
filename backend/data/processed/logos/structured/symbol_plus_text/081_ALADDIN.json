@@ -1,0 +1,94 @@
+{
+  "source_image": "081_ALADDIN.jpg",
+  "text_elements": {
+    "primary_text": "ALADDIN",
+    "secondary_text": null,
+    "language": "Latin and Chinese",
+    "font_style": "serif",
+    "typography_notes": "Readable with a classic touch",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Stylized lamp with a diamond",
+    "category": "abstract",
+    "meanings": [
+      "magic",
+      "luxury"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#8B5A2B",
+        "common_name": "brown",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "text"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "classic",
+    "elegant"
+  ],
+  "tone_descriptors": [
+    "luxury",
+    "mystical"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "magic",
+      "luxury",
+      "elegance"
+    ],
+    "values": [
+      "quality",
+      "mystique"
+    ],
+    "audience_hint": "luxury consumers",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Abstract symbol may not be immediately recognizable",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "symbol",
+      "suggestion": "Enhance recognizability of the lamp",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "classic",
+      "elegant"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with timeless elegance trends"
+  },
+  "analysis_timestamp": "2025-11-10T05:36:27.563668Z"
+}

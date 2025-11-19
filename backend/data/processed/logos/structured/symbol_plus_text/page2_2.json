@@ -1,0 +1,94 @@
+{
+  "source_image": "page2_2.jpg",
+  "text_elements": {
+    "primary_text": "Rd",
+    "secondary_text": "로뎀헤드스파\n두피클리닉 탈모관리",
+    "language": "Korean",
+    "font_style": "elegant serif",
+    "typography_notes": "Readable with a sophisticated touch",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Lettermark with leaf and circle",
+    "category": "lettermark",
+    "meanings": [
+      "nature",
+      "growth"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#2E5D4E",
+        "common_name": "dark green",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "natural"
+  ],
+  "tone_descriptors": [
+    "calm",
+    "professional"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "nature",
+      "health",
+      "care"
+    ],
+    "values": [
+      "wellness",
+      "growth"
+    ],
+    "audience_hint": "health-conscious individuals",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Small text may be hard to read at smaller sizes",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Increase font size for secondary text",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "eco-friendly",
+      "minimalist"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with trends towards sustainability and simplicity"
+  },
+  "analysis_timestamp": "2025-11-10T05:53:04.794426Z"
+}

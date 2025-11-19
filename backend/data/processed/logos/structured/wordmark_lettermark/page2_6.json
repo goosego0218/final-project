@@ -1,0 +1,88 @@
+{
+  "source_image": "page2_6.jpg",
+  "text_elements": {
+    "primary_text": "저먼고기",
+    "secondary_text": "저화구이 전문점",
+    "language": "Korean",
+    "font_style": "brush script",
+    "typography_notes": "Readable with artistic flair",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Red stamp-like mark",
+    "category": "emblem",
+    "meanings": [
+      "traditional",
+      "authentic"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FF0000",
+        "common_name": "red",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between black text and white background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "traditional",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "authentic",
+    "cultural"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "authentic",
+      "Korean",
+      "grill"
+    ],
+    "values": [
+      "tradition",
+      "quality"
+    ],
+    "audience_hint": "Korean cuisine enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider additional colors for more depth",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "traditional",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with trends favoring cultural authenticity"
+  },
+  "analysis_timestamp": "2025-11-10T06:00:10.780359Z"
+}

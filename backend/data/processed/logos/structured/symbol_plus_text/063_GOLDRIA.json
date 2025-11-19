@@ -1,0 +1,75 @@
+{
+  "source_image": "063_GOLDRIA.jpg",
+  "text_elements": {
+    "primary_text": "GOLDRIA",
+    "secondary_text": "SINCE 1999",
+    "language": "Latin",
+    "font_style": "Serif",
+    "typography_notes": "Clear and elegant serif font, easily readable.",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized diamond shape made of lines",
+    "category": "abstract",
+    "meanings": [
+      "luxury",
+      "quality"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#2E2A6C",
+        "common_name": "dark blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "luxury",
+    "elegant"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment.",
+    "spacing_notes": "Adequate white space around elements.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "luxury",
+      "heritage"
+    ],
+    "values": [
+      "quality",
+      "tradition"
+    ],
+    "audience_hint": "affluent consumers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "elegant"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current minimalistic and luxury trends."
+  },
+  "analysis_timestamp": "2025-11-10T05:29:34.577184Z"
+}

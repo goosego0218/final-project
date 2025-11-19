@@ -1,0 +1,82 @@
+{
+  "source_image": "page4_42.jpg",
+  "text_elements": {
+    "primary_text": "미미미한의원",
+    "secondary_text": "아름다운 나를 더 아름답게",
+    "language": "Korean",
+    "font_style": "modern sans-serif",
+    "typography_notes": "Clear and legible with a modern touch",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized Korean characters forming a unique emblem",
+    "category": "lettermark",
+    "meanings": [
+      "cultural",
+      "traditional"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#1A3C5A",
+        "common_name": "dark blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with the background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "professional",
+    "elegant"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with centered text and symbol",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "beauty",
+      "tradition",
+      "elegance"
+    ],
+    "values": [
+      "aesthetic",
+      "cultural"
+    ],
+    "audience_hint": "Korean-speaking beauty enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Introduce a secondary color for accents",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "cultural"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with trends favoring simplicity and cultural elements"
+  },
+  "analysis_timestamp": "2025-11-10T06:18:42.191128Z"
+}

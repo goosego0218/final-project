@@ -1,0 +1,77 @@
+{
+  "source_image": "016_SCANA.jpg",
+  "text_elements": {
+    "primary_text": "SCANA",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "modern sans-serif",
+    "typography_notes": "Clean and easily readable",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized wave integrated into the letter A",
+    "category": "lettermark",
+    "meanings": [
+      "innovation",
+      "energy",
+      "fluidity"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#00BFFF",
+        "common_name": "Deep Sky Blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast on white background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "innovative",
+    "professional"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around text",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "technology",
+      "energy",
+      "innovation"
+    ],
+    "values": [
+      "efficiency",
+      "modernity"
+    ],
+    "audience_hint": "tech-savvy professionals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.9,
+    "notes": "Aligns well with current trends in simplicity and modern design"
+  },
+  "analysis_timestamp": "2025-11-10T04:38:36.567610Z"
+}

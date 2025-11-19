@@ -1,0 +1,82 @@
+{
+  "source_image": "page1_11.jpg",
+  "text_elements": {
+    "primary_text": "L-jewelry",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "elegant serif",
+    "typography_notes": "The text is clear and legible with a sophisticated style.",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized letter 'L' with a diamond shape",
+    "category": "lettermark",
+    "meanings": [
+      "luxury",
+      "elegance"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "High contrast with the white background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "luxury",
+    "elegant"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with equal weight on symbol and text.",
+    "spacing_notes": "Adequate spacing around elements for clarity.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "luxury",
+      "jewelry",
+      "elegance"
+    ],
+    "values": [
+      "quality",
+      "sophistication"
+    ],
+    "audience_hint": "affluent individuals seeking luxury items",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth.",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "elegant"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current trends favoring minimalism and elegance."
+  },
+  "analysis_timestamp": "2025-11-10T05:40:39.121476Z"
+}

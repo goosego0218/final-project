@@ -1,0 +1,84 @@
+{
+  "source_image": "베이커리_29.jpg",
+  "text_elements": {
+    "primary_text": "DR.COOKIE",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "Bold, sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Smiling cookie with a doctor's head mirror",
+    "category": "emblem",
+    "meanings": [
+      "health",
+      "fun",
+      "food"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#4A5E54",
+        "common_name": "Dark Green",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast against the white background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "playful"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "approachable"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "health",
+      "cookies",
+      "fun"
+    ],
+    "values": [
+      "well-being",
+      "enjoyment"
+    ],
+    "audience_hint": "families, children",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "playful",
+      "minimalist"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends of simplicity and playfulness"
+  },
+  "analysis_timestamp": "2025-11-10T06:56:57.763404Z"
+}

@@ -1,0 +1,75 @@
+{
+  "source_image": "빵_86.jpg",
+  "text_elements": {
+    "primary_text": "선명희피자",
+    "secondary_text": "자기제빵",
+    "language": "Korean",
+    "font_style": "serif",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Profile of a woman with flowers",
+    "category": "abstract",
+    "meanings": [
+      "femininity",
+      "nature"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "High contrast with white background",
+    "confidence": 0.95
+  },
+  "style_tags": [
+    "minimal",
+    "elegant"
+  ],
+  "tone_descriptors": [
+    "sophisticated",
+    "natural"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "natural",
+      "feminine",
+      "elegant"
+    ],
+    "values": [
+      "quality",
+      "authenticity"
+    ],
+    "audience_hint": "Adults interested in natural products",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "elegant"
+    ],
+    "score": 0.9,
+    "notes": "Aligns with current trends of minimalism and elegance"
+  },
+  "analysis_timestamp": "2025-11-10T07:15:28.375205Z"
+}

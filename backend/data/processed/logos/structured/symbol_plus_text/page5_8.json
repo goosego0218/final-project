@@ -1,0 +1,83 @@
+{
+  "source_image": "page5_8.jpg",
+  "text_elements": {
+    "primary_text": "lulubicycle",
+    "secondary_text": "LULUBICYCLE",
+    "language": "Latin and Korean",
+    "font_style": "Sans-serif",
+    "typography_notes": "Readable with clear distinction between text elements",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Bicycle inside a gear",
+    "category": "emblem",
+    "meanings": [
+      "cycling",
+      "movement",
+      "mechanical"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#1C3D6E",
+        "common_name": "navy blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "active",
+    "professional"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate spacing around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "bicycle",
+      "movement",
+      "gear"
+    ],
+    "values": [
+      "activity",
+      "innovation"
+    ],
+    "audience_hint": "cycling enthusiasts",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Introduce a secondary color for depth",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current minimalist design trends"
+  },
+  "analysis_timestamp": "2025-11-10T06:30:38.914864Z"
+}

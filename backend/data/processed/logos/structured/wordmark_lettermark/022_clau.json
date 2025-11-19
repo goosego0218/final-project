@@ -1,0 +1,80 @@
+{
+  "source_image": "022_clau.jpg",
+  "text_elements": {
+    "primary_text": "CLAU",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "Sans-serif, rounded",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Encapsulating rounded rectangle",
+    "category": "abstract",
+    "meanings": [
+      "protection",
+      "enclosure"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#C8102E",
+        "common_name": "red",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with white background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "bold",
+    "professional"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with centered text",
+    "spacing_notes": "Adequate white space around text",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "clarity",
+      "security"
+    ],
+    "values": [
+      "trust",
+      "innovation"
+    ],
+    "audience_hint": "tech-savvy consumers",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimalist"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current minimalist design trends"
+  },
+  "analysis_timestamp": "2025-11-10T04:56:13.999165Z"
+}

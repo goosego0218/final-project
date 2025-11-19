@@ -1,0 +1,95 @@
+{
+  "source_image": "page4_15.jpg",
+  "text_elements": {
+    "primary_text": "제주갈치도",
+    "secondary_text": "갈치 요리 전문점",
+    "language": "Korean",
+    "font_style": "brush script",
+    "typography_notes": "The brush script style adds a traditional and artistic feel, but may affect readability at smaller sizes.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Fish illustration integrated with text",
+    "category": "emblem",
+    "meanings": [
+      "seafood",
+      "traditional",
+      "Korean cuisine"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#C8102E",
+        "common_name": "red",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between black text and white background, red accent stands out.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "traditional",
+    "artistic"
+  ],
+  "tone_descriptors": [
+    "authentic",
+    "cultural"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:3",
+    "balance_notes": "Well-balanced with the fish illustration and text.",
+    "spacing_notes": "Adequate spacing between elements, enhancing readability.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "seafood",
+      "Korean",
+      "authentic"
+    ],
+    "values": [
+      "tradition",
+      "quality"
+    ],
+    "audience_hint": "Korean cuisine enthusiasts",
+    "confidence": 0.9
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Brush script may be hard to read at smaller sizes.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Consider a simpler font for smaller applications.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "traditional",
+      "cultural"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with trends emphasizing cultural authenticity."
+  },
+  "analysis_timestamp": "2025-11-10T06:12:44.062196Z"
+}

@@ -1,0 +1,81 @@
+{
+  "source_image": "050_IUMA.jpg",
+  "text_elements": {
+    "primary_text": "IUMA",
+    "secondary_text": "I · YOU · MA",
+    "language": "Latin",
+    "font_style": "Sans-serif, modern",
+    "typography_notes": "Clear and readable with distinct spacing",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized lettermark with dot elements",
+    "category": "lettermark",
+    "meanings": [
+      "connection",
+      "individuality"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#4A4A4A",
+        "common_name": "dark gray",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#005A80",
+        "common_name": "dark blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "professional",
+    "friendly"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with equal spacing",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "connection",
+      "individuality",
+      "modern"
+    ],
+    "values": [
+      "inclusivity",
+      "clarity"
+    ],
+    "audience_hint": "young professionals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.9,
+    "notes": "Aligns well with current trends in simplicity and clarity"
+  },
+  "analysis_timestamp": "2025-11-10T05:24:06.672207Z"
+}

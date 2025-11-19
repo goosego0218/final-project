@@ -1,0 +1,82 @@
+{
+  "source_image": "005_E_G_Yo.jpg",
+  "text_elements": {
+    "primary_text": "E.G.Yo",
+    "secondary_text": "행복을 품다",
+    "language": "English and Korean",
+    "font_style": "Sans-serif, modern",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Profile of a woman with flowing hair",
+    "category": "emblem",
+    "meanings": [
+      "elegance",
+      "femininity"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#004225",
+        "common_name": "dark green",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with white background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "elegant",
+    "calm"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "3:4",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "elegance",
+      "happiness",
+      "femininity"
+    ],
+    "values": [
+      "beauty",
+      "serenity"
+    ],
+    "audience_hint": "female-oriented, beauty industry",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for accents",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "elegant"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current minimalistic and elegant design trends"
+  },
+  "analysis_timestamp": "2025-11-10T04:23:05.223991Z"
+}

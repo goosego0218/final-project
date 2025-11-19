@@ -1,0 +1,94 @@
+{
+  "source_image": "page1_37.jpg",
+  "text_elements": {
+    "primary_text": "유니티 산후조리원",
+    "secondary_text": "premium postpartum care center",
+    "language": "Korean",
+    "font_style": "serif",
+    "typography_notes": "The text is clear and readable with a classic serif style.",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized lettermark 'UN' within a circular emblem",
+    "category": "lettermark",
+    "meanings": [
+      "unity",
+      "care"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#D4AF37",
+        "common_name": "gold",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between gold and black for readability.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "elegant"
+  ],
+  "tone_descriptors": [
+    "luxury",
+    "professional"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment.",
+    "spacing_notes": "Adequate spacing between elements for clarity.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "care",
+      "luxury",
+      "postpartum"
+    ],
+    "values": [
+      "comfort",
+      "quality"
+    ],
+    "audience_hint": "new mothers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Small secondary text may be hard to read at smaller sizes.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Increase the size of the secondary text for better readability.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "elegant"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current trends in luxury branding."
+  },
+  "analysis_timestamp": "2025-11-10T05:46:38.050759Z"
+}

@@ -1,0 +1,94 @@
+{
+  "source_image": "page3_32.jpg",
+  "text_elements": {
+    "primary_text": "탑동포차",
+    "secondary_text": null,
+    "language": "Korean",
+    "font_style": "modern sans-serif",
+    "typography_notes": "Clear and legible with a stylish touch",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Stylized Korean characters with stars and a crescent moon",
+    "category": "lettermark",
+    "meanings": [
+      "night",
+      "Korean culture"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#8A2BE2",
+        "common_name": "blue violet",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FF7F50",
+        "common_name": "coral",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "cultural"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "night",
+      "Korean",
+      "culture"
+    ],
+    "values": [
+      "tradition",
+      "community"
+    ],
+    "audience_hint": "Korean culture enthusiasts",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Complexity in symbol design",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "simplicity",
+      "suggestion": "Simplify the symbol for better clarity",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "cultural"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with trends in cultural and modern design"
+  },
+  "analysis_timestamp": "2025-11-10T06:06:15.194477Z"
+}

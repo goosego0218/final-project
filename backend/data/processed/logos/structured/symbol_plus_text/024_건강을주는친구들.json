@@ -1,0 +1,100 @@
+{
+  "source_image": "024_건강을주는친구들.jpg",
+  "text_elements": {
+    "primary_text": "건강을 주는 친구들",
+    "secondary_text": null,
+    "language": "Korean",
+    "font_style": "rounded sans-serif",
+    "typography_notes": "Clear and legible with a friendly appearance",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Smiling fruits with a coin on top",
+    "category": "abstract",
+    "meanings": [
+      "health",
+      "friendship",
+      "wealth"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FF6F00",
+        "common_name": "orange",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#388E3C",
+        "common_name": "green",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FBC02D",
+        "common_name": "yellow",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "friendly"
+  ],
+  "tone_descriptors": [
+    "welcoming",
+    "healthy"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "3:1",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "health",
+      "friendship",
+      "nutrition"
+    ],
+    "values": [
+      "well-being",
+      "community"
+    ],
+    "audience_hint": "health-conscious individuals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Symbol may be slightly complex",
+      "severity": "low"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "simplicity",
+      "suggestion": "Simplify the symbol for clarity",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "friendly"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current trends in health and wellness branding"
+  },
+  "analysis_timestamp": "2025-11-10T04:59:50.450885Z"
+}

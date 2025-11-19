@@ -1,0 +1,82 @@
+{
+  "source_image": "006_365연결한의원.jpg",
+  "text_elements": {
+    "primary_text": "365연 결한의 원",
+    "secondary_text": "Korean Medical Clinic",
+    "language": "Korean",
+    "font_style": "serif",
+    "typography_notes": "Legible with a traditional feel",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Abstract emblem with Korean characters",
+    "category": "emblem",
+    "meanings": [
+      "health",
+      "tradition"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#3B3B2F",
+        "common_name": "dark olive",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with white background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "traditional",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "professional",
+    "trustworthy"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Centered and balanced",
+    "spacing_notes": "Adequate white space",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "health",
+      "Korean",
+      "clinic"
+    ],
+    "values": [
+      "tradition",
+      "care"
+    ],
+    "audience_hint": "health-conscious individuals",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for contrast",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "traditional"
+    ],
+    "score": 0.7,
+    "notes": "Aligns with trends favoring simplicity and cultural elements"
+  },
+  "analysis_timestamp": "2025-11-10T04:24:29.609756Z"
+}

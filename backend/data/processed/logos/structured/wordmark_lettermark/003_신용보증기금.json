@@ -1,0 +1,94 @@
+{
+  "source_image": "003_신용보증기금.jpg",
+  "text_elements": {
+    "primary_text": "기업의 도전과 성장에 힘이 되는 동반자",
+    "secondary_text": "Beyond Guarantee",
+    "language": "Korean and English",
+    "font_style": "handwritten and serif",
+    "typography_notes": "The Korean text is stylized and artistic, while the English text is more formal.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "No distinct symbol, text-based design",
+    "category": "lettermark",
+    "meanings": [
+      "support",
+      "growth"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#1E73BE",
+        "common_name": "blue",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "professional",
+    "supportive"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with emphasis on the Korean text.",
+    "spacing_notes": "Adequate spacing between elements.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "support",
+      "growth",
+      "guarantee"
+    ],
+    "values": [
+      "reliability",
+      "partnership"
+    ],
+    "audience_hint": "businesses seeking growth",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Handwritten style may affect readability at smaller sizes.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Consider a clearer font for smaller applications.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends of minimalistic and text-based designs."
+  },
+  "analysis_timestamp": "2025-11-10T04:21:05.238717Z"
+}

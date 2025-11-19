@@ -52,7 +52,7 @@ def create_app() -> FastAPI:
     app.include_router(chat_router)
 
     from app.api.logo import router as logo_router
-    app.include_router(logo_router, prefix="/logo")
+    app.include_router(logo_router)
 
     return app
 

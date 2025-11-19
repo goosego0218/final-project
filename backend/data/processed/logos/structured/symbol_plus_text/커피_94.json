@@ -1,0 +1,94 @@
+{
+  "source_image": "커피_94.jpg",
+  "text_elements": {
+    "primary_text": "illac",
+    "secondary_text": "illac coffee",
+    "language": "Latin",
+    "font_style": "rounded sans-serif",
+    "typography_notes": "Readable with a playful touch",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized lowercase 'illac' with a small flower-like symbol",
+    "category": "lettermark",
+    "meanings": [
+      "playfulness",
+      "creativity"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#3B3B6D",
+        "common_name": "dark blue",
+        "usage": "background"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "foreground"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "approachable"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Centered and balanced within the square",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "coffee",
+      "modern",
+      "friendly"
+    ],
+    "values": [
+      "creativity",
+      "approachability"
+    ],
+    "audience_hint": "young adults, coffee enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "The flower-like symbol may not be immediately recognizable",
+      "severity": "low"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "symbol",
+      "suggestion": "Enhance the recognizability of the flower-like symbol",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.9,
+    "notes": "Aligns well with current minimalistic design trends"
+  },
+  "analysis_timestamp": "2025-11-10T07:53:37.027788Z"
+}

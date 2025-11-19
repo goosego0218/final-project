@@ -1,0 +1,88 @@
+{
+  "source_image": "076_Leather_holic.jpg",
+  "text_elements": {
+    "primary_text": "Leatherholic",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "cursive",
+    "typography_notes": "The cursive script is elegant but may affect readability at smaller sizes.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Heart shape integrated into the text",
+    "category": "abstract",
+    "meanings": [
+      "love",
+      "passion"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "High contrast with a white background ensures readability.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "elegant",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "luxury",
+    "passionate"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with the heart shape adding visual interest.",
+    "spacing_notes": "Adequate spacing between letters enhances readability.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "leather",
+      "fashion",
+      "passion"
+    ],
+    "values": [
+      "quality",
+      "style"
+    ],
+    "audience_hint": "fashion-conscious consumers",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Cursive font may be hard to read at small sizes.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Consider a bolder font for smaller applications.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "elegant",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends favoring simplicity and elegance."
+  },
+  "analysis_timestamp": "2025-11-10T05:34:35.664090Z"
+}

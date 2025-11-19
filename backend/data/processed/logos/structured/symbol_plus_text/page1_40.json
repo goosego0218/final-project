@@ -1,0 +1,88 @@
+{
+  "source_image": "page1_40.jpg",
+  "text_elements": {
+    "primary_text": "막족",
+    "secondary_text": "막퍼주는 족발",
+    "language": "Korean",
+    "font_style": "bold sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized pig face with Korean characters",
+    "category": "emblem",
+    "meanings": [
+      "pig",
+      "Korean cuisine"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#D32F2F",
+        "common_name": "red",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with white background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "approachable"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "3:4",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "Korean",
+      "food",
+      "pig"
+    ],
+    "values": [
+      "tradition",
+      "generosity"
+    ],
+    "audience_hint": "Korean food enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Complex symbol may be hard to interpret at small sizes",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "symbol",
+      "suggestion": "Simplify the emblem for smaller applications",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "cultural"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with cultural branding trends"
+  },
+  "analysis_timestamp": "2025-11-10T05:47:31.777026Z"
+}
