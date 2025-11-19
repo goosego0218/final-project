@@ -275,8 +275,18 @@ const ProjectsPage = () => {
                   <div 
                     className="cursor-pointer"
                     onClick={() => {
+<<<<<<< HEAD
                       // 프로젝트 대시보드로 이동
                       navigate(`/project?project=${project.id}`);
+=======
+                      // 정보 수집 완료 여부 확인 (system 메시지가 있으면 완료)
+                      const hasSystemMessage = project.messages.some(m => m.role === "system");
+                      if (hasSystemMessage) {
+                        navigate(`/studio?project=${project.id}`);
+                      } else {
+                        navigate(`/chat?project=${project.id}`);
+                      }
+>>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
                     }}
                   >
                     <CardHeader className="pr-12">

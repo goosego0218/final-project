@@ -9,7 +9,7 @@ from __future__ import annotations
 from typing import Literal, Optional, Dict, Any
 from typing_extensions import TypedDict
 
-from langgraph.graph import MessagesState
+from langchain.agents import AgentState
 
 class BrandProfile(TypedDict, total=False):
     """
@@ -29,6 +29,16 @@ class BrandProfile(TypedDict, total=False):
     # 파일 업로드(로고/캐릭터)는 DB나 별도 파일 스토리지 경로로 관리할 예정
 
 
+class ProjectDraft(TypedDict, total=False):
+    """
+    아직 DB prod_grp 에 INSERT 되지 않은 '프로젝트(폴더) 초안' 정보.
+    - grp_nm, grp_desc 는 폴더 관리용 메타데이터일 뿐,
+      브랜드 이름(brand_name)과는 별개다.
+    """
+    grp_nm: str                    # 프로젝트 폴더 이름
+    grp_desc: Optional[str]        # 프로젝트 설명
+    creator_id: Optional[int]      # 초안을 만든 유저 id
+
 class TrendContext(TypedDict, total=False):
     """
     트렌드 분석 관련해서 공통으로 쓰일 컨텍스트/캐시.
@@ -40,10 +50,9 @@ class TrendContext(TypedDict, total=False):
     # 필요하면 키워드별 캐시, 플랫폼별 트렌드 등 확장 가능
     # e.g. "by_platform": {"instagram": "...", "tiktok": "..."}
 
-
-class AppState(MessagesState):
+class AppState(AgentState):
     """
-    전체 그래프에서 공유할 상태 스키마.
+    전체 그래프 공유할 공통 상태 스키마.
     LangGraph의 MessagesState를 상속하면
     - messages: List[AnyMessage] 필드가 자동 포함된다.
     """
@@ -54,6 +63,10 @@ class AppState(MessagesState):
     # 프로젝트/브랜드 식별자
     # - 아직 DB에 생성 전이면 None일 수 있음
     project_id: Optional[int]
+
+    # 프로젝트 폴더 정보
+    # 프로젝트명, 프로젝트 설명 -> 로고와 쇼츠 에이전트에선 쓰지 않는다.
+    project_draft: ProjectDraft
 
     # 브랜드 기본 정보 (브랜드 챗봇이 채운다)
     brand_profile: BrandProfile
