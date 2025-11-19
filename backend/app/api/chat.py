@@ -13,10 +13,16 @@ from app.db.orm import get_orm_session
 from app.core.deps import get_current_user
 from app.models.auth import UserInfo
 
+from langchain_core.messages import HumanMessage
+from app.agents.state import BrandState
+from app.agents.brand_agent import build_brand_graph
+
 router = APIRouter(
     prefix="/chat",
     tags=["chat"],
 )
+
+brand_graph = build_brand_graph()
 
 @router.post("/brand", response_model=ChatResponse)
 def chat_brand(
@@ -32,16 +38,45 @@ def chat_brand(
     """
 
     # TODO: BrandGraph 연결 지점
-    # - 이전 state 불러오기
-    # - state["messages"]에 이번 유저 메시지 추가
-    # - 그래프 실행
-    # - 최종 state에서 reply, project_id 뽑기
+    state: BrandState = {
+        "messages": [],
+        "mode": "brand",
+        "project_id": req.project_id,
+        "brand_profile": {},
+        "trend_context": {},
+        "meta": {},
+    }
 
-    reply = "[brand] AI의 답변입니다."
+    if req.project_id is None and req.grp_nm:
+        state["draft_grp_nm"] = req.grp_nm
+        state["draft_grp_desc"] = req.grp_desc
+        state["draft_creator_id"] = current_user.id
+
+    # 기존 프로젝트가 있다면 브랜드 정보 로드
+    ## 현재 로직 상 프로젝트 수정은 없어서 실행되진 않음
+    if req.project_id is not None:
+        from app.services.project_service import load_brand_profile_for_agent
+
+        profile = load_brand_profile_for_agent(db, req.project_id)
+        state["brand_profile"] = profile
+    
+    state["messages"].append(HumanMessage(content=req.message))
+
+    new_state = brand_graph.invoke(
+        state,
+        # config는 일단 비워둬도 되고, 나중에 user_id/thread_id 등 넣어도 됨
+        # config={"configurable": {"user_id": current_user.id}},
+    )
+
+    messages = new_state["messages"]
+    last_msg = messages[-1]
+    reply_text = getattr(last_msg, "content", str(last_msg))
+
+    project_id = new_state.get("project_id", req.project_id)
 
     return ChatResponse(
-        reply=reply,
-        project_id=req.project_id,
+        reply=reply_text,
+        project_id=project_id,
     )
 
 @router.post("/logo", response_model=ChatResponse)
