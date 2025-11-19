@@ -80,6 +80,7 @@ def chat_brand(
         }},
     )
 
+
     messages = new_state["messages"]
     last_msg = messages[-1]
     reply_text = getattr(last_msg, "content", str(last_msg))
@@ -111,7 +112,6 @@ def chat_logo(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="logo 챗봇 호출 시 project_id 는 필수입니다.",
         )
-    
     
     # TODO: logo 에이전트 호출
     from app.services.project_service import load_brand_profile_for_agent
