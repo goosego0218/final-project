@@ -10,6 +10,8 @@ from typing import List
 
 import logging
 
+from pathlib import Path
+
 from langchain_core.tools import tool
 from langchain_core.documents import Document
 from langchain_chroma import Chroma
@@ -32,11 +34,15 @@ def _get_vectorstore() -> Chroma:
       지금은 agent 테스트용으로 간단히 구성합니다.
     """
     embeddings = get_embeddings()
-    # 추후 경로나 컬렉션 이름은 settings로 빼도 됨
+    
+    # config에서 벡터스토어 설정 가져오기
+    project_root = Path(__file__).parent.parent.parent.parent.parent  # c:/backend/
+    vector_store_path = project_root / settings.vector_store_dir
+    
     return Chroma(
-        collection_name="trend_rag",
+        collection_name=settings.vector_store_collection,
         embedding_function=embeddings,
-        persist_directory="storage/chroma/trend_rag",
+        persist_directory=str(vector_store_path),
     )
 
 
@@ -91,8 +97,9 @@ def tavily_web_search_tool(query: str) -> str:
     logger.info("[도구:tavily_web_search_tool] 쿼리: %s", query)
 
     tavily = TavilySearchResults(
-        api_key=settings.tavily_api_key,
+        tavily_api_key=settings.tavily_api_key,
         max_results=5,
+        search_depth="advanced",
     )
     results = tavily.invoke({"query": query})
 
