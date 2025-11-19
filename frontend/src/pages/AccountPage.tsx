@@ -187,6 +187,14 @@ const AccountPage = () => {
 
   const handleInstagramDisconnect = () => {
     setInstagramConnected(false);
+    // 즉시 localStorage에 저장
+    const profile = getUserProfile();
+    localStorage.setItem('userProfile', JSON.stringify({
+      ...profile,
+      instagram: { connected: false }
+    }));
+    window.dispatchEvent(new Event('profileUpdated'));
+    
     toast({
       title: "인스타그램 연동 해제",
       description: "인스타그램 연동이 해제되었습니다.",
@@ -231,6 +239,14 @@ const AccountPage = () => {
 
   const handleYoutubeDisconnect = () => {
     setYoutubeConnected(false);
+    // 즉시 localStorage에 저장
+    const profile = getUserProfile();
+    localStorage.setItem('userProfile', JSON.stringify({
+      ...profile,
+      youtube: { connected: false }
+    }));
+    window.dispatchEvent(new Event('profileUpdated'));
+    
     toast({
       title: "유튜브 연동 해제",
       description: "유튜브 연동이 해제되었습니다.",

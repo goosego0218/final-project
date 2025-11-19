@@ -6,6 +6,7 @@
 # - 2025-11-18: 세션 발급 테스트 추가
 # - 2025-11-19: 트렌드 에이전트 테스트 엔드포인트 추가
 
+import os
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
@@ -25,6 +26,16 @@ from app.db.session import oracle_db
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     try:
+        if settings.langsmith_tracing and settings.langsmith_api_key:
+            os.environ["LANGCHAIN_TRACING_V2"] = "true"
+            os.environ["LANGCHAIN_API_KEY"] = settings.langsmith_api_key
+
+        # endpoint / project 는 있을 때만 세팅
+        if settings.langsmith_endpoint:
+            os.environ["LANGCHAIN_ENDPOINT"] = settings.langsmith_endpoint
+        if settings.langsmith_project:
+            os.environ["LANGCHAIN_PROJECT"] = settings.langsmith_project
+
         oracle_db.init_pool()
         print("Oracle pool initialized on startup.")
     except Exception as e:

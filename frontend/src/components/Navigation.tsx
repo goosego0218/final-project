@@ -20,8 +20,8 @@ const Navigation = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    // localStorage에서 로그인 상태 복원
-    return localStorage.getItem('isLoggedIn') === 'true';
+    // localStorage와 sessionStorage에서 로그인 상태 복원
+    return localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
   });
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -54,6 +54,7 @@ const Navigation = () => {
   useEffect(() => {
     const handleStorageChange = () => {
       setUserProfile(getUserProfile());
+      setIsLoggedIn(localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true');
     };
     
     const handleProfileUpdate = () => {
@@ -88,9 +89,15 @@ const Navigation = () => {
     setIsLoginOpen(true);
   };
 
-  const handleLoginSuccess = () => {
+  const handleLoginSuccess = (rememberMe: boolean) => {
     setIsLoggedIn(true);
-    localStorage.setItem('isLoggedIn', 'true');
+    if (rememberMe) {
+      localStorage.setItem('isLoggedIn', 'true');
+      sessionStorage.removeItem('isLoggedIn');
+    } else {
+      sessionStorage.setItem('isLoggedIn', 'true');
+      localStorage.removeItem('isLoggedIn');
+    }
     setIsLoginOpen(false);
     setIsSignUpOpen(false);
     toast({
@@ -102,6 +109,7 @@ const Navigation = () => {
   const handleLogout = () => {
     setIsLoggedIn(false);
     localStorage.removeItem('isLoggedIn');
+    sessionStorage.removeItem('isLoggedIn');
     toast({
       title: "로그아웃되었습니다",
       description: "다음에 또 만나요!",

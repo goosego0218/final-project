@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Image, Video, MoreVertical, Pin, Trash2 } from "lucide-react";
+import { Plus, Image, Video, MoreVertical, Pin, Trash2, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { projectStorage, type Project } from "@/lib/projectStorage";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -23,40 +23,49 @@ const ProjectsPage = () => {
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true');
   const [projects, setProjects] = useState<Project[]>([]);
   const [deleteProjectId, setDeleteProjectId] = useState<string | null>(null);
+  const [editProjectId, setEditProjectId] = useState<string | null>(null);
+  const [editProjectName, setEditProjectName] = useState("");
+  const [editProjectDescription, setEditProjectDescription] = useState("");
 
   useEffect(() => {
-    const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    // localStorage 변경 감지
+    const handleStorageChange = () => {
+      const isNowLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+      setIsLoggedIn(isNowLoggedIn);
+      if (isNowLoggedIn) {
+        setProjects(projectStorage.getProjects());
+      } else {
+        navigate("/");
+      }
+    };
+
+    // 초기 로드
+    const loggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
     setIsLoggedIn(loggedIn);
     
     if (loggedIn) {
       setProjects(projectStorage.getProjects());
+    } else {
+      navigate("/");
+      return;
     }
-
-    // localStorage 변경 감지
-    const handleStorageChange = () => {
-      const isNowLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-      setIsLoggedIn(isNowLoggedIn);
-      if (isNowLoggedIn) {
-        setProjects(projectStorage.getProjects());
-      }
-    };
 
     window.addEventListener('storage', handleStorageChange);
     // 같은 탭에서의 변경도 감지하기 위해 interval 사용
-    const interval = setInterval(handleStorageChange, 500);
+    const interval = setInterval(handleStorageChange, 1000);
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       clearInterval(interval);
     };
-  }, []);
+  }, [navigate]);
 
   const handleNewProjectClick = () => {
-    // localStorage에서 직접 확인하여 최신 로그인 상태 반영
-    const currentlyLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    // localStorage와 sessionStorage에서 직접 확인하여 최신 로그인 상태 반영
+    const currentlyLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
     if (!currentlyLoggedIn) {
       setIsLoginOpen(true);
       return;
@@ -116,6 +125,34 @@ const ProjectsPage = () => {
         title: "프로젝트 삭제",
         description: "프로젝트가 삭제되었습니다.",
       });
+    }
+  };
+
+  const handleEditProject = (projectId: string) => {
+    const project = projectStorage.getProject(projectId);
+    if (project) {
+      setEditProjectId(projectId);
+      setEditProjectName(project.name);
+      setEditProjectDescription(project.description || "");
+    }
+  };
+
+  const handleUpdateProject = () => {
+    if (editProjectId && editProjectName.trim()) {
+      const project = projectStorage.getProject(editProjectId);
+      if (project) {
+        project.name = editProjectName.trim();
+        project.description = editProjectDescription.trim();
+        projectStorage.saveProject(project);
+        setProjects(projectStorage.getProjects());
+        setEditProjectId(null);
+        setEditProjectName("");
+        setEditProjectDescription("");
+        toast({
+          title: "프로젝트 수정",
+          description: "프로젝트가 수정되었습니다.",
+        });
+      }
     }
   };
 
@@ -215,6 +252,13 @@ const ProjectsPage = () => {
                           <Pin className="h-4 w-4 mr-2" />
                           {project.pinned ? "고정 해제" : "고정하기"}
                         </DropdownMenuItem>
+                        <DropdownMenuItem onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditProject(project.id);
+                        }}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          수정하기
+                        </DropdownMenuItem>
                         <DropdownMenuItem 
                           className="text-destructive"
                           onClick={(e) => {
@@ -250,17 +294,19 @@ const ProjectsPage = () => {
                         {project.name}
                         {project.pinned && <Pin className="h-4 w-4 text-primary" />}
                       </CardTitle>
-                      <CardDescription>{project.description}</CardDescription>
+                      <CardDescription className={project.description ? "" : "min-h-[1.25rem]"}>
+                        {project.description || "\u00A0"}
+                      </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-3">
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Image className="w-4 h-4" />
-                          <span>로고 {project.logoCount}개</span>
+                          <span>로고 {(project.savedItems?.filter(item => item.type === "logo").length || 0) + (project.logo ? 1 : 0)}개</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <Video className="w-4 h-4" />
-                          <span>숏폼 {project.shortFormCount}개</span>
+                          <span>숏폼 {project.savedItems?.filter(item => item.type === "short").length || 0}개</span>
                         </div>
                       </div>
                       <div className="text-xs text-muted-foreground">
@@ -293,6 +339,58 @@ const ProjectsPage = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={editProjectId !== null} onOpenChange={(open) => {
+        if (!open) {
+          setEditProjectId(null);
+          setEditProjectName("");
+          setEditProjectDescription("");
+        }
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>프로젝트 수정</DialogTitle>
+            <DialogDescription>
+              프로젝트 정보를 수정하세요.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-project-name">프로젝트 이름</Label>
+              <Input
+                id="edit-project-name"
+                placeholder="예: 브랜드 A 마케팅"
+                value={editProjectName}
+                onChange={(e) => setEditProjectName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-project-description">설명 (선택)</Label>
+              <Textarea
+                id="edit-project-description"
+                placeholder="프로젝트에 대한 간단한 설명을 입력하세요"
+                value={editProjectDescription}
+                onChange={(e) => setEditProjectDescription(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setEditProjectId(null);
+              setEditProjectName("");
+              setEditProjectDescription("");
+            }}>
+              취소
+            </Button>
+            <Button 
+              onClick={handleUpdateProject}
+              disabled={!editProjectName.trim()}
+            >
+              수정하기
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

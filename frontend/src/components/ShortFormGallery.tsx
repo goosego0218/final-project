@@ -1,11 +1,5 @@
-<<<<<<< HEAD
 import { useState, useEffect } from "react";
-import { Heart, MessageCircle, Play, Share2, Sparkles } from "lucide-react";
-=======
-import { useState, useEffect, useRef } from "react";
-import { Heart, MessageCircle, Play, Search, Share2, Sparkles } from "lucide-react";
-import { Input } from "@/components/ui/input";
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
+import { Heart, MessageCircle, Play, Clipboard } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -17,10 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-<<<<<<< HEAD
 import Footer from "@/components/Footer";
-=======
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface ShortForm {
   id: number;
@@ -75,38 +67,77 @@ const generateMockShortForms = (): ShortForm[] => {
   });
 };
 
-<<<<<<< HEAD
 interface ShortFormGalleryProps {
   searchQuery?: string;
 }
 
 const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
-  const [allShortForms] = useState<ShortForm[]>(generateMockShortForms());
+  const [allShortForms, setAllShortForms] = useState<ShortForm[]>(generateMockShortForms());
   const [displayedShortForms, setDisplayedShortForms] = useState<ShortForm[]>([]);
   const [sortBy, setSortBy] = useState<string>("latest");
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
-=======
-const ShortFormGallery = () => {
-  const [allShortForms] = useState<ShortForm[]>(generateMockShortForms());
-  const [displayedShortForms, setDisplayedShortForms] = useState<ShortForm[]>([]);
-  const [sortBy, setSortBy] = useState<string>("latest");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const observerRef = useRef<HTMLDivElement>(null);
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
   const [selectedShort, setSelectedShort] = useState<ShortForm | null>(null);
   const [isLiked, setIsLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
   const [commentText, setCommentText] = useState("");
-  const [comments, setComments] = useState<Array<{ author: string; content: string; time: string }>>([]);
+  const [comments, setComments] = useState<Array<{ author: string; authorAvatar?: string; content: string; time: string }>>([]);
   const { toast } = useToast();
 
-<<<<<<< HEAD
   const ITEMS_PER_PAGE = 12;
-=======
-  const ITEMS_PER_PAGE = 9;
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
+
+  // Load public short forms from localStorage
+  useEffect(() => {
+    const publicShortForms = JSON.parse(localStorage.getItem('public_shortforms') || '[]');
+    const publicShortFormsFormatted: ShortForm[] = publicShortForms.map((sf: any) => ({
+      id: sf.id,
+      title: sf.title,
+      thumbnailUrl: sf.thumbnailUrl,
+      likes: sf.likes || 0,
+      comments: sf.comments || 0,
+      duration: sf.duration || "0:15",
+      createdAt: new Date(sf.createdAt),
+      tags: sf.tags || [],
+    }));
+    
+    // Combine with mock short forms (public short forms first)
+    setAllShortForms([...publicShortFormsFormatted, ...generateMockShortForms()]);
+  }, []);
+
+  // Helper functions for managing liked short forms
+  const getLikedShorts = (): Set<number> => {
+    const liked = localStorage.getItem('liked_shorts');
+    return liked ? new Set(JSON.parse(liked)) : new Set();
+  };
+
+  const saveLikedShort = (shortId: number, isLiked: boolean) => {
+    const liked = getLikedShorts();
+    if (isLiked) {
+      liked.add(shortId);
+    } else {
+      liked.delete(shortId);
+    }
+    localStorage.setItem('liked_shorts', JSON.stringify(Array.from(liked)));
+  };
+
+  // Reset likes count when short form changes
+  useEffect(() => {
+    if (selectedShort) {
+      setLikesCount(0);
+      const liked = getLikedShorts();
+      setIsLiked(liked.has(selectedShort.id));
+    }
+  }, [selectedShort]);
+
+  // Listen to storage events to update liked status
+  useEffect(() => {
+    const handleStorageChange = () => {
+      // 카드 목록이 자동으로 업데이트되도록 함
+      setAllShortForms(prev => [...prev]);
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   const getFilteredAndSortedShortForms = () => {
     let filtered = allShortForms;
@@ -139,7 +170,6 @@ const ShortFormGallery = () => {
     return sorted;
   };
 
-<<<<<<< HEAD
   // Reset when sort or search changes
   useEffect(() => {
     const sortedData = getFilteredAndSortedShortForms();
@@ -157,50 +187,6 @@ const ShortFormGallery = () => {
     setPage(nextPage);
     setHasMore(nextItems.length < sortedData.length);
   };
-=======
-  const loadMore = () => {
-    if (loading) return;
-
-    setLoading(true);
-    const sortedData = getFilteredAndSortedShortForms();
-    const nextItems = sortedData.slice(0, page * ITEMS_PER_PAGE);
-    setDisplayedShortForms(nextItems);
-    setLoading(false);
-  };
-
-  // Reset when sort or search changes
-  useEffect(() => {
-    setPage(1);
-    const sortedData = getFilteredAndSortedShortForms();
-    setDisplayedShortForms(sortedData.slice(0, ITEMS_PER_PAGE));
-  }, [sortBy, searchQuery]);
-
-  // Load more on scroll
-  useEffect(() => {
-    loadMore();
-  }, [page]);
-
-  // Infinite scroll observer
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !loading) {
-          const sortedData = getFilteredAndSortedShortForms();
-          if (displayedShortForms.length < sortedData.length) {
-            setPage((prev) => prev + 1);
-          }
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (observerRef.current) {
-      observer.observe(observerRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, [loading, displayedShortForms.length]);
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
 
   const formatDate = (date: Date) => {
     const today = new Date();
@@ -215,14 +201,35 @@ const ShortFormGallery = () => {
   };
 
   const handleLike = () => {
-    setIsLiked(!isLiked);
-    toast({ description: isLiked ? "좋아요를 취소했습니다" : "좋아요를 눌렀습니다" });
+    if (!selectedShort) return;
+    const newLikedState = !isLiked;
+    setIsLiked(newLikedState);
+    setLikesCount(prev => newLikedState ? prev + 1 : prev - 1);
+    saveLikedShort(selectedShort.id, newLikedState);
+    
+    // 카드 목록의 좋아요 수 업데이트
+    setAllShortForms(prev => prev.map(shortForm => {
+      if (shortForm.id === selectedShort.id) {
+        return {
+          ...shortForm,
+          likes: newLikedState ? shortForm.likes + 1 : Math.max(0, shortForm.likes - 1)
+        };
+      }
+      return shortForm;
+    }));
+    
+    // storage 이벤트 발생시켜 다른 컴포넌트에도 알림
+    window.dispatchEvent(new Event('storage'));
+    
+    toast({ description: newLikedState ? "좋아요를 눌렀습니다" : "좋아요를 취소했습니다" });
   };
 
   const handleComment = () => {
     if (commentText.trim()) {
+      const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
       const newComment = {
-        author: "나",
+        author: userProfile.nickname || "나",
+        authorAvatar: userProfile.avatar || undefined,
         content: commentText,
         time: "방금 전"
       };
@@ -233,40 +240,13 @@ const ShortFormGallery = () => {
   };
 
   const handleShare = () => {
+    const url = selectedShort ? `${window.location.origin}/shorts?short=${selectedShort.id}` : window.location.href;
+    navigator.clipboard.writeText(url);
     toast({ description: "링크가 복사되었습니다" });
-  };
-
-  const handleCreateNew = () => {
-    toast({ description: "스튜디오로 이동합니다" });
   };
 
   return (
     <div className="w-full bg-background">
-<<<<<<< HEAD
-=======
-      {/* Search Section */}
-      <div className="max-w-7xl mx-auto px-8 py-12 bg-secondary/20">
-        <div className="max-w-xl mx-auto">
-          <h2 className="text-2xl font-bold text-foreground mb-4 text-center">
-            트렌드 검색
-          </h2>
-          <div className="relative">
-            <Input
-              type="text"
-              placeholder="찾고 싶은 트렌드를 검색하세요 (예: 축제, 음식 등)"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-12 text-base pr-24"
-            />
-            <Button size="sm" className="absolute right-1.5 top-1.5 h-9">
-              <Search className="h-4 w-4 mr-1" />
-              검색
-            </Button>
-          </div>
-        </div>
-      </div>
-
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
       {/* Sort Bar */}
       <div className="max-w-7xl mx-auto px-8 py-6 flex justify-end border-b border-border/50">
         <div className="flex items-center gap-3">
@@ -318,13 +298,10 @@ const ShortFormGallery = () => {
 
               {/* Info section */}
               <div className="p-4 bg-card">
-                <h3 className="text-base font-semibold text-foreground mb-3 line-clamp-2">
-                  {shortForm.title}
-                </h3>
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-1">
-                      <Heart className="w-4 h-4 text-destructive fill-destructive" />
+                      <Heart className={`w-4 h-4 ${getLikedShorts().has(shortForm.id) ? "text-destructive fill-destructive" : ""}`} />
                       <span>{shortForm.likes.toLocaleString()}</span>
                     </div>
                     <div className="flex items-center gap-1">
@@ -339,7 +316,6 @@ const ShortFormGallery = () => {
           ))}
         </div>
 
-<<<<<<< HEAD
         {hasMore && (
           <div className="text-center mt-8">
             <Button variant="outline" onClick={handleLoadMore}>
@@ -347,79 +323,126 @@ const ShortFormGallery = () => {
             </Button>
           </div>
         )}
-=======
-        {/* Loading indicator */}
-        {loading && (
-          <div className="text-center py-8">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-          </div>
-        )}
-
-        {/* Intersection observer target */}
-        <div ref={observerRef} className="h-4" />
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
       </div>
 
       {/* Short Form Detail Modal */}
-      <Dialog open={!!selectedShort} onOpenChange={() => setSelectedShort(null)}>
-        <DialogContent className="max-w-4xl max-h-[85vh] overflow-hidden">
-          <DialogHeader>
-            <DialogTitle>{selectedShort?.title}</DialogTitle>
-          </DialogHeader>
-          <div className="grid md:grid-cols-2 gap-6 h-full min-h-0">
-            <div className="aspect-[9/16] bg-secondary/30 rounded-lg overflow-hidden w-full max-w-[350px]">
-              <img src={selectedShort?.thumbnailUrl} alt={selectedShort?.title} className="w-full h-full object-cover" />
+      <Dialog open={!!selectedShort} onOpenChange={() => {
+        setSelectedShort(null);
+        setIsLiked(false);
+        setLikesCount(0);
+        setComments([]);
+        setCommentText("");
+      }}>
+        <DialogContent className="max-w-[800px] w-[90vw] overflow-hidden p-0 gap-0">
+          <div className="flex md:flex-row flex-col">
+            {/* Left: Short Form Image (9:16 ratio) */}
+            <div className="bg-background flex items-center justify-center p-0 border-r border-border aspect-[9/16] w-full md:w-[300px] md:flex-shrink-0 rounded-l-lg overflow-hidden relative group">
+              <img 
+                src={selectedShort?.thumbnailUrl} 
+                alt={selectedShort?.title} 
+                className="w-full h-full object-cover"
+              />
+              {selectedShort?.videoUrl && (
+                <video
+                  src={selectedShort.videoUrl}
+                  className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                />
+              )}
             </div>
-            <div className="flex flex-col gap-4 h-full min-h-0">
-              <div className="flex gap-2">
-                <Button variant={isLiked ? "default" : "outline"} onClick={handleLike} className="flex-1">
-                  <Heart className={`w-4 h-4 mr-2 ${isLiked ? "fill-current" : ""}`} />
-                  좋아요 {selectedShort?.likes.toLocaleString()}
-                </Button>
-                <Button variant="outline" onClick={handleShare}>
-                  <Share2 className="w-4 h-4 mr-2" />
-                  공유하기
-                </Button>
-              </div>
-              <Button onClick={handleCreateNew} className="w-full">
-                <Sparkles className="w-4 h-4 mr-2" />
-                이 스타일로 새로운 작품 만들기
-              </Button>
-              <div className="flex flex-col gap-3 flex-1 min-h-0">
-                <h3 className="font-semibold flex items-center gap-2">
-                  <MessageCircle className="w-4 h-4" />
-                  댓글 {comments.length}
-                </h3>
-                <div className="max-h-[300px] overflow-y-auto bg-secondary/20 rounded-lg p-3 space-y-3">
+
+            {/* Right: Comments and Actions */}
+            <div className="flex flex-col bg-background w-full md:w-[500px] md:flex-shrink-0 aspect-[9/16] md:aspect-auto md:h-[533px] rounded-r-lg">
+              {/* Comments Section - Top */}
+              <div className="flex-1 min-h-0 overflow-y-auto p-6 border-b border-border">
+                <div className="space-y-4">
                   {comments.length === 0 ? (
                     <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
                       아직 댓글이 없습니다. 첫 댓글을 남겨보세요!
                     </div>
                   ) : (
                     comments.map((comment, idx) => (
-                      <div key={idx} className="bg-background rounded p-2">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-semibold text-sm">{comment.author}</span>
-                          <span className="text-xs text-muted-foreground">{comment.time}</span>
+                      <div key={idx} className="flex gap-3">
+                        <Avatar className="h-8 w-8 flex-shrink-0">
+                          {comment.authorAvatar ? (
+                            <AvatarImage src={comment.authorAvatar} alt={comment.author} />
+                          ) : null}
+                          <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                            {comment.author.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-semibold text-sm text-foreground">{comment.author}</span>
+                            <span className="text-xs text-muted-foreground">{comment.time}</span>
+                          </div>
+                          <p className="text-sm text-foreground break-words">{comment.content}</p>
                         </div>
-                        <p className="text-sm">{comment.content}</p>
                       </div>
                     ))
                   )}
                 </div>
+              </div>
+
+              {/* Action Buttons - Middle */}
+              <div className="p-4 border-b border-border">
+                <div className="flex items-center gap-3">
+                  <Button 
+                    variant="ghost" 
+                    onClick={handleLike}
+                    className="h-9 px-3 gap-2"
+                  >
+                    <Heart className={`h-5 w-5 ${isLiked ? "fill-destructive text-destructive" : ""}`} />
+                    <span className="text-sm font-semibold text-foreground">
+                      {(selectedShort ? selectedShort.likes + likesCount : 0).toLocaleString()}
+                    </span>
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={handleShare}
+                    className="h-9 w-9"
+                  >
+                    <Clipboard className="h-5 w-5" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Comment Input - Bottom */}
+              <div className="p-4 border-t border-border">
                 <div className="flex gap-2">
-                  <Textarea placeholder="댓글을 입력하세요..." value={commentText} onChange={(e) => setCommentText(e.target.value)} className="min-h-[60px] resize-none" rows={2} />
-                  <Button onClick={handleComment} disabled={!commentText.trim()} className="h-[60px]">등록</Button>
+                  <Textarea 
+                    placeholder="댓글을 입력하세요..." 
+                    value={commentText} 
+                    onChange={(e) => setCommentText(e.target.value)} 
+                    className="min-h-[60px] resize-none flex-1" 
+                    rows={2}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        if (commentText.trim()) {
+                          handleComment();
+                        }
+                      }
+                    }}
+                  />
+                  <Button 
+                    onClick={handleComment} 
+                    disabled={!commentText.trim()} 
+                    className="h-[60px] px-6"
+                  >
+                    등록
+                  </Button>
                 </div>
               </div>
             </div>
           </div>
         </DialogContent>
       </Dialog>
-<<<<<<< HEAD
       <Footer />
-=======
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
     </div>
   );
 };

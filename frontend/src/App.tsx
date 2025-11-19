@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -24,11 +23,6 @@ const queryClient = new QueryClient();
 
 <<<<<<< HEAD
 const App = () => {
-  // 앱 초기 로드 시 로그아웃 상태로 설정
-  useEffect(() => {
-    localStorage.removeItem('isLoggedIn');
-  }, []);
-
   return (
 =======
 const App = () => (

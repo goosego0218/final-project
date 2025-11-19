@@ -1,10 +1,5 @@
-<<<<<<< HEAD
 import { useState, useEffect } from "react";
-import { Heart, MessageCircle, Share2, Sparkles } from "lucide-react";
-=======
-import { useState, useEffect, useRef } from "react";
-import { Heart, MessageCircle, Search, Share2, Sparkles } from "lucide-react";
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
+import { Heart, MessageCircle, Clipboard, Sparkles } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -15,7 +10,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-<<<<<<< HEAD
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
@@ -23,11 +17,7 @@ import Footer from "@/components/Footer";
 import { useNavigate } from "react-router-dom";
 import { projectStorage, type Project } from "@/lib/projectStorage";
 import { Label } from "@/components/ui/label";
-=======
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface Logo {
   id: number;
@@ -77,35 +67,23 @@ const generateMockLogos = (): Logo[] => {
 
 type SortOption = "latest" | "likes" | "comments" | "oldest";
 
-<<<<<<< HEAD
 interface LogoGalleryProps {
   searchQuery?: string;
 }
 
 const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
   const navigate = useNavigate();
-  const [allLogos] = useState<Logo[]>(generateMockLogos());
+  const [allLogos, setAllLogos] = useState<Logo[]>(generateMockLogos());
   const [displayedLogos, setDisplayedLogos] = useState<Logo[]>([]);
   const [sortBy, setSortBy] = useState<SortOption>("latest");
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
-=======
-const LogoGallery = () => {
-  const [allLogos] = useState<Logo[]>(generateMockLogos());
-  const [displayedLogos, setDisplayedLogos] = useState<Logo[]>([]);
-  const [sortBy, setSortBy] = useState<SortOption>("latest");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const loadMoreRef = useRef<HTMLDivElement>(null);
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
   const [selectedLogo, setSelectedLogo] = useState<Logo | null>(null);
   const [isLiked, setIsLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
   const [commentText, setCommentText] = useState("");
-  const [comments, setComments] = useState<Array<{ author: string; content: string; time: string }>>([]);
+  const [comments, setComments] = useState<Array<{ author: string; authorAvatar?: string; content: string; time: string }>>([]);
   const { toast } = useToast();
-<<<<<<< HEAD
   const [isCreateNewModalOpen, setIsCreateNewModalOpen] = useState(false);
   const [isProjectSelectModalOpen, setIsProjectSelectModalOpen] = useState(false);
   const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
@@ -114,10 +92,58 @@ const LogoGallery = () => {
   const [projects, setProjects] = useState<Project[]>([]);
 
   const ITEMS_PER_PAGE = 12;
-=======
 
-  const ITEMS_PER_PAGE = 8;
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
+  // Load public logos from localStorage
+  useEffect(() => {
+    const publicLogos = JSON.parse(localStorage.getItem('public_logos') || '[]');
+    const publicLogosFormatted: Logo[] = publicLogos.map((logo: any) => ({
+      id: logo.id,
+      imageSrc: logo.url,
+      brandName: logo.brandName,
+      likes: logo.likes || 0,
+      comments: logo.comments || 0,
+      createdAt: new Date(logo.createdAt),
+      tags: logo.tags || [],
+    }));
+    
+    // Combine with mock logos (public logos first)
+    setAllLogos([...publicLogosFormatted, ...generateMockLogos()]);
+  }, []);
+
+  // Helper functions for managing liked logos
+  const getLikedLogos = (): Set<number> => {
+    const liked = localStorage.getItem('liked_logos');
+    return liked ? new Set(JSON.parse(liked)) : new Set();
+  };
+
+  const saveLikedLogo = (logoId: number, isLiked: boolean) => {
+    const liked = getLikedLogos();
+    if (isLiked) {
+      liked.add(logoId);
+    } else {
+      liked.delete(logoId);
+    }
+    localStorage.setItem('liked_logos', JSON.stringify(Array.from(liked)));
+  };
+
+  // Reset likes count when logo changes
+  useEffect(() => {
+    if (selectedLogo) {
+      setLikesCount(0);
+      const liked = getLikedLogos();
+      setIsLiked(liked.has(selectedLogo.id));
+    }
+  }, [selectedLogo]);
+
+  // Listen to storage events to update liked status
+  useEffect(() => {
+    const handleStorageChange = () => {
+      // 카드 목록이 자동으로 업데이트되도록 함
+      setAllLogos(prev => [...prev]);
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   // Filter and sort logos
   const getFilteredAndSortedLogos = () => {
@@ -152,7 +178,6 @@ const LogoGallery = () => {
     return sorted;
   };
 
-<<<<<<< HEAD
   // Reset when sort or search changes
   useEffect(() => {
     const sortedLogos = getFilteredAndSortedLogos();
@@ -170,58 +195,6 @@ const LogoGallery = () => {
     setPage(nextPage);
     setHasMore(nextItems.length < sortedLogos.length);
   };
-=======
-  // Load more items
-  const loadMore = () => {
-    if (loading) return;
-
-    setLoading(true);
-    setTimeout(() => {
-      const sortedLogos = getFilteredAndSortedLogos();
-      const nextItems = sortedLogos.slice(0, page * ITEMS_PER_PAGE);
-      setDisplayedLogos(nextItems);
-      setPage((prev) => prev + 1);
-      setLoading(false);
-    }, 500);
-  };
-
-  // Reset when sort or search changes
-  useEffect(() => {
-    setPage(1);
-    const sortedLogos = getFilteredAndSortedLogos();
-    setDisplayedLogos(sortedLogos.slice(0, ITEMS_PER_PAGE));
-    setPage(2);
-  }, [sortBy, searchQuery]);
-
-  // Infinite scroll observer
-  useEffect(() => {
-    if (observerRef.current) {
-      observerRef.current.disconnect();
-    }
-
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !loading) {
-          const sortedLogos = getFilteredAndSortedLogos();
-          if (displayedLogos.length < sortedLogos.length) {
-            loadMore();
-          }
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (loadMoreRef.current) {
-      observerRef.current.observe(loadMoreRef.current);
-    }
-
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-    };
-  }, [loading, displayedLogos.length, sortBy, searchQuery]);
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
 
   const formatDate = (date: Date) => {
     const now = new Date();
@@ -236,14 +209,35 @@ const LogoGallery = () => {
   };
 
   const handleLike = () => {
-    setIsLiked(!isLiked);
-    toast({ description: isLiked ? "좋아요를 취소했습니다" : "좋아요를 눌렀습니다" });
+    if (!selectedLogo) return;
+    const newLikedState = !isLiked;
+    setIsLiked(newLikedState);
+    setLikesCount(prev => newLikedState ? prev + 1 : prev - 1);
+    saveLikedLogo(selectedLogo.id, newLikedState);
+    
+    // 카드 목록의 좋아요 수 업데이트
+    setAllLogos(prev => prev.map(logo => {
+      if (logo.id === selectedLogo.id) {
+        return {
+          ...logo,
+          likes: newLikedState ? logo.likes + 1 : Math.max(0, logo.likes - 1)
+        };
+      }
+      return logo;
+    }));
+    
+    // storage 이벤트 발생시켜 다른 컴포넌트에도 알림
+    window.dispatchEvent(new Event('storage'));
+    
+    toast({ description: newLikedState ? "좋아요를 눌렀습니다" : "좋아요를 취소했습니다" });
   };
 
   const handleComment = () => {
     if (commentText.trim()) {
+      const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
       const newComment = {
-        author: "나",
+        author: userProfile.nickname || "나",
+        authorAvatar: userProfile.avatar || undefined,
         content: commentText,
         time: "방금 전"
       };
@@ -254,12 +248,21 @@ const LogoGallery = () => {
   };
 
   const handleShare = () => {
+    const url = selectedLogo ? `${window.location.origin}/logos?logo=${selectedLogo.id}` : window.location.href;
+    navigator.clipboard.writeText(url);
     toast({ description: "링크가 복사되었습니다" });
   };
 
   const handleCreateNew = () => {
-<<<<<<< HEAD
-    setIsCreateNewModalOpen(true);
+    setSelectedLogo(null); // 로고 상세 모달 닫기
+    setIsLiked(false);
+    setLikesCount(0);
+    setComments([]);
+    setCommentText("");
+    // 약간의 지연 후 새로운 작품 만들기 모달 열기
+    setTimeout(() => {
+      setIsCreateNewModalOpen(true);
+    }, 100);
   };
 
   // "내가 하던 프로젝트에서 계속하기" 선택
@@ -269,10 +272,11 @@ const LogoGallery = () => {
     setProjects(projectStorage.getProjects());
   };
 
-  // 프로젝트 선택 및 Studio로 이동
+  // 프로젝트 선택 및 ChatPage로 이동 (대화하던 시점으로 복귀)
   const handleSelectProject = (projectId: string) => {
     setIsProjectSelectModalOpen(false);
-    navigate(`/studio?project=${projectId}`);
+    projectStorage.setCurrentProject(projectId);
+    navigate(`/chat?project=${projectId}`);
   };
 
   // "새 프로젝트로 시작하기" 선택
@@ -293,38 +297,10 @@ const LogoGallery = () => {
       // ChatPage로 이동 (로고 업로드 단계 제외 플래그)
       navigate(`/chat?project=${newProject.id}&skipLogoUpload=true`);
     }
-=======
-    toast({ description: "스튜디오로 이동합니다" });
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
   };
 
   return (
     <div className="w-full bg-background">
-<<<<<<< HEAD
-=======
-      {/* Search Section */}
-      <div className="max-w-7xl mx-auto px-8 py-12 bg-secondary/20">
-        <div className="max-w-xl mx-auto">
-          <h2 className="text-2xl font-bold text-foreground mb-4 text-center">
-            트렌드 검색
-          </h2>
-          <div className="relative">
-            <Input
-              type="text"
-              placeholder="찾고 싶은 트렌드를 검색하세요 (예: 축제, 음식 등)"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-12 text-base pr-24"
-            />
-            <Button size="sm" className="absolute right-1.5 top-1.5 h-9">
-              <Search className="h-4 w-4 mr-1" />
-              검색
-            </Button>
-          </div>
-        </div>
-      </div>
-
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
       {/* Sort Bar */}
       <div className="max-w-7xl mx-auto px-8 py-6 flex justify-end border-b border-border/50">
         <div className="flex items-center gap-3">
@@ -360,13 +336,10 @@ const LogoGallery = () => {
                   />
                 </div>
                 <div className="p-4">
-                  <h3 className="text-lg font-semibold text-foreground mb-3">
-                    {logo.brandName}
-                  </h3>
                   <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <div className="flex items-center gap-4">
                       <span className="flex items-center gap-1">
-                        <Heart className="w-4 h-4" />
+                        <Heart className={`w-4 h-4 ${getLikedLogos().has(logo.id) ? "fill-destructive text-destructive" : ""}`} />
                         {logo.likes.toLocaleString()}
                       </span>
                       <span className="flex items-center gap-1">
@@ -382,7 +355,6 @@ const LogoGallery = () => {
           ))}
         </div>
 
-<<<<<<< HEAD
         {hasMore && (
           <div className="text-center mt-8">
             <Button variant="outline" onClick={handleLoadMore}>
@@ -390,76 +362,119 @@ const LogoGallery = () => {
             </Button>
           </div>
         )}
-=======
-        {/* Loading indicator */}
-        {loading && (
-          <div className="text-center py-8">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
-        )}
-
-        {/* Intersection observer target */}
-        <div ref={loadMoreRef} className="h-4" />
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
       </div>
 
       {/* Logo Detail Modal */}
-      <Dialog open={!!selectedLogo} onOpenChange={() => setSelectedLogo(null)}>
-        <DialogContent className="max-w-4xl max-h-[85vh] overflow-hidden">
-          <DialogHeader>
-            <DialogTitle>{selectedLogo?.brandName}</DialogTitle>
-          </DialogHeader>
-          <div className="grid md:grid-cols-2 gap-6 h-full min-h-0">
-            <div className="aspect-square bg-secondary/30 rounded-lg overflow-hidden w-full max-w-[500px]">
-              <img src={selectedLogo?.imageSrc} alt={selectedLogo?.brandName} className="w-full h-full object-cover" />
+      <Dialog open={!!selectedLogo} onOpenChange={() => {
+        setSelectedLogo(null);
+        setIsLiked(false);
+        setLikesCount(0);
+        setComments([]);
+        setCommentText("");
+      }}>
+        <DialogContent className="max-w-[800px] w-[90vw] overflow-hidden p-0 gap-0">
+          <div className="flex md:flex-row flex-col">
+            {/* Left: Logo Image */}
+            <div className="bg-background flex items-center justify-center p-0 border-r border-border aspect-square w-full md:w-[400px] md:flex-shrink-0 rounded-l-lg overflow-hidden">
+              <img 
+                src={selectedLogo?.imageSrc} 
+                alt={selectedLogo?.brandName} 
+                className="w-full h-full object-contain"
+              />
             </div>
-            <div className="flex flex-col gap-4 h-full min-h-0">
-              <div className="flex gap-2">
-                <Button variant={isLiked ? "default" : "outline"} onClick={handleLike} className="flex-1">
-                  <Heart className={`w-4 h-4 mr-2 ${isLiked ? "fill-current" : ""}`} />
-                  좋아요 {selectedLogo?.likes.toLocaleString()}
-                </Button>
-                <Button variant="outline" onClick={handleShare}>
-                  <Share2 className="w-4 h-4 mr-2" />
-                  공유하기
-                </Button>
-              </div>
-              <Button onClick={handleCreateNew} className="w-full">
-                <Sparkles className="w-4 h-4 mr-2" />
-                이 스타일로 새로운 작품 만들기
-              </Button>
-              <div className="flex flex-col gap-3 flex-1 min-h-0">
-                <h3 className="font-semibold flex items-center gap-2">
-                  <MessageCircle className="w-4 h-4" />
-                  댓글 {comments.length}
-                </h3>
-                <div className="flex-1 min-h-0 overflow-y-auto bg-secondary/20 rounded-lg p-3 space-y-3">
+
+            {/* Right: Comments and Actions */}
+            <div className="flex flex-col bg-background w-full md:w-[400px] md:flex-shrink-0 aspect-square md:aspect-auto md:h-[400px] rounded-r-lg">
+              {/* Comments Section - Top */}
+              <div className="flex-1 min-h-0 overflow-y-auto p-6 border-b border-border">
+                <div className="space-y-4">
                   {comments.length === 0 ? (
                     <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
                       아직 댓글이 없습니다. 첫 댓글을 남겨보세요!
                     </div>
                   ) : (
                     comments.map((comment, idx) => (
-                      <div key={idx} className="bg-background rounded p-2">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-semibold text-sm">{comment.author}</span>
-                          <span className="text-xs text-muted-foreground">{comment.time}</span>
+                      <div key={idx} className="flex gap-3">
+                        <Avatar className="h-8 w-8 flex-shrink-0">
+                          {comment.authorAvatar ? (
+                            <AvatarImage src={comment.authorAvatar} alt={comment.author} />
+                          ) : null}
+                          <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                            {comment.author.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-semibold text-sm text-foreground">{comment.author}</span>
+                            <span className="text-xs text-muted-foreground">{comment.time}</span>
+                          </div>
+                          <p className="text-sm text-foreground break-words">{comment.content}</p>
                         </div>
-                        <p className="text-sm">{comment.content}</p>
                       </div>
                     ))
                   )}
                 </div>
+              </div>
+
+              {/* Action Buttons - Middle */}
+              <div className="p-4 border-b border-border space-y-3">
+                <div className="flex items-center gap-3">
+                  <Button 
+                    variant="ghost" 
+                    onClick={handleLike}
+                    className="h-9 px-3 gap-2"
+                  >
+                    <Heart className={`h-5 w-5 ${isLiked ? "fill-destructive text-destructive" : ""}`} />
+                    <span className="text-sm font-semibold text-foreground">
+                      {(selectedLogo ? selectedLogo.likes + likesCount : 0).toLocaleString()}
+                    </span>
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={handleShare}
+                    className="h-9 w-9"
+                  >
+                    <Clipboard className="h-5 w-5" />
+                  </Button>
+                </div>
+                <Button onClick={handleCreateNew} className="w-full bg-primary hover:bg-primary/90">
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  이 스타일로 새로운 작품 만들기
+                </Button>
+              </div>
+
+              {/* Comment Input - Bottom */}
+              <div className="p-4 border-t border-border">
                 <div className="flex gap-2">
-                  <Textarea placeholder="댓글을 입력하세요..." value={commentText} onChange={(e) => setCommentText(e.target.value)} className="min-h-[60px] resize-none" rows={2} />
-                  <Button onClick={handleComment} disabled={!commentText.trim()} className="h-[60px]">등록</Button>
+                  <Textarea 
+                    placeholder="댓글을 입력하세요..." 
+                    value={commentText} 
+                    onChange={(e) => setCommentText(e.target.value)} 
+                    className="min-h-[60px] resize-none flex-1" 
+                    rows={2}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        if (commentText.trim()) {
+                          handleComment();
+                        }
+                      }
+                    }}
+                  />
+                  <Button 
+                    onClick={handleComment} 
+                    disabled={!commentText.trim()} 
+                    className="h-[60px] px-6"
+                  >
+                    등록
+                  </Button>
                 </div>
               </div>
             </div>
           </div>
         </DialogContent>
       </Dialog>
-<<<<<<< HEAD
 
       {/* 새로운 작품 만들기 선택 모달 */}
       <Dialog open={isCreateNewModalOpen} onOpenChange={setIsCreateNewModalOpen}>
@@ -590,8 +605,6 @@ const LogoGallery = () => {
         </DialogContent>
       </Dialog>
       <Footer />
-=======
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
     </div>
   );
 };
