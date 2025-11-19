@@ -1,7 +1,8 @@
 # RAG + Tavily + Jina Rerank 트렌드 에이전트
 # 작성일: 2025-11-18
 # 수정내역
-# - 2025-11-19: 초기 작성
+# - 2025-11-19: 초기 작성 (create_react_agent 버전)
+# - 2025-11-19: create_agent + AgentState(AppState) 버전으로 변경
 
 from __future__ import annotations
 
@@ -9,9 +10,9 @@ from typing import Any, Dict, Optional
 
 import logging
 
-from langgraph.prebuilt import create_react_agent
+from langchain.agents import create_agent
 from langgraph.checkpoint.memory import MemorySaver
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, AIMessage
 
 from app.agents.state import AppState
 from app.agents.tools.trend_tools import (
@@ -27,7 +28,7 @@ logger = logging.getLogger(__name__)
 # 트렌드 서브에이전트 시스템 프롬프트
 # (기존 SUBAGENT1_SYSTEM_PROMPT 를 기반으로 재구성)
 # -------------------------------------------------------------------
-SUBAGENT1_SYSTEM_PROMPT = """
+SYSTEM_PROMPT = """
 너는 **RAG 통합 검색 전문 에이전트**다.
 
 # 역할
@@ -70,23 +71,23 @@ SUBAGENT1_SYSTEM_PROMPT = """
 
 - 근거가 된 내용이 있으면 '근거' 섹션에서 간단히 정리한다.
 - 도구 호출 로그나 내부 시스템 설명은 그대로 노출하지 않는다.
-"""
+""".strip()
 
 # -------------------------------------------------------------------
-# LangGraph ReAct 에이전트 생성
+# LangGraph + LangChain v1 create_agent 기반 에이전트 생성
 # -------------------------------------------------------------------
 
 _memory = MemorySaver()
 
-_trend_agent = create_react_agent(
-    model=get_chat_model(),
+_trend_agent = create_agent(
+    model=get_chat_model(),                  # 기존 LLM 팩토리 그대로 사용
     tools=[
         rag_search_tool,
         tavily_web_search_tool,
         apply_reranker_tool,
     ],
-    prompt=SUBAGENT1_SYSTEM_PROMPT,
-    state_schema=AppState,   # ✅ AppState 기반
+    system_prompt=SYSTEM_PROMPT,
+    state_schema=AppState,
     checkpointer=_memory,
 )
 
@@ -104,7 +105,7 @@ def run_trend_query_for_api(
 
     - AppState 구조를 맞춰서 초기 state를 구성하고
     - _trend_agent.invoke(...) 를 호출한 뒤
-    - 마지막 메시지의 content만 뽑아서 문자열로 반환한다.
+    - 마지막 AIMessage의 content만 뽑아서 문자열로 반환한다.
     """
     logger.info(
         "[trend_agent] run_trend_query_for_api user_id=%s project_id=%s mode=%s query=%s",
@@ -116,6 +117,7 @@ def run_trend_query_for_api(
 
     initial_state: AppState = {
         "messages": [HumanMessage(content=query)],
+        # AgentState 기본 필드(remaining_steps)는 기본값 사용
         "mode": mode,                       # "brand" / "logo" / "shorts"
         "project_id": project_id,
         "brand_profile": brand_profile or {},
@@ -123,13 +125,32 @@ def run_trend_query_for_api(
         "meta": {"user_id": user_id},
     }
 
-    result_state = _trend_agent.invoke(initial_state)
+    # thread_id를 붙이고 싶으면 config에 넣을 수 있음 (옵션)
+    # config = {"configurable": {"thread_id": f"trend:{user_id}:{project_id}"}}
+    # result_state = _trend_agent.invoke(initial_state, config=config)
+
+    thread_id = f"trend:{user_id or 'anon'}:{project_id or 'none'}"
+
+    result_state = _trend_agent.invoke(
+        initial_state,
+        config={
+            "configurable": {
+                "thread_id": thread_id,
+            }
+        },
+    )
+    
     messages = result_state["messages"]
     if not messages:
         return "응답을 생성하지 못했습니다."
 
+    # 가장 마지막 AIMessage를 찾아서 반환
+    for msg in reversed(messages):
+        if isinstance(msg, AIMessage):
+            return msg.content
+
+    # 혹시 AIMessage가 없으면 마지막 메시지 content라도 반환
     final_msg = messages[-1]
-    # LangChain 메시지 객체일 경우 .content 사용
     content = getattr(final_msg, "content", None)
     if isinstance(content, str):
         return content
