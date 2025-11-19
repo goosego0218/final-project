@@ -3,6 +3,7 @@
 # 작성일: 2025-11-18
 # 수정내역
 # - 2025-11-18: 초기 작성
+# - 2025-11-19: 브랜드, 로고, 쇼츠 엔드포인트 작성
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session

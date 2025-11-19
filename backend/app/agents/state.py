@@ -29,6 +29,16 @@ class BrandProfile(TypedDict, total=False):
     # 파일 업로드(로고/캐릭터)는 DB나 별도 파일 스토리지 경로로 관리할 예정
 
 
+class ProjectDraft(TypedDict, total=False):
+    """
+    아직 DB prod_grp 에 INSERT 되지 않은 '프로젝트(폴더) 초안' 정보.
+    - grp_nm, grp_desc 는 폴더 관리용 메타데이터일 뿐,
+      브랜드 이름(brand_name)과는 별개다.
+    """
+    grp_nm: str                    # 프로젝트 폴더 이름
+    grp_desc: Optional[str]        # 프로젝트 설명
+    creator_id: Optional[int]      # 초안을 만든 유저 id
+
 class TrendContext(TypedDict, total=False):
     """
     트렌드 분석 관련해서 공통으로 쓰일 컨텍스트/캐시.
@@ -40,10 +50,9 @@ class TrendContext(TypedDict, total=False):
     # 필요하면 키워드별 캐시, 플랫폼별 트렌드 등 확장 가능
     # e.g. "by_platform": {"instagram": "...", "tiktok": "..."}
 
-
 class AppState(MessagesState):
     """
-    전체 그래프에서 공유할 상태 스키마.
+    전체 그래프 공유할 공통 상태 스키마.
     LangGraph의 MessagesState를 상속하면
     - messages: List[AnyMessage] 필드가 자동 포함된다.
     """
@@ -55,6 +64,10 @@ class AppState(MessagesState):
     # - 아직 DB에 생성 전이면 None일 수 있음
     project_id: Optional[int]
 
+    # 프로젝트 폴더 정보
+    # 프로젝트명, 프로젝트 설명
+    project_draft: ProjectDraft
+
     # 브랜드 기본 정보 (브랜드 챗봇이 채운다)
     brand_profile: BrandProfile
 
@@ -63,3 +76,13 @@ class AppState(MessagesState):
 
     # 추가로 메타데이터 보관용 (필요 시 확장)
     meta: Dict[str, Any]
+
+class BrandState(AppState, total=False):
+    """
+    브랜드 챗봇에서만 쓰는 추가 필드.
+    - 폴더(prod_grp) 생성에 필요한 초안 정보.
+    - 로고/숏폼 그래프에서는 전혀 사용하지 않는다.
+    """
+    draft_grp_nm: str                  # 프로젝트 폴더명
+    draft_grp_desc: Optional[str]      # 폴더 설명
+    draft_creator_id: int              # 만든 유저 id

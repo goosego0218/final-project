@@ -101,6 +101,7 @@ def load_brand_profile_for_agent(
         if info.preferred_colors:
             profile["preferred_colors"] = info.preferred_colors
 
+    # 혹시나 브랜드명 없으면 프로젝트 그룹명으로 넣기
     if "brand_name" not in profile and group.grp_nm:
         profile["brand_name"] = group.grp_nm        
 
