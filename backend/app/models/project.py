@@ -64,3 +64,9 @@ class ProdGroup(Base):
         back_populates="project_groups",
         lazy="joined",
     )
+
+    brand_info = relationship(
+        "BrandInfo",
+        back_populates="group",
+        uselist=False,
+    )
