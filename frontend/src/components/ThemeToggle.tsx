@@ -5,10 +5,15 @@ const ThemeToggle = () => {
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
+    // 초기 테마 확인 - localStorage에 값이 없으면 라이트모드 유지
     const theme = localStorage.getItem("theme");
     if (theme === "dark") {
       document.documentElement.classList.add("dark");
       setIsDark(true);
+    } else {
+      // 라이트모드가 기본이므로 dark 클래스 제거
+      document.documentElement.classList.remove("dark");
+      setIsDark(false);
     }
   }, []);
 

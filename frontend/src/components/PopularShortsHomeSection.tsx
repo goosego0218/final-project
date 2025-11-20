@@ -166,7 +166,10 @@ const PopularShortsHomeSection = () => {
       const liked = getLikedShorts();
       // selectedShort.id가 없을 수 있으므로 title이나 다른 고유 식별자 사용
       const shortId = selectedShort.id || selectedShort.title?.charCodeAt(0) || 0;
-      setIsLiked(liked.has(shortId));
+      const likedState = liked.has(shortId);
+      setIsLiked(likedState);
+    } else {
+      setIsLiked(false);
     }
   }, [selectedShort]);
 

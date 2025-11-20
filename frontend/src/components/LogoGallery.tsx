@@ -131,7 +131,10 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
     if (selectedLogo) {
       setLikesCount(0);
       const liked = getLikedLogos();
-      setIsLiked(liked.has(selectedLogo.id));
+      const likedState = liked.has(selectedLogo.id);
+      setIsLiked(likedState);
+    } else {
+      setIsLiked(false);
     }
   }, [selectedLogo]);
 
@@ -599,7 +602,7 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
               onClick={handleCreateProject}
               disabled={!projectName.trim()}
             >
-              생성하기
+              다음으로
             </Button>
           </DialogFooter>
         </DialogContent>
