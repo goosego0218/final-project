@@ -1,0 +1,95 @@
+{
+  "source_image": "page5_35.jpg",
+  "text_elements": {
+    "primary_text": "Yeolim art",
+    "secondary_text": "(주)열림아트",
+    "language": "Latin and Korean",
+    "font_style": "cursive and sans-serif",
+    "typography_notes": "The cursive font is elegant and readable, while the sans-serif is clear.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "A stylized golf club and ball integrated into the text",
+    "category": "lettermark",
+    "meanings": [
+      "creativity",
+      "art",
+      "golf"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FF4500",
+        "common_name": "orange",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between orange and black for visibility.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "playful"
+  ],
+  "tone_descriptors": [
+    "creative",
+    "friendly"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol.",
+    "spacing_notes": "Adequate spacing between elements for clarity.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "art",
+      "creativity",
+      "golf"
+    ],
+    "values": [
+      "innovation",
+      "fun"
+    ],
+    "audience_hint": "art enthusiasts and golfers",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Golf elements may not be immediately clear.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "symbol clarity",
+      "suggestion": "Enhance the golf elements for better recognition.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "playful"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends of integrating playful elements into logos."
+  },
+  "analysis_timestamp": "2025-11-10T06:26:40.619371Z"
+}

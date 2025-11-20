@@ -1,0 +1,88 @@
+{
+  "source_image": "032_IMSM.jpg",
+  "text_elements": {
+    "primary_text": "IMSM",
+    "secondary_text": "interior Branding Consulting DESIGN",
+    "language": "Latin",
+    "font_style": "geometric sans-serif",
+    "typography_notes": "The primary text is stylized with geometric shapes, which may affect readability.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Stylized lettermark with geometric shapes",
+    "category": "lettermark",
+    "meanings": [
+      "modernity",
+      "creativity"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "High contrast with white background ensures readability.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "professional",
+    "creative"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with equal spacing between elements.",
+    "spacing_notes": "Adequate white space enhances clarity.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "interior",
+      "branding",
+      "design"
+    ],
+    "values": [
+      "innovation",
+      "professionalism"
+    ],
+    "audience_hint": "businesses seeking branding services",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Geometric shapes may hinder quick readability.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Simplify geometric shapes for better readability.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends favoring minimalistic and modern designs."
+  },
+  "analysis_timestamp": "2025-11-10T05:12:01.628444Z"
+}

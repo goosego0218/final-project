@@ -1,0 +1,100 @@
+{
+  "source_image": "019_Boston_Mentor.jpg",
+  "text_elements": {
+    "primary_text": "BOSTON MENTOR",
+    "secondary_text": "AMERICAN EDUCATION",
+    "language": "Latin",
+    "font_style": "Serif",
+    "typography_notes": "Clear and professional, but secondary text is smaller and may be less legible at a distance.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Shield with a book, column, and laurel wreath",
+    "category": "emblem",
+    "meanings": [
+      "education",
+      "tradition",
+      "prestige"
+    ],
+    "confidence": 0.95
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#B22222",
+        "common_name": "firebrick",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#DAA520",
+        "common_name": "goldenrod",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "traditional",
+    "academic"
+  ],
+  "tone_descriptors": [
+    "prestigious",
+    "educational"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "3:4",
+    "balance_notes": "Well-balanced with central emblem and text below.",
+    "spacing_notes": "Adequate spacing between elements.",
+    "confidence": 0.85
+  },
+  "brand_message": {
+    "keywords": [
+      "education",
+      "mentorship",
+      "prestige"
+    ],
+    "values": [
+      "knowledge",
+      "tradition"
+    ],
+    "audience_hint": "students, educators",
+    "confidence": 0.9
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Secondary text may be hard to read at smaller sizes.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Increase size of secondary text for better readability.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "classic",
+      "timeless"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with traditional academic branding trends."
+  },
+  "analysis_timestamp": "2025-11-10T04:46:05.970524Z"
+}

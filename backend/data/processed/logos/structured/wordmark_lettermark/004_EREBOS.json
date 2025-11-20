@@ -1,0 +1,80 @@
+{
+  "source_image": "004_EREBOS.jpg",
+  "text_elements": {
+    "primary_text": "EREBOS",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "Bold, geometric sans-serif",
+    "typography_notes": "Highly readable with strong visual impact",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Star above the letter 'O'",
+    "category": "abstract",
+    "meanings": [
+      "energy",
+      "brightness"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "High contrast with white background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "bold",
+    "energetic"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate spacing between letters",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "energy",
+      "modernity"
+    ],
+    "values": [
+      "innovation",
+      "strength"
+    ],
+    "audience_hint": "young, dynamic consumers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Introduce a secondary color for more depth",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends of minimalistic and bold designs"
+  },
+  "analysis_timestamp": "2025-11-10T04:21:58.012511Z"
+}

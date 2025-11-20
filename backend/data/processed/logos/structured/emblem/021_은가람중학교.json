@@ -1,0 +1,109 @@
+{
+  "source_image": "021_은가람중학교.jpg",
+  "text_elements": {
+    "primary_text": "EUNGARAM MIDDLE SCHOOL",
+    "secondary_text": "2015",
+    "language": "English, Korean",
+    "font_style": "Sans-serif, bold",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Stylized tree with colorful horizontal bars",
+    "category": "abstract",
+    "meanings": [
+      "growth",
+      "education",
+      "diversity"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#6A1B9A",
+        "common_name": "purple",
+        "usage": "background"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#F06292",
+        "common_name": "pink",
+        "usage": "accent"
+      },
+      {
+        "hex": "#4DB6AC",
+        "common_name": "teal",
+        "usage": "accent"
+      },
+      {
+        "hex": "#FFD54F",
+        "common_name": "yellow",
+        "usage": "accent"
+      },
+      {
+        "hex": "#8BC34A",
+        "common_name": "green",
+        "usage": "accent"
+      },
+      {
+        "hex": "#795548",
+        "common_name": "brown",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "educational"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "inclusive"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Symmetrical and balanced",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "education",
+      "growth",
+      "community"
+    ],
+    "values": [
+      "diversity",
+      "inclusivity"
+    ],
+    "audience_hint": "students, parents, educators",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Ensure color consistency across media",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "colorful"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends in educational branding"
+  },
+  "analysis_timestamp": "2025-11-10T04:55:31.316274Z"
+}

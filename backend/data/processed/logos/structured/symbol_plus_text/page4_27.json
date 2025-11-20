@@ -1,0 +1,88 @@
+{
+  "source_image": "page4_27.jpg",
+  "text_elements": {
+    "primary_text": "한끼홈쿡",
+    "secondary_text": "Premium Meal Kit Store",
+    "language": "Korean",
+    "font_style": "modern sans-serif",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Stylized Korean characters within an oval shape",
+    "category": "lettermark",
+    "meanings": [
+      "cultural",
+      "premium"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#F4B400",
+        "common_name": "gold",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "premium",
+    "cultural"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "3:4",
+    "balance_notes": "Well-balanced with central focus",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.8
+  },
+  "brand_message": {
+    "keywords": [
+      "premium",
+      "meal kit",
+      "Korean"
+    ],
+    "values": [
+      "quality",
+      "tradition"
+    ],
+    "audience_hint": "food enthusiasts",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Small secondary text",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "typography",
+      "suggestion": "Increase size of secondary text",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "cultural"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with trends in cultural branding and minimalism"
+  },
+  "analysis_timestamp": "2025-11-10T06:15:23.924944Z"
+}

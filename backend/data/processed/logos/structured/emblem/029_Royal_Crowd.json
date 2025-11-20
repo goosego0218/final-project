@@ -1,0 +1,100 @@
+{
+  "source_image": "029_Royal_Crowd.jpg",
+  "text_elements": {
+    "primary_text": "ROYAL CROWD",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "Serif, uppercase",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Coat of arms with crown and shield",
+    "category": "emblem",
+    "meanings": [
+      "royalty",
+      "prestige",
+      "tradition"
+    ],
+    "confidence": 0.95
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#006400",
+        "common_name": "dark green",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFD700",
+        "common_name": "gold",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "traditional",
+    "elegant"
+  ],
+  "tone_descriptors": [
+    "luxury",
+    "regal"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with symmetrical elements",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "royalty",
+      "prestige",
+      "tradition"
+    ],
+    "values": [
+      "excellence",
+      "heritage"
+    ],
+    "audience_hint": "affluent individuals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "complexity",
+      "description": "Detailed emblem may lose clarity at small sizes",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "scalability",
+      "suggestion": "Simplify emblem details for smaller formats",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "classic",
+      "timeless"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with classic and timeless design trends"
+  },
+  "analysis_timestamp": "2025-11-10T05:08:07.945146Z"
+}

@@ -1,0 +1,88 @@
+{
+  "source_image": "011_RHYTHMAIN.jpg",
+  "text_elements": {
+    "primary_text": "RHYTHMINE",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "modern sans-serif",
+    "typography_notes": "Clean and readable with a unique twist on the letter 'M'.",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized lowercase 'r' and 'm' within a circle",
+    "category": "lettermark",
+    "meanings": [
+      "rhythm",
+      "connection"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#8A4FFF",
+        "common_name": "purple",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FF4F81",
+        "common_name": "pink",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "innovative",
+    "friendly"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with equal weight on symbol and text.",
+    "spacing_notes": "Adequate white space for clarity.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "rhythm",
+      "innovation",
+      "connection"
+    ],
+    "values": [
+      "creativity",
+      "modernity"
+    ],
+    "audience_hint": "tech-savvy individuals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for more depth.",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current trends in minimalistic and modern design."
+  },
+  "analysis_timestamp": "2025-11-10T04:31:43.148726Z"
+}

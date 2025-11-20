@@ -1,0 +1,93 @@
+{
+  "source_image": "044_OROX.jpg",
+  "text_elements": {
+    "primary_text": "OROX",
+    "secondary_text": "OILSTONEROX",
+    "language": "Latin",
+    "font_style": "Bold sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Two overlapping leaf shapes forming an infinity symbol",
+    "category": "abstract",
+    "meanings": [
+      "sustainability",
+      "infinity"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#008000",
+        "common_name": "green",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#ADFF2F",
+        "common_name": "yellow-green",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "eco-friendly",
+    "innovative"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "sustainability",
+      "innovation"
+    ],
+    "values": [
+      "environmental consciousness",
+      "endurance"
+    ],
+    "audience_hint": "eco-conscious consumers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Abstract symbol may not be immediately recognizable",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "symbol clarity",
+      "suggestion": "Consider adding more context to the symbol",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "eco-friendly",
+      "modern"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current trends towards sustainability and minimalism"
+  },
+  "analysis_timestamp": "2025-11-10T05:21:05.797616Z"
+}

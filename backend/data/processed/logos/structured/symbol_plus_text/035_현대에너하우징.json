@@ -1,0 +1,86 @@
+{
+  "source_image": "035_현대에너하우징.jpg",
+  "text_elements": {
+    "primary_text": "(주)현대에너하우징",
+    "secondary_text": "Hyundai Ener-Housing Co., Ltd.",
+    "language": "Korean",
+    "font_style": "Sans-serif",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Blue diamond shape with a white starburst",
+    "category": "abstract",
+    "meanings": [
+      "energy",
+      "innovation"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#004B87",
+        "common_name": "blue",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between blue and white",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "corporate"
+  ],
+  "tone_descriptors": [
+    "professional",
+    "trustworthy"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with centered text and symbol",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "energy",
+      "housing",
+      "innovation"
+    ],
+    "values": [
+      "sustainability",
+      "modernity"
+    ],
+    "audience_hint": "corporate clients",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding an accent color for more depth",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current corporate branding trends"
+  },
+  "analysis_timestamp": "2025-11-10T05:15:26.289898Z"
+}

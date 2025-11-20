@@ -1,0 +1,92 @@
+{
+  "source_image": "page5_42.jpg",
+  "text_elements": {
+    "primary_text": "Lanibiki",
+    "secondary_text": "라니비키",
+    "language": "Latin and Korean",
+    "font_style": "serif with gradient effect",
+    "typography_notes": "Readable with a stylish gradient",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Palm tree integrated with the letter L",
+    "category": "lettermark",
+    "meanings": [
+      "tropical",
+      "relaxation"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#A3C9C9",
+        "common_name": "light teal",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#F4C2C2",
+        "common_name": "light pink",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Soft contrast with pastel colors",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "relaxed"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "tropical",
+      "leisure"
+    ],
+    "values": [
+      "relaxation",
+      "vacation"
+    ],
+    "audience_hint": "travel enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [
+    {
+      "type": "contrast",
+      "description": "Pastel colors may reduce visibility on some backgrounds",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "contrast",
+      "suggestion": "Increase color saturation for better visibility",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends of simplicity and pastel colors"
+  },
+  "analysis_timestamp": "2025-11-10T06:28:29.397952Z"
+}

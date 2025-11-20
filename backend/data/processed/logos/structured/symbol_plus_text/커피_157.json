@@ -1,0 +1,82 @@
+{
+  "source_image": "커피_157.jpg",
+  "text_elements": {
+    "primary_text": "休庫",
+    "secondary_text": "Financial Healing Self Cafe",
+    "language": "Chinese, English, Korean",
+    "font_style": "Bold serif",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Stylized coffee cup",
+    "category": "abstract",
+    "meanings": [
+      "coffee",
+      "relaxation"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "background"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "High contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "calm",
+    "professional"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with equal text and symbol weight",
+    "spacing_notes": "Adequate spacing around elements",
+    "confidence": 0.8
+  },
+  "brand_message": {
+    "keywords": [
+      "healing",
+      "financial",
+      "cafe"
+    ],
+    "values": [
+      "relaxation",
+      "self-care"
+    ],
+    "audience_hint": "Adults seeking relaxation",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "modern"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current minimalistic design trends"
+  },
+  "analysis_timestamp": "2025-11-10T07:40:11.063170Z"
+}

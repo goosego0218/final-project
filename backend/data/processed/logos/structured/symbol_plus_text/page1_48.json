@@ -1,0 +1,94 @@
+{
+  "source_image": "page1_48.jpg",
+  "text_elements": {
+    "primary_text": "애월가든",
+    "secondary_text": "흑돼지 전문점",
+    "language": "Korean",
+    "font_style": "bold sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Red seal with Korean characters",
+    "category": "emblem",
+    "meanings": [
+      "traditional",
+      "authenticity"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#8B0000",
+        "common_name": "dark red",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "text"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "traditional",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "authentic",
+    "cultural"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central emblem",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.8
+  },
+  "brand_message": {
+    "keywords": [
+      "authentic",
+      "Korean",
+      "traditional"
+    ],
+    "values": [
+      "heritage",
+      "quality"
+    ],
+    "audience_hint": "cultural enthusiasts",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "May not be understood by non-Korean speakers",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "audience reach",
+      "suggestion": "Include English translation",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "traditional",
+      "minimal"
+    ],
+    "score": 0.7,
+    "notes": "Aligns with trends favoring cultural authenticity"
+  },
+  "analysis_timestamp": "2025-11-10T05:49:13.469825Z"
+}

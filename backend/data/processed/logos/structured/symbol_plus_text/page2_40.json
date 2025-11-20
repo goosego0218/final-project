@@ -1,0 +1,99 @@
+{
+  "source_image": "page2_40.jpg",
+  "text_elements": {
+    "primary_text": "대발집",
+    "secondary_text": "아구찜",
+    "language": "Korean",
+    "font_style": "bold sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Stylized fish within a hexagon",
+    "category": "emblem",
+    "meanings": [
+      "seafood",
+      "traditional"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#4A2C2A",
+        "common_name": "brown",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#D32F2F",
+        "common_name": "red",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "traditional",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "authentic",
+    "cultural"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central emblem",
+    "spacing_notes": "Adequate spacing around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "seafood",
+      "Korean",
+      "traditional"
+    ],
+    "values": [
+      "authenticity",
+      "quality"
+    ],
+    "audience_hint": "Korean cuisine enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Complex emblem may reduce scalability",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "scalability",
+      "suggestion": "Simplify emblem for smaller sizes",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "traditional",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with trends favoring minimalism and cultural authenticity"
+  },
+  "analysis_timestamp": "2025-11-10T05:57:54.556457Z"
+}

@@ -1,0 +1,91 @@
+{
+  "source_image": "034_La_freme.jpg",
+  "text_elements": {
+    "primary_text": "la freme",
+    "secondary_text": "nature brunch restaurant",
+    "language": "Latin",
+    "font_style": "elegant serif",
+    "typography_notes": "Readable with a natural feel",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Four stylized leaves above the text",
+    "category": "abstract",
+    "meanings": [
+      "nature",
+      "freshness",
+      "organic"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#4CAF50",
+        "common_name": "green",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#8BC34A",
+        "common_name": "light green",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal",
+    "organic"
+  ],
+  "tone_descriptors": [
+    "natural",
+    "friendly",
+    "inviting"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "4:3",
+    "balance_notes": "Well-balanced with centered elements",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "nature",
+      "brunch",
+      "restaurant"
+    ],
+    "values": [
+      "freshness",
+      "sustainability"
+    ],
+    "audience_hint": "eco-conscious diners",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a contrasting color for emphasis",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "eco-friendly",
+      "minimalist"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with trends in sustainability and minimalism"
+  },
+  "analysis_timestamp": "2025-11-10T05:14:06.991514Z"
+}

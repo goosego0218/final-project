@@ -1,0 +1,89 @@
+{
+  "source_image": "page6_22.jpg",
+  "text_elements": {
+    "primary_text": "시시파파캠프",
+    "secondary_text": "camping & food",
+    "language": "Korean",
+    "font_style": "sans-serif",
+    "typography_notes": "Readable with clear distinction between elements",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Tent with trees and utensils",
+    "category": "emblem",
+    "meanings": [
+      "outdoor",
+      "camping",
+      "food"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#00BFFF",
+        "common_name": "Deep Sky Blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with background",
+    "confidence": 0.8
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "adventurous"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central emblem",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "camping",
+      "food",
+      "outdoor"
+    ],
+    "values": [
+      "adventure",
+      "community"
+    ],
+    "audience_hint": "outdoor enthusiasts",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "color",
+      "description": "Limited color palette",
+      "severity": "low"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Introduce a secondary color for accents",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current minimalistic design trends"
+  },
+  "analysis_timestamp": "2025-11-10T06:33:49.121508Z"
+}

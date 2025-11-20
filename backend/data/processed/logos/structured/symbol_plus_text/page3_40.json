@@ -1,0 +1,115 @@
+{
+  "source_image": "page3_40.jpg",
+  "text_elements": {
+    "primary_text": "storeview",
+    "secondary_text": "Channel that decorates your daily life",
+    "language": "Latin",
+    "font_style": "rounded sans-serif",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Rainbow with a cloud",
+    "category": "abstract",
+    "meanings": [
+      "diversity",
+      "positivity",
+      "creativity"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FF0000",
+        "common_name": "red",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#FFA500",
+        "common_name": "orange",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#FFFF00",
+        "common_name": "yellow",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#008000",
+        "common_name": "green",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#0000FF",
+        "common_name": "blue",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#4B0082",
+        "common_name": "indigo",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#ADD8E6",
+        "common_name": "light blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "playful",
+    "colorful"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "inviting",
+    "cheerful"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "decor",
+      "daily life",
+      "channel"
+    ],
+    "values": [
+      "creativity",
+      "positivity"
+    ],
+    "audience_hint": "general consumers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "contrast",
+      "suggestion": "Ensure text is legible on all backgrounds",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "colorful"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current trends of using vibrant colors and playful designs"
+  },
+  "analysis_timestamp": "2025-11-10T06:08:08.472025Z"
+}

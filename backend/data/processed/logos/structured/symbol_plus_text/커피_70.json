@@ -1,0 +1,94 @@
+{
+  "source_image": "커피_70.jpg",
+  "text_elements": {
+    "primary_text": "HIDDEN",
+    "secondary_text": "Coffee Bar",
+    "language": "Latin",
+    "font_style": "Bold, sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Dynamic lines extending from text",
+    "category": "abstract",
+    "meanings": [
+      "speed",
+      "movement"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FF6F00",
+        "common_name": "orange",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#0000FF",
+        "common_name": "blue",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "High contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "dynamic"
+  ],
+  "tone_descriptors": [
+    "energetic",
+    "inviting"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:3",
+    "balance_notes": "Well-balanced with dynamic elements",
+    "spacing_notes": "Adequate spacing around text",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "hidden",
+      "coffee",
+      "speed"
+    ],
+    "values": [
+      "quality",
+      "efficiency"
+    ],
+    "audience_hint": "young professionals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "contrast",
+      "description": "Potential readability issue on small scales",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "contrast",
+      "suggestion": "Enhance text contrast for smaller sizes",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current minimalistic and dynamic design trends"
+  },
+  "analysis_timestamp": "2025-11-10T07:49:48.403289Z"
+}

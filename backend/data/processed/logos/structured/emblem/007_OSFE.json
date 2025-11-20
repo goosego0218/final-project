@@ -1,0 +1,96 @@
+{
+  "source_image": "007_OSFE.jpg",
+  "text_elements": {
+    "primary_text": "OSFE",
+    "secondary_text": "OSAN EDUCATION FORUM",
+    "language": "English and Korean",
+    "font_style": "Sans-serif, modern",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Circular emblem with geometric pattern",
+    "category": "emblem",
+    "meanings": [
+      "education",
+      "global",
+      "future"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#5DADE2",
+        "common_name": "blue",
+        "usage": "background"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "foreground"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "educational"
+  ],
+  "tone_descriptors": [
+    "professional",
+    "innovative"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central focus",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "education",
+      "future",
+      "global"
+    ],
+    "values": [
+      "innovation",
+      "knowledge",
+      "community"
+    ],
+    "audience_hint": "educators, students, global audience",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Small text may be hard to read at smaller sizes",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Increase font size for smaller text",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "geometric"
+    ],
+    "score": 0.85,
+    "notes": "Aligns with current trends in educational branding"
+  },
+  "analysis_timestamp": "2025-11-10T04:26:14.161461Z"
+}

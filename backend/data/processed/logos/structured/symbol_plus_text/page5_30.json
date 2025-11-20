@@ -1,0 +1,88 @@
+{
+  "source_image": "page5_30.jpg",
+  "text_elements": {
+    "primary_text": "MEUD",
+    "secondary_text": "hair",
+    "language": "Latin",
+    "font_style": "serif",
+    "typography_notes": "Readable with a classic touch",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Scissors integrated into the text",
+    "category": "abstract",
+    "meanings": [
+      "hairdressing",
+      "creativity"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "High contrast with white background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "professional",
+    "creative"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:3",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "hair",
+      "style",
+      "creativity"
+    ],
+    "values": [
+      "quality",
+      "innovation"
+    ],
+    "audience_hint": "fashion-conscious individuals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Scissors may be too subtle",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "symbol",
+      "suggestion": "Enhance scissors visibility",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current minimalistic design trends"
+  },
+  "analysis_timestamp": "2025-11-10T06:25:48.057951Z"
+}

@@ -1,0 +1,99 @@
+{
+  "source_image": "082_Yalla_Factory.jpg",
+  "text_elements": {
+    "primary_text": "Yalla",
+    "secondary_text": "FACTORY",
+    "language": "Latin",
+    "font_style": "modern sans-serif",
+    "typography_notes": "Readable with a playful twist",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Stylized snail with abstract elements",
+    "category": "abstract",
+    "meanings": [
+      "playfulness",
+      "creativity"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#00A99D",
+        "common_name": "teal",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#4D4D4D",
+        "common_name": "dark gray",
+        "usage": "background"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#A4C639",
+        "common_name": "lime green",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "playful"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "innovative"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:3",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol",
+    "spacing_notes": "Adequate white space for clarity",
+    "confidence": 0.85
+  },
+  "brand_message": {
+    "keywords": [
+      "creativity",
+      "youthful",
+      "dynamic"
+    ],
+    "values": [
+      "innovation",
+      "fun"
+    ],
+    "audience_hint": "young, creative professionals",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Abstract symbol may not be immediately recognizable",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "symbol clarity",
+      "suggestion": "Simplify the snail design for better recognition",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "playful"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current trends of playful and modern design"
+  },
+  "analysis_timestamp": "2025-11-10T05:37:13.919397Z"
+}

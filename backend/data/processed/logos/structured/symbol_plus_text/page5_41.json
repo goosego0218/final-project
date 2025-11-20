@@ -1,0 +1,93 @@
+{
+  "source_image": "page5_41.jpg",
+  "text_elements": {
+    "primary_text": "LIAONING GL",
+    "secondary_text": "INT'L FREIGHT FORWARDING CO., LTD.",
+    "language": "Latin",
+    "font_style": "Bold sans-serif",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized letter 'GL' within a circular shape",
+    "category": "lettermark",
+    "meanings": [
+      "global",
+      "movement"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#1E90FF",
+        "common_name": "Dodger Blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "White",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "professional"
+  ],
+  "tone_descriptors": [
+    "trustworthy",
+    "dynamic"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "global",
+      "logistics",
+      "forwarding"
+    ],
+    "values": [
+      "efficiency",
+      "reliability"
+    ],
+    "audience_hint": "business clients",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "contrast",
+      "description": "Potential issues in low-light conditions",
+      "severity": "low"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "contrast",
+      "suggestion": "Enhance contrast for better visibility",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends in simplicity and professionalism"
+  },
+  "analysis_timestamp": "2025-11-10T06:28:18.011028Z"
+}

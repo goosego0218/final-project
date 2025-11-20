@@ -1,0 +1,83 @@
+{
+  "source_image": "page3_30.jpg",
+  "text_elements": {
+    "primary_text": "소금",
+    "secondary_text": "국수 전문점",
+    "language": "Korean",
+    "font_style": "modern sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Stylized bowl with noodles and chopsticks",
+    "category": "abstract",
+    "meanings": [
+      "food",
+      "noodles",
+      "Asian cuisine"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#D4A373",
+        "common_name": "light brown",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with background",
+    "confidence": 0.8
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "authentic"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "noodles",
+      "Korean",
+      "authentic"
+    ],
+    "values": [
+      "quality",
+      "tradition"
+    ],
+    "audience_hint": "food enthusiasts",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Add a secondary color for depth",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "authentic"
+    ],
+    "score": 0.85,
+    "notes": "Aligns with trends in simplicity and cultural authenticity"
+  },
+  "analysis_timestamp": "2025-11-10T06:05:49.322177Z"
+}

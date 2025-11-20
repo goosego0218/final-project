@@ -1,0 +1,95 @@
+{
+  "source_image": "035_Cafe_Chez_nous.jpg",
+  "text_elements": {
+    "primary_text": "Cafe Chez Nous",
+    "secondary_text": "Dessert & Coffee",
+    "language": "Latin",
+    "font_style": "Serif",
+    "typography_notes": "Readable with elegant styling",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Silhouette of a deer with a forest texture",
+    "category": "animal",
+    "meanings": [
+      "nature",
+      "elegance",
+      "calm"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#8B5A2B",
+        "common_name": "brown",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.85
+  },
+  "style_tags": [
+    "rustic",
+    "elegant"
+  ],
+  "tone_descriptors": [
+    "cozy",
+    "inviting"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "cafe",
+      "nature",
+      "comfort"
+    ],
+    "values": [
+      "relaxation",
+      "quality"
+    ],
+    "audience_hint": "coffee lovers, nature enthusiasts",
+    "confidence": 0.9
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Complexity in deer texture",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "symbol",
+      "suggestion": "Simplify texture for clarity",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "rustic",
+      "nature-inspired"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with trends favoring natural and cozy aesthetics"
+  },
+  "analysis_timestamp": "2025-11-10T05:14:39.402788Z"
+}

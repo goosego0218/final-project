@@ -1,0 +1,98 @@
+{
+  "source_image": "page3_23.jpg",
+  "text_elements": {
+    "primary_text": "설탕후루",
+    "secondary_text": null,
+    "language": "Korean",
+    "font_style": "bold, sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Red circle with decorative pattern and colorful skewer",
+    "category": "emblem",
+    "meanings": [
+      "traditional",
+      "culinary"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#D32F2F",
+        "common_name": "red",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#4CAF50",
+        "common_name": "green",
+        "usage": "accent"
+      },
+      {
+        "hex": "#FFEB3B",
+        "common_name": "yellow",
+        "usage": "accent"
+      },
+      {
+        "hex": "#2196F3",
+        "common_name": "blue",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "traditional",
+    "vibrant"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "cultural"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:3",
+    "balance_notes": "Well-balanced with central emblem",
+    "spacing_notes": "Adequate spacing around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "traditional",
+      "food",
+      "colorful"
+    ],
+    "values": [
+      "heritage",
+      "flavor"
+    ],
+    "audience_hint": "food enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Ensure color consistency across media",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "cultural",
+      "vibrant"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with trends in cultural and vibrant branding"
+  },
+  "analysis_timestamp": "2025-11-10T06:04:08.339302Z"
+}

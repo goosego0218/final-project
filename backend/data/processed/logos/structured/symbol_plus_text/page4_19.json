@@ -1,0 +1,98 @@
+{
+  "source_image": "page4_19.jpg",
+  "text_elements": {
+    "primary_text": "뉴욕베베",
+    "secondary_text": "우리 오늘도 꽃길만 걸어요",
+    "language": "Korean",
+    "font_style": "rounded sans-serif",
+    "typography_notes": "Clear and legible with a friendly appearance",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Three smiling faces with a heart above",
+    "category": "emblem",
+    "meanings": [
+      "friendliness",
+      "family",
+      "care"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#F5E0C3",
+        "common_name": "beige",
+        "usage": "background"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFB6C1",
+        "common_name": "light pink",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Soft contrast suitable for a gentle tone",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "friendly",
+    "cute"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "warm",
+    "inviting"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate spacing around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "family",
+      "care",
+      "happiness"
+    ],
+    "values": [
+      "community",
+      "love",
+      "joy"
+    ],
+    "audience_hint": "families with children",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [
+    {
+      "type": "contrast",
+      "description": "Soft colors may reduce visibility on some backgrounds",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "contrast",
+      "suggestion": "Increase color contrast for better visibility",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "friendly",
+      "minimalist"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with trends favoring simplicity and warmth"
+  },
+  "analysis_timestamp": "2025-11-10T06:13:34.943244Z"
+}

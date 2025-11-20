@@ -1,0 +1,75 @@
+{
+  "source_image": "020_Boxing_N_Movement.jpg",
+  "text_elements": {
+    "primary_text": "BOXING N MOVEMENT",
+    "secondary_text": "Martial arts Gym",
+    "language": "Latin",
+    "font_style": "Bold sans-serif",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Star with BNM in the center",
+    "category": "emblem",
+    "meanings": [
+      "strength",
+      "movement"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#003399",
+        "common_name": "blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with white background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "bold"
+  ],
+  "tone_descriptors": [
+    "dynamic",
+    "energetic"
+  ],
+  "layout": {
+    "orientation": "square",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced circular design",
+    "spacing_notes": "Adequate spacing around text",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "boxing",
+      "movement",
+      "gym"
+    ],
+    "values": [
+      "strength",
+      "discipline"
+    ],
+    "audience_hint": "fitness enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [],
+  "trend_alignment": {
+    "tags": [
+      "modern"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current fitness branding trends"
+  },
+  "analysis_timestamp": "2025-11-10T04:47:27.008058Z"
+}

@@ -1,0 +1,86 @@
+{
+  "source_image": "page4_21.jpg",
+  "text_elements": {
+    "primary_text": "DADASHOP",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "Serif",
+    "typography_notes": "Clear and elegant, but may be slightly challenging at smaller sizes.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Interlocking letters D and S within an oval",
+    "category": "lettermark",
+    "meanings": [
+      "initials",
+      "elegance"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "High contrast with the white background.",
+    "confidence": 0.95
+  },
+  "style_tags": [
+    "classic",
+    "elegant"
+  ],
+  "tone_descriptors": [
+    "luxury",
+    "professional"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment.",
+    "spacing_notes": "Adequate white space around the text and symbol.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "elegance",
+      "quality"
+    ],
+    "values": [
+      "sophistication",
+      "trust"
+    ],
+    "audience_hint": "upscale consumers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Complexity of the lettermark may reduce readability at smaller sizes.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Simplify the lettermark for better readability.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "classic"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with timeless design trends, appealing to a sophisticated audience."
+  },
+  "analysis_timestamp": "2025-11-10T06:14:10.976669Z"
+}

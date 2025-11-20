@@ -1,0 +1,89 @@
+{
+  "source_image": "010_A_BERRY.jpg",
+  "text_elements": {
+    "primary_text": "A BERRY",
+    "secondary_text": "Premium Fruit",
+    "language": "Latin",
+    "font_style": "modern sans-serif and script",
+    "typography_notes": "Clear and legible with a stylish script for 'Berry'",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Outline of a berry with three dots",
+    "category": "abstract",
+    "meanings": [
+      "fruit",
+      "freshness"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#9B59B6",
+        "common_name": "purple",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#E67E22",
+        "common_name": "orange",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "premium",
+    "fresh"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "premium",
+      "fruit",
+      "fresh"
+    ],
+    "values": [
+      "quality",
+      "freshness"
+    ],
+    "audience_hint": "health-conscious consumers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for more depth",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current trends in minimalistic design"
+  },
+  "analysis_timestamp": "2025-11-10T04:29:55.770845Z"
+}

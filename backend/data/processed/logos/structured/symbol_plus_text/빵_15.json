@@ -1,0 +1,97 @@
+{
+  "source_image": "빵_15.jpg",
+  "text_elements": {
+    "primary_text": "Seppang's",
+    "secondary_text": "Freshly baked all day, Every day!",
+    "language": "Latin",
+    "font_style": "Handwritten",
+    "typography_notes": "Readable with a casual, friendly style",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Illustration of a baker holding bread",
+    "category": "emblem",
+    "meanings": [
+      "baking",
+      "freshness",
+      "artisan"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#8B0000",
+        "common_name": "Dark Red",
+        "usage": "background"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "White",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "friendly",
+    "artisanal"
+  ],
+  "tone_descriptors": [
+    "welcoming",
+    "traditional"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with equal emphasis on text and imagery",
+    "spacing_notes": "Adequate white space for readability",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "fresh",
+      "baked",
+      "daily"
+    ],
+    "values": [
+      "quality",
+      "tradition"
+    ],
+    "audience_hint": "local bakery customers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "contrast",
+      "description": "Potential readability issue in low light",
+      "severity": "low"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "contrast",
+      "suggestion": "Enhance text contrast for better readability",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "retro",
+      "artisanal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends favoring handmade and artisanal aesthetics"
+  },
+  "analysis_timestamp": "2025-11-10T07:07:19.050510Z"
+}

@@ -1,0 +1,99 @@
+{
+  "source_image": "page3_31.jpg",
+  "text_elements": {
+    "primary_text": "최선장짬뽕",
+    "secondary_text": null,
+    "language": "Korean",
+    "font_style": "bold, playful",
+    "typography_notes": "Clear and readable with a playful touch",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Cartoon squid character",
+    "category": "animal",
+    "meanings": [
+      "seafood",
+      "playfulness"
+    ],
+    "confidence": 0.95
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#FF0000",
+        "common_name": "red",
+        "usage": "accent"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#D2B48C",
+        "common_name": "tan",
+        "usage": "character fill"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "playful",
+    "cartoonish"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "fun"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central character",
+    "spacing_notes": "Adequate spacing around elements",
+    "confidence": 0.85
+  },
+  "brand_message": {
+    "keywords": [
+      "seafood",
+      "fun",
+      "Korean"
+    ],
+    "values": [
+      "freshness",
+      "enjoyment"
+    ],
+    "audience_hint": "families, children",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Character may not be universally recognized",
+      "severity": "low"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "symbol",
+      "suggestion": "Consider adding a more recognizable element",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "playful",
+      "cartoonish"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current playful and cartoonish design trends"
+  },
+  "analysis_timestamp": "2025-11-10T06:06:02.042616Z"
+}

@@ -1,0 +1,82 @@
+{
+  "source_image": "010_봄의아침.jpg",
+  "text_elements": {
+    "primary_text": "봄의아침",
+    "secondary_text": null,
+    "language": "Korean",
+    "font_style": "handwritten",
+    "typography_notes": "Legible with a natural, organic feel.",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "A cluster of leaves above the text.",
+    "category": "abstract",
+    "meanings": [
+      "nature",
+      "growth"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#4CAF50",
+        "common_name": "green",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with white background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "natural",
+    "fresh"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with central alignment.",
+    "spacing_notes": "Adequate white space around elements.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "nature",
+      "freshness",
+      "morning"
+    ],
+    "values": [
+      "sustainability",
+      "health"
+    ],
+    "audience_hint": "eco-conscious consumers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth.",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "eco-friendly",
+      "minimalist"
+    ],
+    "score": 0.9,
+    "notes": "Aligns well with current eco-friendly and minimalist trends."
+  },
+  "analysis_timestamp": "2025-11-10T04:30:55.957457Z"
+}

@@ -1,0 +1,88 @@
+{
+  "source_image": "빵_75.jpg",
+  "text_elements": {
+    "primary_text": "SINBAD-NEWBREAD",
+    "secondary_text": "신바드 빵가게",
+    "language": "Latin and Hangul",
+    "font_style": "Sans-serif, rounded",
+    "typography_notes": "Clear and legible with a modern touch",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized bread loaf",
+    "category": "abstract",
+    "meanings": [
+      "freshness",
+      "bakery"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#D4A05B",
+        "common_name": "golden brown",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#5C3B28",
+        "common_name": "dark brown",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "inviting"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "bread",
+      "fresh",
+      "bakery"
+    ],
+    "values": [
+      "quality",
+      "tradition"
+    ],
+    "audience_hint": "general public, bakery enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a third color for depth",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "modern"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current minimalistic design trends"
+  },
+  "analysis_timestamp": "2025-11-10T07:14:59.384996Z"
+}

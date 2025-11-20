@@ -1,0 +1,81 @@
+{
+  "source_image": "024_Seosan_surgery.jpg",
+  "text_elements": {
+    "primary_text": "SEOSAN SURGERY",
+    "secondary_text": "SINCE 1995",
+    "language": "Latin",
+    "font_style": "Serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Letter S within a circular emblem",
+    "category": "emblem",
+    "meanings": [
+      "professionalism",
+      "trust"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#005BAC",
+        "common_name": "blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with white background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "classic",
+    "professional"
+  ],
+  "tone_descriptors": [
+    "trustworthy",
+    "established"
+  ],
+  "layout": {
+    "orientation": "square",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Symmetrical and balanced",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "surgery",
+      "medical",
+      "established"
+    ],
+    "values": [
+      "trust",
+      "experience"
+    ],
+    "audience_hint": "medical professionals and patients",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "modernization",
+      "suggestion": "Consider updating the font for a more contemporary look",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "classic"
+    ],
+    "score": 0.7,
+    "notes": "Aligns with traditional and professional design trends"
+  },
+  "analysis_timestamp": "2025-11-10T04:59:34.920959Z"
+}

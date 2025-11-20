@@ -1,0 +1,88 @@
+{
+  "source_image": "커피_116.jpg",
+  "text_elements": {
+    "primary_text": "최강커피",
+    "secondary_text": "STRONGEST COFFEE",
+    "language": "Korean",
+    "font_style": "bold sans-serif",
+    "typography_notes": "Highly readable with strong contrast against background.",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized coffee cup with a crown",
+    "category": "abstract",
+    "meanings": [
+      "strength",
+      "premium"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FF0000",
+        "common_name": "red",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "Excellent contrast between text and background.",
+    "confidence": 0.95
+  },
+  "style_tags": [
+    "modern",
+    "bold"
+  ],
+  "tone_descriptors": [
+    "energetic",
+    "premium"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment.",
+    "spacing_notes": "Adequate spacing between elements.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "strength",
+      "coffee",
+      "premium"
+    ],
+    "values": [
+      "quality",
+      "energy"
+    ],
+    "audience_hint": "coffee enthusiasts",
+    "confidence": 0.9
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "symbol",
+      "suggestion": "Enhance symbol clarity for smaller sizes.",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "bold",
+      "minimalist"
+    ],
+    "score": 0.85,
+    "notes": "Aligns with current trends of bold, minimalistic design."
+  },
+  "analysis_timestamp": "2025-11-10T07:33:44.913519Z"
+}

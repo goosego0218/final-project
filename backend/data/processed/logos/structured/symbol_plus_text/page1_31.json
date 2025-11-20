@@ -1,0 +1,94 @@
+{
+  "source_image": "page1_31.jpg",
+  "text_elements": {
+    "primary_text": "구범쉰 고로케",
+    "secondary_text": "since 1978 · 고로케 & 꽈배기 ·",
+    "language": "Korean",
+    "font_style": "serif with calligraphic elements",
+    "typography_notes": "Readable with a traditional touch",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Hexagonal shape with Korean characters and hands",
+    "category": "emblem",
+    "meanings": [
+      "tradition",
+      "handmade"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#8B4513",
+        "common_name": "saddle brown",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "traditional",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "authentic",
+    "warm"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "tradition",
+      "quality",
+      "handmade"
+    ],
+    "values": [
+      "authenticity",
+      "heritage"
+    ],
+    "audience_hint": "cultural enthusiasts",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Small text might be hard to read at smaller sizes",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Increase font size for smaller text",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "retro",
+      "authentic"
+    ],
+    "score": 0.7,
+    "notes": "Aligns with trends favoring authenticity and heritage"
+  },
+  "analysis_timestamp": "2025-11-10T05:45:28.348782Z"
+}

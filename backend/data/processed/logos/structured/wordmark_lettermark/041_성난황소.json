@@ -1,0 +1,92 @@
+{
+  "source_image": "041_성난황소.jpg",
+  "text_elements": {
+    "primary_text": null,
+    "secondary_text": null,
+    "language": "Chinese",
+    "font_style": "calligraphic",
+    "typography_notes": "Artistic and stylized, may affect readability",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Stylized bull with horns",
+    "category": "abstract",
+    "meanings": [
+      "strength",
+      "power"
+    ],
+    "confidence": 0.95
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#C00000",
+        "common_name": "red",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#8B4513",
+        "common_name": "saddle brown",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between red and brown",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "artistic"
+  ],
+  "tone_descriptors": [
+    "bold",
+    "dynamic"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Symmetrical with emphasis on horns",
+    "spacing_notes": "Compact with minimal white space",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "strength",
+      "tradition"
+    ],
+    "values": [
+      "power",
+      "heritage"
+    ],
+    "audience_hint": "general public",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Text may be hard to read",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Simplify text elements",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "cultural"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with cultural and modern design trends"
+  },
+  "analysis_timestamp": "2025-11-10T05:19:37.136225Z"
+}

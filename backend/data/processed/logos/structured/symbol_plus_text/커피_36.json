@@ -1,0 +1,83 @@
+{
+  "source_image": "커피_36.jpg",
+  "text_elements": {
+    "primary_text": "EOCOFFEE",
+    "secondary_text": "ROASTERY CAFE",
+    "language": "Latin",
+    "font_style": "Sans-serif, bold",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Stylized lettermark resembling 'EO'",
+    "category": "lettermark",
+    "meanings": [
+      "eco-friendly",
+      "coffee"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#008000",
+        "common_name": "green",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with white background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "eco-friendly",
+    "professional"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.85
+  },
+  "brand_message": {
+    "keywords": [
+      "eco-friendly",
+      "coffee",
+      "roastery"
+    ],
+    "values": [
+      "sustainability",
+      "quality"
+    ],
+    "audience_hint": "environmentally conscious coffee drinkers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "eco-friendly",
+      "minimalist"
+    ],
+    "score": 0.9,
+    "notes": "Aligns well with current eco-conscious and minimalist trends"
+  },
+  "analysis_timestamp": "2025-11-10T07:46:56.857525Z"
+}

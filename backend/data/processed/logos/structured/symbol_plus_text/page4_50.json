@@ -1,0 +1,99 @@
+{
+  "source_image": "page4_50.jpg",
+  "text_elements": {
+    "primary_text": "연옥",
+    "secondary_text": "제주음식전문점",
+    "language": "Korean",
+    "font_style": "calligraphic",
+    "typography_notes": "The calligraphic style is artistic but may affect readability at smaller sizes.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "A stylized bowl with rice",
+    "category": "abstract",
+    "meanings": [
+      "food",
+      "tradition"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FF0000",
+        "common_name": "red",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "The black on white provides strong contrast, enhancing readability.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "traditional",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "authentic",
+    "cultural"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:3",
+    "balance_notes": "The symbol and text are well-balanced, creating a cohesive look.",
+    "spacing_notes": "Adequate white space ensures clarity and focus.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "Korean cuisine",
+      "authentic",
+      "Jeju"
+    ],
+    "values": [
+      "tradition",
+      "quality"
+    ],
+    "audience_hint": "food enthusiasts, cultural diners",
+    "confidence": 0.9
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Calligraphic text may be hard to read at smaller sizes.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Consider a simpler font for smaller text.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "traditional",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with the trend of minimalistic and culturally rich designs."
+  },
+  "analysis_timestamp": "2025-11-10T06:20:28.743124Z"
+}

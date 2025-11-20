@@ -1,0 +1,89 @@
+{
+  "source_image": "커피_142.jpg",
+  "text_elements": {
+    "primary_text": "가문비커피",
+    "secondary_text": "ROASTERS",
+    "language": "Korean",
+    "font_style": "modern sans-serif",
+    "typography_notes": "Clear and bold, good readability",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Stylized pine cone or hop",
+    "category": "abstract",
+    "meanings": [
+      "nature",
+      "growth",
+      "craft"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#004d40",
+        "common_name": "teal",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#ffffff",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "professional",
+    "natural"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "coffee",
+      "nature",
+      "quality"
+    ],
+    "values": [
+      "sustainability",
+      "craftsmanship"
+    ],
+    "audience_hint": "coffee enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding an accent color for variety",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "eco-friendly"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends towards minimalism and sustainability"
+  },
+  "analysis_timestamp": "2025-11-10T07:37:50.825835Z"
+}

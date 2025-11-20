@@ -1,0 +1,86 @@
+{
+  "source_image": "page7_13.jpg",
+  "text_elements": {
+    "primary_text": "Turquoise",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "Serif",
+    "typography_notes": "Readable with classic elegance",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Oval shape with two dots and a turquoise line",
+    "category": "abstract",
+    "meanings": [
+      "simplicity",
+      "modernity"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#40E0D0",
+        "common_name": "turquoise",
+        "usage": "accent"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between black and turquoise",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "approachable"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with centered text and symbol",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "simplicity",
+      "modern"
+    ],
+    "values": [
+      "clarity",
+      "freshness"
+    ],
+    "audience_hint": "young, modern audience",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "modern"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current minimalistic design trends"
+  },
+  "analysis_timestamp": "2025-11-10T06:42:51.278892Z"
+}

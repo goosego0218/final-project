@@ -1,0 +1,82 @@
+{
+  "source_image": "007_IF.jpg",
+  "text_elements": {
+    "primary_text": "iF",
+    "secondary_text": "FOOD CONSULTING",
+    "language": "Latin",
+    "font_style": "modern sans-serif",
+    "typography_notes": "Clear and readable with a minimalist style",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Stylized lowercase 'i' and 'F'",
+    "category": "lettermark",
+    "meanings": [
+      "initials",
+      "identity"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#8A94A6",
+        "common_name": "gray-blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast against white background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "professional",
+    "clean"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "2:1",
+    "balance_notes": "Balanced with ample white space",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.8
+  },
+  "brand_message": {
+    "keywords": [
+      "consulting",
+      "food",
+      "expertise"
+    ],
+    "values": [
+      "professionalism",
+      "clarity"
+    ],
+    "audience_hint": "businesses in the food industry",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding an accent color for emphasis",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimalist",
+      "modern"
+    ],
+    "score": 0.9,
+    "notes": "Aligns well with current minimalist design trends"
+  },
+  "analysis_timestamp": "2025-11-10T04:26:02.865301Z"
+}

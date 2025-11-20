@@ -1,0 +1,95 @@
+{
+  "source_image": "page2_35.jpg",
+  "text_elements": {
+    "primary_text": "고양멍군",
+    "secondary_text": "GOYANG MENGGUN",
+    "language": "Korean",
+    "font_style": "Sans-serif, rounded",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Cat and dog inside a house shape with a heart",
+    "category": "animal",
+    "meanings": [
+      "pet care",
+      "home",
+      "love"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#4A3F35",
+        "common_name": "brown",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFD700",
+        "common_name": "gold",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "friendly"
+  ],
+  "tone_descriptors": [
+    "welcoming",
+    "caring"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "pets",
+      "care",
+      "home"
+    ],
+    "values": [
+      "compassion",
+      "trust"
+    ],
+    "audience_hint": "pet owners",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "contrast",
+      "description": "Slightly low contrast in smaller text",
+      "severity": "low"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "contrast",
+      "suggestion": "Enhance contrast for smaller text",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current minimalistic and friendly design trends"
+  },
+  "analysis_timestamp": "2025-11-10T05:56:46.344213Z"
+}

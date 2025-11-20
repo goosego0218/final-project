@@ -1,0 +1,94 @@
+{
+  "source_image": "빵_53.jpg",
+  "text_elements": {
+    "primary_text": "The 겹빵",
+    "secondary_text": null,
+    "language": "English and Korean",
+    "font_style": "modern sans-serif",
+    "typography_notes": "Clear and readable with a mix of languages.",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Outline of sliced bread with leaves",
+    "category": "abstract",
+    "meanings": [
+      "bread",
+      "freshness",
+      "natural"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#D98C3E",
+        "common_name": "orange",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#4A4A4A",
+        "common_name": "dark gray",
+        "usage": "text"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#6B8E23",
+        "common_name": "olive green",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "natural"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment.",
+    "spacing_notes": "Adequate white space around elements.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "bread",
+      "fresh",
+      "natural"
+    ],
+    "values": [
+      "quality",
+      "authenticity"
+    ],
+    "audience_hint": "health-conscious consumers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a contrasting color for more vibrancy.",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "natural"
+    ],
+    "score": 0.85,
+    "notes": "Aligns with trends favoring simplicity and natural themes."
+  },
+  "analysis_timestamp": "2025-11-10T07:11:21.765063Z"
+}

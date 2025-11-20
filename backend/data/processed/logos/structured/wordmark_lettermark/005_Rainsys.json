@@ -1,0 +1,93 @@
+{
+  "source_image": "005_Rainsys.jpg",
+  "text_elements": {
+    "primary_text": "RAIN SYS",
+    "secondary_text": "Real time Alert for Inundation System",
+    "language": "Latin",
+    "font_style": "modern sans-serif",
+    "typography_notes": "Clear and readable with a futuristic touch",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Stylized RS lettermark with a blue square accent",
+    "category": "lettermark",
+    "meanings": [
+      "technology",
+      "innovation"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#007BFF",
+        "common_name": "blue",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between black and blue",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "innovative",
+    "professional"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with emphasis on the lettermark",
+    "spacing_notes": "Adequate spacing for readability",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "real-time",
+      "alert",
+      "system"
+    ],
+    "values": [
+      "innovation",
+      "reliability"
+    ],
+    "audience_hint": "technology and safety sectors",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Small secondary text may be hard to read at smaller sizes",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Increase size of secondary text for better readability",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "futuristic"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends in technology branding"
+  },
+  "analysis_timestamp": "2025-11-10T04:23:25.301871Z"
+}

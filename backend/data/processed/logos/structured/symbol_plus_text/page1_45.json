@@ -1,0 +1,99 @@
+{
+  "source_image": "page1_45.jpg",
+  "text_elements": {
+    "primary_text": "(주)아씨홈",
+    "secondary_text": "DESIGN STUDIO",
+    "language": "Korean",
+    "font_style": "modern sans-serif",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Abstract house shape with geometric elements",
+    "category": "abstract",
+    "meanings": [
+      "home",
+      "creativity"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#D4AF37",
+        "common_name": "gold",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      },
+      {
+        "hex": "#C0C0C0",
+        "common_name": "silver",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between gold and white",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "luxury",
+    "creative"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "design",
+      "home",
+      "studio"
+    ],
+    "values": [
+      "creativity",
+      "elegance"
+    ],
+    "audience_hint": "design enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "color",
+      "description": "Gold may not print well on all materials",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider alternative colors for better print fidelity",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "elegant"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends in minimalistic and elegant design"
+  },
+  "analysis_timestamp": "2025-11-10T05:48:33.095664Z"
+}

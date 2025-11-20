@@ -1,0 +1,105 @@
+{
+  "source_image": "page3_27.jpg",
+  "text_elements": {
+    "primary_text": "애정밥상",
+    "secondary_text": null,
+    "language": "Korean",
+    "font_style": "modern sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Bowl with leaves and abstract food elements",
+    "category": "abstract",
+    "meanings": [
+      "nourishment",
+      "nature",
+      "health"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#6A4A3C",
+        "common_name": "brown",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#A8D08D",
+        "common_name": "green",
+        "usage": "accent"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#F4B183",
+        "common_name": "orange",
+        "usage": "accent"
+      },
+      {
+        "hex": "#FFD966",
+        "common_name": "yellow",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "organic"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "natural"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "nourishment",
+      "care",
+      "nature"
+    ],
+    "values": [
+      "health",
+      "sustainability"
+    ],
+    "audience_hint": "health-conscious individuals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "color",
+      "description": "Potential color clash in certain contexts",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider a more cohesive color palette",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "eco-friendly",
+      "minimalist"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with trends towards sustainability and simplicity"
+  },
+  "analysis_timestamp": "2025-11-10T06:04:58.665767Z"
+}

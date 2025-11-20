@@ -1,0 +1,94 @@
+{
+  "source_image": "026_Crazy_Bubble_Mall.jpg",
+  "text_elements": {
+    "primary_text": "Crazy Bubble",
+    "secondary_text": "Mall",
+    "language": "Latin",
+    "font_style": "Serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Octopus with a crown and bubbles",
+    "category": "animal",
+    "meanings": [
+      "playfulness",
+      "royalty"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#0073E6",
+        "common_name": "blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFD700",
+        "common_name": "gold",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.8
+  },
+  "style_tags": [
+    "modern",
+    "playful"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "fun"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central focus",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "fun",
+      "shopping",
+      "family"
+    ],
+    "values": [
+      "entertainment",
+      "variety"
+    ],
+    "audience_hint": "families and young adults",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Complexity of octopus design",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "symbol",
+      "suggestion": "Simplify octopus design",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "playful",
+      "modern"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current playful and modern design trends"
+  },
+  "analysis_timestamp": "2025-11-10T05:03:55.974121Z"
+}

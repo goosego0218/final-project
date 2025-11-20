@@ -1,0 +1,95 @@
+{
+  "source_image": "page6_20.jpg",
+  "text_elements": {
+    "primary_text": "북새통문고",
+    "secondary_text": "Booksaetong",
+    "language": "Korean",
+    "font_style": "modern sans-serif",
+    "typography_notes": "Clear and readable with a modern touch",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Stylized letter B with book pages and a star",
+    "category": "lettermark",
+    "meanings": [
+      "book",
+      "knowledge",
+      "star"
+    ],
+    "confidence": 0.95
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#00AEEF",
+        "common_name": "blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#4A4A4A",
+        "common_name": "dark gray",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between blue and gray",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "professional",
+    "educational"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "books",
+      "education",
+      "knowledge"
+    ],
+    "values": [
+      "learning",
+      "growth"
+    ],
+    "audience_hint": "students, educators",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Secondary text may be small in print",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Increase size of secondary text",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current minimalistic design trends"
+  },
+  "analysis_timestamp": "2025-11-10T06:33:27.603514Z"
+}

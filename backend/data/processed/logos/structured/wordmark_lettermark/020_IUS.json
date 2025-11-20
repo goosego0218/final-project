@@ -1,0 +1,94 @@
+{
+  "source_image": "020_IUS.jpg",
+  "text_elements": {
+    "primary_text": "lus",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "sans-serif, modern",
+    "typography_notes": "Clean and readable",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Lowercase letters with a red accent",
+    "category": "lettermark",
+    "meanings": [
+      "simplicity",
+      "modernity"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#4A4A4A",
+        "common_name": "dark gray",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#D64541",
+        "common_name": "red",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "professional",
+    "clean"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with emphasis on the 'i'",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.8
+  },
+  "brand_message": {
+    "keywords": [
+      "modern",
+      "simple",
+      "professional"
+    ],
+    "values": [
+      "clarity",
+      "innovation"
+    ],
+    "audience_hint": "tech-savvy professionals",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Minimalistic design may lack distinctiveness",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "distinctiveness",
+      "suggestion": "Consider adding a unique graphic element",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimalist",
+      "modern"
+    ],
+    "score": 0.9,
+    "notes": "Aligns well with current minimalist design trends"
+  },
+  "analysis_timestamp": "2025-11-10T04:47:41.675143Z"
+}

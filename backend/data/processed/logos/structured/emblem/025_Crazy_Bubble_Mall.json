@@ -1,0 +1,83 @@
+{
+  "source_image": "025_Crazy_Bubble_Mall.jpg",
+  "text_elements": {
+    "primary_text": "Crazy Bubble",
+    "secondary_text": "MALL",
+    "language": "Latin",
+    "font_style": "playful serif",
+    "typography_notes": "Readable with decorative elements",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Seahorse with bubbles",
+    "category": "emblem",
+    "meanings": [
+      "playfulness",
+      "ocean",
+      "uniqueness"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "High contrast with white background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "vintage",
+    "playful"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "quirky"
+  ],
+  "layout": {
+    "orientation": "square",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Centered with symmetrical elements",
+    "spacing_notes": "Adequate white space around text and symbol",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "fun",
+      "shopping",
+      "unique"
+    ],
+    "values": [
+      "creativity",
+      "adventure"
+    ],
+    "audience_hint": "families and young adults",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Introduce a secondary color for depth",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "retro",
+      "playful"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with retro and playful design trends"
+  },
+  "analysis_timestamp": "2025-11-10T05:00:03.540083Z"
+}

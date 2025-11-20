@@ -1,0 +1,100 @@
+{
+  "source_image": "page1_6.jpg",
+  "text_elements": {
+    "primary_text": "돈탄집",
+    "secondary_text": "연탄구이 돼지전문점",
+    "language": "Korean",
+    "font_style": "bold sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "A cartoon pig sitting on a green charcoal briquette",
+    "category": "animal",
+    "meanings": [
+      "playful",
+      "food-related"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#008000",
+        "common_name": "green",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "text"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FF0000",
+        "common_name": "red",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "playful",
+    "modern"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "approachable"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "4:5",
+    "balance_notes": "Well-balanced with centered elements",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "charcoal",
+      "pork",
+      "specialty"
+    ],
+    "values": [
+      "quality",
+      "tradition"
+    ],
+    "audience_hint": "food enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Symbol may not convey meaning to all audiences",
+      "severity": "low"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "symbol",
+      "suggestion": "Consider adding text to clarify the symbol",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "playful",
+      "minimalist"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends in playful and minimalist design"
+  },
+  "analysis_timestamp": "2025-11-10T05:50:03.926719Z"
+}

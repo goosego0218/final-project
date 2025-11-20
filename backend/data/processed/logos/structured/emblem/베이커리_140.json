@@ -1,0 +1,90 @@
+{
+  "source_image": "베이커리_140.jpg",
+  "text_elements": {
+    "primary_text": "Bake ARU",
+    "secondary_text": "CUSTOM MADE GIFT HANDMADE DESSERT",
+    "language": "English and Korean",
+    "font_style": "Serif",
+    "typography_notes": "Clear and elegant, but small text may be hard to read at a distance.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Outline of a cake with decorative elements",
+    "category": "emblem",
+    "meanings": [
+      "baking",
+      "gift",
+      "handmade"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#C19A6B",
+        "common_name": "light brown",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with the white background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "elegant",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "luxury",
+    "artisanal"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Symmetrical and centered design.",
+    "spacing_notes": "Adequate white space around elements.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "custom",
+      "handmade",
+      "dessert"
+    ],
+    "values": [
+      "quality",
+      "personalization"
+    ],
+    "audience_hint": "gourmet dessert lovers",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Small text may be hard to read.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Increase font size for smaller text.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "elegant"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current trends in minimalistic and elegant branding."
+  },
+  "analysis_timestamp": "2025-11-10T06:55:04.141688Z"
+}

@@ -1,0 +1,87 @@
+{
+  "source_image": "070_PROTOOL.jpg",
+  "text_elements": {
+    "primary_text": "PROTOOL",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "bold, italicized",
+    "typography_notes": "Highly readable with a strong presence",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized text with a dynamic slant",
+    "category": "lettermark",
+    "meanings": [
+      "professionalism",
+      "speed"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#005A9C",
+        "common_name": "blue",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#00AEEF",
+        "common_name": "light blue",
+        "usage": "background"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "dynamic"
+  ],
+  "tone_descriptors": [
+    "professional",
+    "energetic"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with a slight forward motion",
+    "spacing_notes": "Adequate spacing enhances readability",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "tools",
+      "professional",
+      "efficiency"
+    ],
+    "values": [
+      "quality",
+      "innovation"
+    ],
+    "audience_hint": "professionals in construction and manufacturing",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "dynamic"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current trends in professional branding"
+  },
+  "analysis_timestamp": "2025-11-10T05:32:20.211734Z"
+}

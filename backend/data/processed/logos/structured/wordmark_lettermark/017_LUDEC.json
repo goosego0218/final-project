@@ -1,0 +1,75 @@
+{
+  "source_image": "017_LUDEC.jpg",
+  "text_elements": {
+    "primary_text": "LUDEC",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "Bold, italicized sans-serif",
+    "typography_notes": "Highly readable with strong emphasis",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized text with no additional symbols",
+    "category": "lettermark",
+    "meanings": [
+      "strength",
+      "modernity"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "High contrast with white background",
+    "confidence": 0.95
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "bold",
+    "professional"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around text",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "strength",
+      "clarity"
+    ],
+    "values": [
+      "professionalism",
+      "modernity"
+    ],
+    "audience_hint": "business professionals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "bold"
+    ],
+    "score": 0.9,
+    "notes": "Aligns with current trends of simplicity and bold typography"
+  },
+  "analysis_timestamp": "2025-11-10T04:39:47.138214Z"
+}

@@ -1,0 +1,89 @@
+{
+  "source_image": "page6_49.jpg",
+  "text_elements": {
+    "primary_text": "PASS TOP",
+    "secondary_text": "중국 배송대행 탑!",
+    "language": "Latin and Korean",
+    "font_style": "Bold, sans-serif",
+    "typography_notes": "Readable with clear distinction between elements",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Airplane with a swoosh",
+    "category": "abstract",
+    "meanings": [
+      "speed",
+      "travel",
+      "global"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#1A73E8",
+        "common_name": "blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "dynamic"
+  ],
+  "tone_descriptors": [
+    "professional",
+    "energetic"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with equal weight on text and symbol",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.8
+  },
+  "brand_message": {
+    "keywords": [
+      "delivery",
+      "speed",
+      "global"
+    ],
+    "values": [
+      "efficiency",
+      "reliability"
+    ],
+    "audience_hint": "businesses and individuals needing shipping services",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Korean text may be small for some uses",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "typography",
+      "suggestion": "Increase size of secondary text for better legibility",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "dynamic"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends of simplicity and motion"
+  },
+  "analysis_timestamp": "2025-11-10T06:39:56.563002Z"
+}

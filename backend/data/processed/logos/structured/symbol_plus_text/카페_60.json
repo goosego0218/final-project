@@ -1,0 +1,100 @@
+{
+  "source_image": "카페_60.jpg",
+  "text_elements": {
+    "primary_text": "MALMO COFFEE",
+    "secondary_text": "THERE'S NO NEED TO SAY IT!!!",
+    "language": "Latin",
+    "font_style": "bold, playful",
+    "typography_notes": "Clear and readable with a fun style",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Cartoon character with a playful expression",
+    "category": "emblem",
+    "meanings": [
+      "fun",
+      "friendly"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#004B87",
+        "common_name": "blue",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FF0000",
+        "common_name": "red",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "playful",
+    "retro"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "inviting"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate spacing around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "coffee",
+      "fun",
+      "friendly"
+    ],
+    "values": [
+      "community",
+      "enjoyment"
+    ],
+    "audience_hint": "young adults, families",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "contrast",
+      "description": "Red text may be less visible on certain backgrounds",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "contrast",
+      "suggestion": "Consider a darker shade for red text",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "retro",
+      "playful"
+    ],
+    "score": 0.85,
+    "notes": "Aligns with current trends of nostalgia and playfulness"
+  },
+  "analysis_timestamp": "2025-11-10T07:25:38.571836Z"
+}

@@ -1,0 +1,105 @@
+{
+  "source_image": "베이커리_27.jpg",
+  "text_elements": {
+    "primary_text": "GGUURI",
+    "secondary_text": "BAKERY & COFFEE\nEST. 2025",
+    "language": "Latin",
+    "font_style": "Bold, rounded sans-serif",
+    "typography_notes": "Clear and legible with a playful touch",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Cartoon platypus holding a coffee cup and croissant",
+    "category": "animal",
+    "meanings": [
+      "playfulness",
+      "comfort",
+      "warmth"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FFA500",
+        "common_name": "orange",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "text"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "playful",
+    "modern",
+    "friendly"
+  ],
+  "tone_descriptors": [
+    "welcoming",
+    "casual",
+    "fun"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "4:5",
+    "balance_notes": "Well-balanced with central focus on the character",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.85
+  },
+  "brand_message": {
+    "keywords": [
+      "bakery",
+      "coffee",
+      "fun",
+      "friendly"
+    ],
+    "values": [
+      "comfort",
+      "quality",
+      "community"
+    ],
+    "audience_hint": "young adults, families",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "contrast",
+      "description": "Orange on white may be less visible in bright light",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "contrast",
+      "suggestion": "Consider a darker shade of orange for better visibility",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "playful"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current trends in casual dining and playful branding"
+  },
+  "analysis_timestamp": "2025-11-10T06:56:46.948653Z"
+}
