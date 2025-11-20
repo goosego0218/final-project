@@ -57,7 +57,6 @@ class AppState(AgentState):
     LangGraph의 MessagesState를 상속하면
     - messages: List[AnyMessage] 필드가 자동 포함된다.
     """
-
     # 현재 대화 모드 (어느 챗봇이 메인인지)
     mode: Literal["brand", "logo", "shorts"] 
 
