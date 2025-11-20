@@ -8,7 +8,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.schemas.chat import ChatRequest, ChatResponse, BrandChatRequest, BrandChatResponse
+from app.schemas.chat import BrandChatRequest, BrandChatResponse, LogoChatRequest, LogoChatResponse, ShortsChatRequest, ShortsChatResponse
 from app.db.orm import get_orm_session
 from app.core.deps import get_current_user
 from app.models.auth import UserInfo
@@ -47,7 +47,7 @@ def chat_brand(
     state: AppState = {
         "messages": [],
         "mode": "brand",
-        "project_id": req.project_id,
+        "project_id": None,
         "project_draft": {},
         "brand_profile": {},
         "trend_context": {},
