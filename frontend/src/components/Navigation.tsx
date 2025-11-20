@@ -19,10 +19,7 @@ import { Progress } from "@/components/ui/progress";
 const Navigation = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    // localStorage와 sessionStorage에서 로그인 상태 복원
-    return localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
-  });
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -52,6 +49,9 @@ const Navigation = () => {
 
   // localStorage 변경 감지
   useEffect(() => {
+    // 초기 로그인 상태 확인
+    setIsLoggedIn(localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true');
+    
     const handleStorageChange = () => {
       setUserProfile(getUserProfile());
       setIsLoggedIn(localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true');
@@ -139,7 +139,6 @@ const Navigation = () => {
           {/* Logo */}
           <Link 
             to="/"
-<<<<<<< HEAD
             className="flex items-center gap-2 text-2xl font-bold tracking-tight text-foreground hover:text-primary transition-colors"
           >
             <img 
@@ -147,10 +146,6 @@ const Navigation = () => {
               alt="Makery Logo" 
               className="h-8 w-8 flex-shrink-0"
             />
-=======
-            className="text-2xl font-bold tracking-tight text-foreground hover:text-primary transition-colors"
-          >
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
             MAKERY
           </Link>
 
@@ -174,12 +169,19 @@ const Navigation = () => {
             >
               숏폼 갤러리
             </Link>
-            <Link 
-              to="/projects"
+            <button
+              onClick={() => {
+                const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+                if (isLoggedIn) {
+                  navigate("/projects");
+                } else {
+                  setIsLoginOpen(true);
+                }
+              }}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               내 프로젝트
-            </Link>
+            </button>
             <Link 
               to="/plans"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"

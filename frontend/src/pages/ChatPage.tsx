@@ -63,10 +63,14 @@ const ChatPage = () => {
   const [hasLogo, setHasLogo] = useState<boolean | null>(null);
   const [uploadedLogo, setUploadedLogo] = useState<string | null>(null);
   const [showSkipDialog, setShowSkipDialog] = useState(false);
+  const [skipDialogStep, setSkipDialogStep] = useState<"confirm" | "project" | "type">("confirm"); // 다이얼로그 내부 단계
   const [showGenerateTypeDialog, setShowGenerateTypeDialog] = useState(false); // 로고/숏폼 선택 다이얼로그
   const [showLogoDialog, setShowLogoDialog] = useState(false);
   const [showUploadInDialog, setShowUploadInDialog] = useState(false); // 팝업 내 업로드 UI 표시 여부
   const [isSkippedFlow, setIsSkippedFlow] = useState(false); // 넘어가기 버튼 경로인지 구분
+  const [showProjectConfirm, setShowProjectConfirm] = useState(false); // 프로젝트 생성 확인 단계
+  const [isDraftMode, setIsDraftMode] = useState(false); // draft 모드 여부
+  const [draftProjectInfo, setDraftProjectInfo] = useState<{ name: string; description: string } | null>(null); // draft 프로젝트 정보
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dialogFileInputRef = useRef<HTMLInputElement>(null);
   const [currentQuestion, setCurrentQuestion] = useState<string | null>(null);
@@ -109,10 +113,13 @@ const ChatPage = () => {
   };
 
   const [userProfile, setUserProfile] = useState(getUserProfile());
-  const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   // localStorage 변경 감지하여 사용자 정보 업데이트
   useEffect(() => {
+    // 초기 로그인 상태 확인
+    setIsLoggedIn(localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true');
+    
     const handleStorageChange = () => {
       setUserProfile(getUserProfile());
       setIsLoggedIn(localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true');
@@ -136,10 +143,13 @@ const ChatPage = () => {
 
   // 로그인 상태 확인
   useEffect(() => {
-    if (!isLoggedIn) {
+    // localStorage/sessionStorage에서 직접 확인
+    const currentLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+    if (!currentLoggedIn) {
       navigate("/");
+      return;
     }
-  }, [isLoggedIn, navigate]);
+  }, [navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem('isLoggedIn');
@@ -312,15 +322,53 @@ const ChatPage = () => {
   };
 
   useEffect(() => {
+    const isDraft = searchParams.get('draft') === 'true';
     const projectId = searchParams.get('project') || projectStorage.getCurrentProjectId();
+    const skipLogoUpload = searchParams.get('skipLogoUpload') === 'true';
+    
+    // draft 모드 처리
+    if (isDraft) {
+      setIsDraftMode(true);
+      setIsSkippedFlow(skipLogoUpload);
+      
+      // draft 프로젝트 정보 불러오기
+      const draftData = localStorage.getItem('makery_draft_project');
+      if (draftData) {
+        try {
+          const draft = JSON.parse(draftData);
+          setDraftProjectInfo({ name: draft.name, description: draft.description || "" });
+        } catch (e) {
+          console.error("Draft 프로젝트 정보 파싱 실패:", e);
+        }
+      }
+      
+      // 환영 메시지 추가
+      if (messages.length === 0) {
+        const welcomeMessage: Message = {
+          role: "assistant",
+          content: "안녕하세요! 브랜드 정보를 수집하기 위해 몇 가지 질문을 드리겠습니다.\n\n먼저 브랜드명을 알려주세요."
+        };
+        setMessages([welcomeMessage]);
+        setCurrentQuestion("brand_name");
+        setCurrentStep("collecting");
+      }
+      return;
+    }
+    
+    // 기존 프로젝트가 있는 경우
     if (!projectId) {
       navigate("/projects");
       return;
     }
     setCurrentProjectId(projectId);
+    setIsDraftMode(false);
     
     const project = projectStorage.getProject(projectId);
-    const skipLogoUpload = searchParams.get('skipLogoUpload') === 'true';
+    
+    // skipLogoUpload 플래그 설정
+    if (skipLogoUpload) {
+      setIsSkippedFlow(true);
+    }
     
     if (project) {
       // system 메시지만 제외하고 나머지 메시지는 모두 표시
@@ -453,10 +501,13 @@ const ChatPage = () => {
         setCurrentStep("complete");
       }
     }
-  }, [navigate, searchParams]);
+  }, [navigate, searchParams, messages.length]);
 
   // 첫 진입 시 환영 메시지 추가 (이미 저장된 환영 메시지가 없을 때만)
   useEffect(() => {
+    // draft 모드인 경우는 이미 위에서 처리됨
+    if (isDraftMode) return;
+    
     if (currentProjectId && messages.length === 0 && currentStep === "collecting") {
       const project = projectStorage.getProject(currentProjectId);
       if (project) {
@@ -477,7 +528,7 @@ const ChatPage = () => {
         }
       }
     }
-  }, [currentProjectId, messages.length, currentStep]);
+  }, [currentProjectId, messages.length, currentStep, isDraftMode]);
 
   // 메시지 스크롤
   useEffect(() => {
@@ -498,7 +549,10 @@ const ChatPage = () => {
   }, [collectedInfo.brand_name, collectedInfo.industry, currentStep, uploadedLogo]);
 
   const handleSendMessage = () => {
-    if (!inputMessage.trim() || !currentProjectId) return;
+    if (!inputMessage.trim()) return;
+    
+    // draft 모드가 아닌 경우 currentProjectId가 필요
+    if (!isDraftMode && !currentProjectId) return;
     if (currentStep !== "collecting") return;
 
     const userMessage: Message = {
@@ -508,7 +562,11 @@ const ChatPage = () => {
 
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
-    projectStorage.addMessage(currentProjectId, userMessage);
+    
+    // draft 모드가 아닌 경우에만 projectStorage에 저장
+    if (!isDraftMode && currentProjectId) {
+      projectStorage.addMessage(currentProjectId, userMessage);
+    }
 
     let assistantResponse = "";
     let nextQuestion: string | null = null;
@@ -569,9 +627,9 @@ const ChatPage = () => {
         setCollectedInfo(prev => ({ ...prev, preferred_colors: colors }));
       }
       // 모든 질문 완료
-      assistantResponse = "브랜드 정보 입력이 완료되었습니다.";
+      assistantResponse = "브랜드 정보 입력이 완료되었습니다. 프로젝트를 생성하시겠습니까?";
       nextQuestion = null;
-      // complete 단계로 전환하여 생성하기 버튼 표시
+      // complete 단계로 전환하여 프로젝트 생성 확인 버튼 표시
     }
 
     const assistantMessage: Message = {
@@ -581,17 +639,24 @@ const ChatPage = () => {
 
     setTimeout(() => {
       setMessages([...newMessages, assistantMessage]);
-      projectStorage.addMessage(currentProjectId, assistantMessage);
+      
+      // draft 모드가 아닌 경우에만 projectStorage에 저장
+      if (!isDraftMode && currentProjectId) {
+        projectStorage.addMessage(currentProjectId, assistantMessage);
+      }
+      
       setCurrentQuestion(nextQuestion);
       
       // 모든 질문이 끝났을 때 처리
       if (nextQuestion === null && question === "preferred_colors") {
-        // 브랜드 정보 저장
-        const infoMessage: Message = {
-          role: "system",
-          content: JSON.stringify(collectedInfo)
-        };
-        projectStorage.addMessage(currentProjectId, infoMessage);
+        // draft 모드가 아닌 경우에만 브랜드 정보 저장
+        if (!isDraftMode && currentProjectId) {
+          const infoMessage: Message = {
+            role: "system",
+            content: JSON.stringify(collectedInfo)
+          };
+          projectStorage.addMessage(currentProjectId, infoMessage);
+        }
         
         // complete 단계로 전환하여 생성하기 버튼 표시
         setCurrentStep("complete");
@@ -611,23 +676,66 @@ const ChatPage = () => {
       });
       return;
     }
+    setSkipDialogStep("confirm"); // 다이얼로그 열 때 초기 상태로 리셋
     setShowSkipDialog(true);
   };
 
   const handleSkipConfirm = () => {
-    if (!currentProjectId) return;
-
-    // 정보 저장
-    const infoMessage: Message = {
-      role: "system",
-      content: JSON.stringify(collectedInfo)
-    };
-    projectStorage.addMessage(currentProjectId, infoMessage);
-
-    setShowSkipDialog(false);
+    // 건너뛰기 팝업 흐름에서는 대화창 상태를 변경하지 않음
+    // 오직 팝업 내부 단계만 변경
+    setSkipDialogStep("project");
+  };
+  
+  const handleProjectConfirmInDialog = () => {
+    // draft 모드인 경우 실제 프로젝트 생성
+    if (isDraftMode) {
+      // 필수 항목 체크
+      if (!collectedInfo.brand_name.trim() || !collectedInfo.industry.trim()) {
+        toast({
+          title: "필수 항목 미입력",
+          description: "브랜드명과 업종은 필수 항목입니다.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // draft 프로젝트 정보로 실제 프로젝트 생성
+      const projectName = draftProjectInfo?.name || "새 프로젝트";
+      const projectDescription = draftProjectInfo?.description || "";
+      const project = projectStorage.createProject(projectName, projectDescription);
+      
+      // 수집된 정보를 system 메시지로 저장
+      const infoMessage: Message = {
+        role: "system",
+        content: JSON.stringify(collectedInfo)
+      };
+      projectStorage.addMessage(project.id, infoMessage);
+      
+      // 기존 메시지들을 프로젝트에 저장
+      messages.forEach(msg => {
+        if (msg.role !== "system") {
+          projectStorage.addMessage(project.id, msg);
+        }
+      });
+      
+      // draft 정보 삭제
+      localStorage.removeItem('makery_draft_project');
+      
+      // 프로젝트 ID 설정
+      setCurrentProjectId(project.id);
+      setIsDraftMode(false);
+    } else if (!currentProjectId) {
+      // draft 모드가 아니고 currentProjectId도 없으면 에러
+      toast({
+        title: "오류",
+        description: "프로젝트를 찾을 수 없습니다.",
+        variant: "destructive",
+      });
+      return;
+    }
     
-    // 로고/숏폼 선택 다이얼로그 표시
-    setShowGenerateTypeDialog(true);
+    // 다이얼로그 내부 단계를 "type"으로 변경 (로고/숏폼 선택 단계)
+    setSkipDialogStep("type");
   };
 
   const handleLogoQuestion = (hasLogoFile: boolean, fromDialog: boolean = false) => {
@@ -857,7 +965,8 @@ const ChatPage = () => {
   const progress = calculateProgress();
   const canSkip = collectedInfo.brand_name?.trim() !== "" && collectedInfo.industry?.trim() !== "";
   const showLogoButtons = currentStep === "logoQuestion" && hasLogo === null;
-  const canGenerate = checkRequiredFieldsComplete(collectedInfo) && currentStep === "complete";
+  const canGenerate = canSkip && currentStep === "complete" && showProjectConfirm;
+  const showProjectConfirmButton = canSkip && currentStep === "complete" && !showProjectConfirm;
   
   // 디버깅: canSkip 계산 확인
   console.log("canSkip 계산:", {
@@ -905,7 +1014,7 @@ const ChatPage = () => {
               variant={canSkip ? "default" : "ghost"}
               className={canSkip ? "bg-primary hover:bg-primary/90" : ""}
             >
-              생성하기
+              건너뛰기
             </Button>
           </div>
         </div>
@@ -941,6 +1050,83 @@ const ChatPage = () => {
               </div>
             </div>
           ))}
+          
+          {showProjectConfirmButton && (
+            <div className="mt-4 flex justify-center">
+              <Button 
+                size="lg" 
+                onClick={() => {
+                  // draft 모드인 경우 실제 프로젝트 생성
+                  if (isDraftMode) {
+                    // 필수 항목 체크
+                    if (!collectedInfo.brand_name.trim() || !collectedInfo.industry.trim()) {
+                      toast({
+                        title: "필수 항목 미입력",
+                        description: "브랜드명과 업종은 필수 항목입니다.",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    
+                    // draft 프로젝트 정보로 실제 프로젝트 생성
+                    const projectName = draftProjectInfo?.name || "새 프로젝트";
+                    const projectDescription = draftProjectInfo?.description || "";
+                    const project = projectStorage.createProject(projectName, projectDescription);
+                    
+                    // 수집된 정보를 system 메시지로 저장
+                    const infoMessage: Message = {
+                      role: "system",
+                      content: JSON.stringify(collectedInfo)
+                    };
+                    projectStorage.addMessage(project.id, infoMessage);
+                    
+                    // 기존 메시지들을 프로젝트에 저장
+                    messages.forEach(msg => {
+                      if (msg.role !== "system") {
+                        projectStorage.addMessage(project.id, msg);
+                      }
+                    });
+                    
+                    // draft 정보 삭제
+                    localStorage.removeItem('makery_draft_project');
+                    
+                    // 프로젝트 ID 설정
+                    setCurrentProjectId(project.id);
+                    setIsDraftMode(false);
+                    
+                    // 질문을 메시지로 추가
+                    const confirmQuestion: Message = {
+                      role: "assistant",
+                      content: "어떤 거 만드시겠습니까?"
+                    };
+                    setMessages(prev => [...prev, confirmQuestion]);
+                    projectStorage.addMessage(project.id, confirmQuestion);
+                    
+                    // 바로 showProjectConfirm을 true로 설정하여 로고/숏폼 생성 버튼 표시
+                    setShowProjectConfirm(true);
+                    
+                    // ChatPage에 머물러서 로고/숏폼 생성 버튼을 보여줌 (대시보드로 이동하지 않음)
+                    return;
+                  }
+                  
+                  // 기존 프로젝트가 있는 경우
+                  if (!currentProjectId) return;
+                  // 질문을 메시지로 추가
+                  const confirmQuestion: Message = {
+                    role: "assistant",
+                    content: "어떤 거 만드시겠습니까?"
+                  };
+                  setMessages(prev => [...prev, confirmQuestion]);
+                  projectStorage.addMessage(currentProjectId, confirmQuestion);
+                  // 바로 showProjectConfirm을 true로 설정하여 로고/숏폼 생성 버튼 표시
+                  setShowProjectConfirm(true);
+                }} 
+                className="gap-2 bg-primary hover:bg-primary/90"
+              >
+                생성하기
+              </Button>
+            </div>
+          )}
           
           {canGenerate && (
             <div className="mt-4 flex justify-center gap-3">
@@ -984,21 +1170,112 @@ const ChatPage = () => {
       </div>
 
       {/* Skip Confirmation Dialog */}
-      <AlertDialog open={showSkipDialog} onOpenChange={setShowSkipDialog}>
+      <AlertDialog open={showSkipDialog} onOpenChange={(open) => {
+        // 단계 전환 중이 아닐 때만 팝업 닫기 허용
+        if (!open && skipDialogStep === "confirm") {
+          setShowSkipDialog(false);
+          setSkipDialogStep("confirm"); // 다이얼로그 닫을 때 초기 상태로 리셋
+        }
+        // project나 type 단계에서는 onOpenChange로 닫히지 않도록 함
+      }}>
         <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>입력하지 않은 항목이 있을 수 있습니다</AlertDialogTitle>
-            <AlertDialogDescription>
-              지금까지 입력한 내용만 저장하고 다음 단계로 넘어갈까요?
-              이 단계에서는 더 이상 수정할 수 없습니다.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>아니요, 계속 작성할게요</AlertDialogCancel>
-            <AlertDialogAction onClick={handleSkipConfirm} className="bg-primary hover:bg-primary/90">
-              네, 넘어갈게요
-            </AlertDialogAction>
-          </AlertDialogFooter>
+          {skipDialogStep === "confirm" && (
+            <>
+              <AlertDialogHeader>
+                <AlertDialogTitle>입력하지 않은 항목이 있을 수 있습니다</AlertDialogTitle>
+                <AlertDialogDescription>
+                  지금까지 입력한 내용만 저장하고 다음 단계로 넘어갈까요?
+                  이 단계에서는 더 이상 수정할 수 없습니다.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>아니요, 계속 작성할게요</AlertDialogCancel>
+                <Button 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleSkipConfirm();
+                  }}
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  네, 넘어갈게요
+                </Button>
+              </AlertDialogFooter>
+            </>
+          )}
+          
+          {skipDialogStep === "project" && (
+            <>
+              <AlertDialogHeader>
+                <AlertDialogTitle>지금까지 입력한 내용으로 새 프로젝트를 생성하시겠습니까?</AlertDialogTitle>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <Button 
+                  variant="outline"
+                  onClick={() => {
+                    setShowSkipDialog(false);
+                    setSkipDialogStep("confirm");
+                  }}
+                >
+                  취소
+                </Button>
+                <Button 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleProjectConfirmInDialog();
+                  }}
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  생성하기
+                </Button>
+              </AlertDialogFooter>
+            </>
+          )}
+          
+          {skipDialogStep === "type" && (
+            <>
+              <AlertDialogHeader>
+                <AlertDialogTitle>어떤 작업을 하시겠습니까?</AlertDialogTitle>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                <Button
+                  onClick={() => {
+                    if (!currentProjectId) {
+                      toast({
+                        title: "오류",
+                        description: "프로젝트를 찾을 수 없습니다.",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    setShowSkipDialog(false);
+                    setSkipDialogStep("confirm");
+                    handleGoToStudio(currentProjectId, "logo");
+                  }}
+                  className="flex-1 bg-primary hover:bg-primary/90"
+                >
+                  로고 생성하기
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (!currentProjectId) {
+                      toast({
+                        title: "오류",
+                        description: "프로젝트를 찾을 수 없습니다.",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    setShowSkipDialog(false);
+                    setSkipDialogStep("confirm");
+                    handleGoToStudio(currentProjectId, "short");
+                  }}
+                  className="flex-1 bg-primary hover:bg-primary/90"
+                >
+                  숏폼 생성하기
+                </Button>
+              </AlertDialogFooter>
+            </>
+          )}
         </AlertDialogContent>
       </AlertDialog>
 

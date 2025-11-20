@@ -32,6 +32,7 @@ const MyPage = () => {
   const [projectDescription, setProjectDescription] = useState("");
   const [projects, setProjects] = useState<Project[]>([]);
   const [likedItems, setLikedItems] = useState<Array<{ id: number; type: "logo" | "short"; image: string; title: string; likes: number }>>([]);
+  const [sharedItems, setSharedItems] = useState<Array<{ id: string | number; type: "logo" | "short"; image: string; title: string; likes: number; comments?: number; duration?: string }>>([]);
 
   // Load liked items from localStorage
   useEffect(() => {
@@ -182,39 +183,99 @@ const MyPage = () => {
     };
   }, []);
 
-  // 더미 데이터 - 공유한 작품들
-  const sharedItems = [
-    {
-      id: 1,
-      type: "logo" as const,
-      image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe",
-      title: "My Logo Design",
-      likes: 45,
-      shares: 12,
-      comments: 8,
-      views: 320,
-    },
-    {
-      id: 2,
-      type: "short" as const,
-      image: "https://images.unsplash.com/photo-1611162617474-5b21e879e113",
-      title: "My Short Video",
-      likes: 128,
-      shares: 34,
-      comments: 23,
-      views: 1240,
-    },
-    {
-      id: 3,
-      type: "logo" as const,
-      image: "https://images.unsplash.com/photo-1634942537034-2531766767d1",
-      title: "Brand Logo 2",
-      likes: 67,
-      shares: 18,
-      comments: 12,
-      views: 540,
-    },
-  ];
+  // 공유한 작품 로드 (현재 남아있는 프로젝트 데이터 기준으로 계산)
+  useEffect(() => {
+    const loadSharedItems = () => {
+      // 현재 남아있는 모든 프로젝트 가져오기
+      const allProjects = projectStorage.getProjects();
+      
+      // localStorage에서 공개된 항목 목록 가져오기
+      const publicLogos = JSON.parse(localStorage.getItem('public_logos') || '[]');
+      const publicShortForms = JSON.parse(localStorage.getItem('public_shortforms') || '[]');
+      
+      // 공개된 로고/숏폼 ID 집합 생성
+      const publicLogoIds = new Set(publicLogos.map((l: any) => l.id));
+      const publicShortFormIds = new Set(publicShortForms.map((sf: any) => sf.id));
+      
+      const logoItems: Array<{ id: string | number; type: "logo" | "short"; image: string; title: string; likes: number; comments?: number; duration?: string }> = [];
+      const shortItems: Array<{ id: string | number; type: "logo" | "short"; image: string; title: string; likes: number; comments?: number; duration?: string }> = [];
+      
+      // 각 프로젝트를 순회하면서 공개된 항목만 수집
+      allProjects.forEach((project) => {
+        // 프로젝트의 savedItems 확인
+        if (project.savedItems) {
+          project.savedItems.forEach((item) => {
+            if (item.type === "logo" && publicLogoIds.has(item.id)) {
+              // 공개된 로고이고 실제로 프로젝트에 존재하는지 확인
+              const publicLogo = publicLogos.find((l: any) => l.id === item.id && l.projectId === project.id);
+              if (publicLogo) {
+                logoItems.push({
+                  id: item.id,
+                  type: "logo" as const,
+                  image: item.url,
+                  title: item.title || "로고",
+                  likes: publicLogo.likes || 0,
+                  comments: publicLogo.comments || 0,
+                });
+              }
+            } else if (item.type === "short" && publicShortFormIds.has(item.id)) {
+              // 공개된 숏폼이고 실제로 프로젝트에 존재하는지 확인
+              const publicShortForm = publicShortForms.find((sf: any) => sf.id === item.id && sf.projectId === project.id);
+              if (publicShortForm) {
+                shortItems.push({
+                  id: item.id,
+                  type: "short" as const,
+                  image: item.url,
+                  title: item.title || "숏폼",
+                  likes: publicShortForm.likes || 0,
+                  comments: publicShortForm.comments || 0,
+                  duration: publicShortForm.duration || "0:15",
+                });
+              }
+            }
+          });
+        }
+        
+        // 업로드된 로고도 확인 (업로드된 로고는 savedItems에 없을 수 있음)
+        if (project.logo) {
+          const uploadedLogoId = 'uploaded_logo';
+          if (publicLogoIds.has(uploadedLogoId)) {
+            const publicLogo = publicLogos.find((l: any) => l.id === uploadedLogoId && l.projectId === project.id);
+            if (publicLogo) {
+              // 이미 추가되었는지 확인
+              if (!logoItems.some(item => item.id === uploadedLogoId && item.image === project.logo?.url)) {
+                logoItems.push({
+                  id: uploadedLogoId,
+                  type: "logo" as const,
+                  image: project.logo.url,
+                  title: "업로드된 로고",
+                  likes: publicLogo.likes || 0,
+                  comments: publicLogo.comments || 0,
+                });
+              }
+            }
+          }
+        }
+      });
+      
+      setSharedItems([...logoItems, ...shortItems]);
+    };
+    
+    loadSharedItems();
+    
+    // localStorage 및 프로젝트 변경 감지
+    const handleStorageChange = () => {
+      loadSharedItems();
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    const interval = setInterval(loadSharedItems, 1000);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
+  }, []);
 
   const filteredSharedItems = sharedFilter === "all" 
     ? [...sharedItems.filter(item => item.type === "logo"), ...sharedItems.filter(item => item.type === "short")]
@@ -1115,7 +1176,7 @@ const MyPage = () => {
               onClick={handleCreateProject}
               disabled={!projectName.trim()}
             >
-              생성하기
+              다음으로
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,9 +1,5 @@
-<<<<<<< HEAD
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-=======
-import { useState } from "react";
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,17 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { Camera, Instagram, Youtube } from "lucide-react";
-<<<<<<< HEAD
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const AccountPage = () => {
   const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
-=======
-
-const AccountPage = () => {
-  const { toast } = useToast();
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
   
   // localStorage에서 사용자 정보 불러오기
   const getUserProfile = () => {
@@ -50,7 +40,6 @@ const AccountPage = () => {
   const [avatar, setAvatar] = useState<string | null>(getUserProfile().avatar || null);
   const [instagramConnected, setInstagramConnected] = useState(getUserProfile().instagram?.connected || false);
   const [youtubeConnected, setYoutubeConnected] = useState(getUserProfile().youtube?.connected || false);
-<<<<<<< HEAD
   const [isInstagramModalOpen, setIsInstagramModalOpen] = useState(false);
   const [isYoutubeModalOpen, setIsYoutubeModalOpen] = useState(false);
 
@@ -99,8 +88,6 @@ const AccountPage = () => {
       setSearchParams(searchParams, { replace: true });
     }
   }, [searchParams, setSearchParams]);
-=======
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -150,7 +137,6 @@ const AccountPage = () => {
   };
 
   const handleInstagramConnect = () => {
-<<<<<<< HEAD
     setIsInstagramModalOpen(true);
   };
 
@@ -176,13 +162,6 @@ const AccountPage = () => {
         description: "이제 내 숏폼에서 바로 업로드할 수 있어요.",
       });
     }, 1000);
-=======
-    setInstagramConnected(true);
-    toast({
-      title: "인스타그램 연동",
-      description: "인스타그램이 연동되었습니다.",
-    });
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
   };
 
   const handleInstagramDisconnect = () => {
@@ -202,7 +181,6 @@ const AccountPage = () => {
   };
 
   const handleYoutubeConnect = () => {
-<<<<<<< HEAD
     setIsYoutubeModalOpen(true);
   };
 
@@ -228,13 +206,6 @@ const AccountPage = () => {
         description: "이제 내 숏폼에서 바로 업로드할 수 있어요.",
       });
     }, 1000);
-=======
-    setYoutubeConnected(true);
-    toast({
-      title: "유튜브 연동",
-      description: "유튜브가 연동되었습니다.",
-    });
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
   };
 
   const handleYoutubeDisconnect = () => {
@@ -429,7 +400,6 @@ const AccountPage = () => {
       </div>
       
       <Footer />
-<<<<<<< HEAD
 
       {/* Instagram 연동 모달 */}
       <Dialog open={isInstagramModalOpen} onOpenChange={setIsInstagramModalOpen}>
@@ -476,8 +446,6 @@ const AccountPage = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-=======
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
     </div>
   );
 };

@@ -17,7 +17,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Trash2, Image, Video, Calendar } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+} from "@/components/ui/dialog";
+import { Trash2, Image, Video, Calendar, X } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
 interface LogoItem {
@@ -46,11 +50,17 @@ const ProjectDashboardPage = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleteItemDialogOpen, setIsDeleteItemDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<{ type: "logo" | "short"; id: string } | null>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [activeTab, setActiveTab] = useState("logos");
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+  const [pendingToggleItem, setPendingToggleItem] = useState<{ type: "logo" | "short"; id: string } | null>(null);
+  const [selectedImage, setSelectedImage] = useState<{ url: string; title: string; type: "logo" | "short" } | null>(null);
 
   // localStorage 변경 감지하여 로그인 상태 업데이트
   useEffect(() => {
+    // 초기 로그인 상태 확인
+    setIsLoggedIn(localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true');
+    
     const handleStorageChange = () => {
       setIsLoggedIn(localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true');
     };
@@ -66,7 +76,10 @@ const ProjectDashboardPage = () => {
   }, []);
 
   useEffect(() => {
-    if (!isLoggedIn) {
+    // localStorage/sessionStorage에서 직접 로그인 상태 확인
+    const currentLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+    
+    if (!currentLoggedIn) {
       navigate("/");
       return;
     }
@@ -149,20 +162,29 @@ const ProjectDashboardPage = () => {
 
   const handleCreateLogo = () => {
     if (!project) return;
-    
-    // 정보 수집 완료 여부 확인 (system 메시지가 있으면 완료)
-    const hasSystemMessage = project.messages.some(m => m.role === "system");
-    if (hasSystemMessage) {
-      // 이미 브랜드 정보가 있으면 Studio로
-      navigate(`/studio?project=${project.id}`);
-    } else {
-      // 브랜드 정보가 없으면 ChatPage로
-      navigate(`/chat?project=${project.id}`);
-    }
+    // 로고 스튜디오로 이동
+    navigate(`/studio?project=${project.id}&type=logo`);
+  };
+
+  const handleCreateShort = () => {
+    if (!project) return;
+    // 숏폼 스튜디오로 이동
+    navigate(`/studio?project=${project.id}&type=short`);
   };
 
   const handleDeleteProject = () => {
     if (!project) return;
+    
+    // 프로젝트 삭제 전에 localStorage에서 공개된 로고/숏폼도 제거
+    const publicLogos = JSON.parse(localStorage.getItem('public_logos') || '[]');
+    const publicShortForms = JSON.parse(localStorage.getItem('public_shortforms') || '[]');
+    
+    // 현재 프로젝트의 공개 로고/숏폼 제거
+    const filteredLogos = publicLogos.filter((l: any) => l.projectId !== project.id);
+    const filteredShortForms = publicShortForms.filter((sf: any) => sf.projectId !== project.id);
+    
+    localStorage.setItem('public_logos', JSON.stringify(filteredLogos));
+    localStorage.setItem('public_shortforms', JSON.stringify(filteredShortForms));
     
     projectStorage.deleteProject(project.id);
     toast({
@@ -182,29 +204,38 @@ const ProjectDashboardPage = () => {
   };
 
   const handleTogglePublic = (logoId: string) => {
+    const logo = logos.find(l => l.id === logoId);
+    if (!logo) return;
+    
+    // 비공개에서 공개로 바꾸는 경우 확인 다이얼로그 표시
+    if (!logo.isPublic) {
+      setPendingToggleItem({ type: "logo", id: logoId });
+      setIsShareDialogOpen(true);
+      return;
+    }
+    
+    // 공개에서 비공개로 바꾸는 경우 바로 처리
     setLogos(prevLogos => {
-      const updatedLogos = prevLogos.map(logo => 
-        logo.id === logoId 
-          ? { ...logo, isPublic: !logo.isPublic }
-          : logo
+      const updatedLogos = prevLogos.map(l => 
+        l.id === logoId ? { ...l, isPublic: false } : l
       );
       
       // 공개된 로고를 localStorage에 저장
-      const publicLogos = updatedLogos.filter(logo => logo.isPublic);
-      const publicLogosData = publicLogos.map(logo => ({
-        id: logo.id,
-        url: logo.url,
-        brandName: logo.title || "로고",
+      const publicLogos = updatedLogos.filter(l => l.isPublic);
+      const publicLogosData = publicLogos.map(l => ({
+        id: l.id,
+        url: l.url,
+        brandName: l.title || "로고",
         likes: 0,
         comments: 0,
-        createdAt: new Date(logo.createdAt),
+        createdAt: new Date(l.createdAt),
         tags: [],
         projectId: project?.id || "",
       }));
       
       // 기존 공개 로고 가져오기
       const existingPublicLogos = JSON.parse(localStorage.getItem('public_logos') || '[]');
-      // 현재 프로젝트의 로고 제거 후 새로 추가 (비공개로 변경된 것은 제거됨)
+      // 현재 프로젝트의 로고 제거 후 새로 추가
       const filteredLogos = existingPublicLogos.filter((l: any) => l.projectId !== project?.id);
       const updatedPublicLogos = [...filteredLogos, ...publicLogosData];
       localStorage.setItem('public_logos', JSON.stringify(updatedPublicLogos));
@@ -213,17 +244,106 @@ const ProjectDashboardPage = () => {
     });
     
     toast({
-      title: "공개 상태가 변경되었습니다",
-      description: "갤러리에 반영되었습니다.",
+      title: "비공개로 변경되었습니다",
+      description: "갤러리에서 제거되었습니다.",
     });
+  };
+  
+  const handleConfirmShare = () => {
+    if (!pendingToggleItem || !project) return;
+    
+    if (pendingToggleItem.type === "logo") {
+      setLogos(prevLogos => {
+        const updatedLogos = prevLogos.map(logo => 
+          logo.id === pendingToggleItem.id 
+            ? { ...logo, isPublic: true }
+            : logo
+        );
+        
+        // 공개된 로고를 localStorage에 저장
+        const publicLogos = updatedLogos.filter(logo => logo.isPublic);
+        const publicLogosData = publicLogos.map(logo => ({
+          id: logo.id,
+          url: logo.url,
+          brandName: logo.title || "로고",
+          likes: 0,
+          comments: 0,
+          createdAt: new Date(logo.createdAt),
+          tags: [],
+          projectId: project.id,
+        }));
+        
+        // 기존 공개 로고 가져오기
+        const existingPublicLogos = JSON.parse(localStorage.getItem('public_logos') || '[]');
+        // 현재 프로젝트의 로고 제거 후 새로 추가
+        const filteredLogos = existingPublicLogos.filter((l: any) => l.projectId !== project.id);
+        const updatedPublicLogos = [...filteredLogos, ...publicLogosData];
+        localStorage.setItem('public_logos', JSON.stringify(updatedPublicLogos));
+        
+        return updatedLogos;
+      });
+      
+      toast({
+        title: "공개되었습니다",
+        description: "로고 갤러리에 게시되었습니다.",
+      });
+    } else {
+      setShortForms(prevShortForms => {
+        const updatedShortForms = prevShortForms.map(shortForm => 
+          shortForm.id === pendingToggleItem.id 
+            ? { ...shortForm, isPublic: true }
+            : shortForm
+        );
+        
+        // 공개된 숏폼을 localStorage에 저장
+        const publicShortForms = updatedShortForms.filter(sf => sf.isPublic);
+        const publicShortFormsData = publicShortForms.map(sf => ({
+          id: sf.id,
+          thumbnailUrl: sf.url,
+          title: sf.title || "숏폼",
+          likes: 0,
+          comments: 0,
+          duration: "0:15",
+          createdAt: new Date(sf.createdAt),
+          tags: [],
+          projectId: project.id,
+        }));
+        
+        // 기존 공개 숏폼 가져오기
+        const existingPublicShortForms = JSON.parse(localStorage.getItem('public_shortforms') || '[]');
+        // 현재 프로젝트의 숏폼 제거 후 새로 추가
+        const filteredShortForms = existingPublicShortForms.filter((sf: any) => sf.projectId !== project.id);
+        const updatedPublicShortForms = [...filteredShortForms, ...publicShortFormsData];
+        localStorage.setItem('public_shortforms', JSON.stringify(updatedPublicShortForms));
+        
+        return updatedShortForms;
+      });
+      
+      toast({
+        title: "공개되었습니다",
+        description: "숏폼 갤러리에 게시되었습니다.",
+      });
+    }
+    
+    setIsShareDialogOpen(false);
+    setPendingToggleItem(null);
   };
 
   const handleToggleShortFormPublic = (shortFormId: string) => {
+    const shortForm = shortForms.find(sf => sf.id === shortFormId);
+    if (!shortForm) return;
+    
+    // 비공개에서 공개로 바꾸는 경우 확인 다이얼로그 표시
+    if (!shortForm.isPublic) {
+      setPendingToggleItem({ type: "short", id: shortFormId });
+      setIsShareDialogOpen(true);
+      return;
+    }
+    
+    // 공개에서 비공개로 바꾸는 경우 바로 처리
     setShortForms(prevShortForms => {
-      const updatedShortForms = prevShortForms.map(shortForm => 
-        shortForm.id === shortFormId 
-          ? { ...shortForm, isPublic: !shortForm.isPublic }
-          : shortForm
+      const updatedShortForms = prevShortForms.map(sf => 
+        sf.id === shortFormId ? { ...sf, isPublic: false } : sf
       );
       
       // 공개된 숏폼을 localStorage에 저장
@@ -242,7 +362,7 @@ const ProjectDashboardPage = () => {
       
       // 기존 공개 숏폼 가져오기
       const existingPublicShortForms = JSON.parse(localStorage.getItem('public_shortforms') || '[]');
-      // 현재 프로젝트의 숏폼 제거 후 새로 추가 (비공개로 변경된 것은 제거됨)
+      // 현재 프로젝트의 숏폼 제거 후 새로 추가
       const filteredShortForms = existingPublicShortForms.filter((sf: any) => sf.projectId !== project?.id);
       const updatedPublicShortForms = [...filteredShortForms, ...publicShortFormsData];
       localStorage.setItem('public_shortforms', JSON.stringify(updatedPublicShortForms));
@@ -251,8 +371,8 @@ const ProjectDashboardPage = () => {
     });
     
     toast({
-      title: "공개 상태가 변경되었습니다",
-      description: "갤러리에 반영되었습니다.",
+      title: "비공개로 변경되었습니다",
+      description: "갤러리에서 제거되었습니다.",
     });
   };
 
@@ -277,7 +397,7 @@ const ProjectDashboardPage = () => {
       setShortForms(prev => prev.filter(short => short.id !== itemToDelete.id));
     }
 
-    // 공개 상태도 제거 (localStorage)
+    // 공개 상태도 제거 (localStorage) - 삭제할 항목의 id와 일치하는 것 제거
     if (itemToDelete.type === "logo") {
       const publicLogos = JSON.parse(localStorage.getItem('public_logos') || '[]');
       const updatedPublicLogos = publicLogos.filter((l: any) => l.id !== itemToDelete.id);
@@ -366,7 +486,13 @@ const ProjectDashboardPage = () => {
                   onClick={handleCreateLogo}
                   className="bg-orange-500 hover:bg-orange-600 text-white"
                 >
-                  로고/숏폼 생성하기
+                  로고 생성하기
+                </Button>
+                <Button
+                  onClick={handleCreateShort}
+                  className="bg-orange-500 hover:bg-orange-600 text-white"
+                >
+                  숏폼 생성하기
                 </Button>
                 <Button
                   variant="outline"
@@ -384,13 +510,13 @@ const ProjectDashboardPage = () => {
                 <div className="text-center py-16">
                   <p className="text-muted-foreground mb-4">아직 생성된 로고가 없습니다.</p>
                   <Button onClick={handleCreateLogo} className="bg-orange-500 hover:bg-orange-600 text-white">
-                    로고/숏폼 생성하기
+                    로고 생성하기
                   </Button>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {logos.map((logo) => (
-                    <Card key={logo.id} className="overflow-hidden hover:shadow-lg transition-shadow relative group">
+                    <Card key={logo.id} className="overflow-hidden hover:shadow-lg transition-shadow relative group cursor-pointer" onClick={() => setSelectedImage({ url: logo.url, title: logo.title || "로고", type: "logo" })}>
                       <CardContent className="p-0">
                         <div className="aspect-square bg-muted rounded-t-lg overflow-hidden relative">
                           <img
@@ -417,7 +543,7 @@ const ProjectDashboardPage = () => {
                           <p className="text-xs text-muted-foreground mb-3">
                             {formatDate(logo.createdAt)}
                           </p>
-                          <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
                             <span className="text-xs text-muted-foreground">
                               {logo.isPublic ? "공개" : "비공개"}
                             </span>
@@ -438,12 +564,14 @@ const ProjectDashboardPage = () => {
               {shortForms.length === 0 ? (
                 <div className="text-center py-16">
                   <p className="text-muted-foreground mb-4">아직 생성된 숏폼이 없습니다.</p>
-                  <p className="text-sm text-muted-foreground">Studio에서 숏폼을 생성할 수 있습니다.</p>
+                  <Button onClick={handleCreateShort} className="bg-orange-500 hover:bg-orange-600 text-white">
+                    숏폼 생성하기
+                  </Button>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {shortForms.map((shortForm) => (
-                    <Card key={shortForm.id} className="overflow-hidden hover:shadow-lg transition-shadow relative group">
+                    <Card key={shortForm.id} className="overflow-hidden hover:shadow-lg transition-shadow relative group cursor-pointer" onClick={() => setSelectedImage({ url: shortForm.url, title: shortForm.title || "숏폼", type: "short" })}>
                       <CardContent className="p-0">
                         <div className="aspect-[9/16] bg-muted rounded-t-lg overflow-hidden relative">
                           <img
@@ -472,7 +600,7 @@ const ProjectDashboardPage = () => {
                               {formatDate(shortForm.createdAt)}
                             </p>
                           </div>
-                          <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
                             <span className="text-xs text-muted-foreground">
                               {shortForm.isPublic ? "공개" : "비공개"}
                             </span>
@@ -512,6 +640,31 @@ const ProjectDashboardPage = () => {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* 공유 확인 다이얼로그 */}
+      <AlertDialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>다른 사용자와 공유하시겠습니까?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingToggleItem?.type === "logo" 
+                ? "로고가 로고 갤러리에 게시됩니다." 
+                : "숏폼이 숏폼 갤러리에 게시됩니다."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setIsShareDialogOpen(false);
+              setPendingToggleItem(null);
+            }}>
+              취소
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmShare} className="bg-primary hover:bg-primary/90">
+              공유하기
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* 프로젝트 삭제 확인 다이얼로그 */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
@@ -532,6 +685,31 @@ const ProjectDashboardPage = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* 이미지 확대 보기 다이얼로그 */}
+      <Dialog open={!!selectedImage} onOpenChange={(open) => !open && setSelectedImage(null)}>
+        <DialogContent className="max-w-none w-auto p-0 bg-transparent border-none">
+          <div className="relative inline-block">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-2 right-2 z-10 bg-background/80 hover:bg-background"
+              onClick={() => setSelectedImage(null)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+            {selectedImage && (
+              <img
+                src={selectedImage.url}
+                alt={selectedImage.title}
+                className={`max-w-[90vw] max-h-[90vh] object-contain ${
+                  selectedImage.type === "logo" ? "rounded-lg" : "aspect-[9/16] rounded-lg"
+                }`}
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -2,6 +2,7 @@ export interface Message {
   role: "user" | "assistant" | "system";
   content: string;
   images?: string[];
+  studioType?: "logo" | "short"; // 스튜디오 타입 구분 (로고/숏폼)
 }
 
 export interface SavedItem {

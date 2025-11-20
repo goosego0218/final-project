@@ -31,11 +31,29 @@ const HeroSection = () => {
 
   const handleCreateProject = () => {
     if (projectName.trim()) {
-      const project = projectStorage.createProject(projectName, projectDescription);
+      // 로그인 상태 확인
+      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+      if (!isLoggedIn) {
+        toast({
+          title: "로그인이 필요합니다",
+          description: "프로젝트를 생성하려면 로그인해주세요.",
+        });
+        return;
+      }
+      
+      // 임시 상태(draft)로만 저장 - 실제 프로젝트 생성은 ChatPage의 [생성하기]에서만
+      const draftProject = {
+        name: projectName,
+        description: projectDescription,
+        createdAt: new Date().toISOString()
+      };
+      localStorage.setItem('makery_draft_project', JSON.stringify(draftProject));
+      
       setIsProjectDialogOpen(false);
       setProjectName("");
       setProjectDescription("");
-      navigate("/chat");
+      // ChatPage로 이동 (draft 모드)
+      navigate(`/chat?draft=true&skipLogoUpload=true`);
     }
   };
 
@@ -88,28 +106,27 @@ const HeroSection = () => {
               <Label htmlFor="project-name">프로젝트 이름</Label>
               <Input
                 id="project-name"
-                placeholder="예: 새로운 브랜드 런칭"
+                placeholder="예: 브랜드 A 마케팅"
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="project-description">프로젝트 설명</Label>
+              <Label htmlFor="project-description">설명 (선택)</Label>
               <Textarea
                 id="project-description"
-                placeholder="프로젝트에 대한 간단한 설명을 입력하세요..."
+                placeholder="프로젝트에 대한 간단한 설명을 입력하세요"
                 value={projectDescription}
                 onChange={(e) => setProjectDescription(e.target.value)}
-                rows={3}
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsProjectDialogOpen(false)}>
-              취소
-            </Button>
-            <Button onClick={handleCreateProject}>
-              프로젝트 시작
+            <Button 
+              onClick={handleCreateProject}
+              disabled={!projectName.trim()}
+            >
+              다음으로
             </Button>
           </DialogFooter>
         </DialogContent>

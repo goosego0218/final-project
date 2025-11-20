@@ -125,7 +125,10 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
     if (selectedShort) {
       setLikesCount(0);
       const liked = getLikedShorts();
-      setIsLiked(liked.has(selectedShort.id));
+      const likedState = liked.has(selectedShort.id);
+      setIsLiked(likedState);
+    } else {
+      setIsLiked(false);
     }
   }, [selectedShort]);
 
@@ -301,7 +304,7 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-1">
-                      <Heart className={`w-4 h-4 ${getLikedShorts().has(shortForm.id) ? "text-destructive fill-destructive" : ""}`} />
+                      <Heart className={`w-4 h-4 ${getLikedShorts().has(shortForm.id) ? "fill-destructive text-destructive" : ""}`} />
                       <span>{shortForm.likes.toLocaleString()}</span>
                     </div>
                     <div className="flex items-center gap-1">

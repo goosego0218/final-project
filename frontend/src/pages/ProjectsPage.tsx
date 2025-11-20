@@ -23,7 +23,7 @@ const ProjectsPage = () => {
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
-  const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
   const [deleteProjectId, setDeleteProjectId] = useState<string | null>(null);
   const [editProjectId, setEditProjectId] = useState<string | null>(null);
@@ -75,12 +75,29 @@ const ProjectsPage = () => {
 
   const handleCreateProject = () => {
     if (projectName.trim()) {
-      const project = projectStorage.createProject(projectName, projectDescription);
-      setProjects(projectStorage.getProjects());
+      // 로그인 상태 확인
+      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+      if (!isLoggedIn) {
+        toast({
+          title: "로그인이 필요합니다",
+          description: "프로젝트를 생성하려면 로그인해주세요.",
+        });
+        return;
+      }
+      
+      // 임시 상태(draft)로만 저장 - 실제 프로젝트 생성은 ChatPage의 [생성하기]에서만
+      const draftProject = {
+        name: projectName,
+        description: projectDescription,
+        createdAt: new Date().toISOString()
+      };
+      localStorage.setItem('makery_draft_project', JSON.stringify(draftProject));
+      
       setIsDialogOpen(false);
       setProjectName("");
       setProjectDescription("");
-      navigate("/chat");
+      // ChatPage로 이동 (draft 모드)
+      navigate(`/chat?draft=true&skipLogoUpload=true`);
     }
   };
 
@@ -214,7 +231,7 @@ const ProjectsPage = () => {
                     onClick={handleCreateProject}
                     disabled={!projectName.trim()}
                   >
-                    생성하기
+                    다음으로
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -275,18 +292,8 @@ const ProjectsPage = () => {
                   <div 
                     className="cursor-pointer"
                     onClick={() => {
-<<<<<<< HEAD
                       // 프로젝트 대시보드로 이동
                       navigate(`/project?project=${project.id}`);
-=======
-                      // 정보 수집 완료 여부 확인 (system 메시지가 있으면 완료)
-                      const hasSystemMessage = project.messages.some(m => m.role === "system");
-                      if (hasSystemMessage) {
-                        navigate(`/studio?project=${project.id}`);
-                      } else {
-                        navigate(`/chat?project=${project.id}`);
-                      }
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
                     }}
                   >
                     <CardHeader className="pr-12">
