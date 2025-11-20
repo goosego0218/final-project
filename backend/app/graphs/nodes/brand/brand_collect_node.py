@@ -2,6 +2,7 @@
 # 작성일: 2025-11-20
 # 수정내역
 # - 2025-11-20: 초기 작성
+# - 2025-11-20: smalltalk 모드 추가
 
 from __future__ import annotations
 
@@ -99,12 +100,25 @@ def make_brand_collect_node(llm: "BaseChatModel"):
 
     이런 식으로 사용.
     """
-
     def brand_collect(state: "AppState") -> "AppState":
         """
         마지막 사용자 발화에서 브랜드 정보를 추출해
         state.brand_profile 에 누적/병합하는 노드.
         """
+        # 🔹 1) 의도가 smalltalk 이면 아무 것도 하지 않고 반환
+        meta: Dict[str, Any] = dict(state.get("meta") or {})
+        intent_label = None
+        intent_info = meta.get("intent") or {}
+        if isinstance(intent_info, dict):
+            il = intent_info.get("label")
+            if isinstance(il, str):
+                intent_label = il
+
+        if intent_label == "smalltalk":
+            # 일상 대화일 때는 brand_profile 을 건드리지 않음
+            return {}
+
+        # 🔹 2) 그 외의 경우에만 기존 로직 수행
         user_text = get_last_user_message(state)
         if not user_text:
             # 유저 발화가 없으면 할 일이 없음

@@ -4,6 +4,8 @@
 # 수정내역
 # - 2025-11-19: 초기 작성
 # - 2025-11-20: 노드 분리 후 빌드/컴파일 전용으로 리팩터링
+# - 2025-11-20: brand_intention 노드 추가
+# - 2025-11-20: smalltalk 모드 추가
 
 from __future__ import annotations
 
@@ -14,6 +16,7 @@ from app.agents.state import AppState
 from app.llm.client import get_chat_model
 from app.graphs.nodes.brand.brand_collect_node import make_brand_collect_node
 from app.graphs.nodes.brand.brand_chat_node import make_brand_chat_node
+from app.graphs.nodes.brand.brand_intention_node import make_brand_intention_node
 
 
 # 그래프용 체크포인터 (세션 히스토리 저장)
@@ -37,17 +40,20 @@ def build_brand_graph():
 
     # 노드 함수 생성 (llm 주입)
     brand_collect = make_brand_collect_node(llm)
+    brand_intention = make_brand_intention_node(llm)    
     brand_chat = make_brand_chat_node(llm)
 
     g = StateGraph(AppState)
 
     # 노드 등록
     g.add_node("brand_collect", brand_collect)
+    g.add_node("brand_intention", brand_intention)    
     g.add_node("brand_chat", brand_chat)
 
     # 흐름 정의
     g.add_edge(START, "brand_collect")
-    g.add_edge("brand_collect", "brand_chat")
+    g.add_edge("brand_collect", "brand_intention")
+    g.add_edge("brand_intention", "brand_chat")    
     g.add_edge("brand_chat", END)
 
     # LangGraph 컴파일 + 체크포인터 연결
