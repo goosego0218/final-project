@@ -15,7 +15,7 @@ from langgraph.checkpoint.memory import MemorySaver
 from langchain_core.messages import HumanMessage, AIMessage
 
 from app.agents.state import AppState
-from app.agents.tools.trend_tools import (
+from app.graphs.tools.trend_tools import (
     rag_search_tool,
     tavily_web_search_tool,
     apply_reranker_tool,
