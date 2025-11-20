@@ -8,7 +8,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.schemas.chat import ChatRequest, ChatResponse
+from app.schemas.chat import ChatRequest, ChatResponse, BrandChatRequest, BrandChatResponse
 from app.db.orm import get_orm_session
 from app.core.deps import get_current_user
 from app.models.auth import UserInfo
@@ -30,9 +30,9 @@ brand_graph = build_brand_graph()
 logo_graph = build_logo_graph()
 shorts_graph = build_shorts_graph()
 
-@router.post("/brand", response_model=ChatResponse)
+@router.post("/brand", response_model=BrandChatResponse)
 def chat_brand(
-    req: ChatRequest,
+    req: BrandChatRequest,
     db: Session = Depends(get_orm_session),
     current_user: UserInfo = Depends(get_current_user),
 ):
@@ -87,7 +87,7 @@ def chat_brand(
 
     project_id = new_state.get("project_id", req.project_id)
 
-    return ChatResponse(
+    return BrandChatResponse(
         reply=reply_text,
         project_id=project_id,
     )

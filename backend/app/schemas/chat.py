@@ -23,3 +23,15 @@ class ChatResponse(BaseModel):
     brand_session_id: Optional[str] = None
     logo_session_id: Optional[str] = None
     shorts_session_id: Optional[str] = None    
+
+#### 
+class BrandChatRequest(BaseModel): 
+    message: str                      
+    grp_nm: Optional[str] = None
+    grp_desc: Optional[str] = None
+    brand_session_id: Optional[str] = None
+
+class BrandChatResponse(BaseModel):
+    reply: str                               
+    project_id: Optional[int] = None        
+    brand_session_id: Optional[str] = None
