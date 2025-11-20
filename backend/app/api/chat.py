@@ -60,14 +60,6 @@ def chat_brand(
             "grp_desc": req.grp_desc,
             "creator_id": current_user.id,
         }
-
-    # 기존 프로젝트가 있다면 브랜드 정보 로드
-    ## 현재 로직 상 프로젝트 수정은 없어서 실행되진 않음
-    if req.project_id is not None:
-        from app.services.project_service import load_brand_profile_for_agent
-
-        profile = load_brand_profile_for_agent(db, req.project_id)
-        state["brand_profile"] = profile
     
     state["messages"].append(HumanMessage(content=req.message))
 
@@ -80,12 +72,14 @@ def chat_brand(
         }},
     )
 
-
     messages = new_state["messages"]
     last_msg = messages[-1]
     reply_text = getattr(last_msg, "content", str(last_msg))
 
-    project_id = new_state.get("project_id", req.project_id)
+    project_id = None
+
+    if new_state.get("project_id") is not None:
+        project_id = new_state.get("project_id")
 
     return BrandChatResponse(
         reply=reply_text,
