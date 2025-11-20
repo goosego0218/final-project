@@ -86,9 +86,9 @@ def chat_brand(
         project_id=project_id,
     )
 
-@router.post("/logo", response_model=ChatResponse)
+@router.post("/logo", response_model=LogoChatResponse)
 def chat_logo(
-    req: ChatRequest,
+    req: LogoChatRequest,
     db: Session = Depends(get_orm_session),
     current_user: UserInfo = Depends(get_current_user),
 ):
@@ -134,14 +134,14 @@ def chat_logo(
     last_msg = messages[-1]
     reply_text = getattr(last_msg, "content", str(last_msg))
 
-    return ChatResponse(
+    return LogoChatResponse(
         reply=reply_text,
         project_id=req.project_id,
     )
 
-@router.post("/shorts", response_model=ChatResponse)
+@router.post("/shorts", response_model=ShortsChatResponse)
 def chat_shorts(
-    req: ChatRequest,
+    req: ShortsChatRequest,
     db: Session = Depends(get_orm_session),
     current_user: UserInfo = Depends(get_current_user),
 ):
@@ -187,7 +187,7 @@ def chat_shorts(
     last_msg = messages[-1]
     reply_text = getattr(last_msg, "content", str(last_msg))
 
-    return ChatResponse(
+    return ShortsChatResponse(
         reply=reply_text,
         project_id=req.project_id,
     )
