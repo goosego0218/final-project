@@ -54,7 +54,7 @@ def chat_brand(
         "meta": {},
     }
 
-    if req.project_id is None and req.grp_nm:
+    if req.grp_nm:
         state["project_draft"] = {
             "grp_nm": req.grp_nm,
             "grp_desc": req.grp_desc,
