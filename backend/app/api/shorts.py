@@ -14,8 +14,6 @@ from app.models.auth import UserInfo
 
 from langchain_core.messages import HumanMessage
 from app.agents.state import AppState 
-from app.agents.brand_agent import build_brand_graph
-from app.agents.logo_agent import build_logo_graph
 from app.agents.shorts_agent import build_shorts_graph
 
 from uuid import uuid4

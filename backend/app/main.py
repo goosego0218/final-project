@@ -17,7 +17,7 @@ from app.api.auth import router as auth_router
 from app.api.menu import router as menu_router
 from app.api.project import router as project_router
 from app.api.trend import router as trend_router
-from app.api.chat import router as brand_router
+from app.api.brand import router as brand_router
 from app.api.logo import router as logo_router
 from app.api.shorts import router as shorts_router
 
