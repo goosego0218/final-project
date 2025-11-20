@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -41,22 +40,11 @@ interface BrandInfo {
   slogan: string;
   preferred_colors: string[];
 }
-=======
-import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { ArrowRight, Send, ChevronLeft } from "lucide-react";
-import { projectStorage, type Message } from "@/lib/projectStorage";
-import { useToast } from "@/hooks/use-toast";
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
 
 const ChatPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
-<<<<<<< HEAD
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
@@ -75,9 +63,14 @@ const ChatPage = () => {
   const [hasLogo, setHasLogo] = useState<boolean | null>(null);
   const [uploadedLogo, setUploadedLogo] = useState<string | null>(null);
   const [showSkipDialog, setShowSkipDialog] = useState(false);
+  const [skipDialogStep, setSkipDialogStep] = useState<"confirm" | "project" | "type">("confirm"); // 다이얼로그 내부 단계
+  const [showGenerateTypeDialog, setShowGenerateTypeDialog] = useState(false); // 로고/숏폼 선택 다이얼로그
   const [showLogoDialog, setShowLogoDialog] = useState(false);
   const [showUploadInDialog, setShowUploadInDialog] = useState(false); // 팝업 내 업로드 UI 표시 여부
   const [isSkippedFlow, setIsSkippedFlow] = useState(false); // 넘어가기 버튼 경로인지 구분
+  const [showProjectConfirm, setShowProjectConfirm] = useState(false); // 프로젝트 생성 확인 단계
+  const [isDraftMode, setIsDraftMode] = useState(false); // draft 모드 여부
+  const [draftProjectInfo, setDraftProjectInfo] = useState<{ name: string; description: string } | null>(null); // draft 프로젝트 정보
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dialogFileInputRef = useRef<HTMLInputElement>(null);
   const [currentQuestion, setCurrentQuestion] = useState<string | null>(null);
@@ -101,6 +94,9 @@ const ChatPage = () => {
       return {
         name: profile.nickname || "사용자",
         email: profile.id || "user@example.com",
+        avatar: profile.avatar || null,
+        instagram: profile.instagram?.connected || false,
+        youtube: profile.youtube?.connected || false,
         tokensUsed: 132,
         tokensTotal: 200,
       };
@@ -108,19 +104,25 @@ const ChatPage = () => {
     return {
       name: "사용자",
       email: "user@example.com",
+      avatar: null,
+      instagram: false,
+      youtube: false,
       tokensUsed: 132,
       tokensTotal: 200,
     };
   };
 
   const [userProfile, setUserProfile] = useState(getUserProfile());
-  const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('isLoggedIn') === 'true');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   // localStorage 변경 감지하여 사용자 정보 업데이트
   useEffect(() => {
+    // 초기 로그인 상태 확인
+    setIsLoggedIn(localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true');
+    
     const handleStorageChange = () => {
       setUserProfile(getUserProfile());
-      setIsLoggedIn(localStorage.getItem('isLoggedIn') === 'true');
+      setIsLoggedIn(localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true');
     };
     
     const handleProfileUpdate = () => {
@@ -141,18 +143,123 @@ const ChatPage = () => {
 
   // 로그인 상태 확인
   useEffect(() => {
-    if (!isLoggedIn) {
+    // localStorage/sessionStorage에서 직접 확인
+    const currentLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+    if (!currentLoggedIn) {
       navigate("/");
+      return;
     }
-  }, [isLoggedIn, navigate]);
+  }, [navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem('isLoggedIn');
+    sessionStorage.removeItem('isLoggedIn');
     toast({
       title: "로그아웃되었습니다",
       description: "다음에 또 만나요!",
     });
     navigate("/");
+  };
+
+  // 필수 항목이 모두 채워졌는지 확인
+  const checkRequiredFieldsComplete = (info: BrandInfo): boolean => {
+    // 필수 항목: brand_name, industry
+    // 선택 항목이지만 모든 질문을 다 답했는지 확인하기 위해 preferred_colors까지 확인
+    // preferred_colors까지 답했다면 모든 질문을 다 답한 것으로 간주
+    return info.brand_name.trim() !== "" && 
+           info.industry.trim() !== "" &&
+           info.preferred_colors.length > 0; // 마지막 질문까지 답했는지 확인
+  };
+
+  // 메시지 히스토리에서 브랜드 정보 추출
+  const extractInfoFromMessages = (messages: Message[]): BrandInfo => {
+    const info: BrandInfo = {
+      brand_name: "",
+      industry: "",
+      mood: "",
+      core_keywords: [],
+      target_age: "",
+      target_gender: "",
+      avoid_trends: [],
+      slogan: "",
+      preferred_colors: [],
+    };
+    
+    // 각 user 메시지에 대해 바로 앞의 assistant 메시지를 찾아서 매칭
+    for (let i = 0; i < messages.length; i++) {
+      const message = messages[i];
+      
+      if (message.role === "user") {
+        // 이전 assistant 메시지 찾기
+        let questionType: string | null = null;
+        for (let j = i - 1; j >= 0; j--) {
+          if (messages[j].role === "assistant") {
+            const assistantContent = messages[j].content;
+            // 질문 타입 파악
+            if (assistantContent.includes("브랜드명")) {
+              questionType = "brand_name";
+            } else if (assistantContent.includes("업종") || assistantContent.includes("카테고리")) {
+              questionType = "industry";
+            } else if (assistantContent.includes("분위기") || assistantContent.includes("무드")) {
+              questionType = "mood";
+            } else if (assistantContent.includes("핵심 키워드")) {
+              questionType = "core_keywords";
+            } else if (assistantContent.includes("연령대")) {
+              questionType = "target_age";
+            } else if (assistantContent.includes("성별")) {
+              questionType = "target_gender";
+            } else if (assistantContent.includes("피하고 싶은 트렌드")) {
+              questionType = "avoid_trends";
+            } else if (assistantContent.includes("슬로건") || assistantContent.includes("캐치프레이즈")) {
+              questionType = "slogan";
+            } else if (assistantContent.includes("선호하는 색상")) {
+              questionType = "preferred_colors";
+            }
+            break; // 가장 가까운 assistant 메시지를 찾았으므로 중단
+          }
+        }
+        
+        if (questionType) {
+          const answer = message.content.trim();
+          
+          if (questionType === "brand_name") {
+            info.brand_name = answer;
+          } else if (questionType === "industry") {
+            info.industry = answer;
+          } else if (questionType === "mood") {
+            if (!answer.toLowerCase().includes("없음") && !answer.toLowerCase().includes("건너뛰기")) {
+              info.mood = answer;
+            }
+          } else if (questionType === "core_keywords") {
+            if (!answer.toLowerCase().includes("없음") && !answer.toLowerCase().includes("건너뛰기")) {
+              info.core_keywords = answer.split(',').map(k => k.trim()).filter(k => k);
+            }
+          } else if (questionType === "target_age") {
+            if (!answer.toLowerCase().includes("없음") && !answer.toLowerCase().includes("건너뛰기")) {
+              info.target_age = answer;
+            }
+          } else if (questionType === "target_gender") {
+            if (!answer.toLowerCase().includes("없음") && !answer.toLowerCase().includes("건너뛰기")) {
+              info.target_gender = answer;
+            }
+          } else if (questionType === "avoid_trends") {
+            if (!answer.toLowerCase().includes("없음") && !answer.toLowerCase().includes("건너뛰기")) {
+              info.avoid_trends = answer.split(',').map(t => t.trim()).filter(t => t);
+            }
+          } else if (questionType === "slogan") {
+            if (!answer.toLowerCase().includes("없음") && !answer.toLowerCase().includes("건너뛰기")) {
+              info.slogan = answer;
+            }
+          } else if (questionType === "preferred_colors") {
+            if (!answer.toLowerCase().includes("없음") && !answer.toLowerCase().includes("건너뛰기")) {
+              info.preferred_colors = answer.split(',').map(c => c.trim()).filter(c => c);
+            }
+          }
+        }
+      }
+    }
+    
+    return info;
   };
 
   // 프로그레스 계산
@@ -177,7 +284,7 @@ const ChatPage = () => {
   };
 
   // 공통 Studio 이동 함수
-  const handleGoToStudio = (projectId: string) => {
+  const handleGoToStudio = (projectId: string, type?: "logo" | "short") => {
     if (!projectId) {
       toast({
         title: "오류",
@@ -205,64 +312,185 @@ const ChatPage = () => {
     projectStorage.addMessage(projectId, infoMessage);
 
     // Studio로 이동
+    const typeParam = type ? `&type=${type}` : "";
     toast({
       title: "스튜디오로 이동합니다",
       description: project.logo ? "업로드한 로고를 사용합니다." : "Studio에서 로고를 생성할 수 있습니다.",
     });
     
-    navigate(`/studio?project=${projectId}`);
+    navigate(`/studio?project=${projectId}${typeParam}`);
   };
-=======
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: "assistant",
-      content: "안녕하세요! 프로젝트를 시작하기 전에 몇 가지 정보를 알려주세요.\n\n먼저, 브랜드 이름이나 회사명을 알려주실 수 있나요?"
-    }
-  ]);
-  const [inputMessage, setInputMessage] = useState("");
-  const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
-  const [collectedInfo, setCollectedInfo] = useState({
-    brandName: "",
-    industry: "",
-    targetAudience: "",
-    style: ""
-  });
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
 
   useEffect(() => {
+    const isDraft = searchParams.get('draft') === 'true';
     const projectId = searchParams.get('project') || projectStorage.getCurrentProjectId();
+    const skipLogoUpload = searchParams.get('skipLogoUpload') === 'true';
+    
+    // draft 모드 처리
+    if (isDraft) {
+      setIsDraftMode(true);
+      setIsSkippedFlow(skipLogoUpload);
+      
+      // draft 프로젝트 정보 불러오기
+      const draftData = localStorage.getItem('makery_draft_project');
+      if (draftData) {
+        try {
+          const draft = JSON.parse(draftData);
+          setDraftProjectInfo({ name: draft.name, description: draft.description || "" });
+        } catch (e) {
+          console.error("Draft 프로젝트 정보 파싱 실패:", e);
+        }
+      }
+      
+      // 환영 메시지 추가
+      if (messages.length === 0) {
+        const welcomeMessage: Message = {
+          role: "assistant",
+          content: "안녕하세요! 브랜드 정보를 수집하기 위해 몇 가지 질문을 드리겠습니다.\n\n먼저 브랜드명을 알려주세요."
+        };
+        setMessages([welcomeMessage]);
+        setCurrentQuestion("brand_name");
+        setCurrentStep("collecting");
+      }
+      return;
+    }
+    
+    // 기존 프로젝트가 있는 경우
     if (!projectId) {
       navigate("/projects");
       return;
     }
     setCurrentProjectId(projectId);
+    setIsDraftMode(false);
     
     const project = projectStorage.getProject(projectId);
-<<<<<<< HEAD
-    const skipLogoUpload = searchParams.get('skipLogoUpload') === 'true';
+    
+    // skipLogoUpload 플래그 설정
+    if (skipLogoUpload) {
+      setIsSkippedFlow(true);
+    }
     
     if (project) {
-      const chatMessages = project.messages.filter(m => m.role !== "system" && m.role !== "assistant" || m.content !== "안녕하세요! 브랜드 정보를 수집하기 위해 몇 가지 질문을 드리겠습니다.\n\n먼저 브랜드명을 알려주세요.");
+      // system 메시지만 제외하고 나머지 메시지는 모두 표시
+      const chatMessages = project.messages.filter(m => m.role !== "system");
       setMessages(chatMessages);
       
-      // 이미 수집된 정보가 있으면 복원
+      // 이미 수집된 정보 복원 (systemMessage 우선, 없으면 메시지에서 추출)
+      let restoredInfo: BrandInfo | null = null;
       const systemMessage = project.messages.find(m => m.role === "system");
+      
       if (systemMessage) {
         try {
-          const info = JSON.parse(systemMessage.content);
-          setCollectedInfo(info);
-          if (info.brand_name && info.industry) {
-            // skipLogoUpload가 true면 로고 질문 단계를 건너뛰고 바로 Studio로
-            if (skipLogoUpload) {
-              // 브랜드 정보 저장 후 바로 Studio로 이동
-              handleGoToStudio(projectId);
-              return;
-            }
-            setCurrentStep("logoQuestion");
-            setCurrentQuestion(null);
-          }
+          restoredInfo = JSON.parse(systemMessage.content);
         } catch (e) {
           // 파싱 실패 시 무시
+        }
+      }
+      
+      // systemMessage가 없거나 불완전한 경우 메시지에서 추출
+      // 모든 메시지(assistant 포함)를 사용하여 정보 추출
+      const allMessages = project.messages.filter(m => m.role !== "system");
+      const extractedInfo = extractInfoFromMessages(allMessages);
+      
+      if (!restoredInfo) {
+        // systemMessage가 없으면 추출한 정보 사용
+        restoredInfo = extractedInfo;
+      } else {
+        // systemMessage가 있으면 병합
+        // systemMessage의 정보를 우선 사용하되, 비어있는 필드는 추출한 정보로 보완
+        restoredInfo = {
+          brand_name: restoredInfo.brand_name || extractedInfo.brand_name,
+          industry: restoredInfo.industry || extractedInfo.industry,
+          mood: restoredInfo.mood || extractedInfo.mood,
+          core_keywords: restoredInfo.core_keywords?.length > 0 ? restoredInfo.core_keywords : extractedInfo.core_keywords,
+          target_age: restoredInfo.target_age || extractedInfo.target_age,
+          target_gender: restoredInfo.target_gender || extractedInfo.target_gender,
+          avoid_trends: restoredInfo.avoid_trends?.length > 0 ? restoredInfo.avoid_trends : extractedInfo.avoid_trends,
+          slogan: restoredInfo.slogan || extractedInfo.slogan,
+          preferred_colors: restoredInfo.preferred_colors?.length > 0 ? restoredInfo.preferred_colors : extractedInfo.preferred_colors,
+        };
+      }
+      
+      // restoredInfo가 없으면 빈 객체로 초기화
+      const finalRestoredInfo = restoredInfo || extractedInfo;
+      
+      if (finalRestoredInfo) {
+        // collectedInfo 즉시 업데이트
+        setCollectedInfo(finalRestoredInfo);
+        
+        // 디버깅: 복원된 정보 확인
+        console.log("복원된 정보:", finalRestoredInfo);
+        console.log("brand_name:", finalRestoredInfo.brand_name, "industry:", finalRestoredInfo.industry);
+        
+        // 필수 항목 완료 여부 확인 및 상태 복원
+        const allRequiredComplete = checkRequiredFieldsComplete(finalRestoredInfo);
+        
+        if (allRequiredComplete) {
+          // 모든 필수 항목이 채워진 경우 - complete 단계로 전환
+          setCurrentStep("complete");
+        } else {
+          // 아직 모든 질문을 다 답하지 않은 경우 - collecting 상태 유지
+          // 마지막 질문 파악
+          const lastAssistantMessage = chatMessages.filter(m => m.role === "assistant").pop();
+          
+          // 마지막 질문에 따라 currentQuestion 설정
+          if (lastAssistantMessage) {
+            if (lastAssistantMessage.content.includes("브랜드명")) {
+              setCurrentQuestion("brand_name");
+            } else if (lastAssistantMessage.content.includes("업종") || lastAssistantMessage.content.includes("카테고리")) {
+              setCurrentQuestion("industry");
+            } else if (lastAssistantMessage.content.includes("분위기") || lastAssistantMessage.content.includes("무드")) {
+              setCurrentQuestion("mood");
+            } else if (lastAssistantMessage.content.includes("핵심 키워드")) {
+              setCurrentQuestion("core_keywords");
+            } else if (lastAssistantMessage.content.includes("연령대")) {
+              setCurrentQuestion("target_age");
+            } else if (lastAssistantMessage.content.includes("성별")) {
+              setCurrentQuestion("target_gender");
+            } else if (lastAssistantMessage.content.includes("피하고 싶은 트렌드")) {
+              setCurrentQuestion("avoid_trends");
+            } else if (lastAssistantMessage.content.includes("슬로건") || lastAssistantMessage.content.includes("캐치프레이즈")) {
+              setCurrentQuestion("slogan");
+            } else if (lastAssistantMessage.content.includes("선호하는 색상")) {
+              setCurrentQuestion("preferred_colors");
+            } else if (lastAssistantMessage.content.includes("로고")) {
+              setCurrentStep("logoQuestion");
+              setCurrentQuestion(null);
+            } else {
+              // 마지막 메시지가 질문이 아닌 경우, 다음 질문 파악
+              // 이미 답변한 질문들을 확인하여 다음 질문 결정
+              if (!finalRestoredInfo.brand_name) {
+                setCurrentQuestion("brand_name");
+              } else if (!finalRestoredInfo.industry) {
+                setCurrentQuestion("industry");
+              } else if (!finalRestoredInfo.mood && !finalRestoredInfo.core_keywords.length) {
+                // mood는 선택사항이므로 다음 질문으로
+                setCurrentQuestion("mood");
+              } else if (!finalRestoredInfo.core_keywords.length && !finalRestoredInfo.target_age) {
+                setCurrentQuestion("core_keywords");
+              } else if (!finalRestoredInfo.target_age && !finalRestoredInfo.target_gender) {
+                setCurrentQuestion("target_age");
+              } else if (!finalRestoredInfo.target_gender && !finalRestoredInfo.avoid_trends.length) {
+                setCurrentQuestion("target_gender");
+              } else if (!finalRestoredInfo.avoid_trends.length && !finalRestoredInfo.slogan) {
+                setCurrentQuestion("avoid_trends");
+              } else if (!finalRestoredInfo.slogan && !finalRestoredInfo.preferred_colors.length) {
+                setCurrentQuestion("slogan");
+              } else if (!finalRestoredInfo.preferred_colors.length) {
+                setCurrentQuestion("preferred_colors");
+              }
+            }
+          } else {
+            // 메시지가 없는 경우 첫 질문으로
+            if (!finalRestoredInfo.brand_name) {
+              setCurrentQuestion("brand_name");
+            } else if (!finalRestoredInfo.industry) {
+              setCurrentQuestion("industry");
+            }
+          }
+          
+          // collecting 상태 유지
+          setCurrentStep("collecting");
         }
       }
       
@@ -273,41 +501,59 @@ const ChatPage = () => {
         setCurrentStep("complete");
       }
     }
-  }, [navigate, searchParams]);
+  }, [navigate, searchParams, messages.length]);
 
-  // 첫 진입 시 환영 메시지 추가
+  // 첫 진입 시 환영 메시지 추가 (이미 저장된 환영 메시지가 없을 때만)
   useEffect(() => {
-    if (currentProjectId && messages.length === 0 && currentStep === "collecting" && !currentQuestion) {
-      const welcomeMessage: Message = {
-        role: "assistant",
-        content: "안녕하세요! 브랜드 정보를 수집하기 위해 몇 가지 질문을 드리겠습니다.\n\n먼저 브랜드명을 알려주세요."
-      };
-      setMessages([welcomeMessage]);
-      setCurrentQuestion("brand_name");
-      projectStorage.addMessage(currentProjectId, welcomeMessage);
+    // draft 모드인 경우는 이미 위에서 처리됨
+    if (isDraftMode) return;
+    
+    if (currentProjectId && messages.length === 0 && currentStep === "collecting") {
+      const project = projectStorage.getProject(currentProjectId);
+      if (project) {
+        // 이미 환영 메시지가 저장되어 있는지 확인
+        const hasWelcomeMessage = project.messages.some(m => 
+          m.role === "assistant" && 
+          m.content === "안녕하세요! 브랜드 정보를 수집하기 위해 몇 가지 질문을 드리겠습니다.\n\n먼저 브랜드명을 알려주세요."
+        );
+        
+        if (!hasWelcomeMessage) {
+          const welcomeMessage: Message = {
+            role: "assistant",
+            content: "안녕하세요! 브랜드 정보를 수집하기 위해 몇 가지 질문을 드리겠습니다.\n\n먼저 브랜드명을 알려주세요."
+          };
+          setMessages([welcomeMessage]);
+          setCurrentQuestion("brand_name");
+          projectStorage.addMessage(currentProjectId, welcomeMessage);
+        }
+      }
     }
-  }, [currentProjectId, messages.length, currentStep, currentQuestion]);
+  }, [currentProjectId, messages.length, currentStep, isDraftMode]);
 
   // 메시지 스크롤
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSendMessage = () => {
-    if (!inputMessage.trim() || !currentProjectId) return;
-    if (currentStep !== "collecting") return;
-=======
-    if (project) {
-      setMessages(project.messages);
-      // system 메시지 제외하고 로드
-      const chatMessages = project.messages.filter(m => m.role !== "system");
-      setMessages(chatMessages);
+  // 로고 생성하기 버튼이 나타날 때 스크롤
+  useEffect(() => {
+    const shouldScroll = collectedInfo.brand_name?.trim() !== "" && 
+                         collectedInfo.industry?.trim() !== "" && 
+                         (currentStep === "complete" || uploadedLogo !== null);
+    
+    if (shouldScroll) {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
     }
-  }, [navigate, searchParams]);
+  }, [collectedInfo.brand_name, collectedInfo.industry, currentStep, uploadedLogo]);
 
   const handleSendMessage = () => {
-    if (!inputMessage.trim() || !currentProjectId) return;
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
+    if (!inputMessage.trim()) return;
+    
+    // draft 모드가 아닌 경우 currentProjectId가 필요
+    if (!isDraftMode && !currentProjectId) return;
+    if (currentStep !== "collecting") return;
 
     const userMessage: Message = {
       role: "user",
@@ -316,8 +562,11 @@ const ChatPage = () => {
 
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
-<<<<<<< HEAD
-    projectStorage.addMessage(currentProjectId, userMessage);
+    
+    // draft 모드가 아닌 경우에만 projectStorage에 저장
+    if (!isDraftMode && currentProjectId) {
+      projectStorage.addMessage(currentProjectId, userMessage);
+    }
 
     let assistantResponse = "";
     let nextQuestion: string | null = null;
@@ -378,38 +627,9 @@ const ChatPage = () => {
         setCollectedInfo(prev => ({ ...prev, preferred_colors: colors }));
       }
       // 모든 질문 완료
-      const skipLogoUpload = searchParams.get('skipLogoUpload') === 'true';
-      if (skipLogoUpload) {
-        // 로고 업로드 단계 제외 - 바로 Studio로 이동
-        assistantResponse = "브랜드 정보 입력이 완료되었습니다. Studio로 이동합니다.";
-        nextQuestion = null;
-        // 브랜드 정보 저장 후 Studio로 이동하는 로직은 setTimeout에서 처리
-      } else {
-        // 채팅 흐름으로 온 경우 - 로고 질문 단계로
-        assistantResponse = "브랜드 정보 입력이 거의 끝났어요. 혹시 기존에 사용 중인 로고가 있으신가요?";
-        nextQuestion = null;
-        setCurrentStep("logoQuestion");
-        setIsSkippedFlow(false); // 채팅 흐름으로 온 경우
-      }
-=======
-
-    // 간단한 대화 로직 - 실제로는 더 복잡한 로직이 필요할 수 있습니다
-    let assistantResponse = "";
-    const messageCount = messages.filter(m => m.role === "user").length;
-
-    if (messageCount === 0) {
-      setCollectedInfo(prev => ({ ...prev, brandName: inputMessage }));
-      assistantResponse = "좋습니다! 어떤 업종이나 분야인가요? (예: IT, 패션, 식음료 등)";
-    } else if (messageCount === 1) {
-      setCollectedInfo(prev => ({ ...prev, industry: inputMessage }));
-      assistantResponse = "타겟 고객층은 어떻게 되나요? (예: 20-30대 여성, MZ세대 등)";
-    } else if (messageCount === 2) {
-      setCollectedInfo(prev => ({ ...prev, targetAudience: inputMessage }));
-      assistantResponse = "원하시는 디자인 스타일이나 느낌이 있나요? (예: 모던, 클래식, 미니멀 등)";
-    } else {
-      setCollectedInfo(prev => ({ ...prev, style: inputMessage }));
-      assistantResponse = "완벽합니다! 모든 정보를 수집했습니다.\n\n아래 '생성하기' 버튼을 눌러 스튜디오로 이동하세요.";
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
+      assistantResponse = "브랜드 정보 입력이 완료되었습니다. 프로젝트를 생성하시겠습니까?";
+      nextQuestion = null;
+      // complete 단계로 전환하여 프로젝트 생성 확인 버튼 표시
     }
 
     const assistantMessage: Message = {
@@ -419,41 +639,33 @@ const ChatPage = () => {
 
     setTimeout(() => {
       setMessages([...newMessages, assistantMessage]);
-<<<<<<< HEAD
-      projectStorage.addMessage(currentProjectId, assistantMessage);
+      
+      // draft 모드가 아닌 경우에만 projectStorage에 저장
+      if (!isDraftMode && currentProjectId) {
+        projectStorage.addMessage(currentProjectId, assistantMessage);
+      }
+      
       setCurrentQuestion(nextQuestion);
       
       // 모든 질문이 끝났을 때 처리
       if (nextQuestion === null && question === "preferred_colors") {
-        const skipLogoUpload = searchParams.get('skipLogoUpload') === 'true';
-        if (skipLogoUpload) {
-          // 로고 업로드 단계 제외 - 브랜드 정보 저장 후 바로 Studio로 이동
+        // draft 모드가 아닌 경우에만 브랜드 정보 저장
+        if (!isDraftMode && currentProjectId) {
           const infoMessage: Message = {
             role: "system",
             content: JSON.stringify(collectedInfo)
           };
           projectStorage.addMessage(currentProjectId, infoMessage);
-          
-          // Studio로 이동
-          setTimeout(() => {
-            handleGoToStudio(currentProjectId);
-          }, 1000);
-        } else {
-          // 채팅 흐름으로 온 경우 - 로고 질문 단계로
-          setCurrentStep("logoQuestion");
-          setIsSkippedFlow(false);
         }
+        
+        // complete 단계로 전환하여 생성하기 버튼 표시
+        setCurrentStep("complete");
       }
-=======
-      projectStorage.addMessage(currentProjectId, userMessage);
-      projectStorage.addMessage(currentProjectId, assistantMessage);
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
     }, 500);
 
     setInputMessage("");
   };
 
-<<<<<<< HEAD
   const handleSkipClick = () => {
     // 필수 필드 체크
     if (!collectedInfo.brand_name.trim() || !collectedInfo.industry.trim()) {
@@ -464,25 +676,66 @@ const ChatPage = () => {
       });
       return;
     }
+    setSkipDialogStep("confirm"); // 다이얼로그 열 때 초기 상태로 리셋
     setShowSkipDialog(true);
   };
 
   const handleSkipConfirm = () => {
-    if (!currentProjectId) return;
-
-    // 정보 저장
-    const infoMessage: Message = {
-      role: "system",
-      content: JSON.stringify(collectedInfo)
-    };
-    projectStorage.addMessage(currentProjectId, infoMessage);
-
-    // 넘어가기 버튼 경로로 표시
-    setIsSkippedFlow(true);
-    setShowSkipDialog(false);
+    // 건너뛰기 팝업 흐름에서는 대화창 상태를 변경하지 않음
+    // 오직 팝업 내부 단계만 변경
+    setSkipDialogStep("project");
+  };
+  
+  const handleProjectConfirmInDialog = () => {
+    // draft 모드인 경우 실제 프로젝트 생성
+    if (isDraftMode) {
+      // 필수 항목 체크
+      if (!collectedInfo.brand_name.trim() || !collectedInfo.industry.trim()) {
+        toast({
+          title: "필수 항목 미입력",
+          description: "브랜드명과 업종은 필수 항목입니다.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // draft 프로젝트 정보로 실제 프로젝트 생성
+      const projectName = draftProjectInfo?.name || "새 프로젝트";
+      const projectDescription = draftProjectInfo?.description || "";
+      const project = projectStorage.createProject(projectName, projectDescription);
+      
+      // 수집된 정보를 system 메시지로 저장
+      const infoMessage: Message = {
+        role: "system",
+        content: JSON.stringify(collectedInfo)
+      };
+      projectStorage.addMessage(project.id, infoMessage);
+      
+      // 기존 메시지들을 프로젝트에 저장
+      messages.forEach(msg => {
+        if (msg.role !== "system") {
+          projectStorage.addMessage(project.id, msg);
+        }
+      });
+      
+      // draft 정보 삭제
+      localStorage.removeItem('makery_draft_project');
+      
+      // 프로젝트 ID 설정
+      setCurrentProjectId(project.id);
+      setIsDraftMode(false);
+    } else if (!currentProjectId) {
+      // draft 모드가 아니고 currentProjectId도 없으면 에러
+      toast({
+        title: "오류",
+        description: "프로젝트를 찾을 수 없습니다.",
+        variant: "destructive",
+      });
+      return;
+    }
     
-    // 채팅창에 메시지 추가하지 않고 바로 로고 선택 팝업 표시
-    setShowLogoDialog(true);
+    // 다이얼로그 내부 단계를 "type"으로 변경 (로고/숏폼 선택 단계)
+    setSkipDialogStep("type");
   };
 
   const handleLogoQuestion = (hasLogoFile: boolean, fromDialog: boolean = false) => {
@@ -529,35 +782,17 @@ const ChatPage = () => {
       }
 
       // 브랜드 정보 저장
-=======
-  const handleGenerateClick = () => {
-    if (!currentProjectId) return;
-
-    const project = projectStorage.getProject(currentProjectId);
-    if (project) {
-      // 수집된 정보를 프로젝트에 추가
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
       const infoMessage: Message = {
         role: "system",
         content: JSON.stringify(collectedInfo)
       };
       projectStorage.addMessage(currentProjectId, infoMessage);
-<<<<<<< HEAD
 
       // Studio로 이동
-=======
-      
-      toast({
-        title: "정보가 저장되었습니다",
-        description: "스튜디오로 이동합니다.",
-      });
-
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
       navigate(`/studio?project=${currentProjectId}`);
     }
   };
 
-<<<<<<< HEAD
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>, fromDialog: boolean = false) => {
     const files = e.target.files;
     if (!files || files.length === 0) {
@@ -672,7 +907,7 @@ const ChatPage = () => {
     }
   };
 
-  const handleGenerateClick = () => {
+  const handleGenerateClick = (type: "logo" | "short") => {
     // 필수 필드 체크
     if (!collectedInfo.brand_name.trim() || !collectedInfo.industry.trim()) {
       toast({
@@ -711,16 +946,34 @@ const ChatPage = () => {
       projectStorage.saveProject(project);
     }
 
-    // 공통 함수로 Studio 이동
-    handleGoToStudio(currentProjectId);
+    // 공통 함수로 Studio 이동 (type 지정)
+    handleGoToStudio(currentProjectId, type);
   };
 
+  // collectedInfo가 변경될 때마다 필수 항목 완료 여부 확인 및 상태 업데이트
+  useEffect(() => {
+    if (!currentProjectId) return;
+    
+    const allRequiredComplete = checkRequiredFieldsComplete(collectedInfo);
+    
+    // 모든 필수 항목이 채워졌으면 complete 단계로 전환
+    if (allRequiredComplete && currentStep === "collecting") {
+      setCurrentStep("complete");
+    }
+  }, [collectedInfo, currentProjectId, currentStep, searchParams]);
+
   const progress = calculateProgress();
-  const canSkip = collectedInfo.brand_name.trim() !== "" && collectedInfo.industry.trim() !== "";
+  const canSkip = collectedInfo.brand_name?.trim() !== "" && collectedInfo.industry?.trim() !== "";
   const showLogoButtons = currentStep === "logoQuestion" && hasLogo === null;
-  const canGenerate = collectedInfo.brand_name.trim() !== "" && 
-                      collectedInfo.industry.trim() !== "" && 
-                      (currentStep === "complete" || uploadedLogo !== null);
+  const canGenerate = canSkip && currentStep === "complete" && showProjectConfirm;
+  const showProjectConfirmButton = canSkip && currentStep === "complete" && !showProjectConfirm;
+  
+  // 디버깅: canSkip 계산 확인
+  console.log("canSkip 계산:", {
+    brand_name: collectedInfo.brand_name,
+    industry: collectedInfo.industry,
+    canSkip: canSkip
+  });
 
   return (
     <div className="h-screen bg-background flex flex-col overflow-hidden">
@@ -732,6 +985,9 @@ const ChatPage = () => {
         userEmail={userProfile.email}
         tokensUsed={userProfile.tokensUsed}
         tokensTotal={userProfile.tokensTotal}
+        userAvatar={userProfile.avatar}
+        instagramConnected={userProfile.instagram}
+        youtubeConnected={userProfile.youtube}
       />
 
       {/* Top Bar: Left empty, Center progress, Right skip button */}
@@ -758,7 +1014,7 @@ const ChatPage = () => {
               variant={canSkip ? "default" : "ghost"}
               className={canSkip ? "bg-primary hover:bg-primary/90" : ""}
             >
-              넘어가기
+              건너뛰기
             </Button>
           </div>
         </div>
@@ -766,90 +1022,119 @@ const ChatPage = () => {
 
       {/* Chat Area */}
       <div className="flex-1 container mx-auto px-4 py-4 flex flex-col max-w-4xl w-full min-h-0 overflow-hidden">
-        <div className="flex-1 overflow-y-auto space-y-4 pr-2 min-h-0">
-=======
-  const canGenerate = messages.filter(m => m.role === "user").length >= 4;
-
-  return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center gap-4">
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => navigate("/projects")}
-            className="h-9 w-9"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-2xl font-bold">프로젝트 정보 수집</h1>
-        </div>
-      </header>
-
-      {/* Chat Area */}
-      <div className="flex-1 container mx-auto px-4 py-8 flex flex-col max-w-4xl">
-        <div className="flex-1 overflow-y-auto space-y-4 mb-4">
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
+        <div className="flex-1 overflow-y-auto space-y-4 pr-2 min-h-0 scrollbar-hide">
           {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
-            >
-              <Card
-                className={`max-w-[80%] p-4 ${
-                  message.role === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted"
-                }`}
+            <div key={index} className="space-y-1">
+              {message.role === "assistant" && (
+                <div className="flex items-center gap-2 mb-1">
+                  <img 
+                    src="/makery-logo.png" 
+                    alt="Makery Logo" 
+                    className="h-5 w-5"
+                  />
+                  <span className="text-sm font-semibold text-foreground">MAKERY</span>
+                </div>
+              )}
+              <div
+                className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
               >
-                <p className="whitespace-pre-wrap">{message.content}</p>
-              </Card>
+                <Card
+                  className={`max-w-[80%] p-4 ${
+                    message.role === "user"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted"
+                  }`}
+                >
+                  <p className="whitespace-pre-wrap">{message.content}</p>
+                </Card>
+              </div>
             </div>
           ))}
-<<<<<<< HEAD
           
-          {showLogoButtons && !isSkippedFlow && (
-            <div className="flex justify-start">
-              <Card className="max-w-[80%] p-4 bg-muted">
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => handleLogoQuestion(true, false)}
-                    className="flex-1"
-                  >
-                    기존 로고 업로드하기
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => handleLogoQuestion(false, false)}
-                    className="flex-1"
-                  >
-                    새 로고 만들기
-                  </Button>
-                </div>
-              </Card>
-            </div>
-          )}
-
-          {/* 채팅 흐름에서 업로드한 로고만 표시 (팝업에서 업로드한 것은 표시하지 않음) */}
-          {uploadedLogo && currentStep === "complete" && !isSkippedFlow && (
-            <div className="flex justify-start">
-              <Card className="max-w-[80%] p-4 bg-muted">
-                <p className="mb-2">업로드된 로고:</p>
-                <img 
-                  src={uploadedLogo} 
-                  alt="업로드된 로고" 
-                  className="max-w-full max-h-48 rounded object-contain"
-                />
-              </Card>
-            </div>
-          )}
-
-          {canGenerate && (
+          {showProjectConfirmButton && (
             <div className="mt-4 flex justify-center">
-              <Button size="lg" onClick={handleGenerateClick} className="gap-2 bg-primary hover:bg-primary/90">
+              <Button 
+                size="lg" 
+                onClick={() => {
+                  // draft 모드인 경우 실제 프로젝트 생성
+                  if (isDraftMode) {
+                    // 필수 항목 체크
+                    if (!collectedInfo.brand_name.trim() || !collectedInfo.industry.trim()) {
+                      toast({
+                        title: "필수 항목 미입력",
+                        description: "브랜드명과 업종은 필수 항목입니다.",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    
+                    // draft 프로젝트 정보로 실제 프로젝트 생성
+                    const projectName = draftProjectInfo?.name || "새 프로젝트";
+                    const projectDescription = draftProjectInfo?.description || "";
+                    const project = projectStorage.createProject(projectName, projectDescription);
+                    
+                    // 수집된 정보를 system 메시지로 저장
+                    const infoMessage: Message = {
+                      role: "system",
+                      content: JSON.stringify(collectedInfo)
+                    };
+                    projectStorage.addMessage(project.id, infoMessage);
+                    
+                    // 기존 메시지들을 프로젝트에 저장
+                    messages.forEach(msg => {
+                      if (msg.role !== "system") {
+                        projectStorage.addMessage(project.id, msg);
+                      }
+                    });
+                    
+                    // draft 정보 삭제
+                    localStorage.removeItem('makery_draft_project');
+                    
+                    // 프로젝트 ID 설정
+                    setCurrentProjectId(project.id);
+                    setIsDraftMode(false);
+                    
+                    // 질문을 메시지로 추가
+                    const confirmQuestion: Message = {
+                      role: "assistant",
+                      content: "어떤 거 만드시겠습니까?"
+                    };
+                    setMessages(prev => [...prev, confirmQuestion]);
+                    projectStorage.addMessage(project.id, confirmQuestion);
+                    
+                    // 바로 showProjectConfirm을 true로 설정하여 로고/숏폼 생성 버튼 표시
+                    setShowProjectConfirm(true);
+                    
+                    // ChatPage에 머물러서 로고/숏폼 생성 버튼을 보여줌 (대시보드로 이동하지 않음)
+                    return;
+                  }
+                  
+                  // 기존 프로젝트가 있는 경우
+                  if (!currentProjectId) return;
+                  // 질문을 메시지로 추가
+                  const confirmQuestion: Message = {
+                    role: "assistant",
+                    content: "어떤 거 만드시겠습니까?"
+                  };
+                  setMessages(prev => [...prev, confirmQuestion]);
+                  projectStorage.addMessage(currentProjectId, confirmQuestion);
+                  // 바로 showProjectConfirm을 true로 설정하여 로고/숏폼 생성 버튼 표시
+                  setShowProjectConfirm(true);
+                }} 
+                className="gap-2 bg-primary hover:bg-primary/90"
+              >
+                생성하기
+              </Button>
+            </div>
+          )}
+          
+          {canGenerate && (
+            <div className="mt-4 flex justify-center gap-3">
+              <Button size="lg" onClick={() => handleGenerateClick("logo")} className="gap-2 bg-primary hover:bg-primary/90">
                 로고 생성하기
+              </Button>
+              <Button size="lg" onClick={() => handleGenerateClick("short")} className="gap-2 bg-primary hover:bg-primary/90">
+                숏폼 생성하기
               </Button>
             </div>
           )}
@@ -859,13 +1144,6 @@ const ChatPage = () => {
 
         {/* Chat Input - Studio style */}
         <div className="flex-shrink-0 relative mt-4">
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleLogoUpload}
-            accept="image/png,image/jpeg,image/jpg,image/svg+xml"
-            className="hidden"
-          />
           <Textarea
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
@@ -875,24 +1153,10 @@ const ChatPage = () => {
                 handleSendMessage();
               }
             }}
-            placeholder={
-              currentStep === "logoQuestion" && hasLogo === true
-                ? "로고 파일을 업로드해주세요..."
-                : "메시지를 입력하세요..."
-            }
-            className="min-h-[80px] resize-none pr-12 pl-12 text-sm w-full"
+            placeholder="메시지를 입력하세요..."
+            className="min-h-[80px] resize-none pr-12 pl-4 text-sm w-full"
             disabled={currentStep === "complete" || showLogoButtons}
           />
-          {(currentStep === "logoQuestion" && hasLogo === true) || currentStep === "collecting" ? (
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => fileInputRef.current?.click()}
-              className="absolute bottom-2 left-2 h-8 w-8 p-0 bg-transparent border-0 hover:bg-transparent"
-            >
-              <Plus className="h-4 w-4 text-primary" />
-            </Button>
-          ) : null}
           <Button
             onClick={handleSendMessage}
             disabled={!inputMessage.trim() || currentStep === "complete" || showLogoButtons}
@@ -906,150 +1170,151 @@ const ChatPage = () => {
       </div>
 
       {/* Skip Confirmation Dialog */}
-      <AlertDialog open={showSkipDialog} onOpenChange={setShowSkipDialog}>
+      <AlertDialog open={showSkipDialog} onOpenChange={(open) => {
+        // 단계 전환 중이 아닐 때만 팝업 닫기 허용
+        if (!open && skipDialogStep === "confirm") {
+          setShowSkipDialog(false);
+          setSkipDialogStep("confirm"); // 다이얼로그 닫을 때 초기 상태로 리셋
+        }
+        // project나 type 단계에서는 onOpenChange로 닫히지 않도록 함
+      }}>
+        <AlertDialogContent>
+          {skipDialogStep === "confirm" && (
+            <>
+              <AlertDialogHeader>
+                <AlertDialogTitle>입력하지 않은 항목이 있을 수 있습니다</AlertDialogTitle>
+                <AlertDialogDescription>
+                  지금까지 입력한 내용만 저장하고 다음 단계로 넘어갈까요?
+                  이 단계에서는 더 이상 수정할 수 없습니다.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>아니요, 계속 작성할게요</AlertDialogCancel>
+                <Button 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleSkipConfirm();
+                  }}
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  네, 넘어갈게요
+                </Button>
+              </AlertDialogFooter>
+            </>
+          )}
+          
+          {skipDialogStep === "project" && (
+            <>
+              <AlertDialogHeader>
+                <AlertDialogTitle>지금까지 입력한 내용으로 새 프로젝트를 생성하시겠습니까?</AlertDialogTitle>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <Button 
+                  variant="outline"
+                  onClick={() => {
+                    setShowSkipDialog(false);
+                    setSkipDialogStep("confirm");
+                  }}
+                >
+                  취소
+                </Button>
+                <Button 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleProjectConfirmInDialog();
+                  }}
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  생성하기
+                </Button>
+              </AlertDialogFooter>
+            </>
+          )}
+          
+          {skipDialogStep === "type" && (
+            <>
+              <AlertDialogHeader>
+                <AlertDialogTitle>어떤 작업을 하시겠습니까?</AlertDialogTitle>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                <Button
+                  onClick={() => {
+                    if (!currentProjectId) {
+                      toast({
+                        title: "오류",
+                        description: "프로젝트를 찾을 수 없습니다.",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    setShowSkipDialog(false);
+                    setSkipDialogStep("confirm");
+                    handleGoToStudio(currentProjectId, "logo");
+                  }}
+                  className="flex-1 bg-primary hover:bg-primary/90"
+                >
+                  로고 생성하기
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (!currentProjectId) {
+                      toast({
+                        title: "오류",
+                        description: "프로젝트를 찾을 수 없습니다.",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    setShowSkipDialog(false);
+                    setSkipDialogStep("confirm");
+                    handleGoToStudio(currentProjectId, "short");
+                  }}
+                  className="flex-1 bg-primary hover:bg-primary/90"
+                >
+                  숏폼 생성하기
+                </Button>
+              </AlertDialogFooter>
+            </>
+          )}
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Generate Type Selection Dialog */}
+      <AlertDialog open={showGenerateTypeDialog} onOpenChange={setShowGenerateTypeDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>입력하지 않은 항목이 있을 수 있습니다</AlertDialogTitle>
+            <AlertDialogTitle>생성할 항목을 선택해주세요</AlertDialogTitle>
             <AlertDialogDescription>
-              지금까지 입력한 내용만 저장하고 다음 단계로 넘어갈까요?
-              이 단계에서는 더 이상 수정할 수 없습니다.
+              로고 또는 숏폼 중 원하는 항목을 선택해주세요.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>아니요, 계속 작성할게요</AlertDialogCancel>
-            <AlertDialogAction onClick={handleSkipConfirm} className="bg-primary hover:bg-primary/90">
-              네, 넘어갈게요
-            </AlertDialogAction>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <Button
+              onClick={() => {
+                setShowGenerateTypeDialog(false);
+                if (currentProjectId) {
+                  handleGoToStudio(currentProjectId, "logo");
+                }
+              }}
+              className="flex-1 bg-primary hover:bg-primary/90"
+            >
+              로고 생성하기
+            </Button>
+            <Button
+              onClick={() => {
+                setShowGenerateTypeDialog(false);
+                if (currentProjectId) {
+                  handleGoToStudio(currentProjectId, "short");
+                }
+              }}
+              className="flex-1 bg-primary hover:bg-primary/90"
+            >
+              숏폼 생성하기
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Logo Selection Dialog (for skipped flow) */}
-      <Dialog open={showLogoDialog} onOpenChange={setShowLogoDialog}>
-        <DialogContent>
-          {!showUploadInDialog ? (
-            <>
-              <DialogHeader>
-                <DialogTitle>로고를 어떻게 가져올까요?</DialogTitle>
-                <DialogDescription>
-                  기존 로고를 업로드하거나, Studio에서 새 로고를 만들어보세요.
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter className="flex-col sm:flex-row gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => handleLogoQuestion(true, true)}
-                  className="flex-1"
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  기존 로고 업로드하기
-                </Button>
-                <Button
-                  onClick={() => handleLogoQuestion(false, true)}
-                  className="flex-1 bg-primary hover:bg-primary/90"
-                >
-                  새 로고 만들기
-                </Button>
-              </DialogFooter>
-            </>
-          ) : (
-            <>
-              <DialogHeader>
-                <DialogTitle>로고 파일 업로드</DialogTitle>
-                <DialogDescription>
-                  PNG, SVG 등 이미지 파일을 업로드해주세요.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="py-4">
-                <input
-                  type="file"
-                  ref={dialogFileInputRef}
-                  onChange={(e) => {
-                    if (e.target.files && e.target.files.length > 0) {
-                      handleLogoUpload(e, true);
-                    }
-                  }}
-                  accept="image/png,image/jpeg,image/jpg,image/svg+xml"
-                  className="hidden"
-                />
-                <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
-                  <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground mb-4">
-                    이미지 파일을 선택하거나 드래그하여 업로드하세요
-                  </p>
-                  <Button
-                    onClick={() => {
-                      if (dialogFileInputRef.current) {
-                        dialogFileInputRef.current.click();
-                      } else {
-                        toast({
-                          title: "오류",
-                          description: "파일 입력을 찾을 수 없습니다.",
-                          variant: "destructive",
-                        });
-                      }
-                    }}
-                    variant="outline"
-                  >
-                    파일 선택
-                  </Button>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setShowUploadInDialog(false);
-                  }}
-                >
-                  뒤로
-                </Button>
-              </DialogFooter>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
-=======
-        </div>
-
-        {/* Action Buttons */}
-        {canGenerate && (
-          <div className="mb-4 flex justify-center">
-            <Button
-              size="lg"
-              onClick={handleGenerateClick}
-              className="gap-2"
-            >
-              생성하기
-              <ArrowRight className="h-5 w-5" />
-            </Button>
-          </div>
-        )}
-
-        {/* Input Area */}
-        <div className="flex gap-2">
-          <Input
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === "Enter") {
-                handleSendMessage();
-              }
-            }}
-            placeholder="메시지를 입력하세요..."
-            className="flex-1"
-            disabled={canGenerate}
-          />
-          <Button
-            onClick={handleSendMessage}
-            disabled={!inputMessage.trim() || canGenerate}
-            size="icon"
-          >
-            <Send className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
     </div>
   );
 };

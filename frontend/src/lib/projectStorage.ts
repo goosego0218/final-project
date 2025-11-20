@@ -2,6 +2,16 @@ export interface Message {
   role: "user" | "assistant" | "system";
   content: string;
   images?: string[];
+  studioType?: "logo" | "short"; // 스튜디오 타입 구분 (로고/숏폼)
+}
+
+export interface SavedItem {
+  id: string;
+  url: string;
+  type: "logo" | "short";
+  index: number;
+  title: string;
+  createdAt: string;
 }
 
 export interface Project {
@@ -14,13 +24,11 @@ export interface Project {
   messages: Message[];
   lastUpdated: string;
   pinned?: boolean;
-<<<<<<< HEAD
   logo?: {
     url: string;
     uploadedAt: string;
   };
-=======
->>>>>>> 6c5c159b500ffac8ffb45544f3a1ffbaa2b43002
+  savedItems?: SavedItem[];
 }
 
 const PROJECTS_KEY = 'makery_projects';
