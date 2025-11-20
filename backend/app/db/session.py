@@ -15,15 +15,26 @@ logger = logging.getLogger(__name__)
 # Instant Client 경로 자동 탐색
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 CLIENT_DIR = BASE_DIR / "instantclient_19_28"
+client_dir_override = (
+    Path(settings.oracle_client_dir) if settings.oracle_client_dir else CLIENT_DIR
+)
 
-try:
-    if CLIENT_DIR.exists():
-        oracledb.init_oracle_client(lib_dir=str(CLIENT_DIR))
-        logger.info(f"Oracle client initialized from: {CLIENT_DIR}")
+# Default to thin mode; optionally initialize thick mode when explicitly requested.
+if settings.oracle_use_thick:
+    if client_dir_override.exists():
+        try:
+            oracledb.init_oracle_client(lib_dir=str(client_dir_override))
+            logger.info(f"Oracle client initialized from: {client_dir_override}")
+        except Exception as e:
+            logger.warning(
+                f"Oracle thick client init failed, falling back to thin mode: {e}"
+            )
     else:
-        logger.warning(f"Instant Client folder not found at: {CLIENT_DIR}")
-except Exception as e:
-    logger.warning(f"Oracle client already initialized or not found: {e}")
+        logger.warning(
+            f"Thick mode requested but Instant Client folder not found at: {client_dir_override}"
+        )
+else:
+    logger.info("Oracle thin mode in use (no Instant Client initialization)")
 
 
 class OracleDB:
@@ -40,7 +51,7 @@ class OracleDB:
                 dsn=settings.oracle_dsn,
                 min=1,
                 max=4,
-                increment=1
+                increment=1,
             )
             logger.info("Oracle connection pool initialized successfully")
         except Exception as e:
@@ -51,12 +62,14 @@ class OracleDB:
         if self._pool is None:
             raise RuntimeError("Oracle connection pool is not initialized")
         return self._pool.acquire()
-    
+
     def close_pool(self):
         if self._pool:
             self._pool.close()
 
+
 oracle_db = OracleDB()
+
 
 def get_db_session() -> Generator[oracledb.Connection, None, None]:
     conn = oracle_db.get_connection()

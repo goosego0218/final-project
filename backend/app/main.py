@@ -15,6 +15,7 @@ from app.api.auth import router as auth_router
 from app.api.menu import router as menu_router
 from app.api.project import router as project_router
 from app.api.chat import router as chat_router
+from app.graphs.logo_workflow.router import router as logo_router
 
 from app.db.session import oracle_db
 
@@ -36,14 +37,14 @@ async def lifespan(app: FastAPI):
         print(f"[WARN] Oracle pool close failed: {e}")
 
 
-
 def create_app() -> FastAPI:
     app = FastAPI(
         title=settings.app_name,
         version=settings.app_version,
         lifespan=lifespan,
     )
-
+    
+    app.include_router(logo_router, prefix="/logo", tags=["Logo Generator"])
     app.include_router(health_router)
     app.include_router(db_router)
     app.include_router(auth_router)
@@ -51,9 +52,7 @@ def create_app() -> FastAPI:
     app.include_router(project_router)
     app.include_router(chat_router)
 
-    from app.api.logo import router as logo_router
-    app.include_router(logo_router)
-
+    
     return app
 
 app = create_app()

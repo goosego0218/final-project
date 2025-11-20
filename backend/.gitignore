@@ -4,6 +4,8 @@ instantclient_19_28
 *.env
 .env.*
 
+app/core/config.py
+
 __pycache__/
 *.py[cod]
 *.pyo

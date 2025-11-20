@@ -23,10 +23,17 @@ class Settings(BaseSettings):
     langchain_tracing_v2: bool = True
     langchain_project: str = "logo"
 
+    google_genai_project: str = "expanded-net-478706-g9"
+    google_genai_location: str = "us-central1"
+    google_genai_model: str = "gemini-2.5-flash-image"
+    google_genai_api_key: str = ""
+
     oracle_user: str = ""
     oracle_password: str = ""
     oracle_dsn: str = ""
     oracle_schema: str = ""
+    oracle_use_thick: bool = False
+    oracle_client_dir: str = ""
 
     jwt_secret_key: str = ""
     jwt_algorithm: str = "HS256"
