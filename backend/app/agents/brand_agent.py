@@ -1,57 +1,73 @@
-# 브랜드 LangGraph
+# 브랜드 LangGraph 빌더
 # 작성자: 황민준
 # 작성일: 2025-11-19
 # 수정내역
 # - 2025-11-19: 초기 작성
+# - 2025-11-20: 노드 분리 후 빌드/컴파일 전용으로 리팩터링
+# - 2025-11-20: brand_intention 노드 추가
+# - 2025-11-20: smalltalk 모드 추가
 
 from __future__ import annotations
-from typing import Literal
 
 from langgraph.graph import StateGraph, START, END
-from langchain_core.messages import SystemMessage, AIMessage, HumanMessage, AnyMessage
-from langgraph.graph.message import add_messages
+from langgraph.checkpoint.memory import MemorySaver
 
 from app.agents.state import AppState
 from app.llm.client import get_chat_model
-from langgraph.checkpoint.memory import MemorySaver
 
-llm = get_chat_model()
+# 노드 함수
+from app.graphs.nodes.brand.brand_collect_node import make_brand_collect_node
+from app.graphs.nodes.brand.brand_chat_node import make_brand_chat_node
+from app.graphs.nodes.brand.brand_intention_node import make_brand_intention_node
+from app.graphs.nodes.brand.brand_trend_search_node import make_brand_trend_search_node
+from app.graphs.nodes.brand.brand_trend_refine_node import make_brand_trend_refine_node
 
+
+# 세션별 대화 히스토리 유지를 위한 체크포인터
 checkpointer = MemorySaver()
 
-# 이 부분은 현재 LangGraph 예시 코드입니다.
-
-def brand_node(state: AppState) -> AppState:
-    """
-    브랜드 정보 수집/컨설팅을 담당하는 기본 노드.
-    - 지금은 그냥 LLM 한 번 호출해서 답변만 추가하는 최소 버전.
-    - 나중에 여기서 brand_profile 갱신, 프로젝트 생성/저장 등을 단계별로 쪼개면 됨.
-    """
-    system_prompt = (
-        "너는 브랜드 마케팅 전문가이자 브랜드 전략 컨설턴트야.\n"
-        "사용자의 브랜드를 함께 정의하고, 브랜드 톤/무드, 슬로건, 타깃, 키워드 등을 정리해 주어라.\n"
-        "대답은 친절하고 구체적으로, 한국어로 답변해라."
-    )
-
-    # 기존 대화 + 시스템 프롬프트
-    messages = [SystemMessage(content=system_prompt)] + state["messages"]
-
-    ai_msg = llm.invoke(messages)
-
-    return {
-        "messages": [ai_msg],  # add_messages가 있으니 이렇게 반환해도 merge 됨
-    }
 
 def build_brand_graph():
     """
-    브랜드용 LangGraph 최소 버전.
-    - START -> brand_node -> END
+    브랜드용 LangGraph 빌더.
+
+    여기서 각 노드의 실제 로직은
+    app.graphs.nodes.brand.* 모듈에 정의되어 있음
+    이 함수는 단순히:
+      - 노드 등록
+      - 엣지 연결
+      - 그래프 컴파일
+    만 담당합니다.
     """
-    graph = StateGraph(AppState)
+    # 여기서 한 번만 LLM 생성
+    llm = get_chat_model()
 
-    graph.add_node("brand_chat", brand_node)
+    # 노드 함수 생성
+    brand_collect = make_brand_collect_node(llm)
+    brand_intention = make_brand_intention_node(llm)
+    brand_trend_search = make_brand_trend_search_node(llm)
+    brand_trend_refine = make_brand_trend_refine_node(llm)
+    brand_chat = make_brand_chat_node(llm)
 
-    graph.add_edge(START, "brand_chat")
-    graph.add_edge("brand_chat", END)
+    g = StateGraph(AppState)
 
-    return graph.compile(checkpointer=checkpointer)
+    # 노드 등록
+    g.add_node("brand_collect", brand_collect)
+    g.add_node("brand_intention", brand_intention)
+    g.add_node("trend_search", brand_trend_search)
+    g.add_node("trend_refine", brand_trend_refine)
+    g.add_node("brand_chat", brand_chat)
+
+    # 기본 흐름
+    g.add_edge(START, "brand_collect")
+    g.add_edge("brand_collect", "brand_intention")
+
+    # brand_intention 이후에는 Command.goto 로 분기하므로
+    # 여기서 add_conditional_edges 는 필요 없음.
+
+    # trend_refine → trend_search → brand_chat → END 직선 흐름만 정의
+    g.add_edge("trend_refine", "trend_search")
+    g.add_edge("trend_search", "brand_chat")
+    g.add_edge("brand_chat", END)
+
+    return g.compile(checkpointer=checkpointer)
