@@ -6,6 +6,7 @@
 # - 2025-11-20: 노드 분리 후 빌드/컴파일 전용으로 리팩터링
 # - 2025-11-20: brand_intention 노드 추가
 # - 2025-11-20: smalltalk 모드 추가
+# - 2025-11-21: Command.goto 로 분기 처리
 
 from __future__ import annotations
 
@@ -58,16 +59,6 @@ def build_brand_graph():
     g.add_node("trend_refine", brand_trend_refine)
     g.add_node("brand_chat", brand_chat)
 
-    # 기본 흐름
     g.add_edge(START, "brand_collect")
-    g.add_edge("brand_collect", "brand_intention")
-
-    # brand_intention 이후에는 Command.goto 로 분기하므로
-    # 여기서 add_conditional_edges 는 필요 없음.
-
-    # trend_refine → trend_search → brand_chat → END 직선 흐름만 정의
-    g.add_edge("trend_refine", "trend_search")
-    g.add_edge("trend_search", "brand_chat")
-    g.add_edge("brand_chat", END)
 
     return g.compile(checkpointer=checkpointer)
