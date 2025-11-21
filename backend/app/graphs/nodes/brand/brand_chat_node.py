@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from app.agents.state import AppState, BrandProfile
     from langchain_core.language_models.chat_models import BaseChatModel
 
-
+ 
 def _format_brand_profile(profile: "BrandProfile") -> str:
     """브랜드 프로필을 LLM 프롬프트용 텍스트로 정리."""
     if not profile:
