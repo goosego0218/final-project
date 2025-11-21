@@ -7,7 +7,7 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, Dict, Any
+from typing import TYPE_CHECKING, Dict, Any, Literal
 
 from langchain_core.messages import SystemMessage, HumanMessage
 from langgraph.types import Command
