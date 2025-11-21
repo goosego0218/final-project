@@ -142,7 +142,7 @@ def make_brand_chat_node(llm: "BaseChatModel"):
     llm 인스턴스를 주입받아 brand_chat 노드를 만들어 주는 팩토리.
     """
 
-    def brand_chat(state: "AppState") -> Command[Literal[END]]:
+    def brand_chat(state: "AppState") -> Command[Literal["__end__"]]:
         """
         브랜드 관련 대화를 진행하는 메인 챗 노드.
 
