@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Heart, MessageCircle, Play, Clipboard } from "lucide-react";
 import {
   Select,
@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import Footer from "@/components/Footer";
@@ -18,6 +18,7 @@ interface ShortForm {
   id: number;
   title: string;
   thumbnailUrl: string;
+  videoUrl?: string; // 실제 비디오 URL
   likes: number;
   comments: number;
   duration: string;
@@ -72,7 +73,10 @@ interface ShortFormGalleryProps {
 }
 
 const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
-  const [allShortForms, setAllShortForms] = useState<ShortForm[]>(generateMockShortForms());
+  // Mock 숏폼을 한 번만 생성하고 재사용
+  const mockShortFormsRef = useRef<ShortForm[]>(generateMockShortForms());
+  
+  const [allShortForms, setAllShortForms] = useState<ShortForm[]>([]);
   const [displayedShortForms, setDisplayedShortForms] = useState<ShortForm[]>([]);
   const [sortBy, setSortBy] = useState<string>("latest");
   const [page, setPage] = useState(1);
@@ -85,24 +89,6 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
   const { toast } = useToast();
 
   const ITEMS_PER_PAGE = 12;
-
-  // Load public short forms from localStorage
-  useEffect(() => {
-    const publicShortForms = JSON.parse(localStorage.getItem('public_shortforms') || '[]');
-    const publicShortFormsFormatted: ShortForm[] = publicShortForms.map((sf: any) => ({
-      id: sf.id,
-      title: sf.title,
-      thumbnailUrl: sf.thumbnailUrl,
-      likes: sf.likes || 0,
-      comments: sf.comments || 0,
-      duration: sf.duration || "0:15",
-      createdAt: new Date(sf.createdAt),
-      tags: sf.tags || [],
-    }));
-    
-    // Combine with mock short forms (public short forms first)
-    setAllShortForms([...publicShortFormsFormatted, ...generateMockShortForms()]);
-  }, []);
 
   // Helper functions for managing liked short forms
   const getLikedShorts = (): Set<number> => {
@@ -120,26 +106,98 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
     localStorage.setItem('liked_shorts', JSON.stringify(Array.from(liked)));
   };
 
-  // Reset likes count when short form changes
+  // Load public short forms from localStorage
+  const loadPublicShortForms = () => {
+    const publicShortForms = JSON.parse(localStorage.getItem('public_shortforms') || '[]');
+    const publicShortFormsFormatted: ShortForm[] = publicShortForms.map((sf: any) => ({
+      id: sf.id,
+      title: sf.title,
+      thumbnailUrl: sf.thumbnailUrl || "/placeholder.svg",
+      videoUrl: sf.videoUrl || sf.thumbnailUrl, // videoUrl이 없으면 thumbnailUrl을 비디오 URL로 사용
+      likes: sf.likes || 0,
+      comments: sf.comments || 0,
+      duration: sf.duration || "0:15",
+      createdAt: new Date(sf.createdAt),
+      tags: sf.tags || [],
+    }));
+    
+    // Combine with mock short forms (public short forms first, mock forms with fixed order)
+    setAllShortForms([...publicShortFormsFormatted, ...mockShortFormsRef.current]);
+  };
+
+  useEffect(() => {
+    loadPublicShortForms();
+  }, []);
+
+  // Reset likes count and load comments when short form changes
   useEffect(() => {
     if (selectedShort) {
       setLikesCount(0);
       const liked = getLikedShorts();
       const likedState = liked.has(selectedShort.id);
       setIsLiked(likedState);
+      
+      // Load comments from localStorage
+      const savedComments = localStorage.getItem(`short_comments_${selectedShort.id}`);
+      if (savedComments) {
+        setComments(JSON.parse(savedComments));
+      } else {
+        setComments([]);
+      }
     } else {
       setIsLiked(false);
+      setComments([]);
     }
   }, [selectedShort]);
 
-  // Listen to storage events to update liked status
+  // Listen to storage events and custom events to reload data
   useEffect(() => {
     const handleStorageChange = () => {
-      // 카드 목록이 자동으로 업데이트되도록 함
-      setAllShortForms(prev => [...prev]);
+      loadPublicShortForms();
+      // localStorage에서 통계 불러와서 업데이트
+      setAllShortForms(prev => prev.map(shortForm => {
+        const stats = JSON.parse(localStorage.getItem(`short_stats_${shortForm.id}`) || '{}');
+        if (stats.likes !== undefined || stats.comments !== undefined) {
+          return {
+            ...shortForm,
+            likes: stats.likes !== undefined ? stats.likes : shortForm.likes,
+            comments: stats.comments !== undefined ? stats.comments : shortForm.comments
+          };
+        }
+        return shortForm;
+      }));
     };
+    
+    const handleShortStatsUpdate = (e: CustomEvent) => {
+      const { id, likes, comments } = e.detail;
+      setAllShortForms(prev => prev.map(shortForm => {
+        if (shortForm.id === id) {
+          return {
+            ...shortForm,
+            ...(likes !== undefined && { likes }),
+            ...(comments !== undefined && { comments })
+          };
+        }
+        return shortForm;
+      }));
+    };
+    
+    // Listen for storage events (from other tabs)
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    
+    // Listen for custom events (from same tab)
+    window.addEventListener('publicShortFormsUpdated', handleStorageChange);
+    window.addEventListener('shortStatsUpdated', handleShortStatsUpdate as EventListener);
+    
+    // Also check periodically for same-tab changes
+    const interval = setInterval(loadPublicShortForms, 1000);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('publicShortFormsUpdated', handleStorageChange);
+      window.removeEventListener('shortStatsUpdated', handleShortStatsUpdate as EventListener);
+      clearInterval(interval);
+    };
   }, []);
 
   const getFilteredAndSortedShortForms = () => {
@@ -180,7 +238,7 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
     setDisplayedShortForms(initialItems);
     setPage(1);
     setHasMore(initialItems.length < sortedData.length);
-  }, [sortBy, searchQuery]);
+  }, [allShortForms, sortBy, searchQuery]);
 
   const handleLoadMore = () => {
     const sortedData = getFilteredAndSortedShortForms();
@@ -207,36 +265,72 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
     if (!selectedShort) return;
     const newLikedState = !isLiked;
     setIsLiked(newLikedState);
-    setLikesCount(prev => newLikedState ? prev + 1 : prev - 1);
+    const newLikesCount = newLikedState ? likesCount + 1 : Math.max(0, likesCount - 1);
+    setLikesCount(newLikesCount);
     saveLikedShort(selectedShort.id, newLikedState);
     
     // 카드 목록의 좋아요 수 업데이트
+    const updatedLikes = Math.max(0, newLikedState ? selectedShort.likes + 1 : selectedShort.likes - 1);
     setAllShortForms(prev => prev.map(shortForm => {
       if (shortForm.id === selectedShort.id) {
         return {
           ...shortForm,
-          likes: newLikedState ? shortForm.likes + 1 : Math.max(0, shortForm.likes - 1)
+          likes: updatedLikes
         };
       }
       return shortForm;
     }));
     
+    // localStorage에 좋아요 수 저장
+    const stats = JSON.parse(localStorage.getItem(`short_stats_${selectedShort.id}`) || '{}');
+    stats.likes = updatedLikes;
+    localStorage.setItem(`short_stats_${selectedShort.id}`, JSON.stringify(stats));
+    
     // storage 이벤트 발생시켜 다른 컴포넌트에도 알림
     window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new CustomEvent('shortStatsUpdated', { detail: { id: selectedShort.id, likes: updatedLikes } }));
     
     toast({ description: newLikedState ? "좋아요를 눌렀습니다" : "좋아요를 취소했습니다" });
   };
 
   const handleComment = () => {
-    if (commentText.trim()) {
-      const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+    if (commentText.trim() && selectedShort) {
+      // 로그인 상태 확인
+      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+      const userProfile = isLoggedIn ? JSON.parse(localStorage.getItem('userProfile') || '{}') : {};
       const newComment = {
-        author: userProfile.nickname || "나",
+        author: userProfile.nickname || "익명",
         authorAvatar: userProfile.avatar || undefined,
         content: commentText,
         time: "방금 전"
       };
-      setComments([newComment, ...comments]);
+      const updatedComments = [newComment, ...comments];
+      setComments(updatedComments);
+      
+      // Save comments to localStorage
+      localStorage.setItem(`short_comments_${selectedShort.id}`, JSON.stringify(updatedComments));
+      
+      // 카드 목록의 댓글 수 업데이트
+      const updatedCommentsCount = updatedComments.length;
+      setAllShortForms(prev => prev.map(shortForm => {
+        if (shortForm.id === selectedShort.id) {
+          return {
+            ...shortForm,
+            comments: updatedCommentsCount
+          };
+        }
+        return shortForm;
+      }));
+      
+      // localStorage에 댓글 수 저장
+      const stats = JSON.parse(localStorage.getItem(`short_stats_${selectedShort.id}`) || '{}');
+      stats.comments = updatedCommentsCount;
+      localStorage.setItem(`short_stats_${selectedShort.id}`, JSON.stringify(stats));
+      
+      // storage 이벤트 발생시켜 다른 컴포넌트에도 알림
+      window.dispatchEvent(new Event('storage'));
+      window.dispatchEvent(new CustomEvent('shortStatsUpdated', { detail: { id: selectedShort.id, comments: updatedCommentsCount } }));
+      
       toast({ description: "댓글이 등록되었습니다" });
       setCommentText("");
     }
@@ -269,33 +363,47 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
 
       {/* Short Form Grid */}
       <div className="max-w-7xl mx-auto px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {displayedShortForms.map((shortForm) => (
             <div
               key={shortForm.id}
               className="group relative bg-card rounded-2xl overflow-hidden border border-border/50 hover:shadow-xl hover:scale-[1.02] transition-all duration-200 cursor-pointer"
               onClick={() => setSelectedShort(shortForm)}
             >
-              {/* 9:16 Thumbnail */}
+              {/* 9:16 Video */}
               <div className="aspect-[9/16] bg-secondary/30 relative">
-                <img
-                  src={shortForm.thumbnailUrl}
-                  alt={shortForm.title}
-                  className="w-full h-full object-cover"
-                />
+                {shortForm.videoUrl ? (
+                  <video
+                    src={shortForm.videoUrl}
+                    className="w-full h-full object-cover"
+                    muted
+                    loop
+                    playsInline
+                    autoPlay
+                  />
+                ) : shortForm.thumbnailUrl && !shortForm.thumbnailUrl.endsWith('.svg') && !shortForm.thumbnailUrl.endsWith('.jpg') && !shortForm.thumbnailUrl.endsWith('.png') ? (
+                  // thumbnailUrl이 비디오 URL일 수 있음
+                  <video
+                    src={shortForm.thumbnailUrl}
+                    className="w-full h-full object-cover"
+                    muted
+                    loop
+                    playsInline
+                    autoPlay
+                  />
+                ) : (
+                  <img
+                    src={shortForm.thumbnailUrl || "/placeholder.svg"}
+                    alt={shortForm.title}
+                    className="w-full h-full object-cover"
+                  />
+                )}
 
                 {/* Duration badge */}
-                <div className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm rounded-lg px-2.5 py-1 shadow-md">
+                <div className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm rounded-lg px-2.5 py-1 shadow-md z-10">
                   <span className="text-xs font-medium text-foreground">
                     {shortForm.duration}
                   </span>
-                </div>
-
-                {/* Hover overlay with play button */}
-                <div className="absolute inset-0 bg-background/90 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                  <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center">
-                    <Play className="w-8 h-8 text-primary-foreground fill-primary-foreground ml-1" />
-                  </div>
                 </div>
               </div>
 
@@ -329,30 +437,47 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
       </div>
 
       {/* Short Form Detail Modal */}
-      <Dialog open={!!selectedShort} onOpenChange={() => {
-        setSelectedShort(null);
-        setIsLiked(false);
-        setLikesCount(0);
-        setComments([]);
-        setCommentText("");
+      <Dialog open={!!selectedShort} onOpenChange={(open) => {
+        if (!open) {
+          // 창 닫을 때 카드에 반영
+          if (selectedShort) {
+            setAllShortForms(prev => prev.map(shortForm => {
+              if (shortForm.id === selectedShort.id) {
+                return {
+                  ...shortForm,
+                  likes: Math.max(0, selectedShort.likes + likesCount),
+                  comments: comments.length
+                };
+              }
+              return shortForm;
+            }));
+          }
+          setSelectedShort(null);
+          setIsLiked(false);
+          setLikesCount(0);
+          setComments([]);
+          setCommentText("");
+        }
       }}>
         <DialogContent className="max-w-[800px] w-[90vw] overflow-hidden p-0 gap-0">
           <div className="flex md:flex-row flex-col">
-            {/* Left: Short Form Image (9:16 ratio) */}
-            <div className="bg-background flex items-center justify-center p-0 border-r border-border aspect-[9/16] w-full md:w-[300px] md:flex-shrink-0 rounded-l-lg overflow-hidden relative group">
-              <img 
-                src={selectedShort?.thumbnailUrl} 
-                alt={selectedShort?.title} 
-                className="w-full h-full object-cover"
-              />
-              {selectedShort?.videoUrl && (
+            {/* Left: Short Form Video (9:16 ratio) */}
+            <div className="bg-background flex items-center justify-center p-0 border-r border-border aspect-[9/16] w-full md:w-[300px] md:flex-shrink-0 rounded-l-lg overflow-hidden relative">
+              {selectedShort?.videoUrl || (selectedShort?.thumbnailUrl && !selectedShort.thumbnailUrl.endsWith('.svg') && !selectedShort.thumbnailUrl.endsWith('.jpg') && !selectedShort.thumbnailUrl.endsWith('.png')) ? (
                 <video
-                  src={selectedShort.videoUrl}
-                  className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  src={selectedShort?.videoUrl || selectedShort?.thumbnailUrl}
+                  className="w-full h-full object-cover"
                   autoPlay
                   loop
                   muted
                   playsInline
+                  controls
+                />
+              ) : (
+                <img 
+                  src={selectedShort?.thumbnailUrl || "/placeholder.svg"} 
+                  alt={selectedShort?.title} 
+                  className="w-full h-full object-cover"
                 />
               )}
             </div>
@@ -391,7 +516,7 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
               </div>
 
               {/* Action Buttons - Middle */}
-              <div className="p-4 border-b border-border">
+              <div className="p-4 border-b border-border space-y-3">
                 <div className="flex items-center gap-3">
                   <Button 
                     variant="ghost" 
@@ -400,7 +525,16 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
                   >
                     <Heart className={`h-5 w-5 ${isLiked ? "fill-destructive text-destructive" : ""}`} />
                     <span className="text-sm font-semibold text-foreground">
-                      {(selectedShort ? selectedShort.likes + likesCount : 0).toLocaleString()}
+                      {Math.max(0, selectedShort ? selectedShort.likes + likesCount : 0).toLocaleString()}
+                    </span>
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="h-9 px-3 gap-2"
+                  >
+                    <MessageCircle className="h-5 w-5" />
+                    <span className="text-sm font-semibold text-foreground">
+                      {comments.length.toLocaleString()}
                     </span>
                   </Button>
                   <Button 
@@ -445,6 +579,7 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
           </div>
         </DialogContent>
       </Dialog>
+
       <Footer />
     </div>
   );

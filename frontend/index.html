@@ -15,6 +15,22 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@Lovable" />
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    
+    <!-- 초기 테마 적용 스크립트 - 깜빡임 방지 -->
+    <script>
+      (function() {
+        const theme = localStorage.getItem('theme');
+        // localStorage에 값이 없으면 다크모드를 기본으로 설정
+        if (theme === 'dark' || theme === null) {
+          document.documentElement.classList.add('dark');
+          if (theme === null) {
+            localStorage.setItem('theme', 'dark');
+          }
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      })();
+    </script>
   </head>
 
   <body>

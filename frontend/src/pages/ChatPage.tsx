@@ -22,7 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Send, Plus, Upload } from "lucide-react";
+import { Send, Plus, Upload, Image, Video, X } from "lucide-react";
 import { projectStorage, type Message } from "@/lib/projectStorage";
 import { useToast } from "@/hooks/use-toast";
 import StudioTopBar from "@/components/StudioTopBar";
@@ -75,6 +75,9 @@ const ChatPage = () => {
   const dialogFileInputRef = useRef<HTMLInputElement>(null);
   const [currentQuestion, setCurrentQuestion] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [fromStyleMode, setFromStyleMode] = useState(false);
+  const [baseAssetType, setBaseAssetType] = useState<"logo" | "shortform" | null>(null);
+  const [baseAssetId, setBaseAssetId] = useState<string | null>(null);
 
   // localStorage에서 사용자 정보 가져오기
   const getUserProfile = () => {
@@ -154,6 +157,7 @@ const ChatPage = () => {
   const handleLogout = () => {
     localStorage.removeItem('isLoggedIn');
     sessionStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('userProfile');
     toast({
       title: "로그아웃되었습니다",
       description: "다음에 또 만나요!",
@@ -284,7 +288,7 @@ const ChatPage = () => {
   };
 
   // 공통 Studio 이동 함수
-  const handleGoToStudio = (projectId: string, type?: "logo" | "short") => {
+  const handleGoToStudio = (projectId: string, type?: "logo" | "short", fromStyle?: boolean) => {
     if (!projectId) {
       toast({
         title: "오류",
@@ -313,18 +317,31 @@ const ChatPage = () => {
 
     // Studio로 이동
     const typeParam = type ? `&type=${type}` : "";
+    const fromStyleParam = fromStyle && baseAssetType && baseAssetId 
+      ? `&from_style=true&baseAssetType=${baseAssetType}&baseAssetId=${baseAssetId}` 
+      : "";
     toast({
       title: "스튜디오로 이동합니다",
       description: project.logo ? "업로드한 로고를 사용합니다." : "Studio에서 로고를 생성할 수 있습니다.",
     });
     
-    navigate(`/studio?project=${projectId}${typeParam}`);
+    navigate(`/studio?project=${projectId}${typeParam}${fromStyleParam}`);
   };
 
   useEffect(() => {
     const isDraft = searchParams.get('draft') === 'true';
     const projectId = searchParams.get('project') || projectStorage.getCurrentProjectId();
     const skipLogoUpload = searchParams.get('skipLogoUpload') === 'true';
+    const fromStyle = searchParams.get('from_style') === 'true';
+    const assetType = searchParams.get('baseAssetType') as "logo" | "shortform" | null;
+    const assetId = searchParams.get('baseAssetId');
+    
+    // from_style 모드 설정
+    if (fromStyle) {
+      setFromStyleMode(true);
+      setBaseAssetType(assetType || null);
+      setBaseAssetId(assetId || null);
+    }
     
     // draft 모드 처리
     if (isDraft) {
@@ -946,8 +963,8 @@ const ChatPage = () => {
       projectStorage.saveProject(project);
     }
 
-    // 공통 함수로 Studio 이동 (type 지정)
-    handleGoToStudio(currentProjectId, type);
+    // 공통 함수로 Studio 이동 (type 지정, from_style 정보 전달)
+    handleGoToStudio(currentProjectId, type, fromStyleMode);
   };
 
   // collectedInfo가 변경될 때마다 필수 항목 완료 여부 확인 및 상태 업데이트
@@ -1179,6 +1196,19 @@ const ChatPage = () => {
         // project나 type 단계에서는 onOpenChange로 닫히지 않도록 함
       }}>
         <AlertDialogContent>
+          {/* X 버튼 */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-4 top-4 h-6 w-6 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 z-10"
+            onClick={() => {
+              setShowSkipDialog(false);
+              setSkipDialogStep("confirm");
+            }}
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </Button>
           {skipDialogStep === "confirm" && (
             <>
               <AlertDialogHeader>
@@ -1207,6 +1237,9 @@ const ChatPage = () => {
             <>
               <AlertDialogHeader>
                 <AlertDialogTitle>지금까지 입력한 내용으로 새 프로젝트를 생성하시겠습니까?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  아직 입력하지 않은 항목이 있어도, 지금까지 작성한 정보만으로 프로젝트를 저장하고 다음 단계로 넘어갑니다.
+                </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <Button 
@@ -1235,6 +1268,9 @@ const ChatPage = () => {
             <>
               <AlertDialogHeader>
                 <AlertDialogTitle>어떤 작업을 하시겠습니까?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  방금 생성한 프로젝트에서 바로 시작할 작업을 선택해 주세요.
+                </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter className="flex-col sm:flex-row gap-2">
                 <Button
@@ -1251,8 +1287,9 @@ const ChatPage = () => {
                     setSkipDialogStep("confirm");
                     handleGoToStudio(currentProjectId, "logo");
                   }}
-                  className="flex-1 bg-primary hover:bg-primary/90"
+                  className="flex-1 bg-transparent border border-neutral-700 text-foreground hover:bg-[#FF8A3D] hover:border-[#FF8A3D] hover:text-white group transition-all"
                 >
+                  <Image className="h-4 w-4 mr-2 stroke-foreground group-hover:stroke-white transition-all" />
                   로고 생성하기
                 </Button>
                 <Button
@@ -1269,8 +1306,9 @@ const ChatPage = () => {
                     setSkipDialogStep("confirm");
                     handleGoToStudio(currentProjectId, "short");
                   }}
-                  className="flex-1 bg-primary hover:bg-primary/90"
+                  className="flex-1 bg-transparent border border-neutral-700 text-foreground hover:bg-[#FF8A3D] hover:border-[#FF8A3D] hover:text-white group transition-all"
                 >
+                  <Video className="h-4 w-4 mr-2 stroke-foreground group-hover:stroke-white transition-all" />
                   숏폼 생성하기
                 </Button>
               </AlertDialogFooter>

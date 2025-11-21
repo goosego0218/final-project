@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import ThemeToggle from "./ThemeToggle";
@@ -19,7 +19,6 @@ import { Progress } from "@/components/ui/progress";
 const Navigation = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -45,16 +44,27 @@ const Navigation = () => {
     return { nickname: "사용자", id: "user123", avatar: null };
   };
 
+  // 초기 로그인 상태를 즉시 확인하여 깜빡임 방지
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    return localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+  });
+  
   const [userProfile, setUserProfile] = useState(getUserProfile());
+  
+  // interval 내부에서 최신 상태를 참조하기 위한 ref
+  const isLoggedInRef = useRef(isLoggedIn);
+  
+  // isLoggedIn이 변경될 때마다 ref 업데이트
+  useEffect(() => {
+    isLoggedInRef.current = isLoggedIn;
+  }, [isLoggedIn]);
 
   // localStorage 변경 감지
   useEffect(() => {
-    // 초기 로그인 상태 확인
-    setIsLoggedIn(localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true');
-    
     const handleStorageChange = () => {
+      const newLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+      setIsLoggedIn(newLoggedIn);
       setUserProfile(getUserProfile());
-      setIsLoggedIn(localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true');
     };
     
     const handleProfileUpdate = () => {
@@ -63,8 +73,17 @@ const Navigation = () => {
     
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('profileUpdated', handleProfileUpdate);
-    // 같은 탭에서의 변경도 감지하기 위해 interval 사용
-    const interval = setInterval(handleStorageChange, 1000);
+    
+    // 같은 탭에서의 변경도 감지하기 위해 interval 사용 (5초로 변경하여 깜빡임 최소화)
+    const interval = setInterval(() => {
+      const currentLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+      // 상태가 실제로 변경된 경우에만 업데이트
+      if (currentLoggedIn !== isLoggedInRef.current) {
+        setIsLoggedIn(currentLoggedIn);
+      }
+      // 프로필 정보는 항상 최신 상태로 유지
+      setUserProfile(getUserProfile());
+    }, 5000);
     
     return () => {
       window.removeEventListener('storage', handleStorageChange);
@@ -110,6 +129,7 @@ const Navigation = () => {
     setIsLoggedIn(false);
     localStorage.removeItem('isLoggedIn');
     sessionStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('userProfile');
     toast({
       title: "로그아웃되었습니다",
       description: "다음에 또 만나요!",
@@ -191,18 +211,18 @@ const Navigation = () => {
           </div>
 
           {/* Right Actions */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 flex-shrink-0">
             <ThemeToggle />
             
             {isLoggedIn ? (
               <>
                 {/* Token Badge */}
-                <Link to="/plans">
+                <Link to="/plans" className="flex-shrink-0">
                   <Badge 
                     variant="secondary" 
-                    className="px-3 py-1.5 cursor-pointer hover:bg-primary/20 transition-colors bg-primary/10 border-primary/20 flex items-center gap-1.5"
+                    className="px-3 py-1.5 cursor-pointer hover:bg-primary/20 transition-colors bg-primary/10 border-primary/20 flex items-center gap-1.5 whitespace-nowrap"
                   >
-                    <Zap className="h-3.5 w-3.5 text-primary fill-primary" />
+                    <Zap className="h-3.5 w-3.5 text-primary fill-primary flex-shrink-0" />
                     <span className="text-foreground font-semibold">{tokenData.tokensUsed.toLocaleString()}</span>
                   </Badge>
                 </Link>
@@ -210,8 +230,8 @@ const Navigation = () => {
                 {/* Profile Dropdown */}
                 <DropdownMenu modal={false}>
                   <DropdownMenuTrigger asChild>
-                    <button className="focus:outline-none">
-                      <Avatar className="h-9 w-9 cursor-pointer hover:opacity-80 transition-opacity">
+                    <button className="focus:outline-none flex-shrink-0">
+                      <Avatar className="h-9 w-9 cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0">
                         {userProfile.avatar ? (
                           <img src={userProfile.avatar} alt="Profile" className="h-full w-full object-cover" />
                         ) : (
@@ -304,14 +324,14 @@ const Navigation = () => {
               <>
                 <button 
                   onClick={() => setIsLoginOpen(true)}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 whitespace-nowrap"
                 >
                   Log in
                 </button>
                 <Button 
                   size="sm" 
                   onClick={() => setIsSignUpOpen(true)}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 flex-shrink-0 whitespace-nowrap"
                 >
                   Sign up
                 </Button>

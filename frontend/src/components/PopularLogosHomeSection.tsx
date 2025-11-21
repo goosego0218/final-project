@@ -1,15 +1,11 @@
 import { Heart, MessageCircle, Clipboard, Sparkles } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
-import { projectStorage, type Project } from "@/lib/projectStorage";
-import { Card, CardContent } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import CreateFromStyleModal from "@/components/CreateFromStyleModal";
 
 interface Logo {
   id: number;
@@ -98,21 +94,16 @@ const LogoCard = ({ logo, onClick }: { logo: Logo; onClick: () => void }) => {
 };
 
 const PopularLogosHomeSection = () => {
-  const navigate = useNavigate();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const [selectedLogo, setSelectedLogo] = useState<Logo | null>(null);
+  const [selectedLogo, setSelectedLogo] = useState<Logo | null>(null); // 디테일 모달용
+  const [selectedLogoForCreate, setSelectedLogoForCreate] = useState<Logo | null>(null); // 새 작품 만들기용
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState<Array<{ author: string; authorAvatar?: string; content: string; time: string }>>([]);
   const { toast } = useToast();
   const [isCreateNewModalOpen, setIsCreateNewModalOpen] = useState(false);
-  const [isProjectSelectModalOpen, setIsProjectSelectModalOpen] = useState(false);
-  const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
-  const [projectName, setProjectName] = useState("");
-  const [projectDescription, setProjectDescription] = useState("");
-  const [projects, setProjects] = useState<Project[]>([]);
 
   // Get top logos by likes from the same data source as LogoGallery
   const [topLogos, setTopLogos] = useState<Logo[]>(getTopLogosByLikes());
@@ -167,26 +158,64 @@ const PopularLogosHomeSection = () => {
     localStorage.setItem('liked_logos', JSON.stringify(Array.from(liked)));
   };
 
-  // Reset likes count when logo changes
+  // Reset likes count and load comments when logo changes
   useEffect(() => {
     if (selectedLogo) {
       setLikesCount(0);
       const liked = getLikedLogos();
       const likedState = liked.has(selectedLogo.id);
       setIsLiked(likedState);
+      
+      // Load comments from localStorage
+      const savedComments = localStorage.getItem(`logo_comments_${selectedLogo.id}`);
+      if (savedComments) {
+        setComments(JSON.parse(savedComments));
+      } else {
+        setComments([]);
+      }
     } else {
       setIsLiked(false);
+      setComments([]);
     }
   }, [selectedLogo]);
 
   // Listen to storage events to update liked status
   useEffect(() => {
     const handleStorageChange = () => {
-      // 카드 목록이 자동으로 업데이트되도록 함
-      setTopLogos(prev => [...prev]);
+      // localStorage에서 통계 불러와서 업데이트
+      setTopLogos(prev => prev.map(logo => {
+        const stats = JSON.parse(localStorage.getItem(`logo_stats_${logo.id}`) || '{}');
+        if (stats.likes !== undefined || stats.comments !== undefined) {
+          return {
+            ...logo,
+            likes: stats.likes !== undefined ? stats.likes : logo.likes,
+            comments: stats.comments !== undefined ? stats.comments : logo.comments
+          };
+        }
+        return logo;
+      }));
     };
+    
+    const handleLogoStatsUpdate = (e: CustomEvent) => {
+      const { id, likes, comments } = e.detail;
+      setTopLogos(prev => prev.map(logo => {
+        if (logo.id === id) {
+          return {
+            ...logo,
+            ...(likes !== undefined && { likes }),
+            ...(comments !== undefined && { comments })
+          };
+        }
+        return logo;
+      }));
+    };
+    
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener('logoStatsUpdated', handleLogoStatsUpdate as EventListener);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('logoStatsUpdated', handleLogoStatsUpdate as EventListener);
+    };
   }, []);
 
   const handleMouseEnter = () => {
@@ -201,36 +230,72 @@ const PopularLogosHomeSection = () => {
     if (!selectedLogo) return;
     const newLikedState = !isLiked;
     setIsLiked(newLikedState);
-    setLikesCount(prev => newLikedState ? prev + 1 : prev - 1);
+    const newLikesCount = newLikedState ? likesCount + 1 : Math.max(0, likesCount - 1);
+    setLikesCount(newLikesCount);
     saveLikedLogo(selectedLogo.id, newLikedState);
     
     // 카드 목록의 좋아요 수 업데이트
+    const updatedLikes = Math.max(0, newLikedState ? selectedLogo.likes + 1 : selectedLogo.likes - 1);
     setTopLogos(prev => prev.map(logo => {
       if (logo.id === selectedLogo.id) {
         return {
           ...logo,
-          likes: newLikedState ? logo.likes + 1 : Math.max(0, logo.likes - 1)
+          likes: updatedLikes
         };
       }
       return logo;
     }));
     
+    // localStorage에 좋아요 수 저장
+    const stats = JSON.parse(localStorage.getItem(`logo_stats_${selectedLogo.id}`) || '{}');
+    stats.likes = updatedLikes;
+    localStorage.setItem(`logo_stats_${selectedLogo.id}`, JSON.stringify(stats));
+    
     // storage 이벤트 발생시켜 다른 컴포넌트에도 알림
     window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new CustomEvent('logoStatsUpdated', { detail: { id: selectedLogo.id, likes: updatedLikes } }));
     
     toast({ description: newLikedState ? "좋아요를 눌렀습니다" : "좋아요를 취소했습니다" });
   };
 
   const handleComment = () => {
-    if (commentText.trim()) {
-      const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+    if (commentText.trim() && selectedLogo) {
+      // 로그인 상태 확인
+      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+      const userProfile = isLoggedIn ? JSON.parse(localStorage.getItem('userProfile') || '{}') : {};
       const newComment = {
-        author: userProfile.nickname || "나",
+        author: userProfile.nickname || "익명",
         authorAvatar: userProfile.avatar || undefined,
         content: commentText,
         time: "방금 전"
       };
-      setComments([newComment, ...comments]);
+      const updatedComments = [newComment, ...comments];
+      setComments(updatedComments);
+      
+      // Save comments to localStorage
+      localStorage.setItem(`logo_comments_${selectedLogo.id}`, JSON.stringify(updatedComments));
+      
+      // 카드 목록의 댓글 수 업데이트
+      const updatedCommentsCount = updatedComments.length;
+      setTopLogos(prev => prev.map(logo => {
+        if (logo.id === selectedLogo.id) {
+          return {
+            ...logo,
+            comments: updatedCommentsCount
+          };
+        }
+        return logo;
+      }));
+      
+      // localStorage에 댓글 수 저장
+      const stats = JSON.parse(localStorage.getItem(`logo_stats_${selectedLogo.id}`) || '{}');
+      stats.comments = updatedCommentsCount;
+      localStorage.setItem(`logo_stats_${selectedLogo.id}`, JSON.stringify(stats));
+      
+      // storage 이벤트 발생시켜 다른 컴포넌트에도 알림
+      window.dispatchEvent(new Event('storage'));
+      window.dispatchEvent(new CustomEvent('logoStatsUpdated', { detail: { id: selectedLogo.id, comments: updatedCommentsCount } }));
+      
       toast({ description: "댓글이 등록되었습니다" });
       setCommentText("");
     }
@@ -243,49 +308,17 @@ const PopularLogosHomeSection = () => {
   };
 
   const handleCreateNew = () => {
-    setSelectedLogo(null); // 로고 상세 모달 닫기
+    if (!selectedLogo) return;
+    // 선택된 로고를 별도 state에 저장
+    setSelectedLogoForCreate(selectedLogo);
+    // 아이템 상세 모달 닫기
+    setSelectedLogo(null);
     setIsLiked(false);
     setLikesCount(0);
     setComments([]);
     setCommentText("");
-    // 약간의 지연 후 새로운 작품 만들기 모달 열기
-    setTimeout(() => {
+    // 모달 열기
       setIsCreateNewModalOpen(true);
-    }, 100);
-  };
-
-  // "내가 하던 프로젝트에서 계속하기" 선택
-  const handleContinueExistingProject = () => {
-    setIsCreateNewModalOpen(false);
-    setIsProjectSelectModalOpen(true);
-    setProjects(projectStorage.getProjects());
-  };
-
-  // 프로젝트 선택 및 ChatPage로 이동 (대화하던 시점으로 복귀)
-  const handleSelectProject = (projectId: string) => {
-    setIsProjectSelectModalOpen(false);
-    projectStorage.setCurrentProject(projectId);
-    navigate(`/chat?project=${projectId}`);
-  };
-
-  // "새 프로젝트로 시작하기" 선택
-  const handleStartNewProject = () => {
-    setIsCreateNewModalOpen(false);
-    setIsNewProjectDialogOpen(true);
-    setProjectName("");
-    setProjectDescription("");
-  };
-
-  // 새 프로젝트 생성 및 ChatPage로 이동
-  const handleCreateProject = () => {
-    if (projectName.trim()) {
-      const newProject = projectStorage.createProject(projectName, projectDescription);
-      setIsNewProjectDialogOpen(false);
-      setProjectName("");
-      setProjectDescription("");
-      // ChatPage로 이동 (로고 업로드 단계 제외 플래그)
-      navigate(`/chat?project=${newProject.id}&skipLogoUpload=true`);
-    }
   };
 
   return (
@@ -322,12 +355,27 @@ const PopularLogosHomeSection = () => {
     </section>
 
     {/* Logo Detail Modal */}
-    <Dialog open={!!selectedLogo} onOpenChange={() => {
-      setSelectedLogo(null);
-      setIsLiked(false);
-      setLikesCount(0);
-      setComments([]);
-      setCommentText("");
+    <Dialog open={!!selectedLogo} onOpenChange={(open) => {
+      if (!open) {
+        // 창 닫을 때 카드에 반영
+        if (selectedLogo) {
+          setTopLogos(prev => prev.map(logo => {
+            if (logo.id === selectedLogo.id) {
+              return {
+                ...logo,
+                likes: Math.max(0, selectedLogo.likes + likesCount),
+                comments: comments.length
+              };
+            }
+            return logo;
+          }));
+        }
+        setSelectedLogo(null);
+        setIsLiked(false);
+        setLikesCount(0);
+        setComments([]);
+        setCommentText("");
+      }
     }}>
       <DialogContent className="max-w-[800px] w-[90vw] overflow-hidden p-0 gap-0">
         <div className="flex md:flex-row flex-col">
@@ -383,7 +431,16 @@ const PopularLogosHomeSection = () => {
                 >
                   <Heart className={`h-5 w-5 ${isLiked ? "fill-destructive text-destructive" : ""}`} />
                   <span className="text-sm font-semibold text-foreground">
-                    {(selectedLogo ? selectedLogo.likes + likesCount : 0).toLocaleString()}
+                    {Math.max(0, selectedLogo ? selectedLogo.likes + likesCount : 0).toLocaleString()}
+                  </span>
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  className="h-9 px-3 gap-2"
+                >
+                  <MessageCircle className="h-5 w-5" />
+                  <span className="text-sm font-semibold text-foreground">
+                    {comments.length.toLocaleString()}
                   </span>
                 </Button>
                 <Button 
@@ -433,134 +490,24 @@ const PopularLogosHomeSection = () => {
       </DialogContent>
     </Dialog>
 
-    {/* 새로운 작품 만들기 선택 모달 */}
-    <Dialog open={isCreateNewModalOpen} onOpenChange={setIsCreateNewModalOpen}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>새로운 작품 만들기</DialogTitle>
-          <DialogDescription>
-            어떻게 진행하시겠습니까?
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex flex-col gap-3 py-4">
-          <Button 
-            onClick={handleContinueExistingProject}
-            variant="outline"
-            className="w-full h-auto py-6"
-          >
-            <div className="flex flex-col items-start gap-1">
-              <span className="font-semibold">내가 하던 프로젝트에서 계속하기</span>
-              <span className="text-sm text-muted-foreground">기존 프로젝트를 선택하여 이어서 작업합니다</span>
-            </div>
-          </Button>
-          <Button 
-            onClick={handleStartNewProject}
-            className="w-full h-auto py-6 bg-primary hover:bg-primary/90"
-          >
-            <div className="flex flex-col items-start gap-1">
-              <span className="font-semibold">새 프로젝트로 시작하기</span>
-              <span className="text-sm text-primary-foreground/80">새로운 프로젝트를 생성하여 시작합니다</span>
-            </div>
-          </Button>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setIsCreateNewModalOpen(false)}>
-            취소
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-
-    {/* 프로젝트 선택 모달 */}
-    <Dialog open={isProjectSelectModalOpen} onOpenChange={setIsProjectSelectModalOpen}>
-      <DialogContent className="max-w-2xl max-h-[80vh]">
-        <DialogHeader>
-          <DialogTitle>프로젝트 선택</DialogTitle>
-          <DialogDescription>
-            계속 작업할 프로젝트를 선택해주세요
-          </DialogDescription>
-        </DialogHeader>
-        <div className="overflow-y-auto max-h-[60vh] space-y-2 py-4">
-          {projects.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              프로젝트가 없습니다
-            </div>
-          ) : (
-            projects.map((project) => (
-              <Card 
-                key={project.id}
-                className="cursor-pointer hover:bg-muted/50 transition-colors"
-                onClick={() => handleSelectProject(project.id)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-foreground">{project.name}</h3>
-                      {project.description && (
-                        <p className="text-sm text-muted-foreground mt-1">{project.description}</p>
-                      )}
-                      <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                        <span>로고 {project.logoCount}개</span>
-                        <span>숏폼 {project.shortFormCount}개</span>
-                        <span>{project.date}</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
-          )}
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setIsProjectSelectModalOpen(false)}>
-            취소
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-
-    {/* 새 프로젝트 만들기 다이얼로그 */}
-    <Dialog open={isNewProjectDialogOpen} onOpenChange={setIsNewProjectDialogOpen}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>새 프로젝트 만들기</DialogTitle>
-          <DialogDescription>
-            프로젝트 정보를 입력하고 시작하세요.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="project-name">프로젝트 이름</Label>
-            <Input
-              id="project-name"
-              placeholder="예: 브랜드 A 마케팅"
-              value={projectName}
-              onChange={(e) => setProjectName(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="project-description">설명 (선택)</Label>
-            <Textarea
-              id="project-description"
-              placeholder="프로젝트에 대한 간단한 설명을 입력하세요"
-              value={projectDescription}
-              onChange={(e) => setProjectDescription(e.target.value)}
-            />
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setIsNewProjectDialogOpen(false)}>
-            취소
-          </Button>
-          <Button 
-            onClick={handleCreateProject}
-            disabled={!projectName.trim()}
-          >
-            다음으로
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    {/* 새로운 작품 만들기 모달 */}
+    {selectedLogoForCreate && (
+      <CreateFromStyleModal
+        open={isCreateNewModalOpen}
+        onOpenChange={(open) => {
+          setIsCreateNewModalOpen(open);
+          // 모달이 완전히 닫힐 때만 selectedLogoForCreate를 null로 설정
+          // CreateFromStyleModal 내부에서 프로젝트 선택 모달이 열려있을 때는
+          // onOpenChange(false)를 호출하지 않으므로 안전하게 null로 설정 가능
+          if (!open) {
+            setSelectedLogoForCreate(null);
+          }
+        }}
+        baseAssetType="logo"
+        baseAssetId={selectedLogoForCreate.id}
+        baseAssetImageUrl={selectedLogoForCreate.imageSrc}
+      />
+    )}
   </>
   );
 };

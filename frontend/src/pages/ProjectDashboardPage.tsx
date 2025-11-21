@@ -21,8 +21,11 @@ import {
   Dialog,
   DialogContent,
 } from "@/components/ui/dialog";
-import { Trash2, Image, Video, Calendar, X } from "lucide-react";
+import { Trash2, Image, Video, Calendar, X, Upload, Instagram, Youtube } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { addWatermarkToImage, addWatermarkToVideo } from "@/utils/watermark";
 
 interface LogoItem {
   id: string;
@@ -55,6 +58,9 @@ const ProjectDashboardPage = () => {
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [pendingToggleItem, setPendingToggleItem] = useState<{ type: "logo" | "short"; id: string } | null>(null);
   const [selectedImage, setSelectedImage] = useState<{ url: string; title: string; type: "logo" | "short" } | null>(null);
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+  const [selectedShortFormForUpload, setSelectedShortFormForUpload] = useState<ShortFormItem | null>(null);
+  const [selectedPlatforms, setSelectedPlatforms] = useState<Set<string>>(new Set());
 
   // localStorage 변경 감지하여 로그인 상태 업데이트
   useEffect(() => {
@@ -183,10 +189,14 @@ const ProjectDashboardPage = () => {
     const filteredLogos = publicLogos.filter((l: any) => l.projectId !== project.id);
     const filteredShortForms = publicShortForms.filter((sf: any) => sf.projectId !== project.id);
     
-    localStorage.setItem('public_logos', JSON.stringify(filteredLogos));
-    localStorage.setItem('public_shortforms', JSON.stringify(filteredShortForms));
-    
-    projectStorage.deleteProject(project.id);
+      localStorage.setItem('public_logos', JSON.stringify(filteredLogos));
+      localStorage.setItem('public_shortforms', JSON.stringify(filteredShortForms));
+      
+      // 커스텀 이벤트 발생시켜 갤러리에 알림
+      window.dispatchEvent(new CustomEvent('publicLogosUpdated'));
+      window.dispatchEvent(new CustomEvent('publicShortFormsUpdated'));
+      
+      projectStorage.deleteProject(project.id);
     toast({
       title: "프로젝트가 삭제되었습니다",
       description: "프로젝트와 관련된 모든 데이터가 삭제되었습니다.",
@@ -240,6 +250,9 @@ const ProjectDashboardPage = () => {
       const updatedPublicLogos = [...filteredLogos, ...publicLogosData];
       localStorage.setItem('public_logos', JSON.stringify(updatedPublicLogos));
       
+      // 커스텀 이벤트 발생시켜 갤러리에 알림
+      window.dispatchEvent(new CustomEvent('publicLogosUpdated'));
+      
       return updatedLogos;
     });
     
@@ -249,44 +262,67 @@ const ProjectDashboardPage = () => {
     });
   };
   
-  const handleConfirmShare = () => {
+  const handleConfirmShare = async () => {
     if (!pendingToggleItem || !project) return;
     
     if (pendingToggleItem.type === "logo") {
-      setLogos(prevLogos => {
-        const updatedLogos = prevLogos.map(logo => 
-          logo.id === pendingToggleItem.id 
-            ? { ...logo, isPublic: true }
-            : logo
-        );
-        
-        // 공개된 로고를 localStorage에 저장
-        const publicLogos = updatedLogos.filter(logo => logo.isPublic);
-        const publicLogosData = publicLogos.map(logo => ({
-          id: logo.id,
-          url: logo.url,
-          brandName: logo.title || "로고",
-          likes: 0,
-          comments: 0,
-          createdAt: new Date(logo.createdAt),
-          tags: [],
-          projectId: project.id,
-        }));
-        
-        // 기존 공개 로고 가져오기
-        const existingPublicLogos = JSON.parse(localStorage.getItem('public_logos') || '[]');
-        // 현재 프로젝트의 로고 제거 후 새로 추가
-        const filteredLogos = existingPublicLogos.filter((l: any) => l.projectId !== project.id);
-        const updatedPublicLogos = [...filteredLogos, ...publicLogosData];
-        localStorage.setItem('public_logos', JSON.stringify(updatedPublicLogos));
-        
-        return updatedLogos;
-      });
+      const logo = logos.find(l => l.id === pendingToggleItem.id);
+      if (!logo) return;
       
-      toast({
-        title: "공개되었습니다",
-        description: "로고 갤러리에 게시되었습니다.",
-      });
+      try {
+        // 워터마크 추가
+        const watermarkedUrl = await addWatermarkToImage(logo.url);
+        
+        setLogos(prevLogos => {
+          const updatedLogos = prevLogos.map(l => 
+            l.id === pendingToggleItem.id 
+              ? { ...l, isPublic: true }
+              : l
+          );
+          
+          // 공개된 로고를 localStorage에 저장 (워터마크가 추가된 URL 사용)
+          const publicLogos = updatedLogos.filter(l => l.isPublic);
+          const publicLogosData = publicLogos.map(l => {
+            // 현재 로고인 경우 워터마크가 추가된 URL 사용
+            const url = l.id === pendingToggleItem.id ? watermarkedUrl : l.url;
+            return {
+              id: l.id,
+              url: url,
+              brandName: l.title || "로고",
+              likes: 0,
+              comments: 0,
+              createdAt: new Date(l.createdAt),
+              tags: [],
+              projectId: project.id,
+            };
+          });
+          
+          // 기존 공개 로고 가져오기
+          const existingPublicLogos = JSON.parse(localStorage.getItem('public_logos') || '[]');
+          // 현재 프로젝트의 로고 제거 후 새로 추가
+          const filteredLogos = existingPublicLogos.filter((l: any) => l.projectId !== project.id);
+          const updatedPublicLogos = [...filteredLogos, ...publicLogosData];
+          localStorage.setItem('public_logos', JSON.stringify(updatedPublicLogos));
+          
+          // 커스텀 이벤트 발생시켜 갤러리에 알림
+          window.dispatchEvent(new CustomEvent('publicLogosUpdated'));
+          
+          return updatedLogos;
+        });
+        
+        toast({
+          title: "게시되었습니다",
+          description: "로고 갤러리에 게시되었습니다.",
+        });
+      } catch (error) {
+        console.error('워터마크 추가 실패:', error);
+        toast({
+          title: "오류",
+          description: "워터마크 추가 중 오류가 발생했습니다.",
+          variant: "destructive",
+        });
+        return;
+      }
     } else {
       setShortForms(prevShortForms => {
         const updatedShortForms = prevShortForms.map(shortForm => 
@@ -299,7 +335,8 @@ const ProjectDashboardPage = () => {
         const publicShortForms = updatedShortForms.filter(sf => sf.isPublic);
         const publicShortFormsData = publicShortForms.map(sf => ({
           id: sf.id,
-          thumbnailUrl: sf.url,
+          thumbnailUrl: sf.url, // 비디오 URL (썸네일로도 사용)
+          videoUrl: sf.url, // 실제 비디오 URL
           title: sf.title || "숏폼",
           likes: 0,
           comments: 0,
@@ -316,11 +353,14 @@ const ProjectDashboardPage = () => {
         const updatedPublicShortForms = [...filteredShortForms, ...publicShortFormsData];
         localStorage.setItem('public_shortforms', JSON.stringify(updatedPublicShortForms));
         
+        // 커스텀 이벤트 발생시켜 갤러리에 알림
+        window.dispatchEvent(new CustomEvent('publicShortFormsUpdated'));
+        
         return updatedShortForms;
       });
       
       toast({
-        title: "공개되었습니다",
+        title: "게시되었습니다",
         description: "숏폼 갤러리에 게시되었습니다.",
       });
     }
@@ -366,6 +406,9 @@ const ProjectDashboardPage = () => {
       const filteredShortForms = existingPublicShortForms.filter((sf: any) => sf.projectId !== project?.id);
       const updatedPublicShortForms = [...filteredShortForms, ...publicShortFormsData];
       localStorage.setItem('public_shortforms', JSON.stringify(updatedPublicShortForms));
+      
+      // 커스텀 이벤트 발생시켜 갤러리에 알림
+      window.dispatchEvent(new CustomEvent('publicShortFormsUpdated'));
       
       return updatedShortForms;
     });
@@ -421,6 +464,128 @@ const ProjectDashboardPage = () => {
   const handleDeleteItemClick = (type: "logo" | "short", id: string) => {
     setItemToDelete({ type, id });
     setIsDeleteItemDialogOpen(true);
+  };
+
+  // SNS 연동 여부 확인
+  const checkSocialMediaConnection = () => {
+    const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+    if (profile && (profile.instagram || profile.youtube)) {
+      return {
+        instagram: profile.instagram?.connected || false,
+        youtube: profile.youtube?.connected || false,
+      };
+    }
+    return { instagram: false, youtube: false };
+  };
+
+  // 숏폼 업로드 상태 확인 (localStorage에서)
+  const getShortFormUploadStatus = (shortFormId: string) => {
+    const uploadStatuses = JSON.parse(localStorage.getItem('shortFormUploadStatuses') || '{}');
+    return uploadStatuses[shortFormId] || { instagram: false, youtube: false };
+  };
+
+  // 숏폼 ID를 savedItems의 ID로 변환
+  const getShortFormSavedItemId = (shortFormId: string) => {
+    if (!project) return shortFormId;
+    const savedItem = project.savedItems?.find(item => item.id === shortFormId && item.type === "short");
+    return savedItem ? savedItem.id : shortFormId;
+  };
+
+  // 숏폼 업로드 상태 저장
+  const saveShortFormUploadStatus = (shortFormId: string, platform: "instagram" | "youtube", uploaded: boolean) => {
+    const uploadStatuses = JSON.parse(localStorage.getItem('shortFormUploadStatuses') || '{}');
+    if (!uploadStatuses[shortFormId]) {
+      uploadStatuses[shortFormId] = { instagram: false, youtube: false };
+    }
+    uploadStatuses[shortFormId][platform] = uploaded;
+    localStorage.setItem('shortFormUploadStatuses', JSON.stringify(uploadStatuses));
+  };
+
+  // 숏폼 업로드 버튼 클릭 핸들러
+  const handleShortFormUploadClick = (shortForm: ShortFormItem, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const connections = checkSocialMediaConnection();
+    const hasConnection = connections.instagram || connections.youtube;
+
+    if (hasConnection) {
+      setSelectedShortFormForUpload(shortForm);
+      setIsUploadDialogOpen(true);
+      // 이미 업로드된 플랫폼 확인 (savedItems의 ID 사용)
+      const savedItemId = getShortFormSavedItemId(shortForm.id);
+      const uploadStatus = getShortFormUploadStatus(savedItemId);
+      const initialPlatforms = new Set<string>();
+      // 이미 업로드된 플랫폼은 선택 불가 (취소 불가)
+      // 아직 업로드되지 않은 플랫폼만 선택 가능
+      setSelectedPlatforms(initialPlatforms);
+    } else {
+      toast({
+        title: "소셜 미디어 연동 필요",
+        description: "숏폼을 업로드하려면 먼저 소셜 미디어 계정을 연동해주세요.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // 플랫폼 선택 토글
+  const handlePlatformToggle = (platform: string) => {
+    const connections = checkSocialMediaConnection();
+    const isConnected = platform === "instagram" ? connections.instagram : connections.youtube;
+    
+    if (!isConnected) {
+      toast({
+        title: "소셜 미디어 연동 필요",
+        description: `${platform === "instagram" ? "Instagram" : "YouTube"} 계정을 먼저 연동해주세요.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // 이미 업로드된 플랫폼은 취소 불가
+    if (selectedShortFormForUpload) {
+      const savedItemId = getShortFormSavedItemId(selectedShortFormForUpload.id);
+      const uploadStatus = getShortFormUploadStatus(savedItemId);
+      if (uploadStatus[platform as "instagram" | "youtube"]) {
+        toast({
+          title: "이미 업로드됨",
+          description: `이 숏폼은 이미 ${platform === "instagram" ? "Instagram" : "YouTube"}에 업로드되었습니다.`,
+        });
+        return;
+      }
+    }
+    
+    setSelectedPlatforms(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(platform)) {
+        newSet.delete(platform);
+      } else {
+        newSet.add(platform);
+      }
+      return newSet;
+    });
+  };
+
+  // 업로드 실행
+  const handleConfirmUpload = () => {
+    if (selectedShortFormForUpload && selectedPlatforms.size > 0) {
+      const platforms = Array.from(selectedPlatforms);
+      const platformNames = platforms.map(p => p === "instagram" ? "Instagram" : "YouTube").join(", ");
+      
+      // 업로드 상태 저장 (savedItems의 ID 사용)
+      const savedItemId = getShortFormSavedItemId(selectedShortFormForUpload.id);
+      platforms.forEach(platform => {
+        saveShortFormUploadStatus(savedItemId, platform as "instagram" | "youtube", true);
+      });
+      
+      // 실제 업로드 로직 (여기서는 더미)
+      toast({
+        title: "업로드 완료",
+        description: `숏폼이 ${platformNames}에 성공적으로 업로드되었습니다.`,
+      });
+      
+      setIsUploadDialogOpen(false);
+      setSelectedShortFormForUpload(null);
+      setSelectedPlatforms(new Set());
+    }
   };
 
   if (!project) {
@@ -545,7 +710,7 @@ const ProjectDashboardPage = () => {
                           </p>
                           <div className="flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
                             <span className="text-xs text-muted-foreground">
-                              {logo.isPublic ? "공개" : "비공개"}
+                              {logo.isPublic ? "게시" : "비게시"}
                             </span>
                             <Switch
                               checked={logo.isPublic || false}
@@ -574,14 +739,28 @@ const ProjectDashboardPage = () => {
                     <Card key={shortForm.id} className="overflow-hidden hover:shadow-lg transition-shadow relative group cursor-pointer" onClick={() => setSelectedImage({ url: shortForm.url, title: shortForm.title || "숏폼", type: "short" })}>
                       <CardContent className="p-0">
                         <div className="aspect-[9/16] bg-muted rounded-t-lg overflow-hidden relative">
-                          <img
+                          <video
                             src={shortForm.url}
-                            alt={shortForm.title || "숏폼"}
                             className="w-full h-full object-cover"
+                            muted
+                            loop
+                            playsInline
+                            autoPlay
                           />
-                          <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                          <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded z-10">
                             숏폼
                           </div>
+                          {/* 업로드 버튼 - 왼쪽 하단 */}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => handleShortFormUploadClick(shortForm, e)}
+                            className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/90 hover:bg-background"
+                          >
+                            <Upload className="h-4 w-4 mr-1" />
+                            <span className="text-xs">업로드</span>
+                          </Button>
+                          {/* 삭제 버튼 - 오른쪽 상단 */}
                           <Button
                             variant="ghost"
                             size="sm"
@@ -602,7 +781,7 @@ const ProjectDashboardPage = () => {
                           </div>
                           <div className="flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
                             <span className="text-xs text-muted-foreground">
-                              {shortForm.isPublic ? "공개" : "비공개"}
+                              {shortForm.isPublic ? "게시" : "비게시"}
                             </span>
                             <Switch
                               checked={shortForm.isPublic || false}
@@ -644,11 +823,9 @@ const ProjectDashboardPage = () => {
       <AlertDialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>다른 사용자와 공유하시겠습니까?</AlertDialogTitle>
+            <AlertDialogTitle>게시하시겠습니까?</AlertDialogTitle>
             <AlertDialogDescription>
-              {pendingToggleItem?.type === "logo" 
-                ? "로고가 로고 갤러리에 게시됩니다." 
-                : "숏폼이 숏폼 갤러리에 게시됩니다."}
+              작품을 게시하면 갤러리에 공개되어, 다른 사용자들과 공유되고 함께 감상할 수 있습니다.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -659,7 +836,7 @@ const ProjectDashboardPage = () => {
               취소
             </AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirmShare} className="bg-primary hover:bg-primary/90">
-              공유하기
+              게시하기
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -686,10 +863,122 @@ const ProjectDashboardPage = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* 이미지 확대 보기 다이얼로그 */}
+      {/* 숏폼 업로드 다이얼로그 */}
+      <Dialog open={isUploadDialogOpen} onOpenChange={(open) => {
+        setIsUploadDialogOpen(open);
+        if (!open) {
+          setSelectedShortFormForUpload(null);
+          setSelectedPlatforms(new Set());
+        }
+      }}>
+        <DialogContent className="max-w-[500px]">
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold mb-2">숏폼 업로드</h3>
+              {selectedShortFormForUpload && (
+                <div className="aspect-[9/16] w-32 mx-auto mb-4 rounded-lg overflow-hidden bg-muted">
+                  <video
+                    src={selectedShortFormForUpload.url}
+                    className="w-full h-full object-cover"
+                    muted
+                    loop
+                    playsInline
+                    autoPlay
+                  />
+                </div>
+              )}
+            </div>
+            
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">업로드할 플랫폼을 선택하세요</p>
+              {selectedShortFormForUpload && (() => {
+                const connections = checkSocialMediaConnection();
+                const savedItemId = getShortFormSavedItemId(selectedShortFormForUpload.id);
+                const uploadStatus = getShortFormUploadStatus(savedItemId);
+                
+                return (
+                  <div className="flex flex-col gap-3">
+                    {/* Instagram */}
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="upload-instagram"
+                        checked={selectedPlatforms.has("instagram")}
+                        onCheckedChange={() => handlePlatformToggle("instagram")}
+                        disabled={!connections.instagram || uploadStatus.instagram}
+                      />
+                      <label
+                        htmlFor="upload-instagram"
+                        className={`text-sm font-medium leading-none cursor-pointer flex items-center gap-2 ${
+                          !connections.instagram || uploadStatus.instagram ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
+                      >
+                        <Instagram className="h-4 w-4" />
+                        Instagram
+                        {uploadStatus.instagram && (
+                          <span className="text-xs text-muted-foreground ml-1">(이미 업로드됨)</span>
+                        )}
+                      </label>
+                    </div>
+                    
+                    {/* YouTube */}
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="upload-youtube"
+                        checked={selectedPlatforms.has("youtube")}
+                        onCheckedChange={() => handlePlatformToggle("youtube")}
+                        disabled={!connections.youtube || uploadStatus.youtube}
+                      />
+                      <label
+                        htmlFor="upload-youtube"
+                        className={`text-sm font-medium leading-none cursor-pointer flex items-center gap-2 ${
+                          !connections.youtube || uploadStatus.youtube ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
+                      >
+                        <Youtube className="h-4 w-4" />
+                        YouTube
+                        {uploadStatus.youtube && (
+                          <span className="text-xs text-muted-foreground ml-1">(이미 업로드됨)</span>
+                        )}
+                      </label>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+            
+            {selectedPlatforms.size > 0 && (
+              <div className="flex justify-end gap-2 pt-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsUploadDialogOpen(false);
+                    setSelectedShortFormForUpload(null);
+                    setSelectedPlatforms(new Set());
+                  }}
+                >
+                  취소
+                </Button>
+                <Button
+                  onClick={handleConfirmUpload}
+                >
+                  업로드 하기
+                </Button>
+              </div>
+            )}
+            
+            {selectedPlatforms.size === 0 && (
+              <p className="text-xs text-muted-foreground text-center">
+                업로드할 플랫폼을 선택해주세요
+              </p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* 이미지/비디오 확대 보기 다이얼로그 */}
       <Dialog open={!!selectedImage} onOpenChange={(open) => !open && setSelectedImage(null)}>
-        <DialogContent className="max-w-none w-auto p-0 bg-transparent border-none">
-          <div className="relative inline-block">
+        <DialogContent className="max-w-none w-auto p-0 bg-transparent border-none shadow-none">
+          <div className="relative flex items-center justify-center min-w-[300px] min-h-[533px]">
             <Button
               variant="ghost"
               size="icon"
@@ -699,13 +988,28 @@ const ProjectDashboardPage = () => {
               <X className="h-4 w-4" />
             </Button>
             {selectedImage && (
-              <img
-                src={selectedImage.url}
-                alt={selectedImage.title}
-                className={`max-w-[90vw] max-h-[90vh] object-contain ${
-                  selectedImage.type === "logo" ? "rounded-lg" : "aspect-[9/16] rounded-lg"
-                }`}
-              />
+              selectedImage.type === "short" ? (
+                <video
+                  src={selectedImage.url}
+                  className="rounded-lg"
+                  style={{ 
+                    width: 'min(90vw, 400px)',
+                    height: 'auto',
+                    aspectRatio: '9/16'
+                  }}
+                  controls
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                />
+              ) : (
+                <img
+                  src={selectedImage.url}
+                  alt={selectedImage.title}
+                  className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg"
+                />
+              )
             )}
           </div>
         </DialogContent>
