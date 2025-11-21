@@ -6,9 +6,11 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Dict, Any
+from typing import TYPE_CHECKING, List, Dict, Any, Literal
 
 from langchain_core.messages import SystemMessage, AnyMessage
+from langgraph.types import Command
+from langgraph.graph import END
 
 if TYPE_CHECKING:
     from app.agents.state import AppState, BrandProfile
@@ -140,7 +142,7 @@ def make_brand_chat_node(llm: "BaseChatModel"):
     llm 인스턴스를 주입받아 brand_chat 노드를 만들어 주는 팩토리.
     """
 
-    def brand_chat(state: "AppState") -> "AppState":
+    def brand_chat(state: "AppState") -> Command[Literal[END]]:
         """
         브랜드 관련 대화를 진행하는 메인 챗 노드.
 
@@ -160,8 +162,8 @@ def make_brand_chat_node(llm: "BaseChatModel"):
             if isinstance(il, str):
                 intent_label = il
 
-        # 🔹 smalltalk 의도일 때: 브랜드 프로필은 사용하지 않고,
-        #    SMALLTALK_SYSTEM_PROMPT 만 사용
+        # smalltalk 의도일 때: 브랜드 프로필은 사용하지 않고,
+        # SMALLTALK_SYSTEM_PROMPT 만 사용
         if intent_label == "smalltalk":
             system = SystemMessage(content=SMALLTALK_SYSTEM_PROMPT)
         else:
@@ -175,8 +177,9 @@ def make_brand_chat_node(llm: "BaseChatModel"):
 
         ai_msg = llm.invoke(chat_messages)
 
-        return {
-            "messages": [ai_msg],
-        }
+        return Command(
+            update={"messages": [ai_msg]},
+            goto=END,
+        )
 
     return brand_chat

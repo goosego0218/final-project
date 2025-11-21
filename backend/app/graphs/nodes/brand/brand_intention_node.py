@@ -84,7 +84,7 @@ def make_brand_intention_node(llm: "BaseChatModel"):
     이런 식으로 사용할 예정.
     """
 
-    def brand_intention(state: "AppState") -> Command:
+    def brand_intention(state: "AppState") -> Command[Literal["brand_chat", "trend_search", "trend_refine"]]:
         """
         마지막 사용자 발화를 보고 의도를 분류해
         state.meta["intent"] 에 저장하고,
@@ -168,7 +168,9 @@ def make_brand_intention_node(llm: "BaseChatModel"):
             "raw": raw,
         }
 
-        # 🔹 여기가 핵심: intent 에 따라 다음 노드 결정
+        # 여기가 핵심: intent 에 따라 다음 노드 결정
+        goto: Literal["brand_chat", "trend_search", "trend_refine"]
+
         if label in ("trend_new", "trend_retry"):
             goto = "trend_search"
         elif label == "trend_refine":

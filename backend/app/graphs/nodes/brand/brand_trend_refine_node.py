@@ -6,9 +6,10 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, Dict, Any, List
+from typing import TYPE_CHECKING, Dict, Any, List, Literal
 
 from langchain_core.messages import SystemMessage, HumanMessage
+from langgraph.types import Command
 
 from app.graphs.nodes.common.message_utils import get_last_user_message
 
@@ -63,7 +64,7 @@ def make_brand_trend_refine_node(llm: "BaseChatModel"):
       바로 뒤에서 trend_search 노드가 다시 호출될 수 있도록 준비한다.
     """
 
-    def trend_refine(state: "AppState") -> "AppState":
+    def trend_refine(state: "AppState") -> Command[Literal["trend_search"]]:
         """
         마지막 사용자 발화를 피드백으로 받아,
         - trend_context.last_query 를 수정하고
@@ -72,19 +73,21 @@ def make_brand_trend_refine_node(llm: "BaseChatModel"):
         """
         user_text = get_last_user_message(state)
         if not user_text:
-            return {}
+            return Command(update={}, goto="trend_search")
 
         trend_context: Dict[str, Any] = dict(state.get("trend_context") or {})
         last_query: str = trend_context.get("last_query") or ""
         last_summary: str = trend_context.get("last_result_summary") or ""
 
-        # 이전 정보가 전혀 없는 상태에서 refine 이 들어온 경우:
-        # → 이번 발화를 기반으로 새로운 질의를 시작하는 방향으로 처리
         if not last_query and not last_summary:
             trend_context["last_query"] = user_text
             trend_context.setdefault("constraints", [])
             trend_context["round"] = int(trend_context.get("round") or 0) + 1
-            return {"trend_context": trend_context}
+
+            return Command(
+                update={"trend_context": trend_context},
+                goto="trend_search",
+            )
 
         system_prompt = _TREND_REFINE_SYSTEM_PROMPT + f"""
 
@@ -137,8 +140,11 @@ def make_brand_trend_refine_node(llm: "BaseChatModel"):
         trend_context["round"] = int(trend_context.get("round") or 0) + 1
         trend_context["last_refine_reason"] = reason
 
-        return {
-            "trend_context": trend_context,
-        }
+        return Command(
+            update={
+                "trend_context": trend_context,
+            },
+            goto="trend_search",
+        )
 
     return trend_refine
