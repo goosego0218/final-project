@@ -7,9 +7,10 @@
 from __future__ import annotations
 
 import json
-from typing import Dict, Any, TYPE_CHECKING
+from typing import Dict, Any, TYPE_CHECKING, Literal
 
 from langchain_core.messages import SystemMessage, HumanMessage
+from langgraph.types import Command
 
 from app.graphs.nodes.common.message_utils import get_last_user_message
 
@@ -100,7 +101,7 @@ def make_brand_collect_node(llm: "BaseChatModel"):
 
     이런 식으로 사용.
     """
-    def brand_collect(state: "AppState") -> "AppState":
+    def brand_collect(state: "AppState") -> Command[Literal["brand_intention"]]:
         """
         마지막 사용자 발화에서 브랜드 정보를 추출해
         state.brand_profile 에 누적/병합하는 노드.
@@ -115,14 +116,13 @@ def make_brand_collect_node(llm: "BaseChatModel"):
                 intent_label = il
 
         if intent_label == "smalltalk":
-            # 일상 대화일 때는 brand_profile 을 건드리지 않음
-            return {}
+            # 일상 대화일 때는 brand_profile 을 건드리지 않고 그대로 brand_intention 으로 넘김
+            return Command(update={}, goto="brand_intention")
 
-        # 2) 그 외의 경우에만 기존 로직 수행
         user_text = get_last_user_message(state)
         if not user_text:
-            # 유저 발화가 없으면 할 일이 없음
-            return {}
+            # 유저 발화가 없으면 상태 변경 없이 brand_intention 으로 넘김
+            return Command(update={}, goto="brand_intention")
 
         current_profile: Dict[str, Any] = dict(state.get("brand_profile") or {})
         current_profile_json = json.dumps(current_profile, ensure_ascii=False)
@@ -148,18 +148,19 @@ def make_brand_collect_node(llm: "BaseChatModel"):
         try:
             parsed = json.loads(raw)
         except json.JSONDecodeError:
-            # JSON 파싱 실패 시, 프로필은 건드리지 않고 디버깅 정보만 남김
             new_meta = dict(state.get("meta") or {})
             new_meta.setdefault("brand_collect", {})
             new_meta["brand_collect"]["last_raw"] = raw
-            return {
-                "meta": new_meta,
-            }
+
+            return Command(
+                update={"meta": new_meta},
+                goto="brand_intention",
+            )
 
         updates = parsed.get("brand_profile_updates") or {}
         if not isinstance(updates, dict) or not updates:
             # 업데이트가 없으면 아무 변화 없음
-            return {}
+            return Command(update={}, goto="brand_intention")
 
         merged_profile = _merge_brand_profile(current_profile, updates)
 
@@ -167,10 +168,13 @@ def make_brand_collect_node(llm: "BaseChatModel"):
         new_meta.setdefault("brand_collect", {})
         new_meta["brand_collect"]["last_updates"] = updates
 
-        return {
-            "brand_profile": merged_profile,
-            "meta": new_meta,
-        }
+        return Command(
+            update={
+                "brand_profile": merged_profile,
+                "meta": new_meta,
+            },
+            goto="brand_intention",
+        )
 
     return brand_collect
 
