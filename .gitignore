@@ -1,5 +1,4 @@
 # Local settings and secrets
-backend/app/core/config.py
 .env
 
 # Python caches

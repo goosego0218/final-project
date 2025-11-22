@@ -1,9 +1,11 @@
 from pydantic import BaseModel
 
+
 class LogoRequest(BaseModel):
-    logo_type: str
     reference_image: str
     prompt: str
+    brand_profile: dict | None = None
+
 
 class LogoResponse(BaseModel):
     generated_image_url: str

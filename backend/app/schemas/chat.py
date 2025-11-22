@@ -8,31 +8,41 @@
 from typing import List, Optional, Literal
 from pydantic import BaseModel
 
-class BrandChatRequest(BaseModel): 
-    message: str                      
+
+class BrandChatRequest(BaseModel):
+    message: str
     grp_nm: Optional[str] = None
     grp_desc: Optional[str] = None
     brand_session_id: Optional[str] = None
 
+
 class BrandChatResponse(BaseModel):
-    reply: str                               
-    project_id: Optional[int] = None        
+    reply: str
+    project_id: Optional[int] = None
     brand_session_id: Optional[str] = None
 
+
 class LogoChatRequest(BaseModel):
-    project_id: int                    
+    project_id: int
     message: str
+    logo_type: Optional[str] = None  # 예: wordmark, symbol_plus_text, emblem
+    trend_choice: Optional[str] = None  # 예: 타입별 트렌드 선택값
     logo_session_id: Optional[str] = None
+
 
 class LogoChatResponse(BaseModel):
     reply: str
     project_id: int
     logo_session_id: str
+    brand_profile: Optional[dict] = None
+    reference_image: Optional[str] = None
+
 
 class ShortsChatRequest(BaseModel):
     project_id: int
     message: str
     shorts_session_id: Optional[str] = None
+
 
 class ShortsChatResponse(BaseModel):
     reply: str
