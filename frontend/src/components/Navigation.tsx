@@ -15,12 +15,21 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Zap, User, FolderOpen, CreditCard, Heart, Instagram, Youtube, BarChart3 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { useQuery } from "@tanstack/react-query";
+import { getMenus, Menu } from "@/lib/api";
 
 const Navigation = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // 메뉴 데이터 가져오기
+  const { data: menus = [], isLoading: isMenusLoading } = useQuery({
+    queryKey: ['menus'],
+    queryFn: getMenus,
+    staleTime: 5 * 60 * 1000, // 5분간 캐시 유지
+  });
 
   // localStorage에서 사용자 정보 가져오기
   const getUserProfile = () => {
@@ -148,6 +157,10 @@ const Navigation = () => {
     return nickname.charAt(0);
   };
 
+  // 메뉴를 상위 메뉴 기준으로 그룹화
+  const topLevelMenus = menus.filter(menu => menu.up_menu_id === null);
+  const subMenus = menus.filter(menu => menu.up_menu_id !== null);
+
   return (
     <>
       <AuthModals
@@ -175,45 +188,21 @@ const Navigation = () => {
             MAKERY
           </Link>
 
-          {/* Center Menu */}
+          {/* Center Menu - DB에서 가져온 메뉴로 렌더링 */}
           <div className="hidden md:flex items-center gap-8">
-            <Link 
-              to="/"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Home
-            </Link>
-            <Link 
-              to="/logos"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              로고 갤러리
-            </Link>
-            <Link 
-              to="/shorts"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              숏폼 갤러리
-            </Link>
-            <button
-              onClick={() => {
-                const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
-                if (isLoggedIn) {
-                  navigate("/projects");
-                } else {
-                  setIsLoginOpen(true);
-                }
-              }}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              내 프로젝트
-            </button>
-            <Link 
-              to="/plans"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              플랜 관리
-            </Link>
+            {isMenusLoading ? (
+              <div className="text-sm text-muted-foreground">로딩 중...</div>
+            ) : (
+              topLevelMenus.map((menu) => (
+                <Link 
+                  key={menu.menu_id}
+                  to={menu.menu_path}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {menu.menu_nm}
+                </Link>
+              ))
+            )}
           </div>
 
           {/* Right Actions */}

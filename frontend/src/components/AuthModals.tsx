@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { signUp, login, LoginRequest } from "@/lib/api";
 
 interface AuthModalsProps {
   isLoginOpen: boolean;
@@ -31,20 +32,41 @@ export const AuthModals = ({
   const [rememberMe, setRememberMe] = useState(false);
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [signUpStep, setSignUpStep] = useState(1);
-  const [signUpEmail, setSignUpEmail] = useState(""); // 아이디로 사용
+  const [signUpLoginId, setSignUpLoginId] = useState("");
   const [signUpNickname, setSignUpNickname] = useState("");
+  const [signUpPassword, setSignUpPassword] = useState("");
+  const [signUpConfirmPassword, setSignUpConfirmPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // 로그인 폼 상태
+  const [loginId, setLoginId] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
 
   // 회원가입 다이얼로그가 열릴 때 상태 초기화
   useEffect(() => {
     if (isSignUpOpen) {
       setSignUpStep(1);
-      setSignUpEmail("");
+      setSignUpLoginId("");
       setSignUpNickname("");
+      setSignUpPassword("");
+      setSignUpConfirmPassword("");
       setAgreeToTerms(false);
       setShowPassword(false);
       setShowConfirmPassword(false);
+      setIsLoading(false);
     }
   }, [isSignUpOpen]);
+
+  // 로그인 다이얼로그가 열릴 때 상태 초기화
+  useEffect(() => {
+    if (isLoginOpen) {
+      setLoginId("");
+      setLoginPassword("");
+      setRememberMe(false);
+      setShowPassword(false);
+      setIsLoading(false);
+    }
+  }, [isLoginOpen]);
 
   const handleGoogleLogin = () => {
     toast({
@@ -54,21 +76,86 @@ export const AuthModals = ({
     });
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    onLoginSuccess(rememberMe);
+    setIsLoading(true);
+
+    try {
+      const response = await login({
+        login_id: loginId,
+        password: loginPassword,
+      });
+
+      // 토큰 저장
+      if (rememberMe) {
+        localStorage.setItem('accessToken', response.access_token);
+        sessionStorage.removeItem('accessToken');
+      } else {
+        sessionStorage.setItem('accessToken', response.access_token);
+        localStorage.removeItem('accessToken');
+      }
+
+      // 사용자 프로필 정보는 로그인 API에서 반환되지 않으므로, 
+      // 별도로 조회하거나 여기서는 기본값으로 설정
+      localStorage.setItem('userProfile', JSON.stringify({
+        id: loginId,
+        nickname: loginId, // 닉네임은 별도 API로 조회 필요
+      }));
+      localStorage.setItem('isLoggedIn', 'true');
+      sessionStorage.setItem('isLoggedIn', 'true');
+
+      toast({
+        title: "로그인 되었습니다",
+        description: "환영합니다!",
+        status: "success",
+      });
+
+      onLoginSuccess(rememberMe);
+      onLoginClose();
+    } catch (error) {
+      toast({
+        title: "로그인 실패",
+        description: error instanceof Error ? error.message : "아이디 또는 비밀번호가 잘못되었습니다.",
+        status: "error",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleContinueToStep2 = (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     const idInput = form.querySelector('input[type="text"]') as HTMLInputElement;
-    setSignUpEmail(idInput.value);
-    setSignUpStep(2);
+    if (idInput.value.trim()) {
+      setSignUpLoginId(idInput.value.trim());
+      setSignUpStep(2);
+    }
   };
 
-  const handleSignUp = (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // 비밀번호 확인 검증
+    if (signUpPassword !== signUpConfirmPassword) {
+      toast({
+        title: "비밀번호 불일치",
+        description: "비밀번호와 비밀번호 확인이 일치하지 않습니다.",
+        status: "error",
+      });
+      return;
+    }
+
+    // 비밀번호 길이 검증 (최소 8자)
+    if (signUpPassword.length < 8) {
+      toast({
+        title: "비밀번호 길이",
+        description: "비밀번호는 최소 8자 이상이어야 합니다.",
+        status: "error",
+      });
+      return;
+    }
+
     if (!agreeToTerms) {
       toast({
         title: "약관 동의 필요",
@@ -77,42 +164,105 @@ export const AuthModals = ({
       });
       return;
     }
-    
-    // localStorage에 사용자 정보 저장
-    localStorage.setItem('userProfile', JSON.stringify({
-      nickname: signUpNickname || "사용자",
-      id: signUpEmail // 아이디로 저장
-    }));
-    
-    setSignUpStep(1);
-    setSignUpEmail("");
-    setSignUpNickname("");
-    setAgreeToTerms(false);
-    
-    // 회원가입 완료 토스트 표시
-    toast({
-      title: "회원가입이 완료되었습니다",
-      description: "MAKERY에 오신 것을 환영합니다!",
-      status: "success",
-    });
-    
-    // 회원가입 시에는 자동로그인으로 처리
-    onLoginSuccess(true, true); // 두 번째 파라미터는 isSignUp 플래그
+
+    setIsLoading(true);
+
+    try {
+      // 회원가입 API 호출
+      const user = await signUp({
+        login_id: signUpLoginId,
+        password: signUpPassword,
+        nickname: signUpNickname,
+      });
+
+      // 회원가입 성공 후 자동 로그인
+      try {
+        const loginResponse = await login({
+          login_id: signUpLoginId,
+          password: signUpPassword,
+        });
+
+        // 토큰 저장 (회원가입 시에는 자동 로그인으로 처리)
+        localStorage.setItem('accessToken', loginResponse.access_token);
+        sessionStorage.setItem('accessToken', loginResponse.access_token);
+        localStorage.setItem('isLoggedIn', 'true');
+        sessionStorage.setItem('isLoggedIn', 'true');
+
+        // 사용자 프로필 저장
+        localStorage.setItem('userProfile', JSON.stringify({
+          id: user.login_id,
+          nickname: user.nickname,
+        }));
+
+        toast({
+          title: "회원가입이 완료되었습니다",
+          description: "MAKERY에 오신 것을 환영합니다!",
+          status: "success",
+        });
+
+        // 상태 초기화
+        setSignUpStep(1);
+        setSignUpLoginId("");
+        setSignUpNickname("");
+        setSignUpPassword("");
+        setSignUpConfirmPassword("");
+        setAgreeToTerms(false);
+
+        onLoginSuccess(true, true);
+        onSignUpClose();
+      } catch (loginError) {
+        // 회원가입은 성공했지만 로그인 실패
+        toast({
+          title: "회원가입 완료",
+          description: "회원가입이 완료되었습니다. 로그인해주세요.",
+          status: "success",
+        });
+        onSignUpClose();
+        onSwitchToLogin();
+      }
+    } catch (error) {
+      // 회원가입 실패 (아이디 중복 등)
+      const errorMessage = error instanceof Error ? error.message : "회원가입에 실패했습니다.";
+      
+      if (errorMessage.includes("이미 사용 중인 아이디")) {
+        toast({
+          title: "아이디 중복",
+          description: errorMessage,
+          status: "error",
+        });
+        // Step 1로 돌아가서 아이디 재입력
+        setSignUpStep(1);
+      } else {
+        toast({
+          title: "회원가입 실패",
+          description: errorMessage,
+          status: "error",
+        });
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSignUpClose = () => {
     setSignUpStep(1);
-    setSignUpEmail("");
+    setSignUpLoginId("");
     setSignUpNickname("");
+    setSignUpPassword("");
+    setSignUpConfirmPassword("");
     setAgreeToTerms(false);
+    setIsLoading(false);
     onSignUpClose();
   };
 
   const handleSwitchToLoginFromSignUp = () => {
     setSignUpStep(1);
-    setSignUpEmail("");
+    setSignUpLoginId("");
     setSignUpNickname("");
+    setSignUpPassword("");
+    setSignUpConfirmPassword("");
     setAgreeToTerms(false);
+    setIsLoading(false);
     onSwitchToLogin();
   };
 
@@ -140,6 +290,7 @@ export const AuthModals = ({
               variant="outline"
               className="w-full h-11"
               onClick={handleGoogleLogin}
+              disabled={isLoading}
             >
               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                 <path
@@ -183,6 +334,9 @@ export const AuthModals = ({
                   type="text"
                   placeholder="아이디를 입력하세요"
                   required
+                  value={loginId}
+                  onChange={(e) => setLoginId(e.target.value)}
+                  disabled={isLoading}
                 />
               </div>
 
@@ -195,11 +349,15 @@ export const AuthModals = ({
                     placeholder="••••••••"
                     required
                     className="pr-10"
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    disabled={isLoading}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    disabled={isLoading}
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
@@ -213,6 +371,7 @@ export const AuthModals = ({
                     id="remember"
                     checked={rememberMe}
                     onCheckedChange={(checked) => setRememberMe(checked === true)}
+                    disabled={isLoading}
                   />
                   <label
                     htmlFor="remember"
@@ -224,14 +383,22 @@ export const AuthModals = ({
                 <button
                   type="button"
                   className="text-sm text-primary hover:underline"
+                  disabled={isLoading}
                 >
                   비밀번호를 잊으셨나요?
                 </button>
               </div>
 
               {/* Submit Button */}
-              <Button type="submit" className="w-full h-11">
-                로그인
+              <Button type="submit" className="w-full h-11" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    로그인 중...
+                  </>
+                ) : (
+                  "로그인"
+                )}
               </Button>
             </form>
 
@@ -241,6 +408,7 @@ export const AuthModals = ({
               <button
                 onClick={onSwitchToSignUp}
                 className="text-primary hover:underline font-medium"
+                disabled={isLoading}
               >
                 회원가입
               </button>
@@ -268,12 +436,13 @@ export const AuthModals = ({
 
             {signUpStep === 1 ? (
               <>
-                {/* Step 1: Email Input */}
+                {/* Step 1: ID Input */}
                 {/* Google Sign Up Button */}
                 <Button
                   variant="outline"
                   className="w-full h-11"
                   onClick={handleGoogleLogin}
+                  disabled={isLoading}
                 >
                   <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                     <path
@@ -317,11 +486,14 @@ export const AuthModals = ({
                       type="text"
                       placeholder="아이디를 입력하세요"
                       required
+                      value={signUpLoginId}
+                      onChange={(e) => setSignUpLoginId(e.target.value)}
+                      disabled={isLoading}
                     />
                   </div>
 
                   {/* Continue Button */}
-                  <Button type="submit" className="w-full h-11">
+                  <Button type="submit" className="w-full h-11" disabled={isLoading}>
                     계속하기
                   </Button>
                 </form>
@@ -332,6 +504,7 @@ export const AuthModals = ({
                   <button
                     onClick={handleSwitchToLoginFromSignUp}
                     className="text-primary hover:underline font-medium"
+                    disabled={isLoading}
                   >
                     로그인
                   </button>
@@ -342,7 +515,7 @@ export const AuthModals = ({
                 {/* Step 2: Password Setup */}
                 {/* Display ID */}
                 <div className="rounded-md bg-muted/50 p-3 text-sm text-muted-foreground">
-                  아이디: <span className="font-medium text-foreground">{signUpEmail}</span>
+                  아이디: <span className="font-medium text-foreground">{signUpLoginId}</span>
                 </div>
 
                 {/* Password Form */}
@@ -356,6 +529,7 @@ export const AuthModals = ({
                       required
                       value={signUpNickname}
                       onChange={(e) => setSignUpNickname(e.target.value)}
+                      disabled={isLoading}
                     />
                   </div>
 
@@ -368,15 +542,20 @@ export const AuthModals = ({
                         placeholder="••••••••"
                         required
                         className="pr-10"
+                        value={signUpPassword}
+                        onChange={(e) => setSignUpPassword(e.target.value)}
+                        disabled={isLoading}
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        disabled={isLoading}
                       >
                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
                     </div>
+                    <p className="text-xs text-muted-foreground">최소 8자 이상 입력해주세요</p>
                   </div>
 
                   <div className="space-y-2">
@@ -388,11 +567,15 @@ export const AuthModals = ({
                         placeholder="••••••••"
                         required
                         className="pr-10"
+                        value={signUpConfirmPassword}
+                        onChange={(e) => setSignUpConfirmPassword(e.target.value)}
+                        disabled={isLoading}
                       />
                       <button
                         type="button"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        disabled={isLoading}
                       >
                         {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
@@ -406,6 +589,7 @@ export const AuthModals = ({
                       checked={agreeToTerms}
                       onCheckedChange={(checked) => setAgreeToTerms(checked === true)}
                       className="mt-0.5"
+                      disabled={isLoading}
                     />
                     <label
                       htmlFor="terms"
@@ -423,8 +607,15 @@ export const AuthModals = ({
                   </div>
 
                   {/* Submit Button */}
-                  <Button type="submit" className="w-full h-11">
-                    회원가입
+                  <Button type="submit" className="w-full h-11" disabled={isLoading}>
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        회원가입 중...
+                      </>
+                    ) : (
+                      "회원가입"
+                    )}
                   </Button>
                 </form>
 
@@ -434,6 +625,7 @@ export const AuthModals = ({
                   <button
                     onClick={handleSwitchToLoginFromSignUp}
                     className="text-primary hover:underline font-medium"
+                    disabled={isLoading}
                   >
                     로그인
                   </button>
