@@ -15,7 +15,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Zap, User, FolderOpen, CreditCard, Heart, Instagram, Youtube, BarChart3 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getMenus, Menu } from "@/lib/api";
 
 const Navigation = () => {
@@ -23,12 +23,18 @@ const Navigation = () => {
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  // 메뉴 데이터 가져오기
+  // 초기 로그인 상태를 즉시 확인하여 깜빡임 방지
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    return localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+  });
+
+  // 메뉴 데이터 가져오기 - 로그인 상태를 queryKey에 포함하여 로그인 상태 변경 시 자동으로 다시 가져오기
   const { data: menus = [], isLoading: isMenusLoading } = useQuery({
-    queryKey: ['menus'],
+    queryKey: ['menus', isLoggedIn],
     queryFn: getMenus,
-    staleTime: 5 * 60 * 1000, // 5분간 캐시 유지
+    staleTime: 0, // 로그인 상태 변경 시 즉시 다시 가져오기 위해 staleTime을 0으로 설정
   });
 
   // localStorage에서 사용자 정보 가져오기
@@ -53,11 +59,6 @@ const Navigation = () => {
     return { nickname: "사용자", id: "user123", avatar: null };
   };
 
-  // 초기 로그인 상태를 즉시 확인하여 깜빡임 방지
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    return localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
-  });
-  
   const [userProfile, setUserProfile] = useState(getUserProfile());
   
   // interval 내부에서 최신 상태를 참조하기 위한 ref
@@ -129,6 +130,9 @@ const Navigation = () => {
     setIsLoginOpen(false);
     setIsSignUpOpen(false);
     
+    // 메뉴 쿼리 무효화 및 다시 가져오기
+    queryClient.invalidateQueries({ queryKey: ['menus'] });
+    
     // 회원가입이 아닌 경우에만 로그인 토스트 표시
     if (!isSignUp) {
       toast({
@@ -147,6 +151,9 @@ const Navigation = () => {
     localStorage.removeItem('accessToken');
     sessionStorage.removeItem('accessToken');
     
+    // 메뉴 쿼리 무효화 및 다시 가져오기
+    queryClient.invalidateQueries({ queryKey: ['menus'] });
+    
     // 프로필 업데이트 이벤트 발생
     window.dispatchEvent(new Event('profileUpdated'));
     
@@ -163,9 +170,31 @@ const Navigation = () => {
     return nickname.charAt(0);
   };
 
-  // 메뉴를 상위 메뉴 기준으로 그룹화
-  const topLevelMenus = menus.filter(menu => menu.up_menu_id === null);
+  // 메뉴를 상위 메뉴 기준으로 그룹화하고 menu_order로 정렬
+  const topLevelMenus = menus
+    .filter(menu => menu.up_menu_id === null)
+    .sort((a, b) => {
+      // menu_order가 null인 경우 뒤로
+      if (a.menu_order === null && b.menu_order === null) return 0;
+      if (a.menu_order === null) return 1;
+      if (b.menu_order === null) return -1;
+      return a.menu_order - b.menu_order;
+    });
   const subMenus = menus.filter(menu => menu.up_menu_id !== null);
+
+  // DB 메뉴에서 특정 메뉴 찾기 헬퍼 함수
+  const findMenuByPath = (path: string) => {
+    return menus.find(menu => menu.menu_path === path);
+  };
+  
+  // DB 메뉴에서 특정 메뉴명으로 찾기 헬퍼 함수
+  const findMenuByName = (name: string) => {
+    return menus.find(menu => menu.menu_nm.includes(name));
+  };
+  
+  // DB에서 가져온 메뉴 경로 사용
+  const projectsMenu = findMenuByName("프로젝트") || findMenuByPath("/projects");
+  const shortsReportMenu = findMenuByName("숏폼 리포트") || findMenuByPath("/shortsReport");
 
   return (
     <>
@@ -300,18 +329,22 @@ const Navigation = () => {
                       <Heart className="h-4 w-4 mr-2" />
                       마이페이지
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/projects")}>
-                      <FolderOpen className="h-4 w-4 mr-2" />
-                      내 프로젝트
-                    </DropdownMenuItem>
+                    {projectsMenu && (
+                      <DropdownMenuItem onClick={() => navigate(projectsMenu.menu_path)}>
+                        <FolderOpen className="h-4 w-4 mr-2" />
+                        {projectsMenu.menu_nm}
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem onClick={() => navigate("/plans")}>
                       <CreditCard className="h-4 w-4 mr-2" />
                       플랜 관리
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/shorts/report")}>
-                      <BarChart3 className="h-4 w-4 mr-2" />
-                      숏폼 리포트
-                    </DropdownMenuItem>
+                    {shortsReportMenu && (
+                      <DropdownMenuItem onClick={() => navigate(shortsReportMenu.menu_path)}>
+                        <BarChart3 className="h-4 w-4 mr-2" />
+                        {shortsReportMenu.menu_nm}
+                      </DropdownMenuItem>
+                    )}
                     
                     <DropdownMenuSeparator />
                     

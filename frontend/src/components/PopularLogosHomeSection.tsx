@@ -327,7 +327,7 @@ const PopularLogosHomeSection = () => {
   };
 
   const handleShare = () => {
-    const url = selectedLogo ? `${window.location.origin}/logos?logo=${selectedLogo.id}` : window.location.href;
+    const url = selectedLogo ? `${window.location.origin}/logo-gallery?logo=${selectedLogo.id}` : window.location.href;
     navigator.clipboard.writeText(url);
     toast({ 
       description: "링크가 복사되었습니다",

@@ -12,6 +12,7 @@ class MenuBase(BaseModel):
     menu_nm: str
     up_menu_id: Optional[int] = None
     menu_path: str
+    menu_order: Optional[int] = None
     del_yn: str = "N"
 
     class Config:

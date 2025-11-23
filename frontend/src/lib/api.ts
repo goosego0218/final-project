@@ -7,6 +7,7 @@ export interface Menu {
   menu_nm: string;
   up_menu_id: number | null;
   menu_path: string;
+  menu_order: number | null;
   del_yn: string;
 }
 
@@ -87,6 +88,41 @@ export async function signUp(data: SignUpRequest): Promise<UserBase> {
 // 로그인
 export async function login(data: LoginRequest): Promise<TokenResponse> {
   return apiRequest<TokenResponse>('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+// 프로젝트 관련 타입 정의
+export interface ProjectListItem {
+  grp_id: number;
+  grp_nm: string;
+  grp_desc: string | null;
+  creator_id: number;
+  logo_count: number;
+  shortform_count: number;
+}
+
+export interface CreateProjectRequest {
+  grp_nm: string;
+  grp_desc?: string | null;
+}
+
+export interface ProjectGrp {
+  grp_id: number;
+  grp_nm: string;
+  grp_desc: string | null;
+  creator_id: number;
+}
+
+// 프로젝트 목록 조회
+export async function getProjects(): Promise<ProjectListItem[]> {
+  return apiRequest<ProjectListItem[]>('/projects/groups', { method: 'GET' });
+}
+
+// 프로젝트 생성
+export async function createProject(data: CreateProjectRequest): Promise<ProjectGrp> {
+  return apiRequest<ProjectGrp>('/projects/groups', {
     method: 'POST',
     body: JSON.stringify(data),
   });

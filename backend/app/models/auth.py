@@ -155,6 +155,11 @@ class Menu(Base):
         nullable=False,
         comment="메뉴경로",
     )
+    menu_order: Mapped[int | None] = mapped_column(
+        Integer,
+        nullable=True,
+        comment="메뉴순서",
+    )
     del_yn: Mapped[str] = mapped_column(
         String(1),
         nullable=False,

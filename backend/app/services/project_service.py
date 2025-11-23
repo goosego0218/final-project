@@ -57,6 +57,26 @@ def load_brand_info_entity(
         .first()
     )
 
+def get_user_projects(
+    db: Session,
+    user_id: int,
+) -> list[ProdGroup]:
+    """
+    특정 사용자가 생성한 프로젝트 목록 조회.
+    - del_yn = 'N'인 것만 조회
+    - grp_id 내림차순 정렬 (최신순)
+    """
+    return (
+        db.query(ProdGroup)
+        .filter(
+            ProdGroup.creator_id == user_id,
+            ProdGroup.del_yn == "N",
+        )
+        .order_by(ProdGroup.grp_id.desc())
+        .all()
+    )
+
+
 def load_brand_profile_for_agent(
     db: Session,
     project_id: int,

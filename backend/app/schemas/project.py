@@ -4,6 +4,7 @@
 # - 2025-11-18: 초기 작성
 
 from pydantic import BaseModel
+from typing import Optional
 
 
 class ProjectGrp(BaseModel):
@@ -19,4 +20,17 @@ class ProjectGrp(BaseModel):
 
     class Config:
         from_attributes = True   # ORM → Pydantic 변환용
+
+
+class ProjectListItem(BaseModel):
+    """프로젝트 목록 조회 응답용"""
+    grp_id: int
+    grp_nm: str
+    grp_desc: Optional[str] = None
+    creator_id: int
+    logo_count: int = 0
+    shortform_count: int = 0
+
+    class Config:
+        from_attributes = True
 
