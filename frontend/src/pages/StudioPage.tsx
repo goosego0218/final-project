@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Send, Zap, ChevronLeft, ChevronRight, Download, RefreshCw, Star, Plus, Upload, X, FolderOpen, Instagram, Youtube, Trash2, Info, Check } from "lucide-react";
+import { Send, Zap, ChevronLeft, ChevronRight, Download, RefreshCw, Star, Plus, Upload, X, FolderOpen, Instagram, Youtube, Trash2, Info, Check, Image, Video } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { projectStorage, type Message, type Project, type SavedItem } from "@/lib/projectStorage";
@@ -271,6 +271,25 @@ const StudioPage = () => {
                   setRecommendationStep("second");
                   setSelectedSecondLogo(null);
                   
+                  // 스타일 선택 메시지 찾아서 firstRecommendations 복원
+                  const styleSelectionMessage = logoMessages.find(m =>
+                    m.role === "assistant" && m.content.includes("원하시는 스타일을 선택해주세요") && m.images && m.images.length > 0
+                  );
+                  
+                  if (styleSelectionMessage && styleSelectionMessage.images && styleSelectionMessage.images.length > 0) {
+                    setFirstRecommendations(styleSelectionMessage.images);
+                    // 첫 번째 이미지를 선택된 로고로 설정 (정확한 매칭은 어려우므로 첫 번째로 가정)
+                    setSelectedFirstLogo(styleSelectionMessage.images[0]);
+                    
+                    // 선택된 스타일 복원: 첫 번째 이미지 인덱스 0에 해당하는 스타일
+                    if (selectedLogoType) {
+                      const styleLabels = getStyleLabelsByType(selectedLogoType);
+                      if (styleLabels.length > 0) {
+                        setSelectedStyle(styleLabels[0]);
+                      }
+                    }
+                  }
+                  
                   if (secondRecommendationMessage.images.length > 0) {
                     setPreviewLogoImage(secondRecommendationMessage.images[0]);
                     setSelectedResult({
@@ -435,8 +454,32 @@ const StudioPage = () => {
             const lastImageMessage = shortMessages
               .filter(m => m.role === "assistant" && m.images && m.images.length > 0)
               .pop();
-            if (lastImageMessage && lastImageMessage.images) {
+            if (lastImageMessage && lastImageMessage.images && lastImageMessage.images.length > 0) {
+              // 최종 생성된 숏폼이 있는 경우
               setHasResultPanel(true);
+              setSelectedResult({
+                type: "short",
+                url: lastImageMessage.images[0],
+                index: 0
+              });
+              setLastGeneratedShortFormUrl(lastImageMessage.images[0]);
+              
+              // 만족도 질문 단계 확인
+              const hasSatisfactionQuestion = lastImageMessage.content.includes("마음에 드시나요?") || 
+                                              lastImageMessage.content.includes("어떠신가요?");
+              
+              // 만족도 질문 이후에 사용자 응답이 있는지 확인
+              const lastImageMessageIndex = shortMessages.indexOf(lastImageMessage);
+              const messagesAfterImage = shortMessages.slice(lastImageMessageIndex + 1);
+              const hasUserResponse = messagesAfterImage.some(m => m.role === "user");
+              
+              if (hasSatisfactionQuestion && !hasUserResponse) {
+                // 만족도 질문이 있지만 아직 응답이 없는 경우
+                setShortFormQuestionStep("satisfaction");
+              } else {
+                // 이미 응답했거나 만족도 질문이 없는 경우
+                setShortFormQuestionStep(null);
+              }
             }
           } else {
             // 아직 숏폼 안내가 한 번도 없던 프로젝트면, 새로 시작
@@ -470,7 +513,7 @@ const StudioPage = () => {
             }
             
             const summaryText = summaryParts.length > 0 
-              ? `이전에 나눈 대화 내용: ${summaryParts.join(", ")}`
+              ? `방금 입력한 브랜드 정보예요.\n${summaryParts.join("\n")}`
               : "";
             
             const trendAnalysis = "최근 숏폼 트렌드 분석 결과, 짧고 임팩트 있는 영상이 주목받고 있습니다.";
@@ -620,6 +663,7 @@ const StudioPage = () => {
     toast({
       title: "로그아웃되었습니다",
       description: "다음에 또 만나요!",
+      status: "success",
     });
     navigate("/");
   };
@@ -641,6 +685,15 @@ const StudioPage = () => {
     }
   }, [selectedSecondLogo]);
 
+  // 숏폼 스튜디오에서 로고 선택 시 선택 버튼이 보이도록 스크롤
+  useEffect(() => {
+    if (selectedLogoForShort && studioType === "short") {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
+  }, [selectedLogoForShort, studioType]);
+
   // 저장된 로고/숏폼이 있을 때 "내 프로젝트로 가기" 버튼이 표시되면 스크롤
   useEffect(() => {
     if ((savedLogos.length > 0 || savedShorts.length > 0) && currentProjectId) {
@@ -649,6 +702,15 @@ const StudioPage = () => {
       }, 200);
     }
   }, [savedLogos.length, savedShorts.length, currentProjectId]);
+
+  // "업로드하기" 버튼이 표시될 때 자동 스크롤
+  useEffect(() => {
+    if (uploadQuestionStep && selectedPlatforms.size > 0) {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 300);
+    }
+  }, [uploadQuestionStep, selectedPlatforms.size]);
 
   // 로고 타입별 이미지 파일 목록 (실제 파일 목록)
   const getLogoImagesByType = (type: "text" | "text-icon" | "emblem"): string[] => {
@@ -779,15 +841,42 @@ const StudioPage = () => {
 
   // 첫 번째 추천에서 스타일 버튼 클릭 (다음 단계로 진행)
   const handleStyleSelection = (styleLabel: string, imageIndex: number) => {
-    if (!currentProjectId || !selectedLogoType || !firstRecommendations[imageIndex]) return;
+    // firstRecommendations가 비어있으면 메시지에서 찾기
+    if (firstRecommendations.length === 0) {
+      const currentMessage = messages.find(m => 
+        m.role === "assistant" && m.content.includes("원하시는 스타일을 선택해주세요") && m.images && m.images.length > 0
+      );
+      if (currentMessage && currentMessage.images) {
+        setFirstRecommendations(currentMessage.images);
+      }
+    }
+    
+    if (!currentProjectId || !selectedLogoType) return;
+    
+    // firstRecommendations가 여전히 비어있거나 imageIndex가 범위를 벗어나면 return
+    const imageToUse = firstRecommendations[imageIndex] || (messages.find(m => 
+      m.role === "assistant" && m.content.includes("원하시는 스타일을 선택해주세요") && m.images && m.images.length > imageIndex
+    )?.images?.[imageIndex]);
+    
+    if (!imageToUse) return;
     
     setSelectedStyle(styleLabel);
-    setSelectedFirstLogo(firstRecommendations[imageIndex]);
+    setSelectedFirstLogo(imageToUse);
+    
+    // firstRecommendations 업데이트 (아직 업데이트되지 않았을 경우)
+    if (firstRecommendations.length === 0) {
+      const currentMessage = messages.find(m => 
+        m.role === "assistant" && m.content.includes("원하시는 스타일을 선택해주세요") && m.images && m.images.length > 0
+      );
+      if (currentMessage && currentMessage.images) {
+        setFirstRecommendations(currentMessage.images);
+      }
+    }
     
     // 자동으로 두 번째 추천 단계로 이동
     const allImages = getLogoImagesByType(selectedLogoType);
     // 선택한 이미지와 다른 이미지들 중에서 선택
-    const otherImages = allImages.filter(img => img !== firstRecommendations[imageIndex]);
+    const otherImages = allImages.filter(img => img !== imageToUse);
     const recommendedLogos = getRandomLogos(otherImages, 4);
     setSecondRecommendations(recommendedLogos);
     setRecommendationStep("second");
@@ -1086,6 +1175,18 @@ const StudioPage = () => {
           return;
         }
         
+        // 숏폼 스튜디오에서 이미지만 첨부한 경우
+        if (currentImages.length > 0 && !currentInput.trim()) {
+          const aiMessage: Message = { 
+            role: "assistant", 
+            content: "무엇을 도와드릴까요?",
+            studioType: "short"
+          };
+          setMessages(prev => [...prev, aiMessage]);
+          projectStorage.addMessage(currentProjectId, aiMessage);
+          return;
+        }
+        
         // 일반 메시지 처리
         const aiMessage: Message = {
           role: "assistant",
@@ -1131,6 +1232,18 @@ const StudioPage = () => {
             index: 0
           });
         }
+        return;
+      }
+
+      // 이미지만 첨부한 경우 (로고 스튜디오 또는 일반 스튜디오)
+      if (currentImages.length > 0 && !currentInput.trim()) {
+        const aiMessage: Message = { 
+          role: "assistant", 
+          content: "무엇을 도와드릴까요?",
+          studioType: studioType || undefined
+        };
+        setMessages(prev => [...prev, aiMessage]);
+        projectStorage.addMessage(currentProjectId, aiMessage);
         return;
       }
 
@@ -1196,6 +1309,7 @@ const StudioPage = () => {
         toast({
           title: "지원하지 않는 파일 형식",
           description: "PNG 또는 JPG 파일만 첨부할 수 있습니다.",
+          status: "warning",
         });
       }
     });
@@ -1248,6 +1362,7 @@ const StudioPage = () => {
           toast({
             title: "이미 저장된 로고입니다",
             description: "이 로고는 이미 저장되어 있습니다.",
+            status: "info",
           });
           return;
         }
@@ -1259,6 +1374,7 @@ const StudioPage = () => {
           toast({
             title: "이미 저장된 로고입니다",
             description: "이 로고는 이미 저장되어 있습니다.",
+            status: "info",
           });
           return prev;
         }
@@ -1275,6 +1391,7 @@ const StudioPage = () => {
         toast({
           title: "로고가 저장되었습니다",
           description: "하단 보관함에서 확인할 수 있습니다.",
+          status: "success",
         });
         return updated;
       });
@@ -1288,6 +1405,7 @@ const StudioPage = () => {
           toast({
             title: "이미 저장된 숏폼입니다",
             description: "이 숏폼은 이미 저장되어 있습니다.",
+            status: "info",
           });
           return;
         }
@@ -1299,6 +1417,7 @@ const StudioPage = () => {
           toast({
             title: "이미 저장된 숏폼입니다",
             description: "이 숏폼은 이미 저장되어 있습니다.",
+            status: "info",
           });
           return prev;
         }
@@ -1315,6 +1434,7 @@ const StudioPage = () => {
         toast({
           title: "숏폼이 저장되었습니다",
           description: "하단 보관함에서 확인할 수 있습니다.",
+          status: "success",
         });
         return updated;
       });
@@ -1382,6 +1502,7 @@ const StudioPage = () => {
     toast({
       title: itemToDelete.type === "logo" ? "로고가 삭제되었습니다" : "숏폼이 삭제되었습니다",
       description: "저장된 항목에서 제거되었습니다.",
+      status: "success",
     });
 
     setIsDeleteDialogOpen(false);
@@ -1405,7 +1526,7 @@ const StudioPage = () => {
       toast({
         title: "저장된 항목이 아닙니다",
         description: "저장된 항목만 삭제할 수 있습니다.",
-        variant: "destructive",
+        status: "error",
       });
     }
   };
@@ -1440,7 +1561,7 @@ const StudioPage = () => {
       toast({
         title: "소셜 미디어 연동 필요",
         description: "숏폼을 업로드하려면 먼저 소셜 미디어 계정을 연동해주세요.",
-        variant: "destructive",
+        status: "warning",
       });
     }
   };
@@ -1468,7 +1589,7 @@ const StudioPage = () => {
       toast({
         title: "소셜 미디어 연동 필요",
         description: `${platform === "instagram" ? "Instagram" : "YouTube"} 계정을 먼저 연동해주세요.`,
-        variant: "destructive",
+        status: "warning",
       });
       return;
     }
@@ -1480,6 +1601,7 @@ const StudioPage = () => {
         toast({
           title: "이미 업로드됨",
           description: `이 숏폼은 이미 ${platform === "instagram" ? "Instagram" : "YouTube"}에 업로드되었습니다.`,
+          status: "info",
         });
         return;
       }
@@ -1505,9 +1627,15 @@ const StudioPage = () => {
       // 업로드 상태 저장 (localStorage)
       // savedItems에서 해당 URL의 숏폼 ID 찾기
       const project = projectStorage.getProject(currentProjectId);
-      if (project && project.savedItems) {
+      if (project) {
+        // savedItems가 없으면 초기화
+        if (!project.savedItems) {
+          project.savedItems = [];
+        }
+        
         const shortItem = project.savedItems.find(item => item.url === pendingUploadUrl && item.type === "short");
         if (shortItem) {
+          // 이미 저장된 숏폼인 경우, 업로드 상태만 업데이트
           const uploadStatuses = JSON.parse(localStorage.getItem('shortFormUploadStatuses') || '{}');
           if (!uploadStatuses[shortItem.id]) {
             uploadStatuses[shortItem.id] = { instagram: false, youtube: false };
@@ -1552,6 +1680,7 @@ const StudioPage = () => {
       toast({
         title: "업로드 완료",
         description: `숏폼이 ${platformNames}에 성공적으로 업로드되었습니다.`,
+        status: "success",
       });
       
       // 채팅창에 확인 메시지 추가
@@ -1623,61 +1752,74 @@ const StudioPage = () => {
         youtubeConnected={userProfile.youtube}
       />
 
-      {/* 스튜디오 타입 전환 탭 */}
-      {currentProjectId && (
-        <div className="border-b border-border bg-background">
-          <div className="max-w-7xl mx-auto px-8">
-            {/* from_style 모드일 때 상단 문구 표시 */}
-            {fromStyleMode && studioType === "logo" && (
-              <div className="py-4 text-center">
-                <p className="text-lg font-semibold text-foreground">
-                  이 로고 느낌을 기반으로 로고를 생성해 드릴게요!
-                </p>
-              </div>
-            )}
-            <Tabs value={studioType || "logo"} onValueChange={(value) => {
-              if (currentProjectId) {
-                const fromStyleParam = fromStyleMode && baseAssetType && baseAssetId
-                  ? `&from_style=true&baseAssetType=${baseAssetType}&baseAssetId=${baseAssetId}`
-                  : "";
-                navigate(`/studio?project=${currentProjectId}&type=${value}${fromStyleParam}`);
-              }
-            }}>
-              <div className="flex items-center gap-2">
-                <TabsList className="grid w-full max-w-md grid-cols-2">
-                  <TabsTrigger value="logo" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                    로고 스튜디오
-                  </TabsTrigger>
-                  <TabsTrigger value="short" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                    숏폼 스튜디오
-                  </TabsTrigger>
-                </TabsList>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button type="button" className="text-muted-foreground hover:text-foreground transition-colors">
-                        <Info className="h-4 w-4" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-xs">
-                      <p className="text-sm">
-                        본 서비스에서 제공되는 모든 AI 생성물의 내용 및 활용에 대한 책임은 전적으로 이용자에게 있으며, 회사는 이에 대해 어떠한 법적 책임도 지지 않습니다.
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-            </Tabs>
-          </div>
-        </div>
-      )}
-
       {/* Main Content - Flipped: Canvas Left, Chat Right */}
       <div className="flex-1 min-h-0">
         <ResizablePanelGroup direction="horizontal" className="h-full">
           {/* Left Main Canvas - Results Display */}
           <ResizablePanel defaultSize={70} minSize={60} maxSize={85}>
             <div className="h-full flex flex-col bg-background">
+              {/* 스튜디오 타입 전환 탭 */}
+              {currentProjectId && (
+                <div className="border-b border-border bg-background flex-shrink-0 relative">
+                  {/* from_style 모드일 때 상단 문구 표시 */}
+                  {fromStyleMode && studioType === "logo" && (
+                    <div className="absolute top-0 left-0 right-0 py-2 text-center z-10">
+                      <p className="text-sm font-semibold text-foreground">
+                        이 로고 느낌을 기반으로 로고를 생성해 드릴게요!
+                      </p>
+                    </div>
+                  )}
+                  <div className={`h-full flex items-center justify-center px-4 ${fromStyleMode && studioType === "logo" ? "pt-10" : "py-3"}`}>
+                    <Tabs value={studioType || "logo"} onValueChange={(value) => {
+                      if (currentProjectId) {
+                        const fromStyleParam = fromStyleMode && baseAssetType && baseAssetId
+                          ? `&from_style=true&baseAssetType=${baseAssetType}&baseAssetId=${baseAssetId}`
+                          : "";
+                        navigate(`/studio?project=${currentProjectId}&type=${value}${fromStyleParam}`);
+                      }
+                    }}>
+                      <div className="flex items-center gap-2">
+                        <TabsList className="grid grid-cols-2">
+                          <TabsTrigger 
+                            value="logo" 
+                            className="data-[state=active]:text-white data-[state=active]:bg-[#7C22C8] flex items-center gap-2"
+                          >
+                            <Image className="h-4 w-4" />
+                            로고 스튜디오
+                          </TabsTrigger>
+                          <TabsTrigger 
+                            value="short" 
+                            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-2"
+                          >
+                            <Video className="h-4 w-4" />
+                            숏폼 스튜디오
+                          </TabsTrigger>
+                        </TabsList>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button type="button" className="text-muted-foreground hover:text-foreground transition-colors">
+                                <Info className="h-4 w-4" />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-xs">
+                              <div className="text-sm space-y-2">
+                                <p className="font-semibold text-foreground">
+                                  AI 생성물 이용 안내
+                                </p>
+                                <p className="text-muted-foreground">
+                                  AI 생성물의 내용과 활용에 대한 책임은 이용자에게 있으며,<br />
+                                  회사는 이에 대해 법적 책임을 지지 않습니다.
+                                </p>
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                    </Tabs>
+                  </div>
+                </div>
+              )}
               {/* 메인 콘텐츠 영역 */}
               <div className="flex-1 min-h-0 overflow-hidden">
                 {!hasResultPanel && !selectedResult ? (
@@ -1711,6 +1853,7 @@ const StudioPage = () => {
                           setSelectedResult(null);
                           setHasResultPanel(false);
                         }}
+                        className="hover:bg-transparent"
                       >
                         <ChevronLeft className="h-4 w-4" />
                       </Button>
@@ -1821,6 +1964,7 @@ const StudioPage = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => setHasResultPanel(false)}
+                        className="hover:bg-transparent"
                       >
                         <ChevronLeft className="h-4 w-4 mr-2" />
                         결과 닫기
@@ -1911,9 +2055,26 @@ const StudioPage = () => {
                               onClick={() => handleSavedItemClick(logo)}
                               className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 cursor-pointer transition-all relative ${
                                 selectedResult?.url === logo.url && selectedResult?.type === "logo"
-                                  ? "border-orange-500 shadow-md"
-                                  : "border-border hover:border-orange-500/50"
+                                  ? "shadow-md"
+                                  : "border-border"
                               }`}
+                              style={selectedResult?.url === logo.url && selectedResult?.type === "logo" && studioType === "logo" ? { borderColor: '#7C22C8' } : selectedResult?.url === logo.url && selectedResult?.type === "logo" ? {} : {}}
+                              onMouseEnter={(e) => {
+                                if (!(selectedResult?.url === logo.url && selectedResult?.type === "logo")) {
+                                  if (studioType === "logo") {
+                                    e.currentTarget.style.borderColor = '#7C22C8';
+                                    e.currentTarget.style.opacity = '0.5';
+                                  }
+                                }
+                              }}
+                              onMouseLeave={(e) => {
+                                if (!(selectedResult?.url === logo.url && selectedResult?.type === "logo")) {
+                                  if (studioType === "logo") {
+                                    e.currentTarget.style.borderColor = '';
+                                    e.currentTarget.style.opacity = '';
+                                  }
+                                }
+                              }}
                             >
                               <img
                                 src={logo.url}
@@ -1935,8 +2096,8 @@ const StudioPage = () => {
                               onClick={() => handleSavedItemClick(short)}
                               className={`flex-shrink-0 w-14 h-24 rounded-lg overflow-hidden border-2 cursor-pointer transition-all relative ${
                                 selectedResult?.url === short.url && selectedResult?.type === "short"
-                                  ? "border-orange-500 shadow-md"
-                                  : "border-border hover:border-orange-500/50"
+                                  ? "shadow-md"
+                                  : "border-border"
                               }`}
                             >
                               <video
@@ -1965,10 +2126,21 @@ const StudioPage = () => {
                       variant={activeStorageTab === "logos" ? "default" : "outline"}
                       size="sm"
                       onClick={() => handleToggleStorageTab("logos")}
-                      className={activeStorageTab === "logos" ? "bg-orange-500 hover:bg-orange-600" : ""}
+                      className={activeStorageTab === "logos" && studioType === "logo" ? "text-white" : activeStorageTab === "logos" ? "bg-[#7C22C8] hover:bg-[#6B1DB5] text-white" : "hover:bg-[#7C22C8] hover:text-white hover:border-[#7C22C8]"}
+                      style={activeStorageTab === "logos" && studioType === "logo" ? { backgroundColor: '#7C22C8' } : {}}
+                      onMouseEnter={(e) => {
+                        if (activeStorageTab === "logos" && studioType === "logo") {
+                          e.currentTarget.style.backgroundColor = '#6B1DB5';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (activeStorageTab === "logos" && studioType === "logo") {
+                          e.currentTarget.style.backgroundColor = '#7C22C8';
+                        }
+                      }}
                     >
                       <FolderOpen className="h-4 w-4 mr-2" />
-                      로고
+                      로고 보관함
                     </Button>
                   )}
                   {(!studioType || studioType === "short") && (
@@ -1976,10 +2148,10 @@ const StudioPage = () => {
                       variant={activeStorageTab === "shorts" ? "default" : "outline"}
                       size="sm"
                       onClick={() => handleToggleStorageTab("shorts")}
-                      className={activeStorageTab === "shorts" ? "bg-orange-500 hover:bg-orange-600" : ""}
+                      className={activeStorageTab === "shorts" ? "bg-primary hover:bg-primary/90 text-primary-foreground" : ""}
                     >
                       <FolderOpen className="h-4 w-4 mr-2" />
-                      숏폼
+                      숏폼 보관함
                     </Button>
                   )}
                 </div>
@@ -2029,9 +2201,10 @@ const StudioPage = () => {
                           <Card
                             className={`max-w-[80%] p-4 ${
                               message.role === "user"
-                                ? "bg-primary text-primary-foreground"
+                                ? "text-white border-0"
                                 : "bg-muted"
                             }`}
+                            style={message.role === "user" && studioType === "logo" ? { backgroundColor: '#7C22C8' } : message.role === "user" && studioType === "short" ? { backgroundColor: '#FF8A3D' } : undefined}
                           >
                             {message.role === "user" && message.images && message.images.length > 0 && (
                               <div className="mb-3 space-y-2">
@@ -2063,9 +2236,13 @@ const StudioPage = () => {
                        currentProjectId && (
                         <div className="flex justify-start mt-2">
                           <Button
-                            variant="outline"
+                            variant="ghost"
                             size="sm"
-                            className="font-medium border-neutral-300 dark:border-neutral-700 text-foreground hover:bg-[#FF8A3D] hover:border-[#FF8A3D] hover:text-white transition-all"
+                            className={`font-medium text-sm border border-neutral-300 dark:border-neutral-700 transition-colors ${
+                              studioType === "logo" 
+                                ? "hover:bg-[#7C22C8] hover:text-white hover:border-[#7C22C8]"
+                                : "hover:bg-primary hover:text-white hover:border-primary"
+                            }`}
                             onClick={() => {
                               if (currentProjectId) {
                                 navigate(`/project?project=${currentProjectId}`);
@@ -2113,7 +2290,7 @@ const StudioPage = () => {
                                   toast({
                                     title: "저장된 로고가 없습니다",
                                     description: "먼저 로고를 생성하고 저장해주세요.",
-                                    variant: "destructive",
+                                    status: "warning",
                                   });
                                 }
                               }}
@@ -2141,7 +2318,7 @@ const StudioPage = () => {
                                 setTimeout(() => {
                                   const confirmMessage: Message = {
                                     role: "assistant",
-                                    content: "2) 로고 없이 숏폼을 생성하겠습니다. 잠시만 기다려 주세요.",
+                                    content: "로고 없이 숏폼을 생성하겠습니다. 잠시만 기다려 주세요.",
                                     studioType: "short"
                                   };
                                   setMessages(prev => [...prev, confirmMessage]);
@@ -2183,9 +2360,21 @@ const StudioPage = () => {
                                   }}
                                   className={`relative aspect-square rounded-lg overflow-hidden border-2 cursor-pointer transition-all ${
                                     selectedLogoForShort?.id === logo.id
-                                      ? "border-primary shadow-md"
-                                      : "border-border hover:border-primary/50"
+                                      ? "border-2 border-primary shadow-md"
+                                      : studioType === "logo" ? "border-border" : "border-border hover:border-primary/50"
                                   }`}
+                                  onMouseEnter={(e) => {
+                                    if (selectedLogoForShort?.id !== logo.id && studioType === "logo") {
+                                      e.currentTarget.style.borderColor = '#7C22C8';
+                                      e.currentTarget.style.opacity = '0.5';
+                                    }
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    if (selectedLogoForShort?.id !== logo.id && studioType === "logo") {
+                                      e.currentTarget.style.borderColor = '';
+                                      e.currentTarget.style.opacity = '';
+                                    }
+                                  }}
                                 >
                                   <img
                                     src={logo.url}
@@ -2197,11 +2386,15 @@ const StudioPage = () => {
                             </div>
                             {/* 선택 버튼 - 선택된 로고가 있을 때만 표시 */}
                             {selectedLogoForShort && (
-                              <div className="mt-4 flex justify-end">
+                              <div className="mt-4 flex justify-start">
                                 <Button
-                                  variant="default"
+                                  variant="ghost"
                                   size="sm"
-                                  className="font-medium"
+                                  className={`font-medium text-sm border border-neutral-300 dark:border-neutral-700 transition-colors ${
+                                    studioType === "logo" 
+                                      ? "hover:bg-[#7C22C8] hover:text-white hover:border-[#7C22C8]"
+                                      : "hover:bg-primary hover:text-white hover:border-primary"
+                                  }`}
                                   onClick={() => {
                                     if (!currentProjectId || !selectedLogoForShort) return;
                                     const userMessage: Message = {
@@ -2216,7 +2409,7 @@ const StudioPage = () => {
                                     setTimeout(() => {
                                       const confirmMessage: Message = {
                                         role: "assistant",
-                                        content: `1) 선택하신 로고로 숏폼을 생성하겠습니다. 잠시만 기다려 주세요.`,
+                                        content: `선택하신 로고로 숏폼을 생성하겠습니다. 잠시만 기다려 주세요.`,
                                         studioType: "short"
                                       };
                                       setMessages(prev => [...prev, confirmMessage]);
@@ -2245,8 +2438,9 @@ const StudioPage = () => {
                         return (
                           <div className="flex justify-start mt-2">
                             <div className="max-w-[80%] w-full space-y-3">
-                              <div className="flex gap-3 items-center">
+                              <div className="flex gap-3 items-start">
                                 {/* Instagram Card */}
+                                <div className="flex flex-col items-center gap-1">
                                 <Card
                                   className={`relative cursor-pointer transition-all border-2 ${
                                     selectedPlatforms.has("instagram")
@@ -2263,24 +2457,30 @@ const StudioPage = () => {
                                 >
                                   <CardContent className="p-4 flex flex-col items-center gap-2 min-w-[120px]">
                                     {/* 선택 표시 (빈 회색에 체크표시, 선택 시 주황색) */}
-                                    <div className={`absolute top-2 left-2 h-4 w-4 rounded-full border-2 border-foreground transition-colors flex items-center justify-center ${
+                                      <div className={`absolute top-2 left-2 h-4 w-4 rounded-full border transition-colors flex items-center justify-center ${
                                       selectedPlatforms.has("instagram")
-                                        ? "bg-[#FF8A3D]"
-                                        : "bg-neutral-300 dark:bg-neutral-700"
+                                          ? "bg-[#FF8A3D] border-[#FF8A3D]"
+                                          : "bg-transparent dark:bg-neutral-700 border-neutral-400 dark:border-neutral-600"
                                     }`}>
                                       {selectedPlatforms.has("instagram") && (
                                         <Check className="h-2.5 w-2.5 text-white" />
                                       )}
                                     </div>
-                                    <Instagram className="h-8 w-8" />
+                                      <img
+                                        src="/icon/instagram-logo.png"
+                                        alt="Instagram"
+                                        className="h-8 w-8 object-contain"
+                                      />
                                     <span className="text-sm font-medium">instagram</span>
-                                    {uploadStatus.instagram && (
-                                      <span className="text-xs text-muted-foreground">(이미 업로드됨)</span>
-                                    )}
                                   </CardContent>
                                 </Card>
+                                  {uploadStatus.instagram && (
+                                    <span className="text-xs text-muted-foreground mt-1">(이미 업로드됨)</span>
+                                  )}
+                                </div>
                                 
                                 {/* YouTube Card */}
+                                <div className="flex flex-col items-center gap-1">
                                 <Card
                                   className={`relative cursor-pointer transition-all border-2 ${
                                     selectedPlatforms.has("youtube")
@@ -2297,22 +2497,27 @@ const StudioPage = () => {
                                 >
                                   <CardContent className="p-4 flex flex-col items-center gap-2 min-w-[120px]">
                                     {/* 선택 표시 (빈 회색에 체크표시, 선택 시 주황색) */}
-                                    <div className={`absolute top-2 left-2 h-4 w-4 rounded-full border-2 border-foreground transition-colors flex items-center justify-center ${
+                                      <div className={`absolute top-2 left-2 h-4 w-4 rounded-full border transition-colors flex items-center justify-center ${
                                       selectedPlatforms.has("youtube")
-                                        ? "bg-[#FF8A3D]"
-                                        : "bg-neutral-300 dark:bg-neutral-700"
+                                          ? "bg-[#FF8A3D] border-[#FF8A3D]"
+                                          : "bg-transparent dark:bg-neutral-700 border-neutral-400 dark:border-neutral-600"
                                     }`}>
                                       {selectedPlatforms.has("youtube") && (
                                         <Check className="h-2.5 w-2.5 text-white" />
                                       )}
                                     </div>
-                                    <Youtube className="h-8 w-8" />
+                                      <img
+                                        src="/icon/youtube-logo.png"
+                                        alt="YouTube"
+                                        className="h-8 w-8 object-contain"
+                                      />
                                     <span className="text-sm font-medium">youtube</span>
-                                    {uploadStatus.youtube && (
-                                      <span className="text-xs text-muted-foreground">(이미 업로드됨)</span>
-                                    )}
                                   </CardContent>
                                 </Card>
+                                  {uploadStatus.youtube && (
+                                    <span className="text-xs text-muted-foreground mt-1">(이미 업로드됨)</span>
+                                  )}
+                                </div>
                               </div>
                               
                               {/* 업로드하기 버튼 */}
@@ -2380,7 +2585,11 @@ const StudioPage = () => {
                                     <Button
                                       variant="ghost"
                                       size="sm"
-                                      className="w-full font-medium text-sm border border-neutral-300 dark:border-neutral-700"
+                                      className={`w-full font-medium text-sm border transition-colors ${
+                                        selectedLogoType === "text"
+                                          ? "bg-[#7C22C8] text-white border-[#7C22C8] hover:bg-[#6B1DB5] hover:border-[#6B1DB5]"
+                                          : "border-neutral-300 dark:border-neutral-700 hover:bg-[#7C22C8] hover:text-white hover:border-[#7C22C8]"
+                                      }`}
                                       onClick={() => {
                                         setSelectedLogoType("text");
                                         setLogoTypeSelected(true);
@@ -2418,7 +2627,11 @@ const StudioPage = () => {
                                     <Button
                                       variant="ghost"
                                       size="sm"
-                                      className="w-full font-medium text-sm border border-neutral-300 dark:border-neutral-700"
+                                      className={`w-full font-medium text-sm border transition-colors ${
+                                        selectedLogoType === "text-icon"
+                                          ? "bg-[#7C22C8] text-white border-[#7C22C8] hover:bg-[#6B1DB5] hover:border-[#6B1DB5]"
+                                          : "border-neutral-300 dark:border-neutral-700 hover:bg-[#7C22C8] hover:text-white hover:border-[#7C22C8]"
+                                      }`}
                                       onClick={() => {
                                         setSelectedLogoType("text-icon");
                                         setLogoTypeSelected(true);
@@ -2456,7 +2669,11 @@ const StudioPage = () => {
                                     <Button
                                       variant="ghost"
                                       size="sm"
-                                      className="w-full font-medium text-sm border border-neutral-300 dark:border-neutral-700"
+                                      className={`w-full font-medium text-sm border transition-colors ${
+                                        selectedLogoType === "emblem"
+                                          ? "bg-[#7C22C8] text-white border-[#7C22C8] hover:bg-[#6B1DB5] hover:border-[#6B1DB5]"
+                                          : "border-neutral-300 dark:border-neutral-700 hover:bg-[#7C22C8] hover:text-white hover:border-[#7C22C8]"
+                                      }`}
                                       onClick={() => {
                                         setSelectedLogoType("emblem");
                                         setLogoTypeSelected(true);
@@ -2475,6 +2692,11 @@ const StudioPage = () => {
                         
                         // 스타일 선택 단계 (1차 예시) - 이미지 아래에 스타일 버튼
                         if (isStyleSelectionStep && message.images.length === 4 && selectedLogoType) {
+                          // firstRecommendations가 비어있으면 메시지의 images로 설정
+                          if (firstRecommendations.length === 0 && message.images.length > 0) {
+                            setFirstRecommendations(message.images);
+                          }
+                          
                           const styleLabels = getStyleLabelsByType(selectedLogoType);
                           return (
                             <div className="flex justify-start mt-2">
@@ -2489,9 +2711,22 @@ const StudioPage = () => {
                                         <Card
                                           className={`border-border overflow-hidden cursor-pointer hover:opacity-90 transition-opacity ${
                                             isStyleSelected
-                                              ? "border-2 border-primary shadow-md"
+                                              ? "border-2 shadow-md"
                                               : ""
                                           }`}
+                                          style={isStyleSelected ? { borderColor: '#7C22C8' } : {}}
+                                          onMouseEnter={(e) => {
+                                            if (!isStyleSelected && studioType === "logo") {
+                                              e.currentTarget.style.borderColor = '#7C22C8';
+                                              e.currentTarget.style.opacity = '0.9';
+                                            }
+                                          }}
+                                          onMouseLeave={(e) => {
+                                            if (!isStyleSelected && studioType === "logo") {
+                                              e.currentTarget.style.borderColor = '';
+                                              e.currentTarget.style.opacity = '';
+                                            }
+                                          }}
                                           onClick={() => handleFirstRecommendationClick(img)}
                                         >
                                           <div className="aspect-square bg-muted flex items-center justify-center overflow-hidden">
@@ -2505,7 +2740,22 @@ const StudioPage = () => {
                                         <Button
                                           variant={isStyleSelected ? "default" : "ghost"}
                                           size="sm"
-                                          className="w-full font-medium text-sm border border-neutral-300 dark:border-neutral-700"
+                                          className={`w-full font-medium text-sm border border-neutral-300 dark:border-neutral-700 ${isStyleSelected && studioType === "logo" ? "text-white" : ""}`}
+                                          style={isStyleSelected && studioType === "logo" ? { backgroundColor: '#7C22C8' } : undefined}
+                                          onMouseEnter={(e) => {
+                                            if (!isStyleSelected && studioType === "logo") {
+                                              e.currentTarget.style.backgroundColor = '#7C22C8';
+                                              e.currentTarget.style.borderColor = '#7C22C8';
+                                              e.currentTarget.style.color = 'white';
+                                            }
+                                          }}
+                                          onMouseLeave={(e) => {
+                                            if (!isStyleSelected && studioType === "logo") {
+                                              e.currentTarget.style.backgroundColor = '';
+                                              e.currentTarget.style.borderColor = '';
+                                              e.currentTarget.style.color = '';
+                                            }
+                                          }}
                                           onClick={() => handleStyleSelection(styleLabel, imgIndex)}
                                         >
                                           {styleLabel}
@@ -2535,13 +2785,30 @@ const StudioPage = () => {
                                       : false;
                                     
                                     return (
-                                      <Card
+                                        <Card
                                         key={imgIndex}
                                         className={`cursor-pointer overflow-hidden transition-all ${
                                           isSelected
-                                            ? "border-2 border-primary shadow-md"
-                                            : "border-border hover:border-primary/50"
+                                            ? "border-2 shadow-md"
+                                            : "border-border"
                                         }`}
+                                        style={isSelected ? { borderColor: '#7C22C8' } : {}}
+                                        onMouseEnter={(e) => {
+                                          if (!isSelected) {
+                                            if (studioType === "logo") {
+                                              e.currentTarget.style.borderColor = '#7C22C8';
+                                              e.currentTarget.style.opacity = '0.5';
+                                            }
+                                          }
+                                        }}
+                                        onMouseLeave={(e) => {
+                                          if (!isSelected) {
+                                            if (studioType === "logo") {
+                                              e.currentTarget.style.borderColor = '';
+                                              e.currentTarget.style.opacity = '';
+                                            }
+                                          }
+                                        }}
                                         onClick={() => {
                                           // 이미지 클릭: 미리보기만 업데이트 및 선택 표시
                                           if (isFirstRecommendation || isSecondRecommendation) {
@@ -2676,9 +2943,9 @@ const StudioPage = () => {
                               {isRecommendationStep && isFirstRecommendation && selectedSecondLogo && (
                                 <div className="mt-4 flex justify-end">
                                   <Button
-                                    variant="default"
+                                    variant="ghost"
                                     size="sm"
-                                    className="font-medium"
+                                    className="font-medium text-sm border border-neutral-300 dark:border-neutral-700 transition-colors hover:bg-[#7C22C8] hover:text-white hover:border-[#7C22C8]"
                                     onClick={() => {
                                       // 선택 버튼 클릭: 최종 선택 및 다음 단계로 진행
                                       if (currentProjectId && selectedLogoType) {
@@ -2696,9 +2963,13 @@ const StudioPage = () => {
                                  (studioType === "short" && savedShorts.length > 0)) ? (
                                 <div className={`mt-4 flex ${studioType === "short" ? "justify-start" : "justify-center"}`}>
                                   <Button
-                                    variant="outline"
+                                    variant="ghost"
                                     size="sm"
-                                    className="font-medium border-neutral-300 dark:border-neutral-700 text-foreground hover:bg-[#FF8A3D] hover:border-[#FF8A3D] hover:text-white transition-all"
+                                    className={`font-medium text-sm border border-neutral-300 dark:border-neutral-700 transition-colors ${
+                                      studioType === "logo" 
+                                        ? "hover:bg-[#7C22C8] hover:text-white hover:border-[#7C22C8]"
+                                        : "hover:bg-primary hover:text-white hover:border-primary"
+                                    }`}
                                     onClick={() => {
                                       if (currentProjectId) {
                                         navigate(`/project?project=${currentProjectId}`);
@@ -2729,7 +3000,7 @@ const StudioPage = () => {
                         <Button
                           size="icon"
                           variant="ghost"
-                          className="absolute -top-1 -right-1 h-5 w-5 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          className="absolute -top-1 -right-1 h-5 w-5 bg-destructive text-destructive-foreground hover:bg-destructive hover:text-destructive-foreground"
                           onClick={() => handleRemoveImage(idx)}
                         >
                           <X className="h-3 w-3" />
@@ -2751,30 +3022,31 @@ const StudioPage = () => {
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={handleKeyPress}
-                    placeholder={studioType === "short" ? "메시지를 입력하세요..." : "브랜드명과 업종을 알려주세요"}
-                    className="min-h-[80px] resize-none pr-12 text-sm w-full"
+                    placeholder={studioType === "short" ? "메시지를 입력하세요..." : "메시지를 입력하세요..."}
+                    className={`min-h-[40px] max-h-[40px] resize-none pr-12 pl-12 py-2 text-sm w-full ${studioType === "logo" ? "focus-visible:ring-[#7C22C8]" : ""}`}
                     disabled={isGeneratingShortForm}
+                    rows={1}
                   />
                   <Button
                     size="icon"
                     onClick={() => fileInputRef.current?.click()}
                     variant="ghost"
-                    className="absolute bottom-2 left-2 h-8 w-8 p-0 bg-transparent border-0 hover:bg-transparent"
+                    className="absolute bottom-1 left-2 h-8 w-8 p-0 bg-transparent border-0 hover:bg-transparent"
                     disabled={isGeneratingShortForm}
                   >
-                    <Plus className="h-4 w-4 text-primary" />
+                    <Plus className={`h-4 w-4 ${studioType !== "logo" ? "text-primary" : ""}`} style={studioType === "logo" ? { color: '#7C22C8' } : undefined} />
                   </Button>
                   <Button 
                     onClick={handleSendMessage} 
                     size="icon"
                     variant="ghost"
-                    className="absolute bottom-2 right-2 h-8 w-8 hover:bg-transparent"
+                    className="absolute bottom-1 right-1 h-8 w-8 hover:bg-transparent"
                     disabled={(!inputValue.trim() && attachedImages.length === 0) || isGeneratingShortForm}
                   >
                     {isGeneratingShortForm ? (
-                      <RefreshCw className="h-4 w-4 text-primary animate-spin" />
+                      <RefreshCw className={`h-4 w-4 animate-spin ${studioType !== "logo" ? "text-primary" : ""}`} style={studioType === "logo" ? { color: '#7C22C8' } : undefined} />
                     ) : (
-                      <Send className="h-4 w-4 text-primary" />
+                      <Send className={`h-4 w-4 ${studioType !== "logo" ? "text-primary" : ""}`} style={studioType === "logo" ? { color: '#7C22C8' } : undefined} />
                     )}
                   </Button>
                 </div>
@@ -2795,7 +3067,7 @@ const StudioPage = () => {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)} className="hover:bg-transparent hover:border-border hover:text-foreground">
               취소
             </Button>
             <Button variant="destructive" onClick={handleDelete}>

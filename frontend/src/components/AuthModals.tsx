@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,7 @@ interface AuthModalsProps {
   onSignUpClose: () => void;
   onSwitchToSignUp: () => void;
   onSwitchToLogin: () => void;
-  onLoginSuccess: (rememberMe: boolean) => void;
+  onLoginSuccess: (rememberMe: boolean, isSignUp?: boolean) => void;
 }
 
 export const AuthModals = ({
@@ -34,10 +34,23 @@ export const AuthModals = ({
   const [signUpEmail, setSignUpEmail] = useState(""); // 아이디로 사용
   const [signUpNickname, setSignUpNickname] = useState("");
 
+  // 회원가입 다이얼로그가 열릴 때 상태 초기화
+  useEffect(() => {
+    if (isSignUpOpen) {
+      setSignUpStep(1);
+      setSignUpEmail("");
+      setSignUpNickname("");
+      setAgreeToTerms(false);
+      setShowPassword(false);
+      setShowConfirmPassword(false);
+    }
+  }, [isSignUpOpen]);
+
   const handleGoogleLogin = () => {
     toast({
       title: "Google 로그인",
       description: "Google 로그인 기능은 곧 제공될 예정입니다.",
+      status: "warning",
     });
   };
 
@@ -60,7 +73,7 @@ export const AuthModals = ({
       toast({
         title: "약관 동의 필요",
         description: "이용약관 및 개인정보 처리방침에 동의해주세요.",
-        variant: "destructive",
+        status: "warning",
       });
       return;
     }
@@ -74,8 +87,17 @@ export const AuthModals = ({
     setSignUpStep(1);
     setSignUpEmail("");
     setSignUpNickname("");
+    setAgreeToTerms(false);
+    
+    // 회원가입 완료 토스트 표시
+    toast({
+      title: "회원가입이 완료되었습니다",
+      description: "MAKERY에 오신 것을 환영합니다!",
+      status: "success",
+    });
+    
     // 회원가입 시에는 자동로그인으로 처리
-    onLoginSuccess(true);
+    onLoginSuccess(true, true); // 두 번째 파라미터는 isSignUp 플래그
   };
 
   const handleSignUpClose = () => {

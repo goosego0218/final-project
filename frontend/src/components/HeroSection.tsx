@@ -37,6 +37,7 @@ const HeroSection = () => {
         toast({
           title: "로그인이 필요합니다",
           description: "프로젝트를 생성하려면 로그인해주세요.",
+          status: "warning",
         });
         return;
       }
@@ -57,7 +58,7 @@ const HeroSection = () => {
     }
   };
 
-  const handleLoginSuccess = (rememberMe: boolean) => {
+  const handleLoginSuccess = (rememberMe: boolean, isSignUp?: boolean) => {
     if (rememberMe) {
       localStorage.setItem('isLoggedIn', 'true');
     } else {
@@ -65,10 +66,16 @@ const HeroSection = () => {
     }
     setIsLoginOpen(false);
     setIsSignUpOpen(false);
-    toast({
-      title: "로그인 되었습니다",
-      description: "환영합니다!",
-    });
+    
+    // 회원가입이 아닌 경우에만 로그인 토스트 표시
+    if (!isSignUp) {
+      toast({
+        title: "로그인 되었습니다",
+        description: "환영합니다!",
+        status: "success",
+      });
+    }
+    
     setIsProjectDialogOpen(true);
   };
 
@@ -109,6 +116,7 @@ const HeroSection = () => {
                 placeholder="예: 브랜드 A 마케팅"
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
+                autoComplete="off"
               />
             </div>
             <div className="space-y-2">

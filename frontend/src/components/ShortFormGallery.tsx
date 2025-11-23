@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Heart, MessageCircle, Play, Clipboard } from "lucide-react";
+import { Heart, MessageCircle, Play, Share2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import Footer from "@/components/Footer";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AuthModals } from "@/components/AuthModals";
 
 interface ShortForm {
   id: number;
@@ -87,6 +88,8 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState<Array<{ author: string; authorAvatar?: string; content: string; time: string }>>([]);
   const { toast } = useToast();
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isSignUpOpen, setIsSignUpOpen] = useState(false);
 
   const ITEMS_PER_PAGE = 12;
 
@@ -263,14 +266,23 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
 
   const handleLike = () => {
     if (!selectedShort) return;
+    
+    // 로그인 상태 확인
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+    if (!isLoggedIn) {
+      setIsLoginOpen(true);
+      return;
+    }
+    
     const newLikedState = !isLiked;
     setIsLiked(newLikedState);
-    const newLikesCount = newLikedState ? likesCount + 1 : Math.max(0, likesCount - 1);
-    setLikesCount(newLikesCount);
-    saveLikedShort(selectedShort.id, newLikedState);
     
     // 카드 목록의 좋아요 수 업데이트
     const updatedLikes = Math.max(0, newLikedState ? selectedShort.likes + 1 : selectedShort.likes - 1);
+    
+    // 선택된 숏폼의 좋아요 수 즉시 업데이트
+    setSelectedShort(prev => prev ? { ...prev, likes: updatedLikes } : null);
+    
     setAllShortForms(prev => prev.map(shortForm => {
       if (shortForm.id === selectedShort.id) {
         return {
@@ -281,6 +293,8 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
       return shortForm;
     }));
     
+    saveLikedShort(selectedShort.id, newLikedState);
+    
     // localStorage에 좋아요 수 저장
     const stats = JSON.parse(localStorage.getItem(`short_stats_${selectedShort.id}`) || '{}');
     stats.likes = updatedLikes;
@@ -290,14 +304,22 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
     window.dispatchEvent(new Event('storage'));
     window.dispatchEvent(new CustomEvent('shortStatsUpdated', { detail: { id: selectedShort.id, likes: updatedLikes } }));
     
-    toast({ description: newLikedState ? "좋아요를 눌렀습니다" : "좋아요를 취소했습니다" });
+    toast({ 
+      description: newLikedState ? "좋아요를 눌렀습니다" : "좋아요를 취소했습니다",
+      status: "default",
+    });
   };
 
   const handleComment = () => {
     if (commentText.trim() && selectedShort) {
       // 로그인 상태 확인
       const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
-      const userProfile = isLoggedIn ? JSON.parse(localStorage.getItem('userProfile') || '{}') : {};
+      if (!isLoggedIn) {
+        setIsLoginOpen(true);
+        return;
+      }
+      
+      const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
       const newComment = {
         author: userProfile.nickname || "익명",
         authorAvatar: userProfile.avatar || undefined,
@@ -331,7 +353,10 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
       window.dispatchEvent(new Event('storage'));
       window.dispatchEvent(new CustomEvent('shortStatsUpdated', { detail: { id: selectedShort.id, comments: updatedCommentsCount } }));
       
-      toast({ description: "댓글이 등록되었습니다" });
+      toast({ 
+        description: "댓글이 등록되었습니다",
+        status: "default",
+      });
       setCommentText("");
     }
   };
@@ -339,7 +364,10 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
   const handleShare = () => {
     const url = selectedShort ? `${window.location.origin}/shorts?short=${selectedShort.id}` : window.location.href;
     navigator.clipboard.writeText(url);
-    toast({ description: "링크가 복사되었습니다" });
+    toast({ 
+      description: "링크가 복사되었습니다",
+      status: "default",
+    });
   };
 
   return (
@@ -445,7 +473,7 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
               if (shortForm.id === selectedShort.id) {
                 return {
                   ...shortForm,
-                  likes: Math.max(0, selectedShort.likes + likesCount),
+                  likes: selectedShort.likes,
                   comments: comments.length
                 };
               }
@@ -485,7 +513,7 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
             {/* Right: Comments and Actions */}
             <div className="flex flex-col bg-background w-full md:w-[500px] md:flex-shrink-0 aspect-[9/16] md:aspect-auto md:h-[533px] rounded-r-lg">
               {/* Comments Section - Top */}
-              <div className="flex-1 min-h-0 overflow-y-auto p-6 border-b border-border">
+              <div className="flex-1 min-h-0 overflow-y-auto p-6">
                 <div className="space-y-4">
                   {comments.length === 0 ? (
                     <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
@@ -516,23 +544,23 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
               </div>
 
               {/* Action Buttons - Middle */}
-              <div className="p-4 border-b border-border space-y-3">
+              <div className="p-3 border-t-[1px] border-border space-y-2">
                 <div className="flex items-center gap-3">
                   <Button 
                     variant="ghost" 
                     onClick={handleLike}
-                    className="h-9 px-3 gap-2"
+                    className="h-8 px-3 gap-2 hover:bg-primary/10 hover:text-primary"
                   >
-                    <Heart className={`h-5 w-5 ${isLiked ? "fill-destructive text-destructive" : ""}`} />
+                    <Heart className={`h-4 w-4 ${isLiked ? "fill-destructive text-destructive" : ""}`} />
                     <span className="text-sm font-semibold text-foreground">
-                      {Math.max(0, selectedShort ? selectedShort.likes + likesCount : 0).toLocaleString()}
+                        {selectedShort ? selectedShort.likes.toLocaleString() : "0"}
                     </span>
                   </Button>
                   <Button 
                     variant="ghost" 
-                    className="h-9 px-3 gap-2"
+                    className="h-8 px-3 gap-2 hover:bg-primary/10 hover:text-primary"
                   >
-                    <MessageCircle className="h-5 w-5" />
+                    <MessageCircle className="h-4 w-4" />
                     <span className="text-sm font-semibold text-foreground">
                       {comments.length.toLocaleString()}
                     </span>
@@ -541,22 +569,22 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
                     variant="ghost" 
                     size="icon"
                     onClick={handleShare}
-                    className="h-9 w-9"
+                    className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
                   >
-                    <Clipboard className="h-5 w-5" />
+                    <Share2 className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
 
               {/* Comment Input - Bottom */}
-              <div className="p-4 border-t border-border">
+              <div className="p-3 border-t-[1px] border-border">
                 <div className="flex gap-2">
                   <Textarea 
                     placeholder="댓글을 입력하세요..." 
                     value={commentText} 
                     onChange={(e) => setCommentText(e.target.value)} 
-                    className="min-h-[60px] resize-none flex-1" 
-                    rows={2}
+                    className="h-[40px] min-h-[40px] max-h-[40px] resize-none flex-1 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-primary focus-visible:border-2" 
+                    rows={1}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
@@ -569,7 +597,7 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
                   <Button 
                     onClick={handleComment} 
                     disabled={!commentText.trim()} 
-                    className="h-[60px] px-6"
+                    className="h-[40px] px-6 bg-primary hover:bg-primary/90 text-white disabled:opacity-50"
                   >
                     등록
                   </Button>
@@ -579,6 +607,25 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <AuthModals
+        isLoginOpen={isLoginOpen}
+        isSignUpOpen={isSignUpOpen}
+        onLoginClose={() => setIsLoginOpen(false)}
+        onSignUpClose={() => setIsSignUpOpen(false)}
+        onSwitchToSignUp={() => {
+          setIsLoginOpen(false);
+          setIsSignUpOpen(true);
+        }}
+        onSwitchToLogin={() => {
+          setIsSignUpOpen(false);
+          setIsLoginOpen(true);
+        }}
+        onLoginSuccess={(rememberMe) => {
+          setIsLoginOpen(false);
+          setIsSignUpOpen(false);
+        }}
+      />
 
       <Footer />
     </div>

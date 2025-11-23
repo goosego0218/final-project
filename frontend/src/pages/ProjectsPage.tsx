@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Image, Video, MoreVertical, Pin, Trash2, Edit } from "lucide-react";
+import { Plus, Image, Video, MoreVertical, Pin, Trash2, Edit, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { projectStorage, type Project } from "@/lib/projectStorage";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -29,6 +29,7 @@ const ProjectsPage = () => {
   const [editProjectId, setEditProjectId] = useState<string | null>(null);
   const [editProjectName, setEditProjectName] = useState("");
   const [editProjectDescription, setEditProjectDescription] = useState("");
+  const [showAllProjects, setShowAllProjects] = useState(false);
 
   useEffect(() => {
     // localStorage 변경 감지
@@ -81,6 +82,7 @@ const ProjectsPage = () => {
         toast({
           title: "로그인이 필요합니다",
           description: "프로젝트를 생성하려면 로그인해주세요.",
+          status: "warning",
         });
         return;
       }
@@ -101,16 +103,28 @@ const ProjectsPage = () => {
     }
   };
 
-  const handleLoginSuccess = () => {
+  const handleLoginSuccess = (rememberMe?: boolean, isSignUp?: boolean) => {
     setIsLoggedIn(true);
-    localStorage.setItem('isLoggedIn', 'true');
+    if (rememberMe) {
+      localStorage.setItem('isLoggedIn', 'true');
+      sessionStorage.removeItem('isLoggedIn');
+    } else {
+      sessionStorage.setItem('isLoggedIn', 'true');
+      localStorage.removeItem('isLoggedIn');
+    }
     setIsLoginOpen(false);
     setIsSignUpOpen(false);
     setProjects(projectStorage.getProjects()); // 프로젝트 목록 새로고침
-    toast({
-      title: "로그인 성공",
-      description: "MAKERY에 오신 것을 환영합니다!",
-    });
+    
+    // 회원가입이 아닌 경우에만 로그인 토스트 표시
+    if (!isSignUp) {
+      toast({
+        title: "로그인 성공",
+        description: "MAKERY에 오신 것을 환영합니다!",
+        status: "success",
+      });
+    }
+    
     setIsDialogOpen(true);
   };
 
@@ -130,6 +144,7 @@ const ProjectsPage = () => {
     toast({
       title: "프로젝트 고정 상태 변경",
       description: "프로젝트가 업데이트되었습니다.",
+      status: "success",
     });
   };
 
@@ -141,6 +156,7 @@ const ProjectsPage = () => {
       toast({
         title: "프로젝트 삭제",
         description: "프로젝트가 삭제되었습니다.",
+        status: "success",
       });
     }
   };
@@ -168,6 +184,7 @@ const ProjectsPage = () => {
         toast({
           title: "프로젝트 수정",
           description: "프로젝트가 수정되었습니다.",
+          status: "success",
         });
       }
     }
@@ -214,6 +231,8 @@ const ProjectsPage = () => {
                       placeholder="예: 브랜드 A 마케팅"
                       value={projectName}
                       onChange={(e) => setProjectName(e.target.value)}
+                      autoComplete="off"
+                      data-list-id="project-names"
                     />
                   </div>
                   <div className="space-y-2">
@@ -243,8 +262,9 @@ const ProjectsPage = () => {
               <p className="text-xl text-muted-foreground">프로젝트가 없습니다.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {projects.map((project) => (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {(showAllProjects ? projects : projects.slice(0, 9)).map((project) => (
                 <Card 
                   key={project.id} 
                   className="hover:shadow-lg transition-shadow relative"
@@ -277,7 +297,7 @@ const ProjectsPage = () => {
                           수정하기
                         </DropdownMenuItem>
                         <DropdownMenuItem 
-                          className="text-destructive"
+                          className="text-destructive hover:bg-destructive hover:text-destructive-foreground focus:bg-destructive focus:text-destructive-foreground"
                           onClick={(e) => {
                             e.stopPropagation();
                             setDeleteProjectId(project.id);
@@ -322,8 +342,20 @@ const ProjectsPage = () => {
                     </CardContent>
                   </div>
                 </Card>
-              ))}
-            </div>
+                ))}
+              </div>
+              {projects.length > 9 && !showAllProjects && (
+                <div className="text-center mt-8">
+                  <Button 
+                    variant="outline"
+                    onClick={() => setShowAllProjects(true)}
+                    className="hover:bg-orange-500 hover:text-white hover:border-orange-500"
+                  >
+                    더보기
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -331,7 +363,19 @@ const ProjectsPage = () => {
       <Footer />
 
       <AlertDialog open={deleteProjectId !== null} onOpenChange={() => setDeleteProjectId(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent
+          onOverlayClick={() => setDeleteProjectId(null)}
+        >
+          {/* X 버튼 */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-4 top-4 h-6 w-6 rounded-sm opacity-70 ring-offset-background transition-opacity hover:bg-transparent hover:opacity-100 hover:text-foreground focus:outline-none focus:ring-0 z-10"
+            onClick={() => setDeleteProjectId(null)}
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </Button>
           <AlertDialogHeader>
             <AlertDialogTitle>프로젝트를 삭제하시겠습니까?</AlertDialogTitle>
             <AlertDialogDescription>

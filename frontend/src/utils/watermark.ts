@@ -25,7 +25,7 @@ export const addWatermarkToImage = async (imageUrl: string): Promise<string> => 
       ctx.drawImage(img, 0, 0);
       
       // 워터마크 스타일 설정
-      ctx.fillStyle = 'rgba(255, 138, 61, 0.7)'; // 주황색 반투명
+      ctx.fillStyle = 'rgba(124, 34, 200, 0.7)'; // #7C22C8 반투명
       ctx.font = 'bold 24px Arial';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -89,7 +89,7 @@ export const addWatermarkToVideo = async (videoUrl: string): Promise<{ videoUrl:
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       
       // 워터마크 스타일 설정
-      ctx.fillStyle = 'rgba(255, 138, 61, 0.7)'; // 주황색 반투명
+      ctx.fillStyle = 'rgba(124, 34, 200, 0.7)'; // #7C22C8 반투명
       ctx.font = 'bold 32px Arial';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';

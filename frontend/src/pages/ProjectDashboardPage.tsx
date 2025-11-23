@@ -21,7 +21,7 @@ import {
   Dialog,
   DialogContent,
 } from "@/components/ui/dialog";
-import { Trash2, Image, Video, Calendar, X, Upload, Instagram, Youtube } from "lucide-react";
+import { Trash2, Image, Video, Calendar, X, Upload, Instagram, Youtube, Download } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -101,7 +101,7 @@ const ProjectDashboardPage = () => {
       toast({
         title: "프로젝트를 찾을 수 없습니다",
         description: "프로젝트가 삭제되었거나 존재하지 않습니다.",
-        variant: "destructive",
+        status: "error",
       });
       navigate("/projects");
       return;
@@ -200,6 +200,7 @@ const ProjectDashboardPage = () => {
     toast({
       title: "프로젝트가 삭제되었습니다",
       description: "프로젝트와 관련된 모든 데이터가 삭제되었습니다.",
+      status: "success",
     });
     navigate("/projects");
   };
@@ -259,6 +260,7 @@ const ProjectDashboardPage = () => {
     toast({
       title: "비공개로 변경되었습니다",
       description: "갤러리에서 제거되었습니다.",
+      status: "success",
     });
   };
   
@@ -280,14 +282,16 @@ const ProjectDashboardPage = () => {
               : l
           );
           
-          // 공개된 로고를 localStorage에 저장 (워터마크가 추가된 URL 사용)
+          // 공개된 로고를 localStorage에 저장 (모든 로고에 워터마크 추가)
           const publicLogos = updatedLogos.filter(l => l.isPublic);
-          const publicLogosData = publicLogos.map(l => {
-            // 현재 로고인 경우 워터마크가 추가된 URL 사용
-            const url = l.id === pendingToggleItem.id ? watermarkedUrl : l.url;
+          
+          // 모든 공개된 로고에 워터마크 추가 (비동기 처리)
+          Promise.all(publicLogos.map(async (l) => {
+            // 현재 게시하는 로고는 이미 워터마크가 추가된 URL 사용
+            if (l.id === pendingToggleItem.id) {
             return {
               id: l.id,
-              url: url,
+                url: watermarkedUrl,
               brandName: l.title || "로고",
               likes: 0,
               comments: 0,
@@ -295,8 +299,20 @@ const ProjectDashboardPage = () => {
               tags: [],
               projectId: project.id,
             };
-          });
-          
+            }
+            // 이미 공개된 다른 로고들도 워터마크 추가
+            const watermarkedUrlForOther = await addWatermarkToImage(l.url);
+            return {
+              id: l.id,
+              url: watermarkedUrlForOther,
+              brandName: l.title || "로고",
+              likes: 0,
+              comments: 0,
+              createdAt: new Date(l.createdAt),
+              tags: [],
+              projectId: project.id,
+            };
+          })).then((publicLogosData) => {
           // 기존 공개 로고 가져오기
           const existingPublicLogos = JSON.parse(localStorage.getItem('public_logos') || '[]');
           // 현재 프로젝트의 로고 제거 후 새로 추가
@@ -306,6 +322,14 @@ const ProjectDashboardPage = () => {
           
           // 커스텀 이벤트 발생시켜 갤러리에 알림
           window.dispatchEvent(new CustomEvent('publicLogosUpdated'));
+          }).catch((error) => {
+            console.error('워터마크 추가 실패:', error);
+            toast({
+              title: "오류",
+              description: "워터마크 추가 중 오류가 발생했습니다.",
+              status: "error",
+            });
+          });
           
           return updatedLogos;
         });
@@ -313,13 +337,14 @@ const ProjectDashboardPage = () => {
         toast({
           title: "게시되었습니다",
           description: "로고 갤러리에 게시되었습니다.",
+          status: "success",
         });
       } catch (error) {
         console.error('워터마크 추가 실패:', error);
         toast({
           title: "오류",
           description: "워터마크 추가 중 오류가 발생했습니다.",
-          variant: "destructive",
+          status: "error",
         });
         return;
       }
@@ -362,6 +387,7 @@ const ProjectDashboardPage = () => {
       toast({
         title: "게시되었습니다",
         description: "숏폼 갤러리에 게시되었습니다.",
+        status: "success",
       });
     }
     
@@ -416,6 +442,7 @@ const ProjectDashboardPage = () => {
     toast({
       title: "비공개로 변경되었습니다",
       description: "갤러리에서 제거되었습니다.",
+      status: "success",
     });
   };
 
@@ -454,6 +481,7 @@ const ProjectDashboardPage = () => {
     toast({
       title: itemToDelete.type === "logo" ? "로고가 삭제되었습니다" : "숏폼이 삭제되었습니다",
       description: "저장된 항목에서 제거되었습니다.",
+      status: "success",
     });
 
     setIsDeleteItemDialogOpen(false);
@@ -461,6 +489,49 @@ const ProjectDashboardPage = () => {
   };
 
   // 삭제 버튼 클릭 핸들러
+  const handleDownload = (url: string, title: string) => {
+    try {
+      // 이미지를 fetch하여 Blob으로 변환
+      fetch(url)
+        .then(response => response.blob())
+        .then(blob => {
+          // Blob URL 생성
+          const blobUrl = window.URL.createObjectURL(blob);
+          // 임시 링크 요소 생성
+          const link = document.createElement('a');
+          link.href = blobUrl;
+          link.download = `${title}.png`;
+          // 링크 클릭하여 다운로드 시작
+          document.body.appendChild(link);
+          link.click();
+          // 정리
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(blobUrl);
+          
+          toast({
+            title: "다운로드 완료",
+            description: `${title}이(가) 다운로드되었습니다.`,
+            status: "success",
+          });
+        })
+        .catch((error) => {
+          console.error("다운로드 오류:", error);
+          toast({
+            title: "다운로드 실패",
+            description: "이미지 다운로드 중 오류가 발생했습니다.",
+            status: "error",
+          });
+        });
+    } catch (error) {
+      console.error("다운로드 오류:", error);
+      toast({
+        title: "다운로드 실패",
+        description: "이미지 다운로드 중 오류가 발생했습니다.",
+        status: "error",
+      });
+    }
+  };
+
   const handleDeleteItemClick = (type: "logo" | "short", id: string) => {
     setItemToDelete({ type, id });
     setIsDeleteItemDialogOpen(true);
@@ -484,10 +555,15 @@ const ProjectDashboardPage = () => {
     return uploadStatuses[shortFormId] || { instagram: false, youtube: false };
   };
 
-  // 숏폼 ID를 savedItems의 ID로 변환
-  const getShortFormSavedItemId = (shortFormId: string) => {
+  // 숏폼 ID를 savedItems의 ID로 변환 (URL 기반으로도 찾기)
+  const getShortFormSavedItemId = (shortFormId: string, shortFormUrl?: string) => {
     if (!project) return shortFormId;
-    const savedItem = project.savedItems?.find(item => item.id === shortFormId && item.type === "short");
+    // 먼저 ID로 찾기
+    let savedItem = project.savedItems?.find(item => item.id === shortFormId && item.type === "short");
+    // ID로 찾지 못했고 URL이 제공된 경우, URL로 찾기
+    if (!savedItem && shortFormUrl) {
+      savedItem = project.savedItems?.find(item => item.url === shortFormUrl && item.type === "short");
+    }
     return savedItem ? savedItem.id : shortFormId;
   };
 
@@ -510,8 +586,8 @@ const ProjectDashboardPage = () => {
     if (hasConnection) {
       setSelectedShortFormForUpload(shortForm);
       setIsUploadDialogOpen(true);
-      // 이미 업로드된 플랫폼 확인 (savedItems의 ID 사용)
-      const savedItemId = getShortFormSavedItemId(shortForm.id);
+      // 이미 업로드된 플랫폼 확인 (savedItems의 ID 사용, URL도 함께 전달)
+      const savedItemId = getShortFormSavedItemId(shortForm.id, shortForm.url);
       const uploadStatus = getShortFormUploadStatus(savedItemId);
       const initialPlatforms = new Set<string>();
       // 이미 업로드된 플랫폼은 선택 불가 (취소 불가)
@@ -521,7 +597,7 @@ const ProjectDashboardPage = () => {
       toast({
         title: "소셜 미디어 연동 필요",
         description: "숏폼을 업로드하려면 먼저 소셜 미디어 계정을 연동해주세요.",
-        variant: "destructive",
+        status: "warning",
       });
     }
   };
@@ -535,19 +611,20 @@ const ProjectDashboardPage = () => {
       toast({
         title: "소셜 미디어 연동 필요",
         description: `${platform === "instagram" ? "Instagram" : "YouTube"} 계정을 먼저 연동해주세요.`,
-        variant: "destructive",
+        status: "warning",
       });
       return;
     }
 
     // 이미 업로드된 플랫폼은 취소 불가
     if (selectedShortFormForUpload) {
-      const savedItemId = getShortFormSavedItemId(selectedShortFormForUpload.id);
+      const savedItemId = getShortFormSavedItemId(selectedShortFormForUpload.id, selectedShortFormForUpload.url);
       const uploadStatus = getShortFormUploadStatus(savedItemId);
       if (uploadStatus[platform as "instagram" | "youtube"]) {
         toast({
           title: "이미 업로드됨",
           description: `이 숏폼은 이미 ${platform === "instagram" ? "Instagram" : "YouTube"}에 업로드되었습니다.`,
+          status: "info",
         });
         return;
       }
@@ -570,8 +647,8 @@ const ProjectDashboardPage = () => {
       const platforms = Array.from(selectedPlatforms);
       const platformNames = platforms.map(p => p === "instagram" ? "Instagram" : "YouTube").join(", ");
       
-      // 업로드 상태 저장 (savedItems의 ID 사용)
-      const savedItemId = getShortFormSavedItemId(selectedShortFormForUpload.id);
+      // 업로드 상태 저장 (savedItems의 ID 사용, URL도 함께 전달)
+      const savedItemId = getShortFormSavedItemId(selectedShortFormForUpload.id, selectedShortFormForUpload.url);
       platforms.forEach(platform => {
         saveShortFormUploadStatus(savedItemId, platform as "instagram" | "youtube", true);
       });
@@ -580,6 +657,7 @@ const ProjectDashboardPage = () => {
       toast({
         title: "업로드 완료",
         description: `숏폼이 ${platformNames}에 성공적으로 업로드되었습니다.`,
+        status: "success",
       });
       
       setIsUploadDialogOpen(false);
@@ -628,6 +706,14 @@ const ProjectDashboardPage = () => {
                     <span>·</span>
                     <span>숏폼 {shortForms.length}개</span>
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setIsDeleteDialogOpen(true)}
+                    className="text-destructive hover:bg-destructive hover:text-destructive-foreground h-auto w-auto p-1"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             </div>
@@ -649,23 +735,20 @@ const ProjectDashboardPage = () => {
               <div className="flex items-center gap-3">
                 <Button
                   onClick={handleCreateLogo}
-                  className="bg-orange-500 hover:bg-orange-600 text-white"
+                  className="text-white gap-2"
+                  style={{ backgroundColor: '#7C22C8' }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#6B1DB5'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7C22C8'}
                 >
+                  <Image className="h-4 w-4" />
                   로고 생성하기
                 </Button>
                 <Button
                   onClick={handleCreateShort}
-                  className="bg-orange-500 hover:bg-orange-600 text-white"
+                  className="bg-orange-500 hover:bg-orange-600 text-white gap-2"
                 >
+                  <Video className="h-4 w-4" />
                   숏폼 생성하기
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setIsDeleteDialogOpen(true)}
-                  className="text-destructive hover:text-destructive"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  프로젝트 삭제
                 </Button>
               </div>
             </div>
@@ -674,9 +757,6 @@ const ProjectDashboardPage = () => {
               {logos.length === 0 ? (
                 <div className="text-center py-16">
                   <p className="text-muted-foreground mb-4">아직 생성된 로고가 없습니다.</p>
-                  <Button onClick={handleCreateLogo} className="bg-orange-500 hover:bg-orange-600 text-white">
-                    로고 생성하기
-                  </Button>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -696,9 +776,20 @@ const ProjectDashboardPage = () => {
                               e.stopPropagation();
                               handleDeleteItemClick("logo", logo.id);
                             }}
-                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/90 hover:bg-background text-destructive"
+                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/90 hover:bg-destructive hover:text-destructive-foreground text-destructive"
                           >
                             <Trash2 className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDownload(logo.url, logo.title || "로고");
+                            }}
+                            className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 dark:bg-background/90 hover:bg-black/70 dark:hover:bg-background text-white dark:text-foreground"
+                          >
+                            <Download className="h-4 w-4" />
                           </Button>
                         </div>
                         <div className="p-4">
@@ -729,9 +820,6 @@ const ProjectDashboardPage = () => {
               {shortForms.length === 0 ? (
                 <div className="text-center py-16">
                   <p className="text-muted-foreground mb-4">아직 생성된 숏폼이 없습니다.</p>
-                  <Button onClick={handleCreateShort} className="bg-orange-500 hover:bg-orange-600 text-white">
-                    숏폼 생성하기
-                  </Button>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -755,7 +843,7 @@ const ProjectDashboardPage = () => {
                             variant="ghost"
                             size="sm"
                             onClick={(e) => handleShortFormUploadClick(shortForm, e)}
-                            className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/90 hover:bg-background"
+                            className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/90 hover:bg-background hover:text-foreground"
                           >
                             <Upload className="h-4 w-4 mr-1" />
                             <span className="text-xs">업로드</span>
@@ -768,7 +856,7 @@ const ProjectDashboardPage = () => {
                               e.stopPropagation();
                               handleDeleteItemClick("short", shortForm.id);
                             }}
-                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/90 hover:bg-background text-destructive"
+                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-background/90 hover:bg-destructive hover:text-destructive-foreground text-destructive"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -786,6 +874,7 @@ const ProjectDashboardPage = () => {
                             <Switch
                               checked={shortForm.isPublic || false}
                               onCheckedChange={() => handleToggleShortFormPublic(shortForm.id)}
+                              className="data-[state=checked]:bg-[#FF8A3D]"
                             />
                           </div>
                         </div>
@@ -803,7 +892,19 @@ const ProjectDashboardPage = () => {
 
       {/* 로고/숏폼 삭제 확인 다이얼로그 */}
       <AlertDialog open={isDeleteItemDialogOpen} onOpenChange={setIsDeleteItemDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent
+          onOverlayClick={() => setIsDeleteItemDialogOpen(false)}
+        >
+          {/* X 버튼 */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-4 top-4 h-6 w-6 rounded-sm opacity-70 ring-offset-background transition-opacity hover:bg-transparent hover:opacity-100 hover:text-foreground focus:outline-none focus:ring-0 z-10"
+            onClick={() => setIsDeleteItemDialogOpen(false)}
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </Button>
           <AlertDialogHeader>
             <AlertDialogTitle>삭제하시겠습니까?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -821,7 +922,25 @@ const ProjectDashboardPage = () => {
 
       {/* 공유 확인 다이얼로그 */}
       <AlertDialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent
+          onOverlayClick={() => {
+            setIsShareDialogOpen(false);
+            setPendingToggleItem(null);
+          }}
+        >
+          {/* X 버튼 */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-4 top-4 h-6 w-6 rounded-sm opacity-70 ring-offset-background transition-opacity hover:bg-transparent hover:opacity-100 hover:text-foreground focus:outline-none focus:ring-0 z-10"
+            onClick={() => {
+              setIsShareDialogOpen(false);
+              setPendingToggleItem(null);
+            }}
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </Button>
           <AlertDialogHeader>
             <AlertDialogTitle>게시하시겠습니까?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -844,7 +963,19 @@ const ProjectDashboardPage = () => {
 
       {/* 프로젝트 삭제 확인 다이얼로그 */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent
+          onOverlayClick={() => setIsDeleteDialogOpen(false)}
+        >
+          {/* X 버튼 */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-4 top-4 h-6 w-6 rounded-sm opacity-70 ring-offset-background transition-opacity hover:bg-transparent hover:opacity-100 hover:text-foreground focus:outline-none focus:ring-0 z-10"
+            onClick={() => setIsDeleteDialogOpen(false)}
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </Button>
           <AlertDialogHeader>
             <AlertDialogTitle>프로젝트를 삭제하시겠습니까?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -872,74 +1003,116 @@ const ProjectDashboardPage = () => {
         }
       }}>
         <DialogContent className="max-w-[500px]">
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold mb-2">숏폼 업로드</h3>
+              <h3 className="text-lg font-semibold mb-4">숏폼 업로드</h3>
               {selectedShortFormForUpload && (
-                <div className="aspect-[9/16] w-32 mx-auto mb-4 rounded-lg overflow-hidden bg-muted">
-                  <video
-                    src={selectedShortFormForUpload.url}
-                    className="w-full h-full object-cover"
-                    muted
-                    loop
-                    playsInline
-                    autoPlay
-                  />
+                <div className="space-y-2">
+                  <div className="aspect-[9/16] w-full max-w-[200px] mx-auto rounded-lg overflow-hidden bg-muted">
+                    <video
+                      src={selectedShortFormForUpload.url}
+                      className="w-full h-full object-cover"
+                      muted
+                      loop
+                      playsInline
+                      autoPlay
+                    />
+                  </div>
                 </div>
               )}
             </div>
             
-            <div className="space-y-3">
-              <p className="text-sm text-muted-foreground">업로드할 플랫폼을 선택하세요</p>
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground text-center">업로드할 플랫폼을 선택해주세요</p>
               {selectedShortFormForUpload && (() => {
                 const connections = checkSocialMediaConnection();
-                const savedItemId = getShortFormSavedItemId(selectedShortFormForUpload.id);
+                const savedItemId = getShortFormSavedItemId(selectedShortFormForUpload.id, selectedShortFormForUpload.url);
                 const uploadStatus = getShortFormUploadStatus(savedItemId);
                 
                 return (
-                  <div className="flex flex-col gap-3">
-                    {/* Instagram */}
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="upload-instagram"
-                        checked={selectedPlatforms.has("instagram")}
-                        onCheckedChange={() => handlePlatformToggle("instagram")}
-                        disabled={!connections.instagram || uploadStatus.instagram}
-                      />
-                      <label
-                        htmlFor="upload-instagram"
-                        className={`text-sm font-medium leading-none cursor-pointer flex items-center gap-2 ${
-                          !connections.instagram || uploadStatus.instagram ? "opacity-50 cursor-not-allowed" : ""
-                        }`}
-                      >
-                        <Instagram className="h-4 w-4" />
-                        Instagram
-                        {uploadStatus.instagram && (
-                          <span className="text-xs text-muted-foreground ml-1">(이미 업로드됨)</span>
-                        )}
-                      </label>
+                  <div className="flex justify-center gap-4">
+                    {/* Instagram 카드 */}
+                    <div className="flex flex-col items-center gap-1">
+                    <Card 
+                      className={`relative cursor-pointer transition-all hover:opacity-80 ${
+                        !connections.instagram || uploadStatus.instagram 
+                          ? "opacity-50 cursor-not-allowed" 
+                          : selectedPlatforms.has("instagram")
+                          ? "ring-2 ring-primary"
+                          : ""
+                      }`}
+                      onClick={() => {
+                        if (!connections.instagram || uploadStatus.instagram) return;
+                        handlePlatformToggle("instagram");
+                      }}
+                    >
+                      <CardContent className="p-6 flex flex-col items-center gap-4 min-w-[140px]">
+                        <div className="absolute top-3 left-3">
+                          <div className={`h-4 w-4 rounded-full border-2 ${
+                            selectedPlatforms.has("instagram")
+                              ? "bg-primary border-primary"
+                              : "border-muted-foreground/50"
+                          }`}>
+                            {selectedPlatforms.has("instagram") && (
+                              <div className="h-full w-full rounded-full bg-primary flex items-center justify-center">
+                                <div className="h-2 w-2 rounded-full bg-background" />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <img
+                          src="/icon/instagram-logo.png"
+                          alt="Instagram"
+                          className="h-12 w-12 object-contain"
+                        />
+                        <span className="text-sm font-medium lowercase">instagram</span>
+                      </CardContent>
+                    </Card>
+                      {uploadStatus.instagram && (
+                        <span className="text-xs text-muted-foreground mt-1">(이미 업로드됨)</span>
+                      )}
                     </div>
                     
-                    {/* YouTube */}
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="upload-youtube"
-                        checked={selectedPlatforms.has("youtube")}
-                        onCheckedChange={() => handlePlatformToggle("youtube")}
-                        disabled={!connections.youtube || uploadStatus.youtube}
-                      />
-                      <label
-                        htmlFor="upload-youtube"
-                        className={`text-sm font-medium leading-none cursor-pointer flex items-center gap-2 ${
-                          !connections.youtube || uploadStatus.youtube ? "opacity-50 cursor-not-allowed" : ""
-                        }`}
-                      >
-                        <Youtube className="h-4 w-4" />
-                        YouTube
-                        {uploadStatus.youtube && (
-                          <span className="text-xs text-muted-foreground ml-1">(이미 업로드됨)</span>
-                        )}
-                      </label>
+                    {/* YouTube 카드 */}
+                    <div className="flex flex-col items-center gap-1">
+                    <Card 
+                      className={`relative cursor-pointer transition-all hover:opacity-80 ${
+                        !connections.youtube || uploadStatus.youtube 
+                          ? "opacity-50 cursor-not-allowed" 
+                          : selectedPlatforms.has("youtube")
+                          ? "ring-2 ring-primary"
+                          : ""
+                      }`}
+                      onClick={() => {
+                        if (!connections.youtube || uploadStatus.youtube) return;
+                        handlePlatformToggle("youtube");
+                      }}
+                    >
+                      <CardContent className="p-6 flex flex-col items-center gap-4 min-w-[140px]">
+                        <div className="absolute top-3 left-3">
+                          <div className={`h-4 w-4 rounded-full border-2 ${
+                            selectedPlatforms.has("youtube")
+                              ? "bg-primary border-primary"
+                              : "border-muted-foreground/50"
+                          }`}>
+                            {selectedPlatforms.has("youtube") && (
+                              <div className="h-full w-full rounded-full bg-primary flex items-center justify-center">
+                                <div className="h-2 w-2 rounded-full bg-background" />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <img
+                          src="/icon/youtube-logo.png"
+                          alt="YouTube"
+                          className="h-12 w-12 object-contain"
+                        />
+                        <span className="text-sm font-medium lowercase">youtube</span>
+                      </CardContent>
+                    </Card>
+                      {uploadStatus.youtube && (
+                        <span className="text-xs text-muted-foreground mt-1">(이미 업로드됨)</span>
+                      )}
                     </div>
                   </div>
                 );
@@ -955,6 +1128,7 @@ const ProjectDashboardPage = () => {
                     setSelectedShortFormForUpload(null);
                     setSelectedPlatforms(new Set());
                   }}
+                  className="hover:bg-transparent hover:text-foreground"
                 >
                   취소
                 </Button>
@@ -966,49 +1140,56 @@ const ProjectDashboardPage = () => {
               </div>
             )}
             
-            {selectedPlatforms.size === 0 && (
-              <p className="text-xs text-muted-foreground text-center">
-                업로드할 플랫폼을 선택해주세요
-              </p>
-            )}
           </div>
         </DialogContent>
       </Dialog>
 
       {/* 이미지/비디오 확대 보기 다이얼로그 */}
       <Dialog open={!!selectedImage} onOpenChange={(open) => !open && setSelectedImage(null)}>
-        <DialogContent className="max-w-none w-auto p-0 bg-transparent border-none shadow-none">
+        <DialogContent className="max-w-none w-auto p-0 bg-transparent border-none shadow-none [&>button]:hidden">
           <div className="relative flex items-center justify-center min-w-[300px] min-h-[533px]">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute top-2 right-2 z-10 bg-background/80 hover:bg-background"
-              onClick={() => setSelectedImage(null)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
             {selectedImage && (
               selectedImage.type === "short" ? (
-                <video
-                  src={selectedImage.url}
-                  className="rounded-lg"
-                  style={{ 
-                    width: 'min(90vw, 400px)',
-                    height: 'auto',
-                    aspectRatio: '9/16'
-                  }}
-                  controls
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                />
+                <>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-2 right-2 z-10 bg-background/80 hover:bg-transparent"
+                    onClick={() => setSelectedImage(null)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                  <video
+                    src={selectedImage.url}
+                    className="rounded-lg"
+                    style={{ 
+                      width: 'min(90vw, 400px)',
+                      height: 'auto',
+                      aspectRatio: '9/16'
+                    }}
+                    controls
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                  />
+                </>
               ) : (
-                <img
-                  src={selectedImage.url}
-                  alt={selectedImage.title}
-                  className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg"
-                />
+                <div className="relative">
+                  <img
+                    src={selectedImage.url}
+                    alt={selectedImage.title}
+                    className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-2 right-2 z-10 bg-background/80 hover:bg-transparent"
+                    onClick={() => setSelectedImage(null)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
               )
             )}
           </div>

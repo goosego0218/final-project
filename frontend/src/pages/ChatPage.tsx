@@ -161,6 +161,7 @@ const ChatPage = () => {
     toast({
       title: "로그아웃되었습니다",
       description: "다음에 또 만나요!",
+      status: "success",
     });
     navigate("/");
   };
@@ -293,7 +294,7 @@ const ChatPage = () => {
       toast({
         title: "오류",
         description: "프로젝트를 찾을 수 없습니다.",
-        variant: "destructive",
+        status: "error",
       });
       return;
     }
@@ -303,7 +304,7 @@ const ChatPage = () => {
       toast({
         title: "오류",
         description: "프로젝트를 찾을 수 없습니다.",
-        variant: "destructive",
+        status: "error",
       });
       return;
     }
@@ -322,7 +323,8 @@ const ChatPage = () => {
       : "";
     toast({
       title: "스튜디오로 이동합니다",
-      description: project.logo ? "업로드한 로고를 사용합니다." : "Studio에서 로고를 생성할 수 있습니다.",
+      description: project.logo ? "업로드한 로고를 사용합니다." : "Studio에서 로고와 숏폼을 생성할 수 있습니다.",
+      status: "success",
     });
     
     navigate(`/studio?project=${projectId}${typeParam}${fromStyleParam}`);
@@ -689,7 +691,7 @@ const ChatPage = () => {
       toast({
         title: "필수 항목 미입력",
         description: "브랜드명과 업종은 필수 항목입니다.",
-        variant: "destructive",
+        status: "warning",
       });
       return;
     }
@@ -746,7 +748,7 @@ const ChatPage = () => {
       toast({
         title: "오류",
         description: "프로젝트를 찾을 수 없습니다.",
-        variant: "destructive",
+        status: "error",
       });
       return;
     }
@@ -828,7 +830,7 @@ const ChatPage = () => {
       toast({
         title: "지원하지 않는 파일 형식",
         description: "PNG, JPG, SVG 이미지 파일만 업로드할 수 있습니다.",
-        variant: "destructive",
+        status: "warning",
       });
       // 파일 입력 초기화
       if (e.target) {
@@ -841,7 +843,7 @@ const ChatPage = () => {
       toast({
         title: "오류",
         description: "프로젝트를 찾을 수 없습니다.",
-        variant: "destructive",
+        status: "error",
       });
       return;
     }
@@ -875,6 +877,7 @@ const ChatPage = () => {
           toast({
             title: "로고가 업로드되었습니다",
             description: "Studio로 이동합니다.",
+            status: "success",
           });
           
           // 공통 함수로 Studio 이동
@@ -891,6 +894,7 @@ const ChatPage = () => {
           toast({
             title: "로고가 저장되었습니다",
             description: "프로젝트에 로고가 저장되었습니다.",
+            status: "success",
           });
         }
       } else {
@@ -903,7 +907,7 @@ const ChatPage = () => {
       toast({
         title: "파일 읽기 오류",
         description: "파일을 읽는 중 오류가 발생했습니다.",
-        variant: "destructive",
+        status: "error",
       });
     };
     
@@ -914,7 +918,7 @@ const ChatPage = () => {
       toast({
         title: "파일 읽기 오류",
         description: "파일을 읽는 중 오류가 발생했습니다.",
-        variant: "destructive",
+        status: "error",
       });
     }
     
@@ -930,7 +934,7 @@ const ChatPage = () => {
       toast({
         title: "필수 항목 미입력",
         description: "브랜드명과 업종은 필수 항목입니다.",
-        variant: "destructive",
+        status: "warning",
       });
       return;
     }
@@ -939,7 +943,7 @@ const ChatPage = () => {
       toast({
         title: "오류",
         description: "프로젝트를 찾을 수 없습니다.",
-        variant: "destructive",
+        status: "error",
       });
       return;
     }
@@ -949,7 +953,7 @@ const ChatPage = () => {
       toast({
         title: "오류",
         description: "프로젝트를 찾을 수 없습니다.",
-        variant: "destructive",
+        status: "error",
       });
       return;
     }
@@ -1114,7 +1118,7 @@ const ChatPage = () => {
                     // 질문을 메시지로 추가
                     const confirmQuestion: Message = {
                       role: "assistant",
-                      content: "어떤 거 만드시겠습니까?"
+                      content: "어떤 작업을 하시겠습니까?"
                     };
                     setMessages(prev => [...prev, confirmQuestion]);
                     projectStorage.addMessage(project.id, confirmQuestion);
@@ -1131,7 +1135,7 @@ const ChatPage = () => {
                   // 질문을 메시지로 추가
                   const confirmQuestion: Message = {
                     role: "assistant",
-                    content: "어떤 거 만드시겠습니까?"
+                    content: "어떤 작업을 하시겠습니까까?"
                   };
                   setMessages(prev => [...prev, confirmQuestion]);
                   projectStorage.addMessage(currentProjectId, confirmQuestion);
@@ -1147,10 +1151,12 @@ const ChatPage = () => {
           
           {canGenerate && (
             <div className="mt-4 flex justify-center gap-3">
-              <Button size="lg" onClick={() => handleGenerateClick("logo")} className="gap-2 bg-primary hover:bg-primary/90">
+              <Button size="lg" onClick={() => handleGenerateClick("logo")} className="gap-2 text-white" style={{ backgroundColor: '#7C22C8' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#6B1DB5'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7C22C8'}>
+                <Image className="h-4 w-4" />
                 로고 생성하기
               </Button>
               <Button size="lg" onClick={() => handleGenerateClick("short")} className="gap-2 bg-primary hover:bg-primary/90">
+                <Video className="h-4 w-4" />
                 숏폼 생성하기
               </Button>
             </div>
@@ -1160,7 +1166,7 @@ const ChatPage = () => {
         </div>
 
         {/* Chat Input - Studio style */}
-        <div className="flex-shrink-0 relative mt-4">
+        <div className="flex-shrink-0 relative mt-4 mb-4">
           <Textarea
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
@@ -1171,15 +1177,16 @@ const ChatPage = () => {
               }
             }}
             placeholder="메시지를 입력하세요..."
-            className="min-h-[80px] resize-none pr-12 pl-4 text-sm w-full"
+            className="min-h-[40px] max-h-[40px] resize-none pr-12 pl-4 py-2 text-sm w-full"
             disabled={currentStep === "complete" || showLogoButtons}
+            rows={1}
           />
           <Button
             onClick={handleSendMessage}
             disabled={!inputMessage.trim() || currentStep === "complete" || showLogoButtons}
             size="icon"
             variant="ghost"
-            className="absolute bottom-2 right-2 h-8 w-8 hover:bg-transparent"
+            className="absolute bottom-1 right-1 h-8 w-8 hover:bg-transparent"
           >
             <Send className="h-4 w-4 text-primary" />
           </Button>
@@ -1188,19 +1195,23 @@ const ChatPage = () => {
 
       {/* Skip Confirmation Dialog */}
       <AlertDialog open={showSkipDialog} onOpenChange={(open) => {
-        // 단계 전환 중이 아닐 때만 팝업 닫기 허용
-        if (!open && skipDialogStep === "confirm") {
+        // 오버레이 클릭 시 모달만 닫기
+        if (!open) {
           setShowSkipDialog(false);
           setSkipDialogStep("confirm"); // 다이얼로그 닫을 때 초기 상태로 리셋
         }
-        // project나 type 단계에서는 onOpenChange로 닫히지 않도록 함
       }}>
-        <AlertDialogContent>
+        <AlertDialogContent
+          onOverlayClick={() => {
+            setShowSkipDialog(false);
+            setSkipDialogStep("confirm");
+          }}
+        >
           {/* X 버튼 */}
           <Button
             variant="ghost"
             size="icon"
-            className="absolute right-4 top-4 h-6 w-6 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 z-10"
+            className="absolute right-4 top-4 h-6 w-6 rounded-sm opacity-70 ring-offset-background transition-opacity hover:bg-transparent hover:opacity-100 hover:text-foreground focus:outline-none focus:ring-0 z-10"
             onClick={() => {
               setShowSkipDialog(false);
               setSkipDialogStep("confirm");
@@ -1242,12 +1253,13 @@ const ChatPage = () => {
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <Button 
+                <Button
                   variant="outline"
                   onClick={() => {
                     setShowSkipDialog(false);
                     setSkipDialogStep("confirm");
                   }}
+                  className="hover:bg-transparent hover:border-border hover:text-foreground"
                 >
                   취소
                 </Button>
@@ -1287,9 +1299,12 @@ const ChatPage = () => {
                     setSkipDialogStep("confirm");
                     handleGoToStudio(currentProjectId, "logo");
                   }}
-                  className="flex-1 bg-transparent border border-neutral-700 text-foreground hover:bg-[#FF8A3D] hover:border-[#FF8A3D] hover:text-white group transition-all"
+                  className="flex-1 border border-neutral-300 dark:border-neutral-700 text-white group transition-all"
+                  style={{ backgroundColor: '#7C22C8' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#6B1DB5'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#7C22C8'; }}
                 >
-                  <Image className="h-4 w-4 mr-2 stroke-foreground group-hover:stroke-white transition-all" />
+                  <Image className="h-4 w-4 mr-2 stroke-white transition-all" />
                   로고 생성하기
                 </Button>
                 <Button
@@ -1306,9 +1321,12 @@ const ChatPage = () => {
                     setSkipDialogStep("confirm");
                     handleGoToStudio(currentProjectId, "short");
                   }}
-                  className="flex-1 bg-transparent border border-neutral-700 text-foreground hover:bg-[#FF8A3D] hover:border-[#FF8A3D] hover:text-white group transition-all"
+                  className="flex-1 border border-neutral-300 dark:border-neutral-700 text-white group transition-all"
+                  style={{ backgroundColor: '#FF8A3D' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#E8792E'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#FF8A3D'; }}
                 >
-                  <Video className="h-4 w-4 mr-2 stroke-foreground group-hover:stroke-white transition-all" />
+                  <Video className="h-4 w-4 mr-2 stroke-white transition-all" />
                   숏폼 생성하기
                 </Button>
               </AlertDialogFooter>
@@ -1319,7 +1337,19 @@ const ChatPage = () => {
 
       {/* Generate Type Selection Dialog */}
       <AlertDialog open={showGenerateTypeDialog} onOpenChange={setShowGenerateTypeDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent
+          onOverlayClick={() => setShowGenerateTypeDialog(false)}
+        >
+          {/* X 버튼 */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-4 top-4 h-6 w-6 rounded-sm opacity-70 ring-offset-background transition-opacity hover:bg-transparent hover:opacity-100 hover:text-foreground focus:outline-none focus:ring-0 z-10"
+            onClick={() => setShowGenerateTypeDialog(false)}
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </Button>
           <AlertDialogHeader>
             <AlertDialogTitle>생성할 항목을 선택해주세요</AlertDialogTitle>
             <AlertDialogDescription>
@@ -1334,8 +1364,12 @@ const ChatPage = () => {
                   handleGoToStudio(currentProjectId, "logo");
                 }
               }}
-              className="flex-1 bg-primary hover:bg-primary/90"
+              className="flex-1 text-white gap-2"
+              style={{ backgroundColor: '#7C22C8' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#6B1DB5'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7C22C8'}
             >
+              <Image className="h-4 w-4" />
               로고 생성하기
             </Button>
             <Button
@@ -1345,8 +1379,9 @@ const ChatPage = () => {
                   handleGoToStudio(currentProjectId, "short");
                 }
               }}
-              className="flex-1 bg-primary hover:bg-primary/90"
+              className="flex-1 bg-primary hover:bg-primary/90 gap-2"
             >
+              <Video className="h-4 w-4" />
               숏폼 생성하기
             </Button>
           </AlertDialogFooter>

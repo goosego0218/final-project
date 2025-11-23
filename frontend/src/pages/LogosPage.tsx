@@ -29,9 +29,9 @@ const LogosPage = () => {
                   placeholder="찾고 싶은 로고 스타일을 검색하세요 (예: 축제, 음식 등)"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="h-12 text-base pr-24"
+                  className="h-12 text-base pr-24 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#7C22C8] focus-visible:border-2"
                 />
-                <Button size="sm" className="absolute right-1.5 top-1.5 h-9">
+                <Button size="sm" className="absolute right-1.5 top-1.5 h-9 bg-[#7C22C8] hover:bg-[#6B1DB5] text-white">
                   <Search className="h-4 w-4 mr-1" />
                   검색
                 </Button>

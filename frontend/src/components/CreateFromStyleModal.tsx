@@ -99,7 +99,7 @@ const CreateFromStyleModal = ({
             <Button 
               onClick={handleContinueExistingProject}
               variant="outline"
-              className="w-full h-auto py-6"
+              className="w-full h-auto py-6 hover:!bg-[#7C22C8] hover:!text-white hover:!border-[#7C22C8]"
             >
               <div className="flex flex-col items-start gap-1">
                 <span className="font-semibold">내가 하던 프로젝트에서 계속하기</span>
@@ -108,16 +108,17 @@ const CreateFromStyleModal = ({
             </Button>
             <Button 
               onClick={handleStartNewProject}
-              className="w-full h-auto py-6 bg-primary hover:bg-primary/90"
+              variant="outline"
+              className="w-full h-auto py-6 hover:!bg-[#7C22C8] hover:!text-white hover:!border-[#7C22C8]"
             >
               <div className="flex flex-col items-start gap-1">
                 <span className="font-semibold">새 프로젝트로 시작하기</span>
-                <span className="text-sm text-primary-foreground/80">새로운 프로젝트를 생성하여 시작합니다</span>
+                <span className="text-sm text-muted-foreground">새로운 프로젝트를 생성하여 시작합니다</span>
               </div>
             </Button>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
+            <Button variant="outline" onClick={() => onOpenChange(false)} className="hover:bg-transparent hover:text-foreground">
               취소
             </Button>
           </DialogFooter>
@@ -175,7 +176,7 @@ const CreateFromStyleModal = ({
               setIsProjectSelectModalOpen(false);
               // 취소 버튼 클릭 시 부모 모달도 닫기
               onOpenChange(false);
-            }}>
+            }} className="hover:bg-transparent hover:text-foreground">
               취소
             </Button>
           </DialogFooter>
@@ -208,6 +209,7 @@ const CreateFromStyleModal = ({
                 placeholder="예: 브랜드 A 마케팅"
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
+                autoComplete="off"
               />
             </div>
             <div className="space-y-2">
@@ -224,7 +226,7 @@ const CreateFromStyleModal = ({
             <Button variant="outline" onClick={() => {
               setIsNewProjectModalOpen(false);
               onOpenChange(false);
-            }}>
+            }} className="hover:bg-transparent hover:text-foreground">
               취소
             </Button>
             <Button 

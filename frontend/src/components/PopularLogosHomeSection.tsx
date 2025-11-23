@@ -1,4 +1,4 @@
-import { Heart, MessageCircle, Clipboard, Sparkles } from "lucide-react";
+import { Heart, MessageCircle, Share2, Sparkles } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import CreateFromStyleModal from "@/components/CreateFromStyleModal";
+import { AuthModals } from "@/components/AuthModals";
 
 interface Logo {
   id: number;
@@ -104,6 +105,8 @@ const PopularLogosHomeSection = () => {
   const [comments, setComments] = useState<Array<{ author: string; authorAvatar?: string; content: string; time: string }>>([]);
   const { toast } = useToast();
   const [isCreateNewModalOpen, setIsCreateNewModalOpen] = useState(false);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isSignUpOpen, setIsSignUpOpen] = useState(false);
 
   // Get top logos by likes from the same data source as LogoGallery
   const [topLogos, setTopLogos] = useState<Logo[]>(getTopLogosByLikes());
@@ -228,14 +231,23 @@ const PopularLogosHomeSection = () => {
 
   const handleLike = () => {
     if (!selectedLogo) return;
+    
+    // 로그인 상태 확인
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+    if (!isLoggedIn) {
+      setIsLoginOpen(true);
+      return;
+    }
+    
     const newLikedState = !isLiked;
     setIsLiked(newLikedState);
-    const newLikesCount = newLikedState ? likesCount + 1 : Math.max(0, likesCount - 1);
-    setLikesCount(newLikesCount);
-    saveLikedLogo(selectedLogo.id, newLikedState);
     
     // 카드 목록의 좋아요 수 업데이트
     const updatedLikes = Math.max(0, newLikedState ? selectedLogo.likes + 1 : selectedLogo.likes - 1);
+    
+    // 선택된 로고의 좋아요 수 즉시 업데이트
+    setSelectedLogo(prev => prev ? { ...prev, likes: updatedLikes } : null);
+    
     setTopLogos(prev => prev.map(logo => {
       if (logo.id === selectedLogo.id) {
         return {
@@ -246,6 +258,8 @@ const PopularLogosHomeSection = () => {
       return logo;
     }));
     
+    saveLikedLogo(selectedLogo.id, newLikedState);
+    
     // localStorage에 좋아요 수 저장
     const stats = JSON.parse(localStorage.getItem(`logo_stats_${selectedLogo.id}`) || '{}');
     stats.likes = updatedLikes;
@@ -255,14 +269,22 @@ const PopularLogosHomeSection = () => {
     window.dispatchEvent(new Event('storage'));
     window.dispatchEvent(new CustomEvent('logoStatsUpdated', { detail: { id: selectedLogo.id, likes: updatedLikes } }));
     
-    toast({ description: newLikedState ? "좋아요를 눌렀습니다" : "좋아요를 취소했습니다" });
+    toast({ 
+      description: newLikedState ? "좋아요를 눌렀습니다" : "좋아요를 취소했습니다",
+      status: "default",
+    });
   };
 
   const handleComment = () => {
     if (commentText.trim() && selectedLogo) {
       // 로그인 상태 확인
       const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
-      const userProfile = isLoggedIn ? JSON.parse(localStorage.getItem('userProfile') || '{}') : {};
+      if (!isLoggedIn) {
+        setIsLoginOpen(true);
+        return;
+      }
+      
+      const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
       const newComment = {
         author: userProfile.nickname || "익명",
         authorAvatar: userProfile.avatar || undefined,
@@ -296,7 +318,10 @@ const PopularLogosHomeSection = () => {
       window.dispatchEvent(new Event('storage'));
       window.dispatchEvent(new CustomEvent('logoStatsUpdated', { detail: { id: selectedLogo.id, comments: updatedCommentsCount } }));
       
-      toast({ description: "댓글이 등록되었습니다" });
+      toast({ 
+        description: "댓글이 등록되었습니다",
+        status: "default",
+      });
       setCommentText("");
     }
   };
@@ -304,7 +329,10 @@ const PopularLogosHomeSection = () => {
   const handleShare = () => {
     const url = selectedLogo ? `${window.location.origin}/logos?logo=${selectedLogo.id}` : window.location.href;
     navigator.clipboard.writeText(url);
-    toast({ description: "링크가 복사되었습니다" });
+    toast({ 
+      description: "링크가 복사되었습니다",
+      status: "default",
+    });
   };
 
   const handleCreateNew = () => {
@@ -324,8 +352,8 @@ const PopularLogosHomeSection = () => {
   return (
     <>
     <section className="w-full py-24 bg-gradient-to-b from-background to-secondary/20 overflow-hidden">
-      <div className="w-full px-12">
-        <div className="text-center mb-12">
+      <div className="w-full px-12 mb-12">
+        <div className="text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
             가장 인기 있는 로고
           </h2>
@@ -333,23 +361,23 @@ const PopularLogosHomeSection = () => {
             커뮤니티에서 가장 사랑받는 로고 디자인을 만나보세요
           </p>
         </div>
+      </div>
 
-        {/* Scrolling gallery */}
-        <div
-          ref={scrollContainerRef}
-          className="overflow-x-hidden overflow-y-visible scrollbar-hide"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        >
-          <div className="flex gap-6 py-2">
-              {duplicatedLogos.map((logo, index) => (
-                <LogoCard
-                  key={`${logo.id}-${index}`}
-                  logo={logo}
-                  onClick={() => setSelectedLogo(logo)}
-                />
-              ))}
-          </div>
+      {/* Scrolling gallery */}
+      <div
+        ref={scrollContainerRef}
+        className="overflow-x-hidden overflow-y-visible scrollbar-hide"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        <div className="flex gap-6 py-2">
+            {duplicatedLogos.map((logo, index) => (
+              <LogoCard
+                key={`${logo.id}-${index}`}
+                logo={logo}
+                onClick={() => setSelectedLogo(logo)}
+              />
+            ))}
         </div>
       </div>
     </section>
@@ -363,7 +391,7 @@ const PopularLogosHomeSection = () => {
             if (logo.id === selectedLogo.id) {
               return {
                 ...logo,
-                likes: Math.max(0, selectedLogo.likes + likesCount),
+                likes: selectedLogo.likes,
                 comments: comments.length
               };
             }
@@ -391,7 +419,7 @@ const PopularLogosHomeSection = () => {
           {/* Right: Comments and Actions */}
           <div className="flex flex-col bg-background w-full md:w-[400px] md:flex-shrink-0 aspect-square md:aspect-auto md:h-[400px] rounded-r-lg">
             {/* Comments Section - Top */}
-            <div className="flex-1 min-h-0 overflow-y-auto p-6 border-b border-border">
+            <div className="flex-1 min-h-0 overflow-y-auto p-6">
               <div className="space-y-4">
                 {comments.length === 0 ? (
                   <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
@@ -422,23 +450,23 @@ const PopularLogosHomeSection = () => {
             </div>
 
             {/* Action Buttons - Middle */}
-            <div className="p-4 border-b border-border space-y-3">
+            <div className="p-3 border-t-[1px] border-border space-y-2">
               <div className="flex items-center gap-3">
                 <Button 
                   variant="ghost" 
                   onClick={handleLike}
-                  className="h-9 px-3 gap-2"
+                  className="h-8 px-3 gap-2 hover:bg-[#7C22C8]/10 hover:text-[#7C22C8]"
                 >
-                  <Heart className={`h-5 w-5 ${isLiked ? "fill-destructive text-destructive" : ""}`} />
-                  <span className="text-sm font-semibold text-foreground">
-                    {Math.max(0, selectedLogo ? selectedLogo.likes + likesCount : 0).toLocaleString()}
-                  </span>
+                  <Heart className={`h-4 w-4 ${isLiked ? "fill-destructive text-destructive" : ""}`} />
+                    <span className="text-sm font-semibold text-foreground">
+                      {selectedLogo ? selectedLogo.likes.toLocaleString() : "0"}
+                    </span>
                 </Button>
                 <Button 
                   variant="ghost" 
-                  className="h-9 px-3 gap-2"
+                  className="h-8 px-3 gap-2 hover:bg-[#7C22C8]/10 hover:text-[#7C22C8]"
                 >
-                  <MessageCircle className="h-5 w-5" />
+                  <MessageCircle className="h-4 w-4" />
                   <span className="text-sm font-semibold text-foreground">
                     {comments.length.toLocaleString()}
                   </span>
@@ -447,26 +475,26 @@ const PopularLogosHomeSection = () => {
                   variant="ghost" 
                   size="icon"
                   onClick={handleShare}
-                  className="h-9 w-9"
+                  className="h-8 w-8 hover:bg-[#7C22C8]/10 hover:text-[#7C22C8]"
                 >
-                  <Clipboard className="h-5 w-5" />
+                  <Share2 className="h-4 w-4" />
                 </Button>
               </div>
-              <Button onClick={handleCreateNew} className="w-full bg-primary hover:bg-primary/90">
+              <Button onClick={handleCreateNew} className="w-full h-9 bg-[#7C22C8] hover:bg-[#6B1DB5] text-white text-sm">
                 <Sparkles className="w-4 h-4 mr-2" />
                 이 스타일로 새로운 작품 만들기
               </Button>
             </div>
 
             {/* Comment Input - Bottom */}
-            <div className="p-4 border-t border-border">
+            <div className="p-3 border-t-[1px] border-border">
               <div className="flex gap-2">
                 <Textarea 
                   placeholder="댓글을 입력하세요..." 
                   value={commentText} 
                   onChange={(e) => setCommentText(e.target.value)} 
-                  className="min-h-[60px] resize-none flex-1" 
-                  rows={2}
+                  className="h-[40px] min-h-[40px] max-h-[40px] resize-none flex-1 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#7C22C8] focus-visible:border-2" 
+                  rows={1}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();
@@ -479,7 +507,7 @@ const PopularLogosHomeSection = () => {
                 <Button 
                   onClick={handleComment} 
                   disabled={!commentText.trim()} 
-                  className="h-[60px] px-6"
+                  className="h-[40px] px-6 bg-[#7C22C8] hover:bg-[#6B1DB5] text-white disabled:opacity-50"
                 >
                   등록
                 </Button>
@@ -508,6 +536,25 @@ const PopularLogosHomeSection = () => {
         baseAssetImageUrl={selectedLogoForCreate.imageSrc}
       />
     )}
+
+    <AuthModals
+      isLoginOpen={isLoginOpen}
+      isSignUpOpen={isSignUpOpen}
+      onLoginClose={() => setIsLoginOpen(false)}
+      onSignUpClose={() => setIsSignUpOpen(false)}
+      onSwitchToSignUp={() => {
+        setIsLoginOpen(false);
+        setIsSignUpOpen(true);
+      }}
+      onSwitchToLogin={() => {
+        setIsSignUpOpen(false);
+        setIsLoginOpen(true);
+      }}
+      onLoginSuccess={(rememberMe) => {
+        setIsLoginOpen(false);
+        setIsSignUpOpen(false);
+      }}
+    />
   </>
   );
 };

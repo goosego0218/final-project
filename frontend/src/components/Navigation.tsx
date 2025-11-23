@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
-import { Zap, User, FolderOpen, CreditCard, Heart, Instagram, Youtube } from "lucide-react";
+import { Zap, User, FolderOpen, CreditCard, Heart, Instagram, Youtube, BarChart3 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
 const Navigation = () => {
@@ -108,7 +108,7 @@ const Navigation = () => {
     setIsLoginOpen(true);
   };
 
-  const handleLoginSuccess = (rememberMe: boolean) => {
+  const handleLoginSuccess = (rememberMe: boolean, isSignUp?: boolean) => {
     setIsLoggedIn(true);
     if (rememberMe) {
       localStorage.setItem('isLoggedIn', 'true');
@@ -119,10 +119,15 @@ const Navigation = () => {
     }
     setIsLoginOpen(false);
     setIsSignUpOpen(false);
-    toast({
-      title: "로그인 되었습니다",
-      description: "환영합니다!",
-    });
+    
+    // 회원가입이 아닌 경우에만 로그인 토스트 표시
+    if (!isSignUp) {
+      toast({
+        title: "로그인 되었습니다",
+        description: "환영합니다!",
+        status: "success",
+      });
+    }
   };
 
   const handleLogout = () => {
@@ -133,6 +138,7 @@ const Navigation = () => {
     toast({
       title: "로그아웃되었습니다",
       description: "다음에 또 만나요!",
+      status: "success",
     });
     navigate("/");
   };
@@ -259,20 +265,16 @@ const Navigation = () => {
                         <p className="text-xs text-muted-foreground">{userProfile?.id || "user123"}</p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Instagram 
-                          className={`h-5 w-5 ${
-                            userProfile?.instagram?.connected 
-                              ? "text-pink-600 fill-pink-600" 
-                              : "text-muted-foreground/30"
-                          }`}
-                        />
-                        <Youtube 
-                          className={`h-5 w-5 ${
-                            userProfile?.youtube?.connected 
-                              ? "text-red-600 fill-red-600" 
-                              : "text-muted-foreground/30"
-                          }`}
-                        />
+                        {userProfile?.instagram?.connected ? (
+                          <img src="/icon/instagram-logo.png" alt="Instagram" className="h-5 w-5" />
+                        ) : (
+                          <Instagram className="h-5 w-5 text-muted-foreground/30" strokeWidth={1.5} />
+                        )}
+                        {userProfile?.youtube?.connected ? (
+                          <img src="/icon/youtube-logo.png" alt="YouTube" className="h-5 w-5 object-contain" />
+                        ) : (
+                          <Youtube className="h-5 w-5 text-muted-foreground/30" strokeWidth={1.5} />
+                        )}
                       </div>
                     </div>
                     
@@ -295,6 +297,14 @@ const Navigation = () => {
                     <DropdownMenuSeparator />
                     
                     {/* Menu Items */}
+                    <DropdownMenuItem onClick={() => navigate("/account")}>
+                      <User className="h-4 w-4 mr-2" />
+                      내 프로필
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/mypage")}>
+                      <Heart className="h-4 w-4 mr-2" />
+                      마이페이지
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate("/projects")}>
                       <FolderOpen className="h-4 w-4 mr-2" />
                       내 프로젝트
@@ -303,13 +313,9 @@ const Navigation = () => {
                       <CreditCard className="h-4 w-4 mr-2" />
                       플랜 관리
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/mypage")}>
-                      <Heart className="h-4 w-4 mr-2" />
-                      마이페이지
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/account")}>
-                      <User className="h-4 w-4 mr-2" />
-                      내 프로필
+                    <DropdownMenuItem onClick={() => navigate("/shorts/report")}>
+                      <BarChart3 className="h-4 w-4 mr-2" />
+                      숏폼 리포트
                     </DropdownMenuItem>
                     
                     <DropdownMenuSeparator />

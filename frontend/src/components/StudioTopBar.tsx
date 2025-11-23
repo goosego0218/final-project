@@ -19,6 +19,7 @@ import {
   User,
   Instagram,
   Youtube,
+  BarChart3,
 } from "lucide-react";
 
 interface StudioTopBarProps {
@@ -52,7 +53,7 @@ const StudioTopBar = ({
     <header className="border-b border-border bg-background/80 backdrop-blur-xl flex-shrink-0">
       <div className="w-full px-12 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={onBack} className="h-9 w-9">
+          <Button variant="ghost" size="icon" onClick={onBack} className="h-9 w-9 hover:bg-transparent">
             <ChevronLeft className="h-5 w-5" />
           </Button>
           <Link
@@ -92,20 +93,16 @@ const StudioTopBar = ({
                   <p className="text-xs text-muted-foreground">{userEmail}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Instagram 
-                    className={`h-5 w-5 ${
-                      instagramConnected 
-                        ? "text-pink-600 fill-pink-600" 
-                        : "text-muted-foreground/30"
-                    }`}
-                  />
-                  <Youtube 
-                    className={`h-5 w-5 ${
-                      youtubeConnected 
-                        ? "text-red-600 fill-red-600" 
-                        : "text-muted-foreground/30"
-                    }`}
-                  />
+                  {instagramConnected ? (
+                    <img src="/icon/instagram-logo.png" alt="Instagram" className="h-5 w-5" />
+                  ) : (
+                    <Instagram className="h-5 w-5 text-muted-foreground/30" strokeWidth={1.5} />
+                  )}
+                  {youtubeConnected ? (
+                    <img src="/icon/youtube-logo.png" alt="YouTube" className="h-5 w-5 object-contain" />
+                  ) : (
+                    <Youtube className="h-5 w-5 text-muted-foreground/30" strokeWidth={1.5} />
+                  )}
                 </div>
               </div>
 
@@ -123,6 +120,14 @@ const StudioTopBar = ({
 
               <DropdownMenuSeparator />
 
+              <DropdownMenuItem onClick={() => onNavigate("/account")}>
+                <User className="h-4 w-4 mr-2" />
+                내 프로필
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onNavigate("/mypage")}>
+                <Heart className="h-4 w-4 mr-2" />
+                마이페이지
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => onNavigate("/projects")}>
                 <FolderOpen className="h-4 w-4 mr-2" />
                 내 프로젝트
@@ -131,13 +136,9 @@ const StudioTopBar = ({
                 <CreditCard className="h-4 w-4 mr-2" />
                 플랜 관리
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onNavigate("/mypage")}>
-                <Heart className="h-4 w-4 mr-2" />
-                마이페이지
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onNavigate("/account")}>
-                <User className="h-4 w-4 mr-2" />
-                내 프로필
+              <DropdownMenuItem onClick={() => onNavigate("/shorts/report")}>
+                <BarChart3 className="h-4 w-4 mr-2" />
+                숏폼 리포트
               </DropdownMenuItem>
 
               <DropdownMenuSeparator />

@@ -3,7 +3,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart, Share2, MessageCircle, Eye, Send, Clipboard, Sparkles, Play } from "lucide-react";
+import { Heart, Share2, MessageCircle, Eye, Send, Sparkles, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import CreateFromStyleModal from "@/components/CreateFromStyleModal";
 import { projectStorage } from "@/lib/projectStorage";
+import { AuthModals } from "@/components/AuthModals";
 
 const MyPage = () => {
   const { toast } = useToast();
@@ -26,6 +27,8 @@ const MyPage = () => {
   const [selectedItemForCreate, setSelectedItemForCreate] = useState<any>(null);
   const [likedItems, setLikedItems] = useState<Array<{ id: number; type: "logo" | "short"; image: string; title: string; likes: number; comments?: number; duration?: string }>>([]);
   const [sharedItems, setSharedItems] = useState<Array<{ id: string | number; type: "logo" | "short"; image: string; title: string; likes: number; comments?: number; duration?: string }>>([]);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isSignUpOpen, setIsSignUpOpen] = useState(false);
 
   // Load liked items from localStorage
   useEffect(() => {
@@ -217,7 +220,7 @@ const MyPage = () => {
                 logoItems.push({
                   id: item.id,
                   type: "logo" as const,
-                  image: item.url,
+                  image: publicLogo.url, // 워터마크가 추가된 URL 사용
                   title: item.title || "로고",
                   likes: stats.likes !== undefined ? stats.likes : (publicLogo.likes || 0),
                   comments: stats.comments !== undefined ? stats.comments : (publicLogo.comments || 0),
@@ -232,8 +235,8 @@ const MyPage = () => {
                 shortItems.push({
                   id: item.id,
                   type: "short" as const,
-                  image: item.url, // 비디오 URL
-                  videoUrl: item.url, // 비디오 URL 명시적으로 추가
+                  image: publicShortForm.thumbnailUrl || publicShortForm.videoUrl || item.url, // 공개된 숏폼의 URL 사용
+                  videoUrl: publicShortForm.videoUrl || item.url, // 공개된 숏폼의 비디오 URL 사용
                   title: item.title || "숏폼",
                   likes: stats.likes !== undefined ? stats.likes : (publicShortForm.likes || 0),
                   comments: stats.comments !== undefined ? stats.comments : (publicShortForm.comments || 0),
@@ -251,13 +254,13 @@ const MyPage = () => {
             const publicLogo = publicLogos.find((l: any) => l.id === uploadedLogoId && l.projectId === project.id);
             if (publicLogo) {
               // 이미 추가되었는지 확인
-              if (!logoItems.some(item => item.id === uploadedLogoId && item.image === project.logo?.url)) {
+              if (!logoItems.some(item => item.id === uploadedLogoId && item.image === publicLogo.url)) {
                 // localStorage에서 통계 불러오기
                 const stats = JSON.parse(localStorage.getItem(`logo_stats_${uploadedLogoId}`) || '{}');
                 logoItems.push({
                   id: uploadedLogoId,
                   type: "logo" as const,
-                  image: project.logo.url,
+                  image: publicLogo.url, // 워터마크가 추가된 URL 사용
                   title: "업로드된 로고",
                   likes: stats.likes !== undefined ? stats.likes : (publicLogo.likes || 0),
                   comments: stats.comments !== undefined ? stats.comments : (publicLogo.comments || 0),
@@ -374,10 +377,16 @@ const MyPage = () => {
 
   const handleLike = () => {
     if (!selectedItem) return;
+    
+    // 로그인 상태 확인
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+    if (!isLoggedIn) {
+      setIsLoginOpen(true);
+      return;
+    }
+    
     const newLikedState = !isLiked;
     setIsLiked(newLikedState);
-    const newLikesCount = newLikedState ? likesCount + 1 : Math.max(0, likesCount - 1);
-    setLikesCount(newLikesCount);
     
     // Save to localStorage
     if (selectedItem.type === "logo") {
@@ -396,6 +405,10 @@ const MyPage = () => {
       
       // 카드 목록의 좋아요 수 업데이트
       const updatedLikes = Math.max(0, newLikedState ? (selectedItem.likes || 0) + 1 : (selectedItem.likes || 0) - 1);
+      
+      // 선택된 아이템의 좋아요 수 즉시 업데이트
+      setSelectedItem(prev => prev ? { ...prev, likes: updatedLikes } : null);
+      
       setSharedItems(prev => prev.map(item => {
         if (item.id === selectedItem.id && item.type === "logo") {
           return {
@@ -440,6 +453,10 @@ const MyPage = () => {
       // 카드 목록의 좋아요 수 업데이트
       const currentLikes = typeof selectedItem.likes === 'number' ? selectedItem.likes : 0;
       const updatedLikes = Math.max(0, newLikedState ? currentLikes + 1 : currentLikes - 1);
+      
+      // 선택된 아이템의 좋아요 수 즉시 업데이트
+      setSelectedItem(prev => prev ? { ...prev, likes: updatedLikes } : null);
+      
       setSharedItems(prev => prev.map(item => {
         const itemId = item.id || item.title?.charCodeAt(0) || 0;
         if (itemId === shortId && item.type === "short") {
@@ -470,7 +487,10 @@ const MyPage = () => {
       window.dispatchEvent(new CustomEvent('shortStatsUpdated', { detail: { id: shortId, likes: updatedLikes } }));
     }
     
-    toast({ description: newLikedState ? "좋아요를 눌렀습니다" : "좋아요를 취소했습니다" });
+    toast({ 
+      description: newLikedState ? "좋아요를 눌렀습니다" : "좋아요를 취소했습니다",
+      status: "default",
+    });
     
     // Reload liked items
     window.dispatchEvent(new Event('storage'));
@@ -480,7 +500,12 @@ const MyPage = () => {
     if (commentText.trim() && selectedItem) {
       // 로그인 상태 확인
       const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
-      const userProfile = isLoggedIn ? JSON.parse(localStorage.getItem('userProfile') || '{}') : {};
+      if (!isLoggedIn) {
+        setIsLoginOpen(true);
+        return;
+      }
+      
+      const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
       const newComment = {
         author: userProfile.nickname || "익명",
         authorAvatar: userProfile.avatar || undefined,
@@ -558,7 +583,10 @@ const MyPage = () => {
         window.dispatchEvent(new CustomEvent('shortStatsUpdated', { detail: { id: shortId, comments: updatedCommentsCount } }));
       }
       
-      toast({ description: "댓글이 등록되었습니다" });
+      toast({ 
+        description: "댓글이 등록되었습니다",
+        status: "default",
+      });
       setCommentText("");
     }
   };
@@ -566,7 +594,10 @@ const MyPage = () => {
   const handleShare = () => {
     const url = selectedItem ? `${window.location.origin}/${selectedItem.type === "logo" ? "logos" : "shorts"}?${selectedItem.type === "logo" ? "logo" : "short"}=${selectedItem.id}` : window.location.href;
     navigator.clipboard.writeText(url);
-    toast({ description: "링크가 복사되었습니다" });
+    toast({ 
+      description: "링크가 복사되었습니다",
+      status: "default",
+    });
   };
 
   const handleCreateNew = () => {
@@ -614,7 +645,11 @@ const MyPage = () => {
                 </Badge>
                 <Badge 
                   variant={sharedFilter === "logo" ? "default" : "outline"}
-                  className="cursor-pointer px-4 py-2"
+                  className={`cursor-pointer px-4 py-2 ${
+                    sharedFilter === "logo" 
+                      ? "bg-[#7C22C8] text-white hover:bg-[#6B1DB5]" 
+                      : ""
+                  }`}
                   onClick={() => setSharedFilter("logo")}
                 >
                   로고
@@ -653,7 +688,7 @@ const MyPage = () => {
                                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                                   <div className="flex items-center gap-4">
                                     <span className="flex items-center gap-1">
-                                      <Heart className="w-4 h-4" />
+                                      <Heart className={`w-4 h-4 ${getLikedLogos().has(Number(item.id)) ? "text-destructive fill-destructive" : ""}`} />
                                       {item.likes.toLocaleString()}
                                     </span>
                                     <span className="flex items-center gap-1">
@@ -709,7 +744,7 @@ const MyPage = () => {
                               <div className="flex items-center justify-between text-sm text-muted-foreground">
                                 <div className="flex items-center gap-4">
                                   <div className="flex items-center gap-1">
-                                    <Heart className="w-4 h-4 text-destructive fill-destructive" />
+                                    <Heart className={`w-4 h-4 ${getLikedShorts().has(Number(item.id)) ? "text-destructive fill-destructive" : ""}`} />
                                     <span>{item.likes.toLocaleString()}</span>
                                   </div>
                                   <div className="flex items-center gap-1">
@@ -813,7 +848,11 @@ const MyPage = () => {
                 </Badge>
                 <Badge 
                   variant={likedFilter === "logo" ? "default" : "outline"}
-                  className="cursor-pointer px-4 py-2"
+                  className={`cursor-pointer px-4 py-2 ${
+                    likedFilter === "logo" 
+                      ? "bg-[#7C22C8] text-white hover:bg-[#6B1DB5]" 
+                      : ""
+                  }`}
                   onClick={() => setLikedFilter("logo")}
                 >
                   로고
@@ -852,8 +891,12 @@ const MyPage = () => {
                                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                                   <div className="flex items-center gap-4">
                                     <span className="flex items-center gap-1">
-                                      <Heart className="w-4 h-4" />
+                                      <Heart className={`w-4 h-4 ${getLikedLogos().has(Number(item.id)) ? "text-destructive fill-destructive" : ""}`} />
                                       {item.likes.toLocaleString()}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                      <MessageCircle className="w-4 h-4" />
+                                      {item.comments || 0}
                                     </span>
                                   </div>
                                 </div>
@@ -904,8 +947,12 @@ const MyPage = () => {
                               <div className="flex items-center justify-between text-sm text-muted-foreground">
                                 <div className="flex items-center gap-4">
                                   <div className="flex items-center gap-1">
-                                    <Heart className="w-4 h-4 text-destructive fill-destructive" />
+                                    <Heart className={`w-4 h-4 ${getLikedShorts().has(Number(item.id)) ? "text-destructive fill-destructive" : ""}`} />
                                     <span>{item.likes.toLocaleString()}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <MessageCircle className="w-4 h-4" />
+                                    <span>{item.comments || 0}</span>
                                   </div>
                                 </div>
                               </div>
@@ -937,8 +984,12 @@ const MyPage = () => {
                             <div className="flex items-center justify-between text-sm text-muted-foreground">
                               <div className="flex items-center gap-4">
                                 <span className="flex items-center gap-1">
-                                  <Heart className="w-4 h-4" />
+                                  <Heart className={`w-4 h-4 ${getLikedLogos().has(Number(item.id)) ? "text-destructive fill-destructive" : ""}`} />
                                   {item.likes.toLocaleString()}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <MessageCircle className="w-4 h-4" />
+                                  {item.comments || 0}
                                 </span>
                               </div>
                             </div>
@@ -972,8 +1023,12 @@ const MyPage = () => {
                           <div className="flex items-center justify-between text-sm text-muted-foreground">
                             <div className="flex items-center gap-4">
                               <div className="flex items-center gap-1">
-                                <Heart className="w-4 h-4 text-destructive fill-destructive" />
+                                <Heart className={`w-4 h-4 ${getLikedShorts().has(Number(item.id)) ? "text-destructive fill-destructive" : ""}`} />
                                 <span>{item.likes.toLocaleString()}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <MessageCircle className="w-4 h-4" />
+                                <span>{item.comments || 0}</span>
                               </div>
                             </div>
                           </div>
@@ -998,7 +1053,7 @@ const MyPage = () => {
                 if (item.id === selectedItem.id && item.type === "logo") {
                   return {
                     ...item,
-                    likes: Math.max(0, (selectedItem.likes || 0) + likesCount),
+                    likes: selectedItem.likes || 0,
                     comments: comments.length
                   };
                 }
@@ -1008,7 +1063,7 @@ const MyPage = () => {
                 if (item.id === selectedItem.id && item.type === "logo") {
                   return {
                     ...item,
-                    likes: Math.max(0, (selectedItem.likes || 0) + likesCount),
+                    likes: selectedItem.likes || 0,
                     comments: comments.length
                   };
                 }
@@ -1036,7 +1091,7 @@ const MyPage = () => {
               {/* Right: Comments and Actions */}
               <div className="flex flex-col bg-background w-full md:w-[400px] md:flex-shrink-0 aspect-square md:aspect-auto md:h-[400px] rounded-r-lg">
                 {/* Comments Section - Top */}
-                <div className="flex-1 min-h-0 overflow-y-auto p-6 border-b border-border">
+                <div className="flex-1 min-h-0 overflow-y-auto p-6">
                   <div className="space-y-4">
                     {comments.length === 0 ? (
                       <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
@@ -1067,42 +1122,51 @@ const MyPage = () => {
                 </div>
 
                 {/* Action Buttons - Middle */}
-                <div className="p-4 border-b border-border space-y-3">
+                <div className={`p-3 border-t-[1px] border-border space-y-2`}>
                   <div className="flex items-center gap-3">
                     <Button 
                       variant="ghost" 
                       onClick={handleLike}
-                      className="h-9 px-3 gap-2"
+                      className={`h-8 px-3 gap-2 ${selectedItem?.type === "logo" ? "hover:bg-[#7C22C8]/10 hover:text-[#7C22C8]" : "hover:bg-primary/10 hover:text-primary"}`}
                     >
-                      <Heart className={`h-5 w-5 ${isLiked ? "fill-destructive text-destructive" : ""}`} />
+                      <Heart className={`h-4 w-4 ${isLiked ? "fill-destructive text-destructive" : ""}`} />
                       <span className="text-sm font-semibold text-foreground">
-                        {(selectedItem ? selectedItem.likes + likesCount : 0).toLocaleString()}
+                        {selectedItem ? selectedItem.likes.toLocaleString() : "0"}
+                      </span>
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      className={`h-8 px-3 gap-2 ${selectedItem?.type === "logo" ? "hover:bg-[#7C22C8]/10 hover:text-[#7C22C8]" : "hover:bg-primary/10 hover:text-primary"}`}
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                      <span className="text-sm font-semibold text-foreground">
+                        {comments.length.toLocaleString()}
                       </span>
                     </Button>
                     <Button 
                       variant="ghost" 
                       size="icon"
                       onClick={handleShare}
-                      className="h-9 w-9"
+                      className={`h-8 w-8 ${selectedItem?.type === "logo" ? "hover:bg-[#7C22C8]/10 hover:text-[#7C22C8]" : "hover:bg-primary/10 hover:text-primary"}`}
                     >
-                      <Clipboard className="h-5 w-5" />
+                      <Share2 className="h-4 w-4" />
                     </Button>
                   </div>
-                  <Button onClick={handleCreateNew} className="w-full bg-primary hover:bg-primary/90">
+                  <Button onClick={handleCreateNew} className={`w-full h-9 text-white text-sm ${selectedItem?.type === "logo" ? "bg-[#7C22C8] hover:bg-[#6B1DB5]" : "bg-primary hover:bg-primary/90"}`}>
                     <Sparkles className="w-4 h-4 mr-2" />
                     이 스타일로 새로운 작품 만들기
                   </Button>
                 </div>
 
                 {/* Comment Input - Bottom */}
-                <div className="p-4 border-t border-border">
+                <div className="p-3 border-t-[1px] border-border">
                   <div className="flex gap-2">
                     <Textarea 
                       placeholder="댓글을 입력하세요..." 
                       value={commentText} 
                       onChange={(e) => setCommentText(e.target.value)} 
-                      className="min-h-[60px] resize-none flex-1" 
-                      rows={2}
+                      className={`h-[40px] min-h-[40px] max-h-[40px] resize-none flex-1 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-2 ${selectedItem?.type === "logo" ? "focus-visible:border-[#7C22C8]" : "focus-visible:border-primary"}`}
+                      rows={1}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
                           e.preventDefault();
@@ -1115,7 +1179,7 @@ const MyPage = () => {
                     <Button 
                       onClick={handleComment} 
                       disabled={!commentText.trim()} 
-                      className="h-[60px] px-6"
+                      className={`h-[40px] px-6 text-white disabled:opacity-50 ${selectedItem?.type === "logo" ? "bg-[#7C22C8] hover:bg-[#6B1DB5]" : "bg-primary hover:bg-primary/90"}`}
                     >
                       등록
                     </Button>
@@ -1139,7 +1203,7 @@ const MyPage = () => {
                 if (itemId === shortId && item.type === "short") {
                   return {
                     ...item,
-                    likes: Math.max(0, (selectedItem.likes || 0) + likesCount),
+                    likes: selectedItem.likes || 0,
                     comments: comments.length
                   };
                 }
@@ -1150,7 +1214,7 @@ const MyPage = () => {
                 if (itemId === shortId && item.type === "short") {
                   return {
                     ...item,
-                    likes: Math.max(0, (selectedItem.likes || 0) + likesCount),
+                    likes: selectedItem.likes || 0,
                     comments: comments.length
                   };
                 }
@@ -1190,7 +1254,7 @@ const MyPage = () => {
               {/* Right: Comments and Actions */}
               <div className="flex flex-col bg-background w-full md:w-[500px] md:flex-shrink-0 aspect-[9/16] md:aspect-auto md:h-[533px] rounded-r-lg">
                 {/* Comments Section - Top */}
-                <div className="flex-1 min-h-0 overflow-y-auto p-6 border-b border-border">
+                <div className="flex-1 min-h-0 overflow-y-auto p-6">
                   <div className="space-y-4">
                     {comments.length === 0 ? (
                       <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
@@ -1221,23 +1285,23 @@ const MyPage = () => {
                 </div>
 
                 {/* Action Buttons - Middle */}
-                <div className="p-4 border-b border-border">
+                <div className={`p-3 border-t-[1px] border-border space-y-2`}>
                   <div className="flex items-center gap-3">
                     <Button 
                       variant="ghost" 
                       onClick={handleLike}
-                      className="h-9 px-3 gap-2"
+                      className={`h-8 px-3 gap-2 ${selectedItem?.type === "logo" ? "hover:bg-[#7C22C8]/10 hover:text-[#7C22C8]" : "hover:bg-primary/10 hover:text-primary"}`}
                     >
-                      <Heart className={`h-5 w-5 ${isLiked ? "fill-destructive text-destructive" : ""}`} />
+                      <Heart className={`h-4 w-4 ${isLiked ? "fill-destructive text-destructive" : ""}`} />
                       <span className="text-sm font-semibold text-foreground">
                         {Math.max(0, selectedItem ? (selectedItem.likes || 0) + likesCount : 0).toLocaleString()}
                       </span>
                     </Button>
                     <Button 
                       variant="ghost" 
-                      className="h-9 px-3 gap-2"
+                      className={`h-8 px-3 gap-2 ${selectedItem?.type === "logo" ? "hover:bg-[#7C22C8]/10 hover:text-[#7C22C8]" : "hover:bg-primary/10 hover:text-primary"}`}
                     >
-                      <MessageCircle className="h-5 w-5" />
+                      <MessageCircle className="h-4 w-4" />
                       <span className="text-sm font-semibold text-foreground">
                         {comments.length.toLocaleString()}
                       </span>
@@ -1246,22 +1310,22 @@ const MyPage = () => {
                       variant="ghost" 
                       size="icon"
                       onClick={handleShare}
-                      className="h-9 w-9"
+                      className={`h-8 w-8 ${selectedItem?.type === "logo" ? "hover:bg-[#7C22C8]/10 hover:text-[#7C22C8]" : "hover:bg-primary/10 hover:text-primary"}`}
                     >
-                      <Clipboard className="h-5 w-5" />
+                      <Share2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
 
                 {/* Comment Input - Bottom */}
-                <div className="p-4 border-t border-border">
+                <div className="p-3 border-t-[1px] border-border">
                   <div className="flex gap-2">
                     <Textarea 
                       placeholder="댓글을 입력하세요..." 
                       value={commentText} 
                       onChange={(e) => setCommentText(e.target.value)} 
-                      className="min-h-[60px] resize-none flex-1" 
-                      rows={2}
+                      className={`h-[40px] min-h-[40px] max-h-[40px] resize-none flex-1 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-2 ${selectedItem?.type === "logo" ? "focus-visible:border-[#7C22C8]" : "focus-visible:border-primary"}`}
+                      rows={1}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
                           e.preventDefault();
@@ -1274,7 +1338,7 @@ const MyPage = () => {
                     <Button 
                       onClick={handleComment} 
                       disabled={!commentText.trim()} 
-                      className="h-[60px] px-6"
+                      className={`h-[40px] px-6 text-white disabled:opacity-50 ${selectedItem?.type === "logo" ? "bg-[#7C22C8] hover:bg-[#6B1DB5]" : "bg-primary hover:bg-primary/90"}`}
                     >
                       등록
                     </Button>
@@ -1304,6 +1368,25 @@ const MyPage = () => {
           baseAssetImageUrl={selectedItemForCreate.image}
         />
       )}
+
+      <AuthModals
+        isLoginOpen={isLoginOpen}
+        isSignUpOpen={isSignUpOpen}
+        onLoginClose={() => setIsLoginOpen(false)}
+        onSignUpClose={() => setIsSignUpOpen(false)}
+        onSwitchToSignUp={() => {
+          setIsLoginOpen(false);
+          setIsSignUpOpen(true);
+        }}
+        onSwitchToLogin={() => {
+          setIsSignUpOpen(false);
+          setIsLoginOpen(true);
+        }}
+        onLoginSuccess={(rememberMe) => {
+          setIsLoginOpen(false);
+          setIsSignUpOpen(false);
+        }}
+      />
       
       <Footer />
     </div>

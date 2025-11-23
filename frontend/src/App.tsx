@@ -7,6 +7,7 @@ import { ThemeProvider } from "next-themes";
 import Index from "./pages/Index";
 import LogosPage from "./pages/LogosPage";
 import ShortsPage from "./pages/ShortsPage";
+import ShortsReportPage from "./pages/ShortsReportPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import ProjectDashboardPage from "./pages/ProjectDashboardPage";
 import PlansPage from "./pages/PlansPage";
@@ -30,6 +31,7 @@ const App = () => {
             <Route path="/" element={<Index />} />
             <Route path="/logos" element={<LogosPage />} />
             <Route path="/shorts" element={<ShortsPage />} />
+            <Route path="/shorts/report" element={<ShortsReportPage />} />
             <Route path="/projects" element={<ProjectsPage />} />
             <Route path="/project" element={<ProjectDashboardPage />} />
             <Route path="/plans" element={<PlansPage />} />
