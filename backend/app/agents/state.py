@@ -4,6 +4,7 @@
 # 수정내역
 # - 2025-11-17: 초기 작성
 # - 2025-11-19: LangChain AgentState 적용
+# - 2025-11-22: 숏폼 에이전트 State 추가
 
 from __future__ import annotations
 
@@ -11,6 +12,20 @@ from typing import Literal, Optional, Dict, Any
 from typing_extensions import TypedDict
 
 from langchain.agents import AgentState
+
+class ShortsState(TypedDict, total=False):
+    """
+    숏폼 에이전트 전용 State
+    
+    AppState 내부에 shorts_state: ShortsAgentState 형태로 사용
+    """
+    logo_usage_choice: Optional[Literal["use_existing", "without_logo"]]
+    logo_file_path: Optional[str]
+    selected_image_path: Optional[str]
+    generated_prompt: Optional[str]
+    video_file_path: Optional[str]
+    save_choice: Optional[Literal["save", "regenerate"]]
+
 
 class BrandProfile(TypedDict, total=False):
     """
@@ -76,3 +91,6 @@ class AppState(AgentState):
 
     # 추가로 메타데이터 보관용 (필요 시 확장)
     meta: Dict[str, Any]
+
+    # 숏폼 에이전트 전용 State - 11-22 추가
+    shorts_state: ShortsState
