@@ -78,31 +78,58 @@ export const AuthModals = ({
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // 입력 검증
+    if (!loginId.trim()) {
+      toast({
+        title: "입력 오류",
+        description: "아이디를 입력해주세요.",
+        status: "error",
+      });
+      return;
+    }
+
+    if (!loginPassword.trim()) {
+      toast({
+        title: "입력 오류",
+        description: "비밀번호를 입력해주세요.",
+        status: "error",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const response = await login({
-        login_id: loginId,
+        login_id: loginId.trim(),
         password: loginPassword,
       });
 
       // 토큰 저장
       if (rememberMe) {
         localStorage.setItem('accessToken', response.access_token);
-        sessionStorage.removeItem('accessToken');
+        sessionStorage.removeItem('accessToken'); // sessionStorage는 제거
       } else {
         sessionStorage.setItem('accessToken', response.access_token);
-        localStorage.removeItem('accessToken');
+        localStorage.removeItem('accessToken'); // localStorage는 제거
       }
 
-      // 사용자 프로필 정보는 로그인 API에서 반환되지 않으므로, 
-      // 별도로 조회하거나 여기서는 기본값으로 설정
-      localStorage.setItem('userProfile', JSON.stringify({
-        id: loginId,
-        nickname: loginId, // 닉네임은 별도 API로 조회 필요
-      }));
+      // 사용자 프로필 정보 저장
+      // 백엔드 로그인 API는 토큰만 반환하므로, loginId를 기반으로 기본 정보 저장
+      // 실제 닉네임 등은 나중에 사용자 정보 조회 API가 생기면 업데이트 가능
+      const userProfile = {
+        id: loginId.trim(),
+        login_id: loginId.trim(),
+        nickname: loginId.trim(), // 임시로 loginId 사용, 나중에 업데이트 가능
+      };
+      
+      localStorage.setItem('userProfile', JSON.stringify(userProfile));
       localStorage.setItem('isLoggedIn', 'true');
       sessionStorage.setItem('isLoggedIn', 'true');
+
+      // 프로필 업데이트 이벤트 발생 (Navigation 컴포넌트에서 감지)
+      window.dispatchEvent(new Event('profileUpdated'));
 
       toast({
         title: "로그인 되었습니다",
@@ -113,9 +140,10 @@ export const AuthModals = ({
       onLoginSuccess(rememberMe);
       onLoginClose();
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "아이디 또는 비밀번호가 잘못되었습니다.";
       toast({
         title: "로그인 실패",
-        description: error instanceof Error ? error.message : "아이디 또는 비밀번호가 잘못되었습니다.",
+        description: errorMessage,
         status: "error",
       });
     } finally {
@@ -188,11 +216,17 @@ export const AuthModals = ({
         localStorage.setItem('isLoggedIn', 'true');
         sessionStorage.setItem('isLoggedIn', 'true');
 
-        // 사용자 프로필 저장
-        localStorage.setItem('userProfile', JSON.stringify({
+        // 사용자 프로필 저장 (회원가입 응답에서 받은 정보 사용)
+        const userProfile = {
           id: user.login_id,
+          login_id: user.login_id,
           nickname: user.nickname,
-        }));
+          role_id: user.role_id,
+        };
+        localStorage.setItem('userProfile', JSON.stringify(userProfile));
+        
+        // 프로필 업데이트 이벤트 발생 (Navigation 컴포넌트에서 감지)
+        window.dispatchEvent(new Event('profileUpdated'));
 
         toast({
           title: "회원가입이 완료되었습니다",

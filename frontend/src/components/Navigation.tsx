@@ -144,6 +144,12 @@ const Navigation = () => {
     localStorage.removeItem('isLoggedIn');
     sessionStorage.removeItem('isLoggedIn');
     localStorage.removeItem('userProfile');
+    localStorage.removeItem('accessToken');
+    sessionStorage.removeItem('accessToken');
+    
+    // 프로필 업데이트 이벤트 발생
+    window.dispatchEvent(new Event('profileUpdated'));
+    
     toast({
       title: "로그아웃되었습니다",
       description: "다음에 또 만나요!",
