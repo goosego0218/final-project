@@ -169,6 +169,26 @@ export async function sendBrandChat(data: BrandChatRequest): Promise<BrandChatRe
   });
 }
 
+// 브랜드 프로젝트 생성
+export interface CreateBrandProjectRequest {
+  brand_session_id: string;
+  grp_nm?: string;
+  grp_desc?: string;
+}
+
+export interface CreateBrandProjectResponse {
+  project_id: number;
+  grp_nm: string;
+  grp_desc?: string | null;
+}
+
+export async function createBrandProject(data: CreateBrandProjectRequest): Promise<CreateBrandProjectResponse> {
+  return apiRequest<CreateBrandProjectResponse>('/brand/create-project', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
 // 프로젝트 상세 조회 (브랜드 정보 포함)
 export interface ProjectDetail {
   grp_id: number;
@@ -176,7 +196,7 @@ export interface ProjectDetail {
   grp_desc: string | null;
   creator_id: number;
   // 브랜드 정보가 있으면 포함
-  brand_info?: any;
+  brand_info?: BrandInfo;
 }
 
 export async function getProjectDetail(projectId: number): Promise<ProjectDetail> {

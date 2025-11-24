@@ -26,7 +26,7 @@ import { Send, Plus, Upload, Image, Video, X } from "lucide-react";
 import { projectStorage, type Message } from "@/lib/projectStorage";
 import { useToast } from "@/hooks/use-toast";
 import StudioTopBar from "@/components/StudioTopBar";
-import { sendBrandChat, BrandInfo } from "@/lib/api";
+import { sendBrandChat, createBrandProject, BrandInfo } from "@/lib/api";
 
 type InfoStep = "collecting" | "logoQuestion" | "complete";
 
@@ -82,6 +82,7 @@ const ChatPage = () => {
   const [dbProjectId, setDbProjectId] = useState<number | null>(null); // DB 프로젝트 ID
   const [isLoadingChat, setIsLoadingChat] = useState(false); // 챗 로딩 상태
   const [brandInfo, setBrandInfo] = useState<BrandInfo | null>(null); // 백엔드에서 받은 brand_info
+  const [brandSessionId, setBrandSessionId] = useState<string | null>(null); // brand_session_id 저장
 
 
   // localStorage에서 사용자 정보 가져오기
@@ -171,14 +172,45 @@ const ChatPage = () => {
     navigate("/");
   };
 
-  // 필수 항목이 모두 채워졌는지 확인
+  // 필수 항목이 모두 채워졌는지 확인 (건너뛰기용: brand_name과 category만)
   const checkRequiredFieldsComplete = (info: BrandInfo): boolean => {
-    // 필수 항목: brand_name, industry
-    // 선택 항목이지만 모든 질문을 다 답했는지 확인하기 위해 preferred_colors까지 확인
-    // preferred_colors까지 답했다면 모든 질문을 다 답한 것으로 간주
-    return info.brand_name.trim() !== "" && 
-           info.industry.trim() !== "" &&
-           info.preferred_colors.length > 0; // 마지막 질문까지 답했는지 확인
+    // 필수 항목: brand_name, category만 확인
+    const brandName = info.brand_name?.trim() || "";
+    const category = info.category?.trim() || "";
+    return brandName !== "" && category !== "";
+  };
+
+  // 모든 필드가 채워졌는지 확인 (9개 필드 모두)
+  const checkAllFieldsComplete = (info: BrandInfo): boolean => {
+    // core_keywords, avoided_trends, preferred_colors는 문자열 또는 배열일 수 있음
+    const coreKeywords = Array.isArray(info.core_keywords) 
+      ? info.core_keywords.join(', ') 
+      : info.core_keywords;
+    const avoidedTrends = Array.isArray(info.avoided_trends)
+      ? info.avoided_trends.join(', ')
+      : info.avoided_trends;
+    const preferredColors = Array.isArray(info.preferred_colors)
+      ? info.preferred_colors.join(', ')
+      : info.preferred_colors;
+    
+    const fields = [
+      info.brand_name,
+      info.category,
+      info.tone_mood,
+      coreKeywords,
+      info.target_age,
+      info.target_gender,
+      avoidedTrends,
+      info.slogan,
+      preferredColors,
+    ];
+    
+    // 각 필드가 채워져 있는지 확인 (빈 문자열이 아니고 null/undefined가 아님)
+    return fields.every((f) => {
+      if (f === null || f === undefined) return false;
+      const str = String(f).trim();
+      return str !== '';
+    });
   };
 
   // 메시지 히스토리에서 브랜드 정보 추출
@@ -364,6 +396,8 @@ const ChatPage = () => {
     if (dbProjectIdParam) {
       const dbId = parseInt(dbProjectIdParam);
       setDbProjectId(dbId);
+      // DB 프로젝트 ID를 brand_session_id로도 사용
+      setBrandSessionId(dbId.toString());
       
       // 환영 메시지 추가
       if (messages.length === 0) {
@@ -456,16 +490,21 @@ const ChatPage = () => {
     try {
       const response = await sendBrandChat({
         message: inputMessage,
-        brand_session_id: dbProjectId?.toString(),
+        brand_session_id: brandSessionId || undefined, // 저장된 brand_session_id 사용
         grp_nm: isDraftMode ? draftProjectInfo?.name : undefined,
         grp_desc: isDraftMode ? draftProjectInfo?.description : undefined,
       });
-  
+
       // 백엔드 응답을 assistant 메시지로 추가
       const assistantMessage: Message = {
         role: "assistant",
         content: response.reply
       };
+
+      // brand_session_id 저장 (응답에서 받은 값)
+      if (response.brand_session_id) {
+        setBrandSessionId(response.brand_session_id);
+      }
 
       // brand_info 업데이트
       if (response.brand_info) {
@@ -482,6 +521,13 @@ const ChatPage = () => {
           
           // draft 정보 삭제
           localStorage.removeItem('makery_draft_project');
+          
+          // project_id를 brand_session_id로도 사용
+          if (response.brand_session_id) {
+            setBrandSessionId(response.brand_session_id);
+          } else {
+            setBrandSessionId(response.project_id.toString());
+          }
           
           // 프로젝트 생성 완료 메시지
           toast({
@@ -799,10 +845,29 @@ const ChatPage = () => {
 
 
   const progress = calculateProgress();
-  const canSkip = collectedInfo.brand_name?.trim() !== "" && collectedInfo.industry?.trim() !== "";
+  
+  // brandInfo를 우선 사용, 없으면 collectedInfo 사용
+  const currentBrandInfo: BrandInfo = brandInfo || {
+    brand_name: collectedInfo.brand_name,
+    category: collectedInfo.industry,
+    tone_mood: collectedInfo.mood,
+    core_keywords: collectedInfo.core_keywords.join(', '),
+    target_age: collectedInfo.target_age,
+    target_gender: collectedInfo.target_gender,
+    avoided_trends: collectedInfo.avoid_trends.join(', '),
+    slogan: collectedInfo.slogan,
+    preferred_colors: collectedInfo.preferred_colors.join(', '),
+  };
+  
+  // brand_name과 category만 있으면 건너뛰기 가능
+  const canSkip = checkRequiredFieldsComplete(currentBrandInfo);
+  // 9개 필드가 모두 채워졌는지 확인
+  const allFieldsComplete = checkAllFieldsComplete(currentBrandInfo);
+  
   const showLogoButtons = currentStep === "logoQuestion" && hasLogo === null;
   const canGenerate = canSkip && currentStep === "complete" && showProjectConfirm;
-  const showProjectConfirmButton = canSkip && currentStep === "complete" && !showProjectConfirm;
+  // 9개 필드가 모두 채워졌거나 필수 필드만 채워진 경우 생성하기 버튼 표시
+  const showProjectConfirmButton = (allFieldsComplete || canSkip) && currentStep === "collecting" && !showProjectConfirm;
   
   // 디버깅: canSkip 계산 확인
   console.log("canSkip 계산:", {
@@ -891,18 +956,38 @@ const ChatPage = () => {
             <div className="mt-4 flex justify-center">
               <Button 
                 size="lg" 
-                onClick={() => {
-                  // draft 모드 또는 DB 프로젝트 모드인 경우
-                  if (isDraftMode || dbProjectId) {
-                    // 백엔드에서 이미 프로젝트가 생성되었는지 확인
-                    if (!dbProjectId) {
-                      toast({
-                        title: "프로젝트 생성 중",
-                        description: "브랜드 정보를 더 입력해주세요.",
-                        variant: "default",
-                      });
-                      return;
-                    }
+                onClick={async () => {
+                  // 필수 필드 체크 (brand_name과 category)
+                  if (!canSkip) {
+                    toast({
+                      title: "필수 항목 미입력",
+                      description: "브랜드명과 업종은 필수 항목입니다.",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+                  
+                  // brand_session_id가 없으면 에러
+                  if (!brandSessionId) {
+                    toast({
+                      title: "오류",
+                      description: "세션 정보가 없습니다.",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+
+                  setIsLoadingChat(true);
+                  try {
+                    // 프로젝트 생성 API 호출
+                    const response = await createBrandProject({
+                      brand_session_id: brandSessionId,
+                      grp_nm: draftProjectInfo?.name || currentBrandInfo.brand_name || undefined,
+                      grp_desc: draftProjectInfo?.description || undefined,
+                    });
+
+                    // 프로젝트 ID 저장
+                    setDbProjectId(response.project_id);
                     
                     // draft 정보 삭제
                     localStorage.removeItem('makery_draft_project');
@@ -918,24 +1003,33 @@ const ChatPage = () => {
                     // 바로 showProjectConfirm을 true로 설정하여 로고/숏폼 생성 버튼 표시
                     setShowProjectConfirm(true);
                     
-                    return;
+                    toast({
+                      title: "프로젝트 생성 완료",
+                      description: "프로젝트가 생성되었습니다.",
+                      status: "success",
+                    });
+                  } catch (error) {
+                    console.error('프로젝트 생성 오류:', error);
+                    toast({
+                      title: "프로젝트 생성 실패",
+                      description: error instanceof Error ? error.message : "프로젝트 생성에 실패했습니다.",
+                      variant: "destructive",
+                    });
+                  } finally {
+                    setIsLoadingChat(false);
                   }
-                  
-                  // 기존 프로젝트가 있는 경우 (로컬 projectStorage)
-                  if (!currentProjectId) return;
-                  // 질문을 메시지로 추가
-                  const confirmQuestion: Message = {
-                    role: "assistant",
-                    content: "어떤 작업을 하시겠습니까?"
-                  };
-                  setMessages(prev => [...prev, confirmQuestion]);
-                  projectStorage.addMessage(currentProjectId, confirmQuestion);
-                  // 바로 showProjectConfirm을 true로 설정하여 로고/숏폼 생성 버튼 표시
-                  setShowProjectConfirm(true);
                 }} 
                 className="gap-2 bg-primary hover:bg-primary/90"
+                disabled={isLoadingChat}
               >
-                생성하기
+                {isLoadingChat ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    생성 중...
+                  </>
+                ) : (
+                  "생성하기"
+                )}
               </Button>
             </div>
           )}

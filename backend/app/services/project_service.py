@@ -206,24 +206,34 @@ def persist_brand_project(
 
     # BrandProfile 스키마에 맞춰 필드 매핑
     # - profile 에 해당 키가 있으면 그대로 덮어쓴다.
+    # - 배열인 경우 콤마로 구분된 문자열로 변환
     if "brand_name" in profile:
-        info.brand_name = profile["brand_name"]
+        value = profile["brand_name"]
+        info.brand_name = ", ".join(value) if isinstance(value, list) else str(value)
     if "category" in profile:
-        info.category = profile["category"]
+        value = profile["category"]
+        info.category = ", ".join(value) if isinstance(value, list) else str(value)
     if "tone_mood" in profile:
-        info.tone_mood = profile["tone_mood"]
+        value = profile["tone_mood"]
+        info.tone_mood = ", ".join(value) if isinstance(value, list) else str(value) if value else None
     if "core_keywords" in profile:
-        info.core_keywords = profile["core_keywords"]
+        value = profile["core_keywords"]
+        info.core_keywords = ", ".join(value) if isinstance(value, list) else str(value) if value else None
     if "slogan" in profile:
-        info.slogan = profile["slogan"]
+        value = profile["slogan"]
+        info.slogan = ", ".join(value) if isinstance(value, list) else str(value) if value else None
     if "target_age" in profile:
-        info.target_age = profile["target_age"]
+        value = profile["target_age"]
+        info.target_age = ", ".join(value) if isinstance(value, list) else str(value) if value else None
     if "target_gender" in profile:
-        info.target_gender = profile["target_gender"]
+        value = profile["target_gender"]
+        info.target_gender = ", ".join(value) if isinstance(value, list) else str(value) if value else None
     if "avoided_trends" in profile:
-        info.avoided_trends = profile["avoided_trends"]
+        value = profile["avoided_trends"]
+        info.avoided_trends = ", ".join(value) if isinstance(value, list) else str(value) if value else None
     if "preferred_colors" in profile:
-        info.preferred_colors = profile["preferred_colors"]
+        value = profile["preferred_colors"]
+        info.preferred_colors = ", ".join(value) if isinstance(value, list) else str(value) if value else None
 
     db.add(info)
     db.commit()
