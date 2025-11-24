@@ -142,10 +142,23 @@ export interface BrandChatRequest {
   grp_desc?: string;
 }
 
+export interface BrandInfo {
+  brand_name?: string;
+  category?: string;
+  tone_mood?: string;
+  core_keywords?: string;
+  slogan?: string;
+  target_age?: string;
+  target_gender?: string;
+  avoided_trends?: string;
+  preferred_colors?: string;
+}
+
 export interface BrandChatResponse {
   reply: string;
   project_id?: number;
   brand_session_id?: string;
+  brand_info?: BrandInfo;
 }
 
 // 브랜드 챗 API 호출

@@ -91,4 +91,5 @@ def chat_brand(
     return BrandChatResponse(
         reply=reply_text,
         project_id=project_id,
+        brand_info=new_state["brand_profile"]
     )

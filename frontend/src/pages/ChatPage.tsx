@@ -26,7 +26,7 @@ import { Send, Plus, Upload, Image, Video, X } from "lucide-react";
 import { projectStorage, type Message } from "@/lib/projectStorage";
 import { useToast } from "@/hooks/use-toast";
 import StudioTopBar from "@/components/StudioTopBar";
-import { sendBrandChat } from "@/lib/api";
+import { sendBrandChat, BrandInfo } from "@/lib/api";
 
 type InfoStep = "collecting" | "logoQuestion" | "complete";
 
@@ -81,6 +81,7 @@ const ChatPage = () => {
   const [baseAssetId, setBaseAssetId] = useState<string | null>(null);
   const [dbProjectId, setDbProjectId] = useState<number | null>(null); // DB 프로젝트 ID
   const [isLoadingChat, setIsLoadingChat] = useState(false); // 챗 로딩 상태
+  const [brandInfo, setBrandInfo] = useState<BrandInfo | null>(null); // 백엔드에서 받은 brand_info
 
 
   // localStorage에서 사용자 정보 가져오기
@@ -271,20 +272,41 @@ const ChatPage = () => {
     return info;
   };
 
-  // 프로그레스 계산
+  // 프로그레스 계산 (백엔드 brand_info 기반)
   const calculateProgress = () => {
+    // 백엔드에서 받은 brand_info가 있으면 그것을 사용, 없으면 collectedInfo 사용
+    const info = brandInfo || {
+      brand_name: collectedInfo.brand_name,
+      category: collectedInfo.industry,
+      tone_mood: collectedInfo.mood,
+      core_keywords: collectedInfo.core_keywords.join(', '),
+      target_age: collectedInfo.target_age,
+      target_gender: collectedInfo.target_gender,
+      avoided_trends: collectedInfo.avoid_trends.join(', '),
+      slogan: collectedInfo.slogan,
+      preferred_colors: collectedInfo.preferred_colors.join(', '),
+    };
+
+    // 총 9개 필드 체크
     const fields = [
-      collectedInfo.brand_name,
-      collectedInfo.industry,
-      collectedInfo.mood,
-      collectedInfo.core_keywords.length > 0 ? "filled" : "",
-      collectedInfo.target_age,
-      collectedInfo.target_gender,
-      collectedInfo.avoid_trends.length > 0 ? "filled" : "",
-      collectedInfo.slogan,
-      collectedInfo.preferred_colors.length > 0 ? "filled" : "",
+      info.brand_name,
+      info.category,
+      info.tone_mood,
+      info.core_keywords,
+      info.target_age,
+      info.target_gender,
+      info.avoided_trends,
+      info.slogan,
+      info.preferred_colors,
     ];
-    const answeredCount = fields.filter((f) => f && f.trim() !== "").length;
+    
+    // 각 필드가 채워져 있는지 확인 (빈 문자열이 아니고 null/undefined가 아님)
+    const answeredCount = fields.filter((f) => {
+      if (f === null || f === undefined) return false;
+      const str = String(f).trim();
+      return str !== '';
+    }).length;
+    
     return {
       answered: answeredCount,
       total: 9,
@@ -444,7 +466,12 @@ const ChatPage = () => {
         role: "assistant",
         content: response.reply
       };
-  
+
+      // brand_info 업데이트
+      if (response.brand_info) {
+        setBrandInfo(response.brand_info);
+      }
+
       setTimeout(() => {
         setMessages(prev => [...prev, assistantMessage]);
         

@@ -18,7 +18,7 @@ class BrandChatResponse(BaseModel):
     reply: str                               
     project_id: Optional[int] = None        
     brand_session_id: Optional[str] = None
-    # Appstate에 Brandprofile front에 뿌려줘야함 BrandProfile 스키마 참고
+    brand_info: Optional[dict] = None  # BrandProfile 정보
 
 class LogoChatRequest(BaseModel):
     project_id: int                    
