@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Heart, MessageCircle, Clipboard, Sparkles } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Heart, MessageCircle, Share2, Sparkles } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -7,17 +7,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import Footer from "@/components/Footer";
-import { useNavigate } from "react-router-dom";
-import { projectStorage, type Project } from "@/lib/projectStorage";
-import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import CreateFromStyleModal from "@/components/CreateFromStyleModal";
+import { AuthModals } from "@/components/AuthModals";
 
 interface Logo {
   id: number;
@@ -72,43 +70,26 @@ interface LogoGalleryProps {
 }
 
 const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
-  const navigate = useNavigate();
-  const [allLogos, setAllLogos] = useState<Logo[]>(generateMockLogos());
+  // Mock 로고를 한 번만 생성하고 재사용
+  const mockLogosRef = useRef<Logo[]>(generateMockLogos());
+  
+  const [allLogos, setAllLogos] = useState<Logo[]>([]);
   const [displayedLogos, setDisplayedLogos] = useState<Logo[]>([]);
   const [sortBy, setSortBy] = useState<SortOption>("latest");
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
-  const [selectedLogo, setSelectedLogo] = useState<Logo | null>(null);
+  const [selectedLogo, setSelectedLogo] = useState<Logo | null>(null); // 디테일 모달용
+  const [selectedLogoForCreate, setSelectedLogoForCreate] = useState<Logo | null>(null); // 새 작품 만들기용
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState<Array<{ author: string; authorAvatar?: string; content: string; time: string }>>([]);
   const { toast } = useToast();
   const [isCreateNewModalOpen, setIsCreateNewModalOpen] = useState(false);
-  const [isProjectSelectModalOpen, setIsProjectSelectModalOpen] = useState(false);
-  const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
-  const [projectName, setProjectName] = useState("");
-  const [projectDescription, setProjectDescription] = useState("");
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isSignUpOpen, setIsSignUpOpen] = useState(false);
 
   const ITEMS_PER_PAGE = 12;
-
-  // Load public logos from localStorage
-  useEffect(() => {
-    const publicLogos = JSON.parse(localStorage.getItem('public_logos') || '[]');
-    const publicLogosFormatted: Logo[] = publicLogos.map((logo: any) => ({
-      id: logo.id,
-      imageSrc: logo.url,
-      brandName: logo.brandName,
-      likes: logo.likes || 0,
-      comments: logo.comments || 0,
-      createdAt: new Date(logo.createdAt),
-      tags: logo.tags || [],
-    }));
-    
-    // Combine with mock logos (public logos first)
-    setAllLogos([...publicLogosFormatted, ...generateMockLogos()]);
-  }, []);
 
   // Helper functions for managing liked logos
   const getLikedLogos = (): Set<number> => {
@@ -126,26 +107,92 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
     localStorage.setItem('liked_logos', JSON.stringify(Array.from(liked)));
   };
 
-  // Reset likes count when logo changes
+  // Load public logos from localStorage
+  const loadPublicLogos = () => {
+    const publicLogos = JSON.parse(localStorage.getItem('public_logos') || '[]');
+    const publicLogosFormatted: Logo[] = publicLogos.map((logo: any) => ({
+      id: logo.id,
+      imageSrc: logo.url,
+      brandName: logo.brandName,
+      likes: logo.likes || 0,
+      comments: logo.comments || 0,
+      createdAt: new Date(logo.createdAt),
+      tags: logo.tags || [],
+    }));
+    
+    // Combine with mock logos (public logos first, mock logos with fixed order)
+    setAllLogos([...publicLogosFormatted, ...mockLogosRef.current]);
+  };
+
+  useEffect(() => {
+    loadPublicLogos();
+  }, []);
+
+  // Reset likes count and load comments when logo changes
   useEffect(() => {
     if (selectedLogo) {
       setLikesCount(0);
       const liked = getLikedLogos();
       const likedState = liked.has(selectedLogo.id);
       setIsLiked(likedState);
+      
+      // Load comments from localStorage
+      const savedComments = localStorage.getItem(`logo_comments_${selectedLogo.id}`);
+      if (savedComments) {
+        setComments(JSON.parse(savedComments));
+      } else {
+        setComments([]);
+      }
     } else {
       setIsLiked(false);
+      setComments([]);
     }
   }, [selectedLogo]);
 
-  // Listen to storage events to update liked status
+  // Listen to storage events and custom events to reload data
   useEffect(() => {
     const handleStorageChange = () => {
-      // 카드 목록이 자동으로 업데이트되도록 함
-      setAllLogos(prev => [...prev]);
+      loadPublicLogos();
+      // localStorage에서 통계 불러와서 업데이트
+      setAllLogos(prev => prev.map(logo => {
+        const stats = JSON.parse(localStorage.getItem(`logo_stats_${logo.id}`) || '{}');
+        if (stats.likes !== undefined || stats.comments !== undefined) {
+          return {
+            ...logo,
+            likes: stats.likes !== undefined ? stats.likes : logo.likes,
+            comments: stats.comments !== undefined ? stats.comments : logo.comments
+          };
+        }
+        return logo;
+      }));
     };
+    
+    const handleLogoStatsUpdate = (e: CustomEvent) => {
+      const { id, likes, comments } = e.detail;
+      setAllLogos(prev => prev.map(logo => {
+        if (logo.id === id) {
+          return {
+            ...logo,
+            ...(likes !== undefined && { likes }),
+            ...(comments !== undefined && { comments })
+          };
+        }
+        return logo;
+      }));
+    };
+    
+    // Listen for storage events (from other tabs)
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    
+    // Listen for custom events (from same tab)
+    window.addEventListener('publicLogosUpdated', handleStorageChange);
+    window.addEventListener('logoStatsUpdated', handleLogoStatsUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('publicLogosUpdated', handleStorageChange);
+      window.removeEventListener('logoStatsUpdated', handleLogoStatsUpdate as EventListener);
+    };
   }, []);
 
   // Filter and sort logos
@@ -188,7 +235,7 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
     setDisplayedLogos(initialItems);
     setPage(1);
     setHasMore(initialItems.length < sortedLogos.length);
-  }, [sortBy, searchQuery]);
+  }, [allLogos, sortBy, searchQuery]);
 
   const handleLoadMore = () => {
     const sortedLogos = getFilteredAndSortedLogos();
@@ -213,93 +260,122 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
 
   const handleLike = () => {
     if (!selectedLogo) return;
+    
+    // 로그인 상태 확인
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+    if (!isLoggedIn) {
+      setIsLoginOpen(true);
+      return;
+    }
+    
     const newLikedState = !isLiked;
     setIsLiked(newLikedState);
-    setLikesCount(prev => newLikedState ? prev + 1 : prev - 1);
-    saveLikedLogo(selectedLogo.id, newLikedState);
     
     // 카드 목록의 좋아요 수 업데이트
+    const updatedLikes = Math.max(0, newLikedState ? selectedLogo.likes + 1 : selectedLogo.likes - 1);
+    
+    // 선택된 로고의 좋아요 수 즉시 업데이트
+    setSelectedLogo(prev => prev ? { ...prev, likes: updatedLikes } : null);
+    
     setAllLogos(prev => prev.map(logo => {
       if (logo.id === selectedLogo.id) {
         return {
           ...logo,
-          likes: newLikedState ? logo.likes + 1 : Math.max(0, logo.likes - 1)
+          likes: updatedLikes
         };
       }
       return logo;
     }));
     
+    saveLikedLogo(selectedLogo.id, newLikedState);
+    
+    // localStorage에 좋아요 수 저장
+    const stats = JSON.parse(localStorage.getItem(`logo_stats_${selectedLogo.id}`) || '{}');
+    stats.likes = updatedLikes;
+    localStorage.setItem(`logo_stats_${selectedLogo.id}`, JSON.stringify(stats));
+    
     // storage 이벤트 발생시켜 다른 컴포넌트에도 알림
     window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new CustomEvent('logoStatsUpdated', { detail: { id: selectedLogo.id, likes: updatedLikes } }));
     
-    toast({ description: newLikedState ? "좋아요를 눌렀습니다" : "좋아요를 취소했습니다" });
+    toast({ 
+      description: newLikedState ? "좋아요를 눌렀습니다" : "좋아요를 취소했습니다",
+      status: "default",
+    });
   };
 
   const handleComment = () => {
-    if (commentText.trim()) {
+    if (commentText.trim() && selectedLogo) {
+      // 로그인 상태 확인
+      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+      if (!isLoggedIn) {
+        setIsLoginOpen(true);
+        return;
+      }
+      
       const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
       const newComment = {
-        author: userProfile.nickname || "나",
+        author: userProfile.nickname || "익명",
         authorAvatar: userProfile.avatar || undefined,
         content: commentText,
         time: "방금 전"
       };
-      setComments([newComment, ...comments]);
-      toast({ description: "댓글이 등록되었습니다" });
+      const updatedComments = [newComment, ...comments];
+      setComments(updatedComments);
+      
+      // Save comments to localStorage
+      localStorage.setItem(`logo_comments_${selectedLogo.id}`, JSON.stringify(updatedComments));
+      
+      // 카드 목록의 댓글 수 업데이트
+      const updatedCommentsCount = updatedComments.length;
+      setAllLogos(prev => prev.map(logo => {
+        if (logo.id === selectedLogo.id) {
+          return {
+            ...logo,
+            comments: updatedCommentsCount
+          };
+        }
+        return logo;
+      }));
+      
+      // localStorage에 댓글 수 저장
+      const stats = JSON.parse(localStorage.getItem(`logo_stats_${selectedLogo.id}`) || '{}');
+      stats.comments = updatedCommentsCount;
+      localStorage.setItem(`logo_stats_${selectedLogo.id}`, JSON.stringify(stats));
+      
+      // storage 이벤트 발생시켜 다른 컴포넌트에도 알림
+      window.dispatchEvent(new Event('storage'));
+      window.dispatchEvent(new CustomEvent('logoStatsUpdated', { detail: { id: selectedLogo.id, comments: updatedCommentsCount } }));
+      
+      toast({ 
+        description: "댓글이 등록되었습니다",
+        status: "default",
+      });
       setCommentText("");
     }
   };
 
   const handleShare = () => {
-    const url = selectedLogo ? `${window.location.origin}/logos?logo=${selectedLogo.id}` : window.location.href;
+    const url = selectedLogo ? `${window.location.origin}/logo-gallery?logo=${selectedLogo.id}` : window.location.href;
     navigator.clipboard.writeText(url);
-    toast({ description: "링크가 복사되었습니다" });
+    toast({ 
+      description: "링크가 복사되었습니다",
+      status: "default",
+    });
   };
 
   const handleCreateNew = () => {
-    setSelectedLogo(null); // 로고 상세 모달 닫기
+    if (!selectedLogo) return;
+    // 선택된 로고를 별도 state에 저장
+    setSelectedLogoForCreate(selectedLogo);
+    // 아이템 상세 모달 닫기
+    setSelectedLogo(null);
     setIsLiked(false);
     setLikesCount(0);
     setComments([]);
     setCommentText("");
-    // 약간의 지연 후 새로운 작품 만들기 모달 열기
-    setTimeout(() => {
-      setIsCreateNewModalOpen(true);
-    }, 100);
-  };
-
-  // "내가 하던 프로젝트에서 계속하기" 선택
-  const handleContinueExistingProject = () => {
-    setIsCreateNewModalOpen(false);
-    setIsProjectSelectModalOpen(true);
-    setProjects(projectStorage.getProjects());
-  };
-
-  // 프로젝트 선택 및 ChatPage로 이동 (대화하던 시점으로 복귀)
-  const handleSelectProject = (projectId: string) => {
-    setIsProjectSelectModalOpen(false);
-    projectStorage.setCurrentProject(projectId);
-    navigate(`/chat?project=${projectId}`);
-  };
-
-  // "새 프로젝트로 시작하기" 선택
-  const handleStartNewProject = () => {
-    setIsCreateNewModalOpen(false);
-    setIsNewProjectDialogOpen(true);
-    setProjectName("");
-    setProjectDescription("");
-  };
-
-  // 새 프로젝트 생성 및 ChatPage로 이동
-  const handleCreateProject = () => {
-    if (projectName.trim()) {
-      const newProject = projectStorage.createProject(projectName, projectDescription);
-      setIsNewProjectDialogOpen(false);
-      setProjectName("");
-      setProjectDescription("");
-      // ChatPage로 이동 (로고 업로드 단계 제외 플래그)
-      navigate(`/chat?project=${newProject.id}&skipLogoUpload=true`);
-    }
+    // 모달 열기
+    setIsCreateNewModalOpen(true);
   };
 
   return (
@@ -308,14 +384,14 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
       <div className="max-w-7xl mx-auto px-8 py-6 flex justify-end border-b border-border/50">
         <div className="flex items-center gap-3">
           <Select value={sortBy} onValueChange={(value: SortOption) => setSortBy(value)}>
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-[140px] focus:ring-[#7C22C8] focus:ring-2">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="latest">최신순</SelectItem>
-              <SelectItem value="likes">좋아요순</SelectItem>
-              <SelectItem value="comments">댓글순</SelectItem>
-              <SelectItem value="oldest">오래된순</SelectItem>
+              <SelectItem value="latest" className="data-[highlighted]:bg-[#7C22C8] data-[highlighted]:text-white">최신순</SelectItem>
+              <SelectItem value="likes" className="data-[highlighted]:bg-[#7C22C8] data-[highlighted]:text-white">좋아요순</SelectItem>
+              <SelectItem value="comments" className="data-[highlighted]:bg-[#7C22C8] data-[highlighted]:text-white">댓글순</SelectItem>
+              <SelectItem value="oldest" className="data-[highlighted]:bg-[#7C22C8] data-[highlighted]:text-white">오래된순</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -360,7 +436,7 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
 
         {hasMore && (
           <div className="text-center mt-8">
-            <Button variant="outline" onClick={handleLoadMore}>
+            <Button variant="outline" onClick={handleLoadMore} className="hover:bg-[#7C22C8] hover:text-white hover:border-[#7C22C8]">
               더보기
             </Button>
           </div>
@@ -368,12 +444,27 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
       </div>
 
       {/* Logo Detail Modal */}
-      <Dialog open={!!selectedLogo} onOpenChange={() => {
-        setSelectedLogo(null);
-        setIsLiked(false);
-        setLikesCount(0);
-        setComments([]);
-        setCommentText("");
+      <Dialog open={!!selectedLogo} onOpenChange={(open) => {
+        if (!open) {
+          // 창 닫을 때 카드에 반영
+          if (selectedLogo) {
+            setAllLogos(prev => prev.map(logo => {
+              if (logo.id === selectedLogo.id) {
+                return {
+                  ...logo,
+                  likes: selectedLogo.likes,
+                  comments: comments.length
+                };
+              }
+              return logo;
+            }));
+          }
+          setSelectedLogo(null);
+          setIsLiked(false);
+          setLikesCount(0);
+          setComments([]);
+          setCommentText("");
+        }
       }}>
         <DialogContent className="max-w-[800px] w-[90vw] overflow-hidden p-0 gap-0">
           <div className="flex md:flex-row flex-col">
@@ -389,7 +480,7 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
             {/* Right: Comments and Actions */}
             <div className="flex flex-col bg-background w-full md:w-[400px] md:flex-shrink-0 aspect-square md:aspect-auto md:h-[400px] rounded-r-lg">
               {/* Comments Section - Top */}
-              <div className="flex-1 min-h-0 overflow-y-auto p-6 border-b border-border">
+              <div className="flex-1 min-h-0 overflow-y-auto p-6">
                 <div className="space-y-4">
                   {comments.length === 0 ? (
                     <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
@@ -420,42 +511,51 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
               </div>
 
               {/* Action Buttons - Middle */}
-              <div className="p-4 border-b border-border space-y-3">
+              <div className="p-3 border-t-[1px] border-border space-y-2">
                 <div className="flex items-center gap-3">
                   <Button 
                     variant="ghost" 
                     onClick={handleLike}
-                    className="h-9 px-3 gap-2"
+                    className="h-8 px-3 gap-2 hover:bg-[#7C22C8]/10 hover:text-[#7C22C8]"
                   >
-                    <Heart className={`h-5 w-5 ${isLiked ? "fill-destructive text-destructive" : ""}`} />
+                    <Heart className={`h-4 w-4 ${isLiked ? "fill-destructive text-destructive" : ""}`} />
                     <span className="text-sm font-semibold text-foreground">
-                      {(selectedLogo ? selectedLogo.likes + likesCount : 0).toLocaleString()}
+                      {selectedLogo ? selectedLogo.likes.toLocaleString() : "0"}
+                    </span>
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="h-8 px-3 gap-2 hover:bg-[#7C22C8]/10 hover:text-[#7C22C8]"
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                    <span className="text-sm font-semibold text-foreground">
+                      {comments.length.toLocaleString()}
                     </span>
                   </Button>
                   <Button 
                     variant="ghost" 
                     size="icon"
                     onClick={handleShare}
-                    className="h-9 w-9"
+                    className="h-8 w-8 hover:bg-[#7C22C8]/10 hover:text-[#7C22C8]"
                   >
-                    <Clipboard className="h-5 w-5" />
+                    <Share2 className="h-4 w-4" />
                   </Button>
                 </div>
-                <Button onClick={handleCreateNew} className="w-full bg-primary hover:bg-primary/90">
+                <Button onClick={handleCreateNew} className="w-full h-9 bg-[#7C22C8] hover:bg-[#6B1DB5] text-white text-sm">
                   <Sparkles className="w-4 h-4 mr-2" />
                   이 스타일로 새로운 작품 만들기
                 </Button>
               </div>
 
               {/* Comment Input - Bottom */}
-              <div className="p-4 border-t border-border">
+              <div className="p-3 border-t-[1px] border-border">
                 <div className="flex gap-2">
                   <Textarea 
                     placeholder="댓글을 입력하세요..." 
                     value={commentText} 
                     onChange={(e) => setCommentText(e.target.value)} 
-                    className="min-h-[60px] resize-none flex-1" 
-                    rows={2}
+                    className="h-[40px] min-h-[40px] max-h-[40px] resize-none flex-1 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#7C22C8] focus-visible:border-2" 
+                    rows={1}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
@@ -468,7 +568,7 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
                   <Button 
                     onClick={handleComment} 
                     disabled={!commentText.trim()} 
-                    className="h-[60px] px-6"
+                    className="h-[40px] px-6 bg-[#7C22C8] hover:bg-[#6B1DB5] text-white disabled:opacity-50"
                   >
                     등록
                   </Button>
@@ -479,134 +579,44 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
         </DialogContent>
       </Dialog>
 
-      {/* 새로운 작품 만들기 선택 모달 */}
-      <Dialog open={isCreateNewModalOpen} onOpenChange={setIsCreateNewModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>새로운 작품 만들기</DialogTitle>
-            <DialogDescription>
-              어떻게 진행하시겠습니까?
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col gap-3 py-4">
-            <Button 
-              onClick={handleContinueExistingProject}
-              variant="outline"
-              className="w-full h-auto py-6"
-            >
-              <div className="flex flex-col items-start gap-1">
-                <span className="font-semibold">내가 하던 프로젝트에서 계속하기</span>
-                <span className="text-sm text-muted-foreground">기존 프로젝트를 선택하여 이어서 작업합니다</span>
-              </div>
-            </Button>
-            <Button 
-              onClick={handleStartNewProject}
-              className="w-full h-auto py-6 bg-primary hover:bg-primary/90"
-            >
-              <div className="flex flex-col items-start gap-1">
-                <span className="font-semibold">새 프로젝트로 시작하기</span>
-                <span className="text-sm text-primary-foreground/80">새로운 프로젝트를 생성하여 시작합니다</span>
-              </div>
-            </Button>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsCreateNewModalOpen(false)}>
-              취소
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* 새로운 작품 만들기 모달 */}
+      {selectedLogoForCreate && (
+        <CreateFromStyleModal
+          open={isCreateNewModalOpen}
+          onOpenChange={(open) => {
+            setIsCreateNewModalOpen(open);
+            // 모달이 완전히 닫힐 때만 selectedLogoForCreate를 null로 설정
+            // CreateFromStyleModal 내부에서 프로젝트 선택 모달이 열려있을 때는
+            // onOpenChange(false)를 호출하지 않으므로 안전하게 null로 설정 가능
+            if (!open) {
+              setSelectedLogoForCreate(null);
+            }
+          }}
+          baseAssetType="logo"
+          baseAssetId={selectedLogoForCreate.id}
+          baseAssetImageUrl={selectedLogoForCreate.imageSrc}
+        />
+      )}
 
-      {/* 프로젝트 선택 모달 */}
-      <Dialog open={isProjectSelectModalOpen} onOpenChange={setIsProjectSelectModalOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh]">
-          <DialogHeader>
-            <DialogTitle>프로젝트 선택</DialogTitle>
-            <DialogDescription>
-              계속 작업할 프로젝트를 선택해주세요
-            </DialogDescription>
-          </DialogHeader>
-          <div className="overflow-y-auto max-h-[60vh] space-y-2 py-4">
-            {projects.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                프로젝트가 없습니다
-              </div>
-            ) : (
-              projects.map((project) => (
-                <Card 
-                  key={project.id}
-                  className="cursor-pointer hover:bg-muted/50 transition-colors"
-                  onClick={() => handleSelectProject(project.id)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-foreground">{project.name}</h3>
-                        {project.description && (
-                          <p className="text-sm text-muted-foreground mt-1">{project.description}</p>
-                        )}
-                        <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                          <span>로고 {project.logoCount}개</span>
-                          <span>숏폼 {project.shortFormCount}개</span>
-                          <span>{project.date}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsProjectSelectModalOpen(false)}>
-              취소
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AuthModals
+        isLoginOpen={isLoginOpen}
+        isSignUpOpen={isSignUpOpen}
+        onLoginClose={() => setIsLoginOpen(false)}
+        onSignUpClose={() => setIsSignUpOpen(false)}
+        onSwitchToSignUp={() => {
+          setIsLoginOpen(false);
+          setIsSignUpOpen(true);
+        }}
+        onSwitchToLogin={() => {
+          setIsSignUpOpen(false);
+          setIsLoginOpen(true);
+        }}
+        onLoginSuccess={(rememberMe) => {
+          setIsLoginOpen(false);
+          setIsSignUpOpen(false);
+        }}
+      />
 
-      {/* 새 프로젝트 만들기 다이얼로그 */}
-      <Dialog open={isNewProjectDialogOpen} onOpenChange={setIsNewProjectDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>새 프로젝트 만들기</DialogTitle>
-            <DialogDescription>
-              프로젝트 정보를 입력하고 시작하세요.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="project-name">프로젝트 이름</Label>
-              <Input
-                id="project-name"
-                placeholder="예: 브랜드 A 마케팅"
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="project-description">설명 (선택)</Label>
-              <Textarea
-                id="project-description"
-                placeholder="프로젝트에 대한 간단한 설명을 입력하세요"
-                value={projectDescription}
-                onChange={(e) => setProjectDescription(e.target.value)}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsNewProjectDialogOpen(false)}>
-              취소
-            </Button>
-            <Button 
-              onClick={handleCreateProject}
-              disabled={!projectName.trim()}
-            >
-              다음으로
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
       <Footer />
     </div>
   );

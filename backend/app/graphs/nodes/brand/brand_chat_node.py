@@ -6,15 +6,17 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Dict, Any
+from typing import TYPE_CHECKING, List, Dict, Any, Literal
 
 from langchain_core.messages import SystemMessage, AnyMessage
+from langgraph.types import Command
+from langgraph.graph import END
 
 if TYPE_CHECKING:
     from app.agents.state import AppState, BrandProfile
     from langchain_core.language_models.chat_models import BaseChatModel
 
-
+ 
 def _format_brand_profile(profile: "BrandProfile") -> str:
     """브랜드 프로필을 LLM 프롬프트용 텍스트로 정리."""
     if not profile:
@@ -140,7 +142,7 @@ def make_brand_chat_node(llm: "BaseChatModel"):
     llm 인스턴스를 주입받아 brand_chat 노드를 만들어 주는 팩토리.
     """
 
-    def brand_chat(state: "AppState") -> "AppState":
+    def brand_chat(state: "AppState") -> Command[Literal["__end__"]]:
         """
         브랜드 관련 대화를 진행하는 메인 챗 노드.
 
@@ -159,24 +161,71 @@ def make_brand_chat_node(llm: "BaseChatModel"):
             il = intent_info.get("label")
             if isinstance(il, str):
                 intent_label = il
+        
+        # 필수 필드 검증 결과(meta["validation"]) 읽기
+        validation: Dict[str, Any] = dict(meta.get("validation") or {})
+        required_missing = validation.get("required_missing") or []
+        is_valid = bool(validation.get("is_valid", True))
 
-        # 🔹 smalltalk 의도일 때: 브랜드 프로필은 사용하지 않고,
-        #    SMALLTALK_SYSTEM_PROMPT 만 사용
+        # 사람이 읽을 수 있는 한국어 라벨로 매핑
+        # BrandProfile 기준: brand_name, category
+        missing_labels: List[str] = []
+        if "brand_name" in required_missing:
+            missing_labels.append("브랜드 이름")
+        if "category" in required_missing:
+            missing_labels.append("업종")
+
+        # smalltalk 의도일 때: 브랜드 프로필은 사용하지 않고,
+        # SMALLTALK_SYSTEM_PROMPT 만 사용
         if intent_label == "smalltalk":
             system = SystemMessage(content=SMALLTALK_SYSTEM_PROMPT)
         else:
             profile_text = _format_brand_profile(brand_profile)
-            system = SystemMessage(
-                content=f"{BRAND_CHAT_SYSTEM_PROMPT}\n\n{profile_text}"
-            )
+            system_content = f"{BRAND_CHAT_SYSTEM_PROMPT}\n\n{profile_text}"
+
+            # finalize + 필수 필드 검증 결과에 따른 추가 지시
+            if intent_label == "finalize":
+                if not is_valid:
+                    # 필수 항목이 비어 있을 때: 먼저 부족한 필드를 물어보도록 유도
+                    if missing_labels:
+                        missing_text = ", ".join(missing_labels)
+                    else:
+                        missing_text = "브랜드 이름, 업종"
+                    system_content += (
+                        "\n\n[필수 정보 보완 지시]\n"
+                        "브랜드를 최종 정리하기 전에, 다음 필수 항목이 아직 정리되지 않았습니다: "
+                        f"{missing_text}.\n"
+                        "사용자에게 자연스럽게 다시 질문해서 이 정보를 먼저 채워 넣으세요. "
+                        "이미 사용자가 말한 내용과 충돌하는 경우, 사용자가 방금 말한 최신 내용을 우선합니다."
+                    )
+                else:
+                    # 필수 항목이 모두 채워진 상태: 요약 + 확정 여부 확인
+                    system_content += (
+                        "\n\n[브랜드 확정 지시]\n"
+                        "현재 brand_profile 에 필수 정보(브랜드 이름, 업종)가 모두 채워져 있습니다.\n"
+                        "지금까지 모인 브랜드 정보를 간단히 요약해 주고, "
+                        "\"이대로 브랜드를 확정해도 될까요?\" 라고 자연스럽게 확인 질문을 던지세요."
+                    )
+            else:
+                # finalize 는 아니지만 필수 항목이 비어 있는 경우: 대화 중에 자연스럽게 보완
+                if required_missing and missing_labels:
+                    missing_text = ", ".join(missing_labels)
+                    system_content += (
+                        "\n\n[부족 정보 안내]\n"
+                        "브랜드 대화를 이어가면서, 다음 필수 항목도 자연스럽게 질문해서 채워 넣으세요: "
+                        f"{missing_text}."
+                    )
+
+            system = SystemMessage(content=system_content)
 
         chat_messages: List[AnyMessage] = [system]
         chat_messages.extend(messages)
 
         ai_msg = llm.invoke(chat_messages)
 
-        return {
-            "messages": [ai_msg],
-        }
+        return Command(
+            update={"messages": [ai_msg]},
+            goto=END,
+        )
 
     return brand_chat

@@ -18,6 +18,17 @@ class BrandChatResponse(BaseModel):
     reply: str                               
     project_id: Optional[int] = None        
     brand_session_id: Optional[str] = None
+    brand_info: Optional[dict] = None  # BrandProfile 정보
+
+class CreateBrandProjectRequest(BaseModel):
+    brand_session_id: str  # 필수: 세션 ID
+    grp_nm: Optional[str] = None  # 프로젝트명 (없으면 brand_name 사용)
+    grp_desc: Optional[str] = None  # 프로젝트 설명
+
+class CreateBrandProjectResponse(BaseModel):
+    project_id: int
+    grp_nm: str
+    grp_desc: Optional[str] = None
 
 class LogoChatRequest(BaseModel):
     project_id: int                    
