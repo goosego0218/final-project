@@ -1,0 +1,88 @@
+{
+  "source_image": "keopi_79.jpg",
+  "text_elements": {
+    "primary_text": "LitCoffee",
+    "secondary_text": "Life Is Treasure",
+    "language": "Latin",
+    "font_style": "Serif",
+    "typography_notes": "The text is clear and readable with a classic serif style.",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Interlocking letters L and T within a rounded square",
+    "category": "lettermark",
+    "meanings": [
+      "initials",
+      "branding"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "High contrast between black text and white background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "elegant",
+    "professional"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "The logo is well-balanced with centered text and symbol.",
+    "spacing_notes": "Adequate white space around elements enhances readability.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "coffee",
+      "luxury",
+      "lifestyle"
+    ],
+    "values": [
+      "quality",
+      "sophistication"
+    ],
+    "audience_hint": "coffee enthusiasts and professionals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for more visual interest.",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "elegant"
+    ],
+    "score": 0.8,
+    "notes": "The logo aligns well with current trends favoring simplicity and elegance."
+  },
+  "analysis_timestamp": "2025-11-10T07:50:58.458459Z"
+}

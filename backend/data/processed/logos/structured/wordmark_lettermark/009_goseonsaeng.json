@@ -1,0 +1,95 @@
+{
+  "source_image": "009_goseonsaeng.jpg",
+  "text_elements": {
+    "primary_text": "고선생",
+    "secondary_text": "화덕 생선구이",
+    "language": "Korean",
+    "font_style": "brush script",
+    "typography_notes": "The text is stylized and artistic, which may affect readability at smaller sizes.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "A stylized fish grill with a red accent",
+    "category": "emblem",
+    "meanings": [
+      "cooking",
+      "grill",
+      "fish"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FF0000",
+        "common_name": "red",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "The black and red contrast well against the white background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "traditional",
+    "artistic"
+  ],
+  "tone_descriptors": [
+    "authentic",
+    "cultural"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "The logo is well-balanced with the text and symbol centered.",
+    "spacing_notes": "Adequate white space around the elements enhances readability.",
+    "confidence": 0.8
+  },
+  "brand_message": {
+    "keywords": [
+      "grill",
+      "authentic",
+      "Korean"
+    ],
+    "values": [
+      "tradition",
+      "quality"
+    ],
+    "audience_hint": "food enthusiasts, particularly those interested in Korean cuisine",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "The stylized font may be hard to read at smaller sizes.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "typography",
+      "suggestion": "Consider a slightly clearer font for smaller applications.",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "cultural",
+      "artistic"
+    ],
+    "score": 0.7,
+    "notes": "The logo aligns with trends emphasizing cultural authenticity and artistic expression."
+  },
+  "analysis_timestamp": "2025-11-10T04:29:33.826873Z"
+}

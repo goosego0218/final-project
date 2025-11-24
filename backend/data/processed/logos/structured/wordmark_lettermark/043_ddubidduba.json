@@ -1,0 +1,88 @@
+{
+  "source_image": "043_ddubidduba.jpg",
+  "text_elements": {
+    "primary_text": "뚜레쥬르",
+    "secondary_text": "All 바른 아이스크림",
+    "language": "Korean",
+    "font_style": "handwritten",
+    "typography_notes": "The primary text is stylized and artistic, which may affect readability.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Stylized Korean text",
+    "category": "lettermark",
+    "meanings": [
+      "Korean culture",
+      "artistic expression"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#3B2C2A",
+        "common_name": "dark brown",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "The dark brown text contrasts well against a light background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "cultural"
+  ],
+  "tone_descriptors": [
+    "artistic",
+    "cultural"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "The layout is balanced with text centered.",
+    "spacing_notes": "Adequate spacing between elements enhances readability.",
+    "confidence": 0.8
+  },
+  "brand_message": {
+    "keywords": [
+      "Korean",
+      "ice cream",
+      "artistic"
+    ],
+    "values": [
+      "cultural authenticity",
+      "quality"
+    ],
+    "audience_hint": "Korean-speaking audience",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Stylized text may be hard to read for non-Korean speakers.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Consider a more readable font for broader appeal.",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "cultural",
+      "modern"
+    ],
+    "score": 0.7,
+    "notes": "Aligns with trends in cultural branding and artistic expression."
+  },
+  "analysis_timestamp": "2025-11-10T05:20:43.499561Z"
+}

@@ -1,0 +1,95 @@
+{
+  "source_image": "beikeori_126.jpg",
+  "text_elements": {
+    "primary_text": "MILK COUNTRY",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "Bold serif",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Cartoon cow holding a cup with a landscape background",
+    "category": "animal",
+    "meanings": [
+      "dairy",
+      "farm",
+      "freshness"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#5A7DA0",
+        "common_name": "blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "retro",
+    "playful"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "wholesome"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "4:3",
+    "balance_notes": "Well-balanced with central focus",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.85
+  },
+  "brand_message": {
+    "keywords": [
+      "dairy",
+      "farm",
+      "fresh"
+    ],
+    "values": [
+      "quality",
+      "tradition"
+    ],
+    "audience_hint": "families, dairy lovers",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "contrast",
+      "description": "Slightly low contrast in certain areas",
+      "severity": "low"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "contrast",
+      "suggestion": "Enhance contrast for better visibility",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "retro",
+      "playful"
+    ],
+    "score": 0.85,
+    "notes": "Aligns with current retro and playful design trends"
+  },
+  "analysis_timestamp": "2025-11-10T06:52:26.013713Z"
+}

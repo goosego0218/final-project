@@ -1,0 +1,93 @@
+{
+  "source_image": "006_iltagosu.jpg",
+  "text_elements": {
+    "primary_text": "일타고수",
+    "secondary_text": "퓨/전/북/장/구",
+    "language": "Korean",
+    "font_style": "brush script",
+    "typography_notes": "The text is artistic and stylized, which may affect readability at smaller sizes.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Two rectangular shapes with abstract designs, one red with a drum and one blue with a hand.",
+    "category": "abstract",
+    "meanings": [
+      "cultural",
+      "musical"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FF0000",
+        "common_name": "red",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#0000FF",
+        "common_name": "blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "The red and blue contrast well against each other and the white background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "cultural",
+    "artistic"
+  ],
+  "tone_descriptors": [
+    "traditional",
+    "expressive"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "The logo is well-balanced with equal visual weight on both sides.",
+    "spacing_notes": "Adequate white space surrounds the elements, enhancing clarity.",
+    "confidence": 0.85
+  },
+  "brand_message": {
+    "keywords": [
+      "culture",
+      "music",
+      "tradition"
+    ],
+    "values": [
+      "heritage",
+      "artistry"
+    ],
+    "audience_hint": "cultural enthusiasts",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "The stylized font may be hard to read at smaller sizes.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "typography",
+      "suggestion": "Consider a more legible font for smaller applications.",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "cultural",
+      "artistic"
+    ],
+    "score": 0.7,
+    "notes": "The logo aligns with trends emphasizing cultural and artistic expression."
+  },
+  "analysis_timestamp": "2025-11-10T04:25:15.679406Z"
+}

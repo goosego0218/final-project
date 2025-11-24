@@ -1,0 +1,95 @@
+{
+  "source_image": "keopi_133.jpg",
+  "text_elements": {
+    "primary_text": "Tid coffee",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "cursive",
+    "typography_notes": "The cursive font is elegant but may affect readability at smaller sizes.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "A coffee cup with vertical lines resembling sound waves",
+    "category": "abstract",
+    "meanings": [
+      "coffee",
+      "sound",
+      "vibration"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#D4AF37",
+        "common_name": "gold",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#333333",
+        "common_name": "dark gray",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "The gold on dark gray provides good contrast.",
+    "confidence": 0.95
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "luxury",
+    "sophisticated"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "The logo is well-balanced with equal emphasis on text and symbol.",
+    "spacing_notes": "Adequate white space around elements enhances readability.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "coffee",
+      "premium",
+      "sound"
+    ],
+    "values": [
+      "quality",
+      "innovation"
+    ],
+    "audience_hint": "coffee enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Cursive font may be hard to read at small sizes.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "typography",
+      "suggestion": "Consider a more legible font for smaller applications.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "The logo aligns with current trends in minimalistic and elegant design."
+  },
+  "analysis_timestamp": "2025-11-10T07:36:54.150338Z"
+}

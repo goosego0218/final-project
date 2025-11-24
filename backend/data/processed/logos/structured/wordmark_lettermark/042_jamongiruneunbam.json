@@ -1,0 +1,95 @@
+{
+  "source_image": "042_jamongiruneunbam.jpg",
+  "text_elements": {
+    "primary_text": "자몽이주밤",
+    "secondary_text": null,
+    "language": "Korean",
+    "font_style": "handwritten",
+    "typography_notes": "The text is stylized with a playful, handwritten look, enhancing readability.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "A slice of grapefruit integrated above the text",
+    "category": "abstract",
+    "meanings": [
+      "freshness",
+      "fruit",
+      "vibrancy"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FF4500",
+        "common_name": "orange",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "playful"
+  ],
+  "tone_descriptors": [
+    "fresh",
+    "friendly"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with the symbol integrated into the text.",
+    "spacing_notes": "Adequate spacing between characters enhances readability.",
+    "confidence": 0.8
+  },
+  "brand_message": {
+    "keywords": [
+      "fresh",
+      "fruit",
+      "vibrant"
+    ],
+    "values": [
+      "health",
+      "energy"
+    ],
+    "audience_hint": "young adults",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "The grapefruit slice might be too subtle.",
+      "severity": "low"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "symbol",
+      "suggestion": "Enhance the visibility of the grapefruit slice.",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "playful"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current trends in playful and fresh branding."
+  },
+  "analysis_timestamp": "2025-11-10T05:20:11.264247Z"
+}

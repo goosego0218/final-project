@@ -1,0 +1,83 @@
+{
+  "source_image": "kape_56.jpg",
+  "text_elements": {
+    "primary_text": "상주공간",
+    "secondary_text": "a Place in Sangju",
+    "language": "Korean",
+    "font_style": "modern sans-serif",
+    "typography_notes": "Clear and legible with a modern touch.",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "An oval shape with floral and wheat symbols",
+    "category": "emblem",
+    "meanings": [
+      "nature",
+      "agriculture",
+      "tradition"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#E76F51",
+        "common_name": "orange",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast against white background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "natural"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment.",
+    "spacing_notes": "Adequate white space for readability.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "nature",
+      "community",
+      "tradition"
+    ],
+    "values": [
+      "harmony",
+      "local culture"
+    ],
+    "audience_hint": "local residents and tourists",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth.",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "nature-inspired"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with trends favoring simplicity and nature."
+  },
+  "analysis_timestamp": "2025-11-10T07:25:00.360219Z"
+}

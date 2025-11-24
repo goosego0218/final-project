@@ -5,41 +5,24 @@ from typing import Optional
 # Absolute path to the images folder (avoids issues when working dir changes)
 BASE_DIR = Path(__file__).resolve().parents[2] / "data/images"
 
+# Map logical logo types to the current folder structure under data/images
 TYPE_TO_DIR = {
-    "wordmark": "wordmark_lettermark",
-    "symbol_plus_text": "symbol_plus_text",
-    "emblem": "emblem",
+    "wordmark": "1_wordmark",
+    "symbol_plus_text": "2_symbol",
+    "emblem": "3_emblem",
 }
-# 대표 예시 이미지 (타입 선택 시 미리보기용)
-TYPE_PREVIEW = {
-    "wordmark": str(
-        BASE_DIR
-        / "wordmark_lettermark"
-        / "designed_korean_type"
-        / "한글3.png"
-    ),
-    "symbol_plus_text": str(
-        BASE_DIR
-        / "symbol_plus_text"
-        / "playful_kitsch_character"
-        / "베이커리_45.jpg"
-    ),
-    "emblem": str(
-        BASE_DIR
-        / "emblem"
-        / "kitsch"
-        / "베이커리_126.jpg"
-    ),
-}
+
+# Previews will be resolved dynamically so they stay valid after renames.
+TYPE_PREVIEW: dict[str, Optional[str]] = {}
+
 IMAGE_EXTENSIONS = ["*.png", "*.jpg", "*.jpeg", "*.webp"]
 
 
 def load_reference_images(logo_type: str, trend: str | None = None):
     """
-    로고 타입(필수) + 트렌드(옵션)로 참조 이미지를 최대 4개 반환.
-    트렌드별 하위 폴더가 없으면 타입 폴더 전체에서 선택.
+    Return up to 4 reference images for the requested logo_type (and optional trend).
+    Falls back to the default type when an invalid value is provided.
     """
-    # 안전하게 기본값/미지원 처리
     if not logo_type or logo_type not in TYPE_TO_DIR:
         logo_type = "symbol_plus_text"
     folder = BASE_DIR / TYPE_TO_DIR[logo_type]
@@ -63,9 +46,30 @@ def _first_image_in(folder: Path) -> Optional[str]:
     return None
 
 
+def _first_image_in_tree(folder: Path) -> Optional[str]:
+    """
+    Return the first image found in the folder, checking the folder itself
+    first and then its immediate subdirectories (alphabetical order).
+    """
+    direct = _first_image_in(folder)
+    if direct:
+        return direct
+    for sub in sorted([p for p in folder.iterdir() if p.is_dir()], key=lambda p: p.name.lower()):
+        found = _first_image_in(sub)
+        if found:
+            return found
+    return None
+
+
+# Build previews dynamically so renamed folders/files stay in sync.
+for _logo_type, _dir in TYPE_TO_DIR.items():
+    preview = _first_image_in_tree(BASE_DIR / _dir)
+    TYPE_PREVIEW[_logo_type] = preview
+
+
 def list_types():
     """
-    로고 타입 목록과 대표 예시 이미지를 반환.
+    Return available logo types with a preview image path for each.
     """
     items = []
     for t in ("symbol_plus_text", "wordmark", "emblem"):
@@ -76,7 +80,7 @@ def list_types():
 
 def list_trends(logo_type: str):
     """
-    주어진 로고 타입의 트렌드(하위 폴더) 목록과 각 폴더의 첫 이미지 경로를 반환.
+    Return available trend folders under the selected logo type with a preview per trend.
     """
     if logo_type not in TYPE_TO_DIR:
         logo_type = "symbol_plus_text"

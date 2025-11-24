@@ -1,0 +1,93 @@
+{
+  "source_image": "keopi_43.jpg",
+  "text_elements": {
+    "primary_text": "CITY OF COFFEE",
+    "secondary_text": "커피도시 부산",
+    "language": "English and Korean",
+    "font_style": "Bold sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Coffee bean inside a water droplet above a bridge",
+    "category": "emblem",
+    "meanings": [
+      "coffee culture",
+      "city landmark"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#1A237E",
+        "common_name": "Indigo",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#FFECB3",
+        "common_name": "Light Yellow",
+        "usage": "background"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "urban"
+  ],
+  "layout": {
+    "orientation": "hexagonal",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate spacing around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "coffee",
+      "city",
+      "culture"
+    ],
+    "values": [
+      "community",
+      "local pride"
+    ],
+    "audience_hint": "coffee enthusiasts and city residents",
+    "confidence": 0.9
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Complexity of emblem might reduce scalability",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "scalability",
+      "suggestion": "Simplify emblem for smaller sizes",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "urban"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current urban and minimalist design trends"
+  },
+  "analysis_timestamp": "2025-11-10T07:47:53.729780Z"
+}

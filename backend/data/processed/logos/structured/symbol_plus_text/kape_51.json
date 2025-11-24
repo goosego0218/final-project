@@ -1,0 +1,89 @@
+{
+  "source_image": "kape_51.jpg",
+  "text_elements": {
+    "primary_text": "Spookie",
+    "secondary_text": "수제 제과 x 요거트 카페",
+    "language": "Latin and Korean",
+    "font_style": "cursive",
+    "typography_notes": "The cursive font is elegant but may affect readability at smaller sizes.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "A ghost-like figure with a party hat integrated into the text",
+    "category": "abstract",
+    "meanings": [
+      "playful",
+      "festive",
+      "ghost"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "High contrast between the black text and white background.",
+    "confidence": 0.95
+  },
+  "style_tags": [
+    "modern",
+    "playful"
+  ],
+  "tone_descriptors": [
+    "fun",
+    "youthful"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with the symbol integrated into the text.",
+    "spacing_notes": "Adequate spacing between elements.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "fun",
+      "youth",
+      "creativity"
+    ],
+    "values": [
+      "playfulness",
+      "innovation"
+    ],
+    "audience_hint": "young adults and families",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Cursive font may be hard to read at smaller sizes.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Consider a more readable font for smaller applications.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "playful"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current trends in playful and modern branding."
+  },
+  "analysis_timestamp": "2025-11-10T07:24:17.413154Z"
+}

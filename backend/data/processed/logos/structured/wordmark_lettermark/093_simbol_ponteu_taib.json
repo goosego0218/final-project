@@ -1,0 +1,94 @@
+{
+  "source_image": "093_simbol_ponteu_taib.jpg",
+  "text_elements": {
+    "primary_text": "YPLAN",
+    "secondary_text": "Development & Interior",
+    "language": "Latin",
+    "font_style": "Sans-serif, modern",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Stylized 'YP' lettermark",
+    "category": "lettermark",
+    "meanings": [
+      "initials",
+      "branding"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#C8102E",
+        "common_name": "red",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "professional",
+    "contemporary"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:3",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate spacing around elements",
+    "confidence": 0.8
+  },
+  "brand_message": {
+    "keywords": [
+      "development",
+      "interior",
+      "design"
+    ],
+    "values": [
+      "innovation",
+      "quality"
+    ],
+    "audience_hint": "business professionals",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [
+    {
+      "type": "color",
+      "description": "Limited color palette",
+      "severity": "low"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Introduce an accent color for variety",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current minimalistic design trends"
+  },
+  "analysis_timestamp": "2025-11-10T05:39:49.624280Z"
+}

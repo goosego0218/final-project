@@ -1,0 +1,88 @@
+{
+  "source_image": "001_ddalgiro17beonga.jpg",
+  "text_elements": {
+    "primary_text": "딸기골 17번가",
+    "secondary_text": null,
+    "language": "Korean",
+    "font_style": "handwritten",
+    "typography_notes": "The text is stylized and may be challenging to read at a glance.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "A stylized strawberry illustration",
+    "category": "abstract",
+    "meanings": [
+      "freshness",
+      "fruit"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "High contrast with white background.",
+    "confidence": 0.95
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "natural"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Centered with balanced text and symbol.",
+    "spacing_notes": "Adequate white space around elements.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "strawberry",
+      "fresh",
+      "local"
+    ],
+    "values": [
+      "freshness",
+      "authenticity"
+    ],
+    "audience_hint": "health-conscious consumers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Handwritten style may reduce readability.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Consider a clearer font style.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "organic"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with trends favoring simplicity and natural themes."
+  },
+  "analysis_timestamp": "2025-11-10T04:18:59.114170Z"
+}
