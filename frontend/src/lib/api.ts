@@ -127,3 +127,42 @@ export async function createProject(data: CreateProjectRequest): Promise<Project
     body: JSON.stringify(data),
   });
 }
+
+
+// 브랜드 챗 관련 타입 정의
+export interface BrandChatRequest {
+  message: string;
+  brand_session_id?: string;
+  grp_nm?: string;
+  grp_desc?: string;
+}
+
+export interface BrandChatResponse {
+  reply: string;
+  project_id?: number;
+  brand_session_id?: string;
+}
+
+// 브랜드 챗 API 호출
+export async function sendBrandChat(data: BrandChatRequest): Promise<BrandChatResponse> {
+  return apiRequest<BrandChatResponse>('/brand/chat', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+// 프로젝트 상세 조회 (브랜드 정보 포함)
+export interface ProjectDetail {
+  grp_id: number;
+  grp_nm: string;
+  grp_desc: string | null;
+  creator_id: number;
+  // 브랜드 정보가 있으면 포함
+  brand_info?: any;
+}
+
+export async function getProjectDetail(projectId: number): Promise<ProjectDetail> {
+  return apiRequest<ProjectDetail>(`/projects/groups/${projectId}`, {
+    method: 'GET',
+  });
+}

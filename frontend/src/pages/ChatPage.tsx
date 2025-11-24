@@ -26,6 +26,7 @@ import { Send, Plus, Upload, Image, Video, X } from "lucide-react";
 import { projectStorage, type Message } from "@/lib/projectStorage";
 import { useToast } from "@/hooks/use-toast";
 import StudioTopBar from "@/components/StudioTopBar";
+import { sendBrandChat } from "@/lib/api";
 
 type InfoStep = "collecting" | "logoQuestion" | "complete";
 
@@ -78,6 +79,9 @@ const ChatPage = () => {
   const [fromStyleMode, setFromStyleMode] = useState(false);
   const [baseAssetType, setBaseAssetType] = useState<"logo" | "shortform" | null>(null);
   const [baseAssetId, setBaseAssetId] = useState<string | null>(null);
+  const [dbProjectId, setDbProjectId] = useState<number | null>(null); // DB 프로젝트 ID
+  const [isLoadingChat, setIsLoadingChat] = useState(false); // 챗 로딩 상태
+
 
   // localStorage에서 사용자 정보 가져오기
   const getUserProfile = () => {
@@ -332,11 +336,30 @@ const ChatPage = () => {
 
   useEffect(() => {
     const isDraft = searchParams.get('draft') === 'true';
+    const dbProjectIdParam = searchParams.get('db_project'); // DB 프로젝트 ID
     const projectId = searchParams.get('project') || projectStorage.getCurrentProjectId();
     const skipLogoUpload = searchParams.get('skipLogoUpload') === 'true';
     const fromStyle = searchParams.get('from_style') === 'true';
     const assetType = searchParams.get('baseAssetType') as "logo" | "shortform" | null;
     const assetId = searchParams.get('baseAssetId');
+    
+    // DB 프로젝트 ID가 있는 경우 (DB에서 가져온 프로젝트)
+    if (dbProjectIdParam) {
+      const dbId = parseInt(dbProjectIdParam);
+      setDbProjectId(dbId);
+      
+      // 환영 메시지 추가
+      if (messages.length === 0) {
+        const welcomeMessage: Message = {
+          role: "assistant",
+          content: "안녕하세요! 브랜드 정보를 수집하기 위해 몇 가지 질문을 드리겠습니다.\n\n먼저 브랜드명을 알려주세요."
+        };
+        setMessages([welcomeMessage]);
+        setCurrentQuestion("brand_name");
+        setCurrentStep("collecting");
+      }
+      return;
+    }
     
     // from_style 모드 설정
     if (fromStyle) {
@@ -407,16 +430,13 @@ const ChatPage = () => {
       }
       
       // systemMessage가 없거나 불완전한 경우 메시지에서 추출
-      // 모든 메시지(assistant 포함)를 사용하여 정보 추출
       const allMessages = project.messages.filter(m => m.role !== "system");
       const extractedInfo = extractInfoFromMessages(allMessages);
       
       if (!restoredInfo) {
-        // systemMessage가 없으면 추출한 정보 사용
         restoredInfo = extractedInfo;
       } else {
         // systemMessage가 있으면 병합
-        // systemMessage의 정보를 우선 사용하되, 비어있는 필드는 추출한 정보로 보완
         restoredInfo = {
           brand_name: restoredInfo.brand_name || extractedInfo.brand_name,
           industry: restoredInfo.industry || extractedInfo.industry,
@@ -430,29 +450,18 @@ const ChatPage = () => {
         };
       }
       
-      // restoredInfo가 없으면 빈 객체로 초기화
       const finalRestoredInfo = restoredInfo || extractedInfo;
       
       if (finalRestoredInfo) {
-        // collectedInfo 즉시 업데이트
         setCollectedInfo(finalRestoredInfo);
         
-        // 디버깅: 복원된 정보 확인
-        console.log("복원된 정보:", finalRestoredInfo);
-        console.log("brand_name:", finalRestoredInfo.brand_name, "industry:", finalRestoredInfo.industry);
-        
-        // 필수 항목 완료 여부 확인 및 상태 복원
         const allRequiredComplete = checkRequiredFieldsComplete(finalRestoredInfo);
         
         if (allRequiredComplete) {
-          // 모든 필수 항목이 채워진 경우 - complete 단계로 전환
           setCurrentStep("complete");
         } else {
-          // 아직 모든 질문을 다 답하지 않은 경우 - collecting 상태 유지
-          // 마지막 질문 파악
           const lastAssistantMessage = chatMessages.filter(m => m.role === "assistant").pop();
           
-          // 마지막 질문에 따라 currentQuestion 설정
           if (lastAssistantMessage) {
             if (lastAssistantMessage.content.includes("브랜드명")) {
               setCurrentQuestion("brand_name");
@@ -476,14 +485,11 @@ const ChatPage = () => {
               setCurrentStep("logoQuestion");
               setCurrentQuestion(null);
             } else {
-              // 마지막 메시지가 질문이 아닌 경우, 다음 질문 파악
-              // 이미 답변한 질문들을 확인하여 다음 질문 결정
               if (!finalRestoredInfo.brand_name) {
                 setCurrentQuestion("brand_name");
               } else if (!finalRestoredInfo.industry) {
                 setCurrentQuestion("industry");
               } else if (!finalRestoredInfo.mood && !finalRestoredInfo.core_keywords.length) {
-                // mood는 선택사항이므로 다음 질문으로
                 setCurrentQuestion("mood");
               } else if (!finalRestoredInfo.core_keywords.length && !finalRestoredInfo.target_age) {
                 setCurrentQuestion("core_keywords");
@@ -500,7 +506,6 @@ const ChatPage = () => {
               }
             }
           } else {
-            // 메시지가 없는 경우 첫 질문으로
             if (!finalRestoredInfo.brand_name) {
               setCurrentQuestion("brand_name");
             } else if (!finalRestoredInfo.industry) {
@@ -508,12 +513,10 @@ const ChatPage = () => {
             }
           }
           
-          // collecting 상태 유지
           setCurrentStep("collecting");
         }
       }
       
-      // 프로젝트에 로고가 있으면 복원
       if (project.logo) {
         setUploadedLogo(project.logo.url);
         setHasLogo(true);
@@ -567,18 +570,18 @@ const ChatPage = () => {
     }
   }, [collectedInfo.brand_name, collectedInfo.industry, currentStep, uploadedLogo]);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
     
-    // draft 모드가 아닌 경우 currentProjectId가 필요
-    if (!isDraftMode && !currentProjectId) return;
+    // DB 프로젝트 모드가 아니고, draft 모드도 아닌 경우 currentProjectId 필요
+    if (!dbProjectId && !isDraftMode && !currentProjectId) return;
     if (currentStep !== "collecting") return;
-
+  
     const userMessage: Message = {
       role: "user",
       content: inputMessage
     };
-
+  
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
     
@@ -586,14 +589,52 @@ const ChatPage = () => {
     if (!isDraftMode && currentProjectId) {
       projectStorage.addMessage(currentProjectId, userMessage);
     }
-
+  
+    // 🆕 DB 프로젝트 모드인 경우 백엔드 API 호출
+    if (dbProjectId) {
+      setIsLoadingChat(true);
+      try {
+        const response = await sendBrandChat({
+          message: inputMessage,
+          brand_session_id: dbProjectId.toString(),
+        });
+  
+        // 백엔드 응답을 assistant 메시지로 추가
+        const assistantMessage: Message = {
+          role: "assistant",
+          content: response.reply
+        };
+  
+        setTimeout(() => {
+          setMessages(prev => [...prev, assistantMessage]);
+          
+          // 브랜드 정보를 파싱하여 collectedInfo 업데이트
+          // (백엔드가 structured output을 주면 여기서 파싱)
+          // 현재는 단순히 메시지만 추가
+          
+        }, 500);
+  
+      } catch (error) {
+        console.error('브랜드 챗 API 오류:', error);
+        toast({
+          title: "오류",
+          description: error instanceof Error ? error.message : "메시지 전송에 실패했습니다.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoadingChat(false);
+      }
+      
+      setInputMessage("");
+      return;
+    }
+  
+    // 🔽 기존 로컬 로직 (draft 모드나 기존 프로젝트용)
     let assistantResponse = "";
     let nextQuestion: string | null = null;
-
-    // 현재 질문이 없으면 첫 질문으로 처리
+  
     const question = currentQuestion || "brand_name";
-
-    // 현재 질문에 따라 정보 수집
+  
     if (question === "brand_name") {
       setCollectedInfo(prev => ({ ...prev, brand_name: inputMessage }));
       assistantResponse = "좋습니다! 어떤 업종이나 카테고리인가요? (예: 베이커리, 카페, IT 등)";
@@ -645,30 +686,25 @@ const ChatPage = () => {
         const colors = inputMessage.split(',').map(c => c.trim()).filter(c => c);
         setCollectedInfo(prev => ({ ...prev, preferred_colors: colors }));
       }
-      // 모든 질문 완료
       assistantResponse = "브랜드 정보 입력이 완료되었습니다. 프로젝트를 생성하시겠습니까?";
       nextQuestion = null;
-      // complete 단계로 전환하여 프로젝트 생성 확인 버튼 표시
     }
-
+  
     const assistantMessage: Message = {
       role: "assistant",
       content: assistantResponse
     };
-
+  
     setTimeout(() => {
       setMessages([...newMessages, assistantMessage]);
       
-      // draft 모드가 아닌 경우에만 projectStorage에 저장
       if (!isDraftMode && currentProjectId) {
         projectStorage.addMessage(currentProjectId, assistantMessage);
       }
       
       setCurrentQuestion(nextQuestion);
       
-      // 모든 질문이 끝났을 때 처리
       if (nextQuestion === null && question === "preferred_colors") {
-        // draft 모드가 아닌 경우에만 브랜드 정보 저장
         if (!isDraftMode && currentProjectId) {
           const infoMessage: Message = {
             role: "system",
@@ -677,11 +713,10 @@ const ChatPage = () => {
           projectStorage.addMessage(currentProjectId, infoMessage);
         }
         
-        // complete 단계로 전환하여 생성하기 버튼 표시
         setCurrentStep("complete");
       }
     }, 500);
-
+  
     setInputMessage("");
   };
 
@@ -1178,7 +1213,7 @@ const ChatPage = () => {
             }}
             placeholder="메시지를 입력하세요..."
             className="min-h-[40px] max-h-[40px] resize-none pr-12 pl-4 py-2 text-sm w-full"
-            disabled={currentStep === "complete" || showLogoButtons}
+            disabled={currentStep === "complete" || showLogoButtons || isLoadingChat}
             rows={1}
           />
           <Button

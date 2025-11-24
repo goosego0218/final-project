@@ -322,8 +322,8 @@ const ProjectsPage = () => {
                   <div 
                     className="cursor-pointer"
                     onClick={() => {
-                      // 프로젝트 대시보드로 이동
-                      navigate(`/project?project=${project.grp_id}`);
+                      // 챗봇 페이지로 이동 (백엔드 DB 프로젝트 ID 전달)
+                      navigate(`/chat?db_project=${project.grp_id}`);
                     }}
                   >
                     <CardHeader className="pr-12">
