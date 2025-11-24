@@ -68,10 +68,10 @@ def build_brand_graph():
     # 2) brand_collect → brand_intention
     g.add_edge("brand_collect", "brand_intention")
 
-    # 3) brand_intention 에서 갈 수 있는 애들
-    g.add_edge("brand_intention", "trend_search")
-    g.add_edge("brand_intention", "trend_refine")
-    g.add_edge("brand_intention", "brand_chat")
+    # # 3) brand_intention 에서 갈 수 있는 애들
+    # g.add_edge("brand_intention", "trend_search")
+    # g.add_edge("brand_intention", "trend_refine")
+    # g.add_edge("brand_intention", "brand_chat")
 
     # 4) 트렌드 라인
     g.add_edge("trend_refine", "trend_search")
