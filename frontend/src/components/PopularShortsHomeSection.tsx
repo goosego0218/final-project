@@ -338,7 +338,7 @@ const PopularShortsHomeSection = () => {
   };
 
   const handleShare = () => {
-    const url = selectedShort ? `${window.location.origin}/shorts?short=${selectedShort.id || ''}` : window.location.href;
+    const url = selectedShort ? `${window.location.origin}/shortform-gallery?short=${selectedShort.id || ''}` : window.location.href;
     navigator.clipboard.writeText(url);
     toast({
       description: "링크가 복사되었습니다",

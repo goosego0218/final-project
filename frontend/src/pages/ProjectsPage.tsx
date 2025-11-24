@@ -9,37 +9,48 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Image, Video, MoreVertical, Pin, Trash2, Edit, X } from "lucide-react";
+import { Plus, Image, Video, MoreVertical, Trash2, Edit, X, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { projectStorage, type Project } from "@/lib/projectStorage";
+import { getProjects, createProject, ProjectListItem, CreateProjectRequest } from "@/lib/api";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 const ProjectsPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [deleteProjectId, setDeleteProjectId] = useState<string | null>(null);
-  const [editProjectId, setEditProjectId] = useState<string | null>(null);
+  const [deleteProjectId, setDeleteProjectId] = useState<number | null>(null);
+  const [editProjectId, setEditProjectId] = useState<number | null>(null);
   const [editProjectName, setEditProjectName] = useState("");
   const [editProjectDescription, setEditProjectDescription] = useState("");
   const [showAllProjects, setShowAllProjects] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+
+  // DB에서 프로젝트 목록 가져오기
+  const { data: projects = [], isLoading: isProjectsLoading, refetch } = useQuery({
+    queryKey: ['projects'],
+    queryFn: getProjects,
+    enabled: isLoggedIn, // 로그인 상태일 때만 조회
+    staleTime: 0,
+  });
 
   useEffect(() => {
     // localStorage 변경 감지
     const handleStorageChange = () => {
       const isNowLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
       setIsLoggedIn(isNowLoggedIn);
-      if (isNowLoggedIn) {
-        setProjects(projectStorage.getProjects());
-      } else {
+      if (!isNowLoggedIn) {
         navigate("/");
+      } else {
+        // 로그인 상태면 프로젝트 목록 다시 가져오기
+        refetch();
       }
     };
 
@@ -47,9 +58,7 @@ const ProjectsPage = () => {
     const loggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
     setIsLoggedIn(loggedIn);
     
-    if (loggedIn) {
-      setProjects(projectStorage.getProjects());
-    } else {
+    if (!loggedIn) {
       navigate("/");
       return;
     }
@@ -62,7 +71,7 @@ const ProjectsPage = () => {
       window.removeEventListener('storage', handleStorageChange);
       clearInterval(interval);
     };
-  }, [navigate]);
+  }, [navigate, refetch]);
 
   const handleNewProjectClick = () => {
     // localStorage와 sessionStorage에서 직접 확인하여 최신 로그인 상태 반영
@@ -74,32 +83,46 @@ const ProjectsPage = () => {
     setIsDialogOpen(true);
   };
 
-  const handleCreateProject = () => {
-    if (projectName.trim()) {
-      // 로그인 상태 확인
-      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
-      if (!isLoggedIn) {
-        toast({
-          title: "로그인이 필요합니다",
-          description: "프로젝트를 생성하려면 로그인해주세요.",
-          status: "warning",
-        });
-        return;
-      }
-      
-      // 임시 상태(draft)로만 저장 - 실제 프로젝트 생성은 ChatPage의 [생성하기]에서만
-      const draftProject = {
-        name: projectName,
-        description: projectDescription,
-        createdAt: new Date().toISOString()
-      };
-      localStorage.setItem('makery_draft_project', JSON.stringify(draftProject));
+  const handleCreateProject = async () => {
+    if (!projectName.trim()) {
+      toast({
+        title: "프로젝트 이름 필요",
+        description: "프로젝트 이름을 입력해주세요.",
+        status: "warning",
+      });
+      return;
+    }
+
+    setIsCreating(true);
+    try {
+      const newProject = await createProject({
+        grp_nm: projectName.trim(),
+        grp_desc: projectDescription.trim() || null,
+      });
+
+      // 프로젝트 목록 다시 가져오기
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
       
       setIsDialogOpen(false);
       setProjectName("");
       setProjectDescription("");
-      // ChatPage로 이동 (draft 모드)
-      navigate(`/chat?draft=true&skipLogoUpload=true`);
+      
+      toast({
+        title: "프로젝트 생성 완료",
+        description: "프로젝트가 생성되었습니다.",
+        status: "success",
+      });
+
+      // 프로젝트 대시보드로 이동
+      navigate(`/project?project=${newProject.grp_id}`);
+    } catch (error) {
+      toast({
+        title: "프로젝트 생성 실패",
+        description: error instanceof Error ? error.message : "프로젝트 생성에 실패했습니다.",
+        status: "error",
+      });
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -114,7 +137,9 @@ const ProjectsPage = () => {
     }
     setIsLoginOpen(false);
     setIsSignUpOpen(false);
-    setProjects(projectStorage.getProjects()); // 프로젝트 목록 새로고침
+    
+    // 프로젝트 목록 다시 가져오기
+    queryClient.invalidateQueries({ queryKey: ['projects'] });
     
     // 회원가입이 아닌 경우에만 로그인 토스트 표시
     if (!isSignUp) {
@@ -138,55 +163,35 @@ const ProjectsPage = () => {
     setIsLoginOpen(true);
   };
 
-  const handleTogglePin = (projectId: string) => {
-    projectStorage.togglePinProject(projectId);
-    setProjects(projectStorage.getProjects());
-    toast({
-      title: "프로젝트 고정 상태 변경",
-      description: "프로젝트가 업데이트되었습니다.",
-      status: "success",
-    });
-  };
-
   const handleDeleteProject = () => {
+    // TODO: 삭제 API 구현 필요
     if (deleteProjectId) {
-      projectStorage.deleteProject(deleteProjectId);
-      setProjects(projectStorage.getProjects());
-      setDeleteProjectId(null);
       toast({
-        title: "프로젝트 삭제",
-        description: "프로젝트가 삭제되었습니다.",
-        status: "success",
+        title: "삭제 기능 준비 중",
+        description: "프로젝트 삭제 기능은 곧 제공될 예정입니다.",
+        status: "warning",
       });
+      setDeleteProjectId(null);
     }
   };
 
-  const handleEditProject = (projectId: string) => {
-    const project = projectStorage.getProject(projectId);
-    if (project) {
-      setEditProjectId(projectId);
-      setEditProjectName(project.name);
-      setEditProjectDescription(project.description || "");
-    }
+  const handleEditProject = (project: ProjectListItem) => {
+    setEditProjectId(project.grp_id);
+    setEditProjectName(project.grp_nm);
+    setEditProjectDescription(project.grp_desc || "");
   };
 
   const handleUpdateProject = () => {
+    // TODO: 수정 API 구현 필요
     if (editProjectId && editProjectName.trim()) {
-      const project = projectStorage.getProject(editProjectId);
-      if (project) {
-        project.name = editProjectName.trim();
-        project.description = editProjectDescription.trim();
-        projectStorage.saveProject(project);
-        setProjects(projectStorage.getProjects());
-        setEditProjectId(null);
-        setEditProjectName("");
-        setEditProjectDescription("");
-        toast({
-          title: "프로젝트 수정",
-          description: "프로젝트가 수정되었습니다.",
-          status: "success",
-        });
-      }
+      toast({
+        title: "수정 기능 준비 중",
+        description: "프로젝트 수정 기능은 곧 제공될 예정입니다.",
+        status: "warning",
+      });
+      setEditProjectId(null);
+      setEditProjectName("");
+      setEditProjectDescription("");
     }
   };
 
@@ -248,16 +253,28 @@ const ProjectsPage = () => {
                 <DialogFooter>
                   <Button 
                     onClick={handleCreateProject}
-                    disabled={!projectName.trim()}
+                    disabled={!projectName.trim() || isCreating}
                   >
-                    다음으로
+                    {isCreating ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        생성 중...
+                      </>
+                    ) : (
+                      "생성하기"
+                    )}
                   </Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
           </div>
 
-          {projects.length === 0 ? (
+          {isProjectsLoading ? (
+            <div className="text-center py-16">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-muted-foreground" />
+              <p className="text-xl text-muted-foreground">프로젝트를 불러오는 중...</p>
+            </div>
+          ) : projects.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-xl text-muted-foreground">프로젝트가 없습니다.</p>
             </div>
@@ -266,7 +283,7 @@ const ProjectsPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {(showAllProjects ? projects : projects.slice(0, 9)).map((project) => (
                 <Card 
-                  key={project.id} 
+                  key={project.grp_id} 
                   className="hover:shadow-lg transition-shadow relative"
                 >
                   <div className="absolute top-4 right-4 z-10">
@@ -284,14 +301,7 @@ const ProjectsPage = () => {
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={(e) => {
                           e.stopPropagation();
-                          handleTogglePin(project.id);
-                        }}>
-                          <Pin className="h-4 w-4 mr-2" />
-                          {project.pinned ? "고정 해제" : "고정하기"}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={(e) => {
-                          e.stopPropagation();
-                          handleEditProject(project.id);
+                          handleEditProject(project);
                         }}>
                           <Edit className="h-4 w-4 mr-2" />
                           수정하기
@@ -300,7 +310,7 @@ const ProjectsPage = () => {
                           className="text-destructive hover:bg-destructive hover:text-destructive-foreground focus:bg-destructive focus:text-destructive-foreground"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setDeleteProjectId(project.id);
+                            setDeleteProjectId(project.grp_id);
                           }}
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
@@ -313,31 +323,27 @@ const ProjectsPage = () => {
                     className="cursor-pointer"
                     onClick={() => {
                       // 프로젝트 대시보드로 이동
-                      navigate(`/project?project=${project.id}`);
+                      navigate(`/project?project=${project.grp_id}`);
                     }}
                   >
                     <CardHeader className="pr-12">
-                      <CardTitle className="flex items-center gap-2">
-                        {project.name}
-                        {project.pinned && <Pin className="h-4 w-4 text-primary" />}
+                      <CardTitle>
+                        {project.grp_nm}
                       </CardTitle>
-                      <CardDescription className={project.description ? "" : "min-h-[1.25rem]"}>
-                        {project.description || "\u00A0"}
+                      <CardDescription className={project.grp_desc ? "" : "min-h-[1.25rem]"}>
+                        {project.grp_desc || "\u00A0"}
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-3">
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Image className="w-4 h-4" />
-                          <span>로고 {(project.savedItems?.filter(item => item.type === "logo").length || 0) + (project.logo ? 1 : 0)}개</span>
+                          <span>로고 {project.logo_count}개</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <Video className="w-4 h-4" />
-                          <span>숏폼 {project.savedItems?.filter(item => item.type === "short").length || 0}개</span>
+                          <span>숏폼 {project.shortform_count}개</span>
                         </div>
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {project.date}
                       </div>
                     </CardContent>
                   </div>

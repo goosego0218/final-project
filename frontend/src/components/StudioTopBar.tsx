@@ -136,7 +136,7 @@ const StudioTopBar = ({
                 <CreditCard className="h-4 w-4 mr-2" />
                 플랜 관리
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onNavigate("/shorts/report")}>
+              <DropdownMenuItem onClick={() => onNavigate("/shortsReport")}>
                 <BarChart3 className="h-4 w-4 mr-2" />
                 숏폼 리포트
               </DropdownMenuItem>
