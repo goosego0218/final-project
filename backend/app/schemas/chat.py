@@ -36,6 +36,7 @@ class LogoChatResponse(BaseModel):
     logo_session_id: str
     brand_profile: Optional[dict] = None
     reference_image: Optional[str] = None
+    reference_candidates: Optional[list[str]] = None
 
 
 class ShortsChatRequest(BaseModel):

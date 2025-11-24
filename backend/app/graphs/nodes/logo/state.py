@@ -11,4 +11,5 @@ class LogoState(BaseModel):
     brand_profile: Optional[Dict] = None
     trend_choice: Optional[str] = None
     reference_candidates: Optional[List[str]] = None
+    reply: Optional[str] = None
     

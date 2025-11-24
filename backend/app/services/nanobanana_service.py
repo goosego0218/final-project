@@ -4,12 +4,23 @@ from pathlib import Path
 from google import genai
 from PIL import Image
 from app.core.config import settings
+from langsmith import traceable
 
 
+@traceable(name="nanobanana_generate", run_type="chain")
 def generate_with_nanobanana(reference_path: str, prompt: str) -> str:
-    client = genai.Client(api_key=settings.google_genai_api_key)
+    """
+    reference_path와 prompt를 사용해 이미지를 생성한다.
+    Google GenAI 설정이 비어 있으면 명확한 예외를 발생시킨다.
+    """
+    if not settings.google_genai_api_key or not settings.google_genai_model:
+        raise RuntimeError("Google GenAI model/api_key 설정이 비어 있습니다. .env를 확인하세요.")
 
     image_path = Path(reference_path)
+    if not image_path.exists():
+        raise RuntimeError(f"Reference image not found: {image_path}")
+
+    client = genai.Client(api_key=settings.google_genai_api_key)
 
     with Image.open(image_path) as pil_image:
         system_prompt = (

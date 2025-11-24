@@ -32,7 +32,7 @@ def chat_logo(
     if req.project_id is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="logo 챗봇 호출 시 project_id 는 필수입니다.",
+            detail="logo 챗봇 요청에는 project_id 가 필수입니다",
         )
 
     from app.services.project_service import load_brand_profile_for_agent
@@ -65,15 +65,16 @@ def chat_logo(
     logo_type = new_state.get("logo_type") or "symbol_plus_text"
     trend = new_state.get("trend_choice") or "(미선택)"
     candidates = new_state.get("reference_candidates") or []
-    reference_image = new_state.get("reference_image_path") or (
-        candidates[0] if candidates else None
-    )
+    reference_image = None
+    reply_text = new_state.get("reply") or "로고 유형과 트렌드, 참조 이미지를 선택해주세요."
 
     return LogoChatResponse(
+        reply=reply_text,
         project_id=req.project_id,
         logo_session_id=logo_session_id,
         brand_profile=brand_profile,
         reference_image=reference_image,
+        reference_candidates=[str(c) for c in candidates],
     )
 
 
@@ -81,15 +82,20 @@ def chat_logo(
 def generate_logo(request: LogoRequest):
     """
     준비된 값으로 로고를 생성합니다.
-    - reference_image, prompt는 필수
+    - reference_image, prompt가 필수
     - brand_profile은 선택 전달
     """
+    thread_id = f"logo-generate-{uuid4()}"
     result = logo_generate_workflow.invoke(
         {
-            # logo_type은 상담 단계에서 이미 기본값/선택값이 정해졌다고 가정
             "reference_image_path": request.reference_image,
             "user_prompt": request.prompt,
             "brand_profile": request.brand_profile,
-        }
+        },
+        config={
+            "configurable": {
+                "thread_id": thread_id,
+            }
+        },
     )
     return LogoResponse(generated_image_url=result["generated_image_url"])
