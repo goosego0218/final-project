@@ -12,7 +12,7 @@ from app.core.deps import get_current_user
 from app.db.orm import get_orm_session
 from app.models.auth import UserInfo
 from app.schemas.project import ProjectGrp, ProjectListItem
-from app.services.project_service import create_project_group, get_user_projects, load_project_group_entity
+from app.services.project_service import create_project_group, get_user_projects, load_project_group_entity, delete_project_group
 
 router = APIRouter(
     prefix="/projects",
@@ -121,3 +121,27 @@ def get_project_detail_endpoint(
         grp_desc=project.grp_desc,
         creator_id=project.creator_id,
     )
+
+
+@router.delete(
+    "/groups/{project_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def delete_project_group_endpoint(
+    project_id: int,
+    db: Session = Depends(get_orm_session),
+    current_user: UserInfo = Depends(get_current_user),
+):
+    """
+    프로젝트 삭제 (소프트 삭제: del_yn을 'Y'로 변경).
+    - 본인이 생성한 프로젝트만 삭제 가능
+    """
+    try:
+        delete_project_group(db, project_id, current_user.id)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
+    
+    return None

@@ -77,6 +77,34 @@ def get_user_projects(
     )
 
 
+def delete_project_group(
+    db: Session,
+    project_id: int,
+    user_id: int,
+) -> ProdGroup:
+    """
+    프로젝트 그룹 소프트 삭제 (del_yn을 'Y'로 변경).
+    - 본인이 생성한 프로젝트만 삭제 가능
+    """
+    project = load_project_group_entity(db, project_id)
+    
+    if project is None:
+        raise ValueError(f"project_id={project_id} 프로젝트를 찾을 수 없습니다.")
+    
+    if project.creator_id != user_id:
+        raise ValueError("본인이 생성한 프로젝트만 삭제할 수 있습니다.")
+    
+    if project.del_yn == "Y":
+        raise ValueError("이미 삭제된 프로젝트입니다.")
+    
+    # del_yn을 'Y'로 변경
+    project.del_yn = "Y"
+    db.commit()
+    db.refresh(project)
+    
+    return project
+
+
 def load_brand_profile_for_agent(
     db: Session,
     project_id: int,

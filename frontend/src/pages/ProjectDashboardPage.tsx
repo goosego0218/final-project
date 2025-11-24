@@ -6,8 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { getProjectDetail, ProjectDetail } from "@/lib/api";
-import { useQuery } from "@tanstack/react-query";
+import { getProjectDetail, deleteProject, ProjectDetail, ProjectListItem } from "@/lib/api";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { 
   AlertDialog,
@@ -49,6 +49,7 @@ const ProjectDashboardPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [logos, setLogos] = useState<LogoItem[]>([]);
   const [shortForms, setShortForms] = useState<ShortFormItem[]>([]);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -62,6 +63,7 @@ const ProjectDashboardPage = () => {
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [selectedShortFormForUpload, setSelectedShortFormForUpload] = useState<ShortFormItem | null>(null);
   const [selectedPlatforms, setSelectedPlatforms] = useState<Set<string>>(new Set());
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const projectId = searchParams.get('project');
   
@@ -141,15 +143,25 @@ const ProjectDashboardPage = () => {
     navigate(`/studio?project=${projectId}&type=short`);
   };
 
-  const handleDeleteProject = () => {
-    if (!project) return;
-    
-    // 프로젝트 삭제 전에 localStorage에서 공개된 로고/숏폼도 제거
-    const publicLogos = JSON.parse(localStorage.getItem('public_logos') || '[]');
-    const publicShortForms = JSON.parse(localStorage.getItem('public_shortforms') || '[]');
-    
-    // 현재 프로젝트의 공개 로고/숏폼 제거
-    if (projectId) {
+  const handleDeleteProject = async () => {
+    if (!project || !projectId) return;
+
+    setIsDeleting(true);
+    try {
+      // Optimistic update: 프로젝트 목록에서 즉시 제거
+      queryClient.setQueryData<ProjectListItem[]>(['userProjects'], (old) => {
+        if (!old) return old;
+        return old.filter(p => p.grp_id !== Number(projectId));
+      });
+      
+      // DB에서 프로젝트 삭제 API 호출
+      await deleteProject(Number(projectId));
+      
+      // 프로젝트 삭제 전에 localStorage에서 공개된 로고/숏폼도 제거
+      const publicLogos = JSON.parse(localStorage.getItem('public_logos') || '[]');
+      const publicShortForms = JSON.parse(localStorage.getItem('public_shortforms') || '[]');
+      
+      // 현재 프로젝트의 공개 로고/숏폼 제거
       const filteredLogos = publicLogos.filter((l: any) => l.projectId !== projectId);
       const filteredShortForms = publicShortForms.filter((sf: any) => sf.projectId !== projectId);
       
@@ -159,15 +171,29 @@ const ProjectDashboardPage = () => {
       // 커스텀 이벤트 발생시켜 갤러리에 알림
       window.dispatchEvent(new CustomEvent('publicLogosUpdated'));
       window.dispatchEvent(new CustomEvent('publicShortFormsUpdated'));
+      
+      // 삭제 성공 후 쿼리 무효화 (백그라운드에서 최신 데이터 가져오기)
+      queryClient.invalidateQueries({ queryKey: ['userProjects'] });
+      
+      toast({
+        title: "프로젝트 삭제",
+        description: "프로젝트가 삭제되었습니다.",
+        status: "success",
+      });
+      
+      navigate("/projects");
+    } catch (error) {
+      // 실패 시 원래 데이터로 롤백
+      queryClient.invalidateQueries({ queryKey: ['userProjects'] });
+      
+      toast({
+        title: "삭제 실패",
+        description: error instanceof Error ? error.message : "프로젝트 삭제에 실패했습니다.",
+        status: "error",
+      });
+    } finally {
+      setIsDeleting(false);
     }
-    
-    // TODO: DB에서 프로젝트 삭제 API 호출
-    toast({
-      title: "프로젝트가 삭제되었습니다",
-      description: "프로젝트와 관련된 모든 데이터가 삭제되었습니다.",
-      status: "success",
-    });
-    navigate("/projects");
   };
 
   const formatDate = (dateString: string) => {
@@ -930,12 +956,20 @@ const ProjectDashboardPage = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeleting}>취소</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteProject}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isDeleting}
             >
-              삭제하기
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  삭제 중...
+                </>
+              ) : (
+                "삭제하기"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
