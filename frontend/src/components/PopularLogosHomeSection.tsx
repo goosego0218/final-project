@@ -41,9 +41,33 @@ const generateMockLogos = (): Logo[] => {
     { name: "크래프트 비어", tags: ["음식", "분위기"] },
   ];
 
+  // 예시 로고 이미지 URL들 (Unsplash 사용)
+  const logoImages = [
+    "https://images.unsplash.com/photo-1611262588024-d12430b98920?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1614680376593-902f74cf0d41?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1611262588019-2c9c2b5b5b5b?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1614680376408-81e91e3c156f?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1611262588024-d12430b98920?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1614680376593-902f74cf0d41?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1611262588019-2c9c2b5b5b5b?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1614680376408-81e91e3c156f?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1611262588024-d12430b98920?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1614680376593-902f74cf0d41?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1611262588019-2c9c2b5b5b5b?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1614680376408-81e91e3c156f?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1611262588024-d12430b98920?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1614680376593-902f74cf0d41?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1611262588019-2c9c2b5b5b5b?w=400&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1614680376408-81e91e3c156f?w=400&h=400&fit=crop",
+  ];
+
   return brands.map((brand, index) => ({
     id: index + 1,
-    imageSrc: "/placeholder.svg",
+    imageSrc: logoImages[index % logoImages.length],
     brandName: brand.name,
     likes: Math.floor(Math.random() * 5000) + 100,
     comments: Math.floor(Math.random() * 500) + 10,
