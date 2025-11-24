@@ -1,5 +1,6 @@
 // API base URL 설정
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const FILE_SERVER_URL = import.meta.env.VITE_FILE_SERVER_URL || 'https://kr.object.ncloudstorage.com/aissemble';
 
 // 메뉴 타입 정의
 export interface Menu {
@@ -210,4 +211,25 @@ export async function deleteProject(projectId: number): Promise<void> {
   return apiRequest<void>(`/projects/groups/${projectId}`, {
     method: 'DELETE',
   });
+}
+
+/**
+ * 파일 경로를 완전한 파일 서버 URL로 변환합니다.
+ * @param filePath 상대 경로 (예: "/media/logo/edited_output.png") 또는 완전한 URL
+ * @returns 완전한 URL
+ */
+export function getFileUrl(filePath: string | null | undefined): string | null {
+  if (!filePath) {
+    return null;
+  }
+  
+  // 이미 완전한 URL인 경우 그대로 반환
+  if (filePath.startsWith("http://") || filePath.startsWith("https://")) {
+    return filePath;
+  }
+  
+  // 상대 경로인 경우 파일 서버 URL과 결합
+  const baseUrl = FILE_SERVER_URL.replace(/\/$/, ""); // 끝의 슬래시 제거
+  const path = filePath.startsWith("/") ? filePath : `/${filePath}`;
+  return `${baseUrl}${path}`;
 }

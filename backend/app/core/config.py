@@ -41,6 +41,9 @@ class Settings(BaseSettings):
     vector_store_dir: str = "vector_store/chroma_db"  # 상대 경로 (프로젝트 루트 기준)
     vector_store_collection: str = "RAG_md"            # 기본 컬렉션 이름
 
+    # File Server
+    file_server_url: str = "https://kr.object.ncloudstorage.com/aissemble"  # 파일 서버 기본 URL
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
