@@ -84,34 +84,33 @@ def get_current_user(
     token: Optional[str] = Depends(bearer_scheme),
     db: Session = Depends(get_orm_session),
 ) -> UserInfo:
-    # raw_token = _extract_raw_token(token)
-    # if not raw_token:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_401_UNAUTHORIZED,
-    #         detail="인증 토큰이 필요합니다.",
-    #     )
+    raw_token = _extract_raw_token(token)
+    if not raw_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="인증 토큰이 필요합니다.",
+        )
 
-    # try:
-    #     payload = decode_access_token(raw_token)
-    # except Exception:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_401_UNAUTHORIZED,
-    #         detail="유효하지 않은 토큰입니다.",
-    #     )
+    try:
+        payload = decode_access_token(raw_token)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="유효하지 않은 토큰입니다.",
+        )
 
-    # user_id = payload.get("sub")
-    # if user_id is None:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_401_UNAUTHORIZED,
-    #         detail="유효하지 않은 토큰입니다.",
-    #     )
+    user_id = payload.get("sub")
+    if user_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="유효하지 않은 토큰입니다.",
+        )
 
-    # user = db.get(UserInfo, int(user_id))
-    # if user is None:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_401_UNAUTHORIZED,
-    #         detail="존재하지 않는 사용자입니다.",
-    #     )
+    user = db.get(UserInfo, int(user_id))
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="존재하지 않는 사용자입니다.",
+        )
 
-    # return user
-    return _get_test_user(db)
+    return user
