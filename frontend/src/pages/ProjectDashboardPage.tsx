@@ -6,7 +6,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { projectStorage, type Project, type Message } from "@/lib/projectStorage";
+import { getProjectDetail, ProjectDetail } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -47,7 +49,6 @@ const ProjectDashboardPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
-  const [project, setProject] = useState<Project | null>(null);
   const [logos, setLogos] = useState<LogoItem[]>([]);
   const [shortForms, setShortForms] = useState<ShortFormItem[]>([]);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -61,6 +62,16 @@ const ProjectDashboardPage = () => {
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [selectedShortFormForUpload, setSelectedShortFormForUpload] = useState<ShortFormItem | null>(null);
   const [selectedPlatforms, setSelectedPlatforms] = useState<Set<string>>(new Set());
+
+  const projectId = searchParams.get('project');
+  
+  // DB에서 프로젝트 정보 가져오기
+  const { data: project, isLoading: isProjectLoading, error: projectError } = useQuery({
+    queryKey: ['project', projectId],
+    queryFn: () => getProjectDetail(Number(projectId)),
+    enabled: !!projectId && isLoggedIn,
+    staleTime: 0,
+  });
 
   // localStorage 변경 감지하여 로그인 상태 업데이트
   useEffect(() => {
@@ -84,98 +95,50 @@ const ProjectDashboardPage = () => {
   useEffect(() => {
     // localStorage/sessionStorage에서 직접 로그인 상태 확인
     const currentLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+    setIsLoggedIn(currentLoggedIn);
     
     if (!currentLoggedIn) {
       navigate("/");
       return;
     }
 
-    const projectId = searchParams.get('project');
     if (!projectId) {
       navigate("/projects");
       return;
     }
+  }, [navigate, projectId]);
 
-    const loadedProject = projectStorage.getProject(projectId);
-    if (!loadedProject) {
+  // 프로젝트 로드 실패 시 처리
+  useEffect(() => {
+    if (projectError) {
       toast({
         title: "프로젝트를 찾을 수 없습니다",
         description: "프로젝트가 삭제되었거나 존재하지 않습니다.",
         status: "error",
       });
       navigate("/projects");
-      return;
     }
+  }, [projectError, navigate, toast]);
 
-    setProject(loadedProject);
-
-    // localStorage에서 공개 상태 불러오기
-    const publicLogos = JSON.parse(localStorage.getItem('public_logos') || '[]');
-    const publicShortForms = JSON.parse(localStorage.getItem('public_shortforms') || '[]');
-    const currentProjectPublicLogos = publicLogos.filter((l: any) => l.projectId === projectId);
-    const currentProjectPublicShortForms = publicShortForms.filter((sf: any) => sf.projectId === projectId);
-    
-    // 공개된 로고/숏폼 ID 집합 생성
-    const publicLogoIds = new Set(currentProjectPublicLogos.map((l: any) => l.id));
-    const publicShortFormIds = new Set(currentProjectPublicShortForms.map((sf: any) => sf.id));
-
-    // 저장된 항목만 추출 (Studio에서 저장 버튼을 눌러 저장한 것만)
-    const extractedLogos: LogoItem[] = [];
-    const extractedShortForms: ShortFormItem[] = [];
-
-    // 프로젝트의 savedItems에서 저장된 로고/숏폼만 표시
-    if (loadedProject.savedItems && loadedProject.savedItems.length > 0) {
-      loadedProject.savedItems.forEach((savedItem) => {
-        if (savedItem.type === "logo") {
-          extractedLogos.push({
-            id: savedItem.id,
-            url: savedItem.url,
-            createdAt: savedItem.createdAt,
-            title: savedItem.title,
-            isPublic: publicLogoIds.has(savedItem.id), // localStorage에서 공개 상태 복원
-          });
-        } else if (savedItem.type === "short") {
-          extractedShortForms.push({
-            id: savedItem.id,
-            url: savedItem.url,
-            createdAt: savedItem.createdAt,
-            title: savedItem.title,
-            isPublic: publicShortFormIds.has(savedItem.id), // localStorage에서 공개 상태 복원
-          });
-        }
-      });
+  // 로고/숏폼 목록은 일단 빈 배열로 설정 (나중에 generation_prod 조인하여 추가)
+  useEffect(() => {
+    if (project) {
+      // TODO: DB에서 로고/숏폼 목록 가져오기 (generation_prod 테이블)
+      setLogos([]);
+      setShortForms([]);
     }
-
-    // 프로젝트에 저장된 로고가 있으면 추가 (업로드된 로고 - 이것도 저장된 것으로 간주)
-    if (loadedProject.logo) {
-      const uploadedLogoId = 'uploaded_logo';
-      // 업로드된 로고가 savedItems에 없으면 추가
-      const isUploadedLogoInSaved = loadedProject.savedItems?.some(item => item.id === uploadedLogoId);
-      if (!isUploadedLogoInSaved) {
-        extractedLogos.unshift({
-          id: uploadedLogoId,
-          url: loadedProject.logo.url,
-          createdAt: loadedProject.logo.uploadedAt,
-          title: "업로드된 로고",
-          isPublic: publicLogoIds.has(uploadedLogoId), // localStorage에서 공개 상태 복원
-        });
-      }
-    }
-
-    setLogos(extractedLogos);
-    setShortForms(extractedShortForms);
-  }, [searchParams, navigate, toast, isLoggedIn]);
+  }, [project]);
 
   const handleCreateLogo = () => {
-    if (!project) return;
-    // 로고 스튜디오로 이동
-    navigate(`/studio?project=${project.id}&type=logo`);
+    if (!project || !projectId) return;
+    // 로고 스튜디오로 이동 (DB 프로젝트 ID 사용)
+    navigate(`/studio?project=${projectId}&type=logo`);
   };
 
   const handleCreateShort = () => {
-    if (!project) return;
-    // 숏폼 스튜디오로 이동
-    navigate(`/studio?project=${project.id}&type=short`);
+    if (!project || !projectId) return;
+    // 숏폼 스튜디오로 이동 (DB 프로젝트 ID 사용)
+    navigate(`/studio?project=${projectId}&type=short`);
   };
 
   const handleDeleteProject = () => {
@@ -186,17 +149,19 @@ const ProjectDashboardPage = () => {
     const publicShortForms = JSON.parse(localStorage.getItem('public_shortforms') || '[]');
     
     // 현재 프로젝트의 공개 로고/숏폼 제거
-    const filteredLogos = publicLogos.filter((l: any) => l.projectId !== project.id);
-    const filteredShortForms = publicShortForms.filter((sf: any) => sf.projectId !== project.id);
-    
+    if (projectId) {
+      const filteredLogos = publicLogos.filter((l: any) => l.projectId !== projectId);
+      const filteredShortForms = publicShortForms.filter((sf: any) => sf.projectId !== projectId);
+      
       localStorage.setItem('public_logos', JSON.stringify(filteredLogos));
       localStorage.setItem('public_shortforms', JSON.stringify(filteredShortForms));
       
       // 커스텀 이벤트 발생시켜 갤러리에 알림
       window.dispatchEvent(new CustomEvent('publicLogosUpdated'));
       window.dispatchEvent(new CustomEvent('publicShortFormsUpdated'));
-      
-      projectStorage.deleteProject(project.id);
+    }
+    
+    // TODO: DB에서 프로젝트 삭제 API 호출
     toast({
       title: "프로젝트가 삭제되었습니다",
       description: "프로젝트와 관련된 모든 데이터가 삭제되었습니다.",
@@ -241,7 +206,7 @@ const ProjectDashboardPage = () => {
         comments: 0,
         createdAt: new Date(l.createdAt),
         tags: [],
-        projectId: project?.id || "",
+        projectId: projectId || "",
       }));
       
       // 기존 공개 로고 가져오기
@@ -297,7 +262,7 @@ const ProjectDashboardPage = () => {
               comments: 0,
               createdAt: new Date(l.createdAt),
               tags: [],
-              projectId: project.id,
+              projectId: projectId || "",
             };
             }
             // 이미 공개된 다른 로고들도 워터마크 추가
@@ -310,13 +275,13 @@ const ProjectDashboardPage = () => {
               comments: 0,
               createdAt: new Date(l.createdAt),
               tags: [],
-              projectId: project.id,
+              projectId: projectId || "",
             };
           })).then((publicLogosData) => {
           // 기존 공개 로고 가져오기
           const existingPublicLogos = JSON.parse(localStorage.getItem('public_logos') || '[]');
           // 현재 프로젝트의 로고 제거 후 새로 추가
-          const filteredLogos = existingPublicLogos.filter((l: any) => l.projectId !== project.id);
+          const filteredLogos = existingPublicLogos.filter((l: any) => l.projectId !== projectId);
           const updatedPublicLogos = [...filteredLogos, ...publicLogosData];
           localStorage.setItem('public_logos', JSON.stringify(updatedPublicLogos));
           
@@ -374,7 +339,7 @@ const ProjectDashboardPage = () => {
         // 기존 공개 숏폼 가져오기
         const existingPublicShortForms = JSON.parse(localStorage.getItem('public_shortforms') || '[]');
         // 현재 프로젝트의 숏폼 제거 후 새로 추가
-        const filteredShortForms = existingPublicShortForms.filter((sf: any) => sf.projectId !== project.id);
+        const filteredShortForms = existingPublicShortForms.filter((sf: any) => sf.projectId !== projectId);
         const updatedPublicShortForms = [...filteredShortForms, ...publicShortFormsData];
         localStorage.setItem('public_shortforms', JSON.stringify(updatedPublicShortForms));
         
@@ -423,7 +388,7 @@ const ProjectDashboardPage = () => {
         duration: "0:15",
         createdAt: new Date(sf.createdAt),
         tags: [],
-        projectId: project?.id || "",
+        projectId: projectId || "",
       }));
       
       // 기존 공개 숏폼 가져오기
@@ -448,19 +413,10 @@ const ProjectDashboardPage = () => {
 
   // 로고/숏폼 삭제 핸들러
   const handleDeleteItem = () => {
-    if (!itemToDelete || !project) return;
+    if (!itemToDelete) return;
 
-    const projectData = projectStorage.getProject(project.id);
-    if (!projectData) return;
-
-    // savedItems에서 제거
-    const updatedSavedItems = (projectData.savedItems || []).filter(
-      item => item.id !== itemToDelete.id
-    );
-    projectData.savedItems = updatedSavedItems;
-    projectStorage.saveProject(projectData);
-
-    // 상태 업데이트
+    // TODO: DB에서 로고/숏폼 삭제 API 호출 (generation_prod 테이블)
+    // 현재는 상태에서만 제거
     if (itemToDelete.type === "logo") {
       setLogos(prev => prev.filter(logo => logo.id !== itemToDelete.id));
     } else {
@@ -556,15 +512,10 @@ const ProjectDashboardPage = () => {
   };
 
   // 숏폼 ID를 savedItems의 ID로 변환 (URL 기반으로도 찾기)
+  // TODO: DB에서 로고/숏폼 목록을 가져오면 이 함수도 수정 필요
   const getShortFormSavedItemId = (shortFormId: string, shortFormUrl?: string) => {
-    if (!project) return shortFormId;
-    // 먼저 ID로 찾기
-    let savedItem = project.savedItems?.find(item => item.id === shortFormId && item.type === "short");
-    // ID로 찾지 못했고 URL이 제공된 경우, URL로 찾기
-    if (!savedItem && shortFormUrl) {
-      savedItem = project.savedItems?.find(item => item.url === shortFormUrl && item.type === "short");
-    }
-    return savedItem ? savedItem.id : shortFormId;
+    // 일단 shortFormId 그대로 반환 (DB 기반으로 변경 예정)
+    return shortFormId;
   };
 
   // 숏폼 업로드 상태 저장
@@ -689,18 +640,14 @@ const ProjectDashboardPage = () => {
             <div className="flex items-start justify-between mb-6">
               <div className="flex-1">
                 <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-                  {project.name}
+                  {project.grp_nm}
                 </h1>
-                {project.description && (
+                {project.grp_desc && (
                   <p className="text-lg text-muted-foreground mb-4">
-                    {project.description}
+                    {project.grp_desc}
                   </p>
                 )}
                 <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    <span>{formatDate(project.date)}</span>
-                  </div>
                   <div className="flex items-center gap-4">
                     <span>로고 {logos.length}개</span>
                     <span>·</span>
