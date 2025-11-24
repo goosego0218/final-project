@@ -106,3 +106,79 @@ def load_brand_profile_for_agent(
         profile["brand_name"] = group.grp_nm        
 
     return profile
+
+
+def persist_brand_project(
+    db: Session,
+    *,
+    creator_id: int,
+    project_id: int | None,
+    project_draft: dict | None,
+    brand_profile: BrandProfile | dict | None,
+) -> ProdGroup | None:
+    """
+    브랜드 그래프에서 생성한 persist_request 를 받아
+    - 프로젝트 그룹(prod_grp)을 생성하거나(없으면)
+    - 브랜드 상세 정보(brand_info)를 upsert 한 뒤
+    최종 ProdGroup 엔티티를 반환한다.
+
+    저장할 정보가 충분치 않으면 아무 것도 하지 않고 None 을 반환한다.
+    """
+    draft: dict = dict(project_draft or {})
+    profile: dict = dict(brand_profile or {})
+
+    group: ProdGroup | None = None
+
+    # 1) project_id 가 이미 있으면 해당 프로젝트 그룹을 조회
+    if project_id is not None:
+        group = load_project_group_entity(db, project_id)
+        if group is None:
+            # 존재하지 않는 project_id 이면 저장하지 않고 종료
+            return None
+    else:
+        # 2) project_id 가 없으면, grp_nm 을 기준으로 새 프로젝트 그룹 생성
+        grp_nm = draft.get("grp_nm")
+        if not grp_nm:
+            # 프로젝트 이름조차 없으면 생성할 수 없음
+            return None
+
+        payload = ProjectGrp(
+            grp_id=None,
+            grp_nm=grp_nm,
+            grp_desc=draft.get("grp_desc"),
+            creator_id=creator_id,
+        )
+        group = create_project_group(db, payload, creator_id=creator_id)
+        project_id = group.grp_id
+
+    # 3) 브랜드 정보 upsert (brand_info)
+    info = load_brand_info_entity(db, project_id)
+    if info is None:
+        info = BrandInfo(grp_id=project_id)
+
+    # BrandProfile 스키마에 맞춰 필드 매핑
+    # - profile 에 해당 키가 있으면 그대로 덮어쓴다.
+    if "brand_name" in profile:
+        info.brand_name = profile["brand_name"]
+    if "category" in profile:
+        info.category = profile["category"]
+    if "tone_mood" in profile:
+        info.tone_mood = profile["tone_mood"]
+    if "core_keywords" in profile:
+        info.core_keywords = profile["core_keywords"]
+    if "slogan" in profile:
+        info.slogan = profile["slogan"]
+    if "target_age" in profile:
+        info.target_age = profile["target_age"]
+    if "target_gender" in profile:
+        info.target_gender = profile["target_gender"]
+    if "avoided_trends" in profile:
+        info.avoided_trends = profile["avoided_trends"]
+    if "preferred_colors" in profile:
+        info.preferred_colors = profile["preferred_colors"]
+
+    db.add(info)
+    db.commit()
+    db.refresh(group)
+
+    return group

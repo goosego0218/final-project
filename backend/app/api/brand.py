@@ -15,6 +15,7 @@ from app.models.auth import UserInfo
 from langchain_core.messages import HumanMessage
 from app.agents.state import AppState 
 from app.agents.brand_agent import build_brand_graph
+from app.services.brand_service import persist_brand_from_graph_state
 
 from uuid import uuid4
 
@@ -62,18 +63,29 @@ def chat_brand(
 
     new_state = brand_graph.invoke(
         state,
-        config={"configurable": {
-            "thread_id": f"user-{current_user.id}-project-brand-{brand_session_id}"
-        }},
+        config={
+            "configurable": {
+                "thread_id": f"user-{current_user.id}-project-brand-{brand_session_id}"
+            }
+        },
     )
 
     messages = new_state["messages"]
     last_msg = messages[-1]
     reply_text = getattr(last_msg, "content", str(last_msg))
 
-    project_id = None
+    project_id: int | None = None
 
-    if new_state.get("project_id") is not None:
+    group = persist_brand_from_graph_state(
+        db,
+        current_user=current_user,
+        state=new_state,
+    )
+    if group is not None:
+        project_id = group.grp_id
+
+    # 그래프가 나중에 project_id 를 직접 세팅하면 그걸 fallback 으로 사용
+    if project_id is None and new_state.get("project_id") is not None:
         project_id = new_state.get("project_id")
 
     return BrandChatResponse(
