@@ -94,36 +94,27 @@ const ProjectsPage = () => {
     }
 
     setIsCreating(true);
-    try {
-      const newProject = await createProject({
-        grp_nm: projectName.trim(),
-        grp_desc: projectDescription.trim() || null,
-      });
+    
+    // 프로젝트 정보를 localStorage에 임시 저장 (draft 모드)
+    const draftProject = {
+      name: projectName.trim(),
+      description: projectDescription.trim() || "",
+    };
+    localStorage.setItem('makery_draft_project', JSON.stringify(draftProject));
+    
+    setIsDialogOpen(false);
+    setProjectName("");
+    setProjectDescription("");
+    setIsCreating(false);
+    
+    toast({
+      title: "프로젝트 준비 완료",
+      description: "브랜드 정보를 입력해주세요.",
+      status: "success",
+    });
 
-      // 프로젝트 목록 다시 가져오기
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
-      
-      setIsDialogOpen(false);
-      setProjectName("");
-      setProjectDescription("");
-      
-      toast({
-        title: "프로젝트 생성 완료",
-        description: "프로젝트가 생성되었습니다.",
-        status: "success",
-      });
-
-      // 프로젝트 대시보드로 이동
-      navigate(`/project?project=${newProject.grp_id}`);
-    } catch (error) {
-      toast({
-        title: "프로젝트 생성 실패",
-        description: error instanceof Error ? error.message : "프로젝트 생성에 실패했습니다.",
-        status: "error",
-      });
-    } finally {
-      setIsCreating(false);
-    }
+    // draft 모드로 ChatPage로 이동하여 브랜드 정보 수집 시작
+    navigate(`/chat?draft=true`);
   };
 
   const handleLoginSuccess = (rememberMe?: boolean, isSignUp?: boolean) => {

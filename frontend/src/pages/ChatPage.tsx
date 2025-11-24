@@ -337,11 +337,6 @@ const ChatPage = () => {
   useEffect(() => {
     const isDraft = searchParams.get('draft') === 'true';
     const dbProjectIdParam = searchParams.get('db_project'); // DB 프로젝트 ID
-    const projectId = searchParams.get('project') || projectStorage.getCurrentProjectId();
-    const skipLogoUpload = searchParams.get('skipLogoUpload') === 'true';
-    const fromStyle = searchParams.get('from_style') === 'true';
-    const assetType = searchParams.get('baseAssetType') as "logo" | "shortform" | null;
-    const assetId = searchParams.get('baseAssetId');
     
     // DB 프로젝트 ID가 있는 경우 (DB에서 가져온 프로젝트)
     if (dbProjectIdParam) {
@@ -361,17 +356,9 @@ const ChatPage = () => {
       return;
     }
     
-    // from_style 모드 설정
-    if (fromStyle) {
-      setFromStyleMode(true);
-      setBaseAssetType(assetType || null);
-      setBaseAssetId(assetId || null);
-    }
-    
     // draft 모드 처리
     if (isDraft) {
       setIsDraftMode(true);
-      setIsSkippedFlow(skipLogoUpload);
       
       // draft 프로젝트 정보 불러오기
       const draftData = localStorage.getItem('makery_draft_project');
@@ -397,160 +384,10 @@ const ChatPage = () => {
       return;
     }
     
-    // 기존 프로젝트가 있는 경우
-    if (!projectId) {
-      navigate("/projects");
-      return;
-    }
-    setCurrentProjectId(projectId);
-    setIsDraftMode(false);
-    
-    const project = projectStorage.getProject(projectId);
-    
-    // skipLogoUpload 플래그 설정
-    if (skipLogoUpload) {
-      setIsSkippedFlow(true);
-    }
-    
-    if (project) {
-      // system 메시지만 제외하고 나머지 메시지는 모두 표시
-      const chatMessages = project.messages.filter(m => m.role !== "system");
-      setMessages(chatMessages);
-      
-      // 이미 수집된 정보 복원 (systemMessage 우선, 없으면 메시지에서 추출)
-      let restoredInfo: BrandInfo | null = null;
-      const systemMessage = project.messages.find(m => m.role === "system");
-      
-      if (systemMessage) {
-        try {
-          restoredInfo = JSON.parse(systemMessage.content);
-        } catch (e) {
-          // 파싱 실패 시 무시
-        }
-      }
-      
-      // systemMessage가 없거나 불완전한 경우 메시지에서 추출
-      const allMessages = project.messages.filter(m => m.role !== "system");
-      const extractedInfo = extractInfoFromMessages(allMessages);
-      
-      if (!restoredInfo) {
-        restoredInfo = extractedInfo;
-      } else {
-        // systemMessage가 있으면 병합
-        restoredInfo = {
-          brand_name: restoredInfo.brand_name || extractedInfo.brand_name,
-          industry: restoredInfo.industry || extractedInfo.industry,
-          mood: restoredInfo.mood || extractedInfo.mood,
-          core_keywords: restoredInfo.core_keywords?.length > 0 ? restoredInfo.core_keywords : extractedInfo.core_keywords,
-          target_age: restoredInfo.target_age || extractedInfo.target_age,
-          target_gender: restoredInfo.target_gender || extractedInfo.target_gender,
-          avoid_trends: restoredInfo.avoid_trends?.length > 0 ? restoredInfo.avoid_trends : extractedInfo.avoid_trends,
-          slogan: restoredInfo.slogan || extractedInfo.slogan,
-          preferred_colors: restoredInfo.preferred_colors?.length > 0 ? restoredInfo.preferred_colors : extractedInfo.preferred_colors,
-        };
-      }
-      
-      const finalRestoredInfo = restoredInfo || extractedInfo;
-      
-      if (finalRestoredInfo) {
-        setCollectedInfo(finalRestoredInfo);
-        
-        const allRequiredComplete = checkRequiredFieldsComplete(finalRestoredInfo);
-        
-        if (allRequiredComplete) {
-          setCurrentStep("complete");
-        } else {
-          const lastAssistantMessage = chatMessages.filter(m => m.role === "assistant").pop();
-          
-          if (lastAssistantMessage) {
-            if (lastAssistantMessage.content.includes("브랜드명")) {
-              setCurrentQuestion("brand_name");
-            } else if (lastAssistantMessage.content.includes("업종") || lastAssistantMessage.content.includes("카테고리")) {
-              setCurrentQuestion("industry");
-            } else if (lastAssistantMessage.content.includes("분위기") || lastAssistantMessage.content.includes("무드")) {
-              setCurrentQuestion("mood");
-            } else if (lastAssistantMessage.content.includes("핵심 키워드")) {
-              setCurrentQuestion("core_keywords");
-            } else if (lastAssistantMessage.content.includes("연령대")) {
-              setCurrentQuestion("target_age");
-            } else if (lastAssistantMessage.content.includes("성별")) {
-              setCurrentQuestion("target_gender");
-            } else if (lastAssistantMessage.content.includes("피하고 싶은 트렌드")) {
-              setCurrentQuestion("avoid_trends");
-            } else if (lastAssistantMessage.content.includes("슬로건") || lastAssistantMessage.content.includes("캐치프레이즈")) {
-              setCurrentQuestion("slogan");
-            } else if (lastAssistantMessage.content.includes("선호하는 색상")) {
-              setCurrentQuestion("preferred_colors");
-            } else if (lastAssistantMessage.content.includes("로고")) {
-              setCurrentStep("logoQuestion");
-              setCurrentQuestion(null);
-            } else {
-              if (!finalRestoredInfo.brand_name) {
-                setCurrentQuestion("brand_name");
-              } else if (!finalRestoredInfo.industry) {
-                setCurrentQuestion("industry");
-              } else if (!finalRestoredInfo.mood && !finalRestoredInfo.core_keywords.length) {
-                setCurrentQuestion("mood");
-              } else if (!finalRestoredInfo.core_keywords.length && !finalRestoredInfo.target_age) {
-                setCurrentQuestion("core_keywords");
-              } else if (!finalRestoredInfo.target_age && !finalRestoredInfo.target_gender) {
-                setCurrentQuestion("target_age");
-              } else if (!finalRestoredInfo.target_gender && !finalRestoredInfo.avoid_trends.length) {
-                setCurrentQuestion("target_gender");
-              } else if (!finalRestoredInfo.avoid_trends.length && !finalRestoredInfo.slogan) {
-                setCurrentQuestion("avoid_trends");
-              } else if (!finalRestoredInfo.slogan && !finalRestoredInfo.preferred_colors.length) {
-                setCurrentQuestion("slogan");
-              } else if (!finalRestoredInfo.preferred_colors.length) {
-                setCurrentQuestion("preferred_colors");
-              }
-            }
-          } else {
-            if (!finalRestoredInfo.brand_name) {
-              setCurrentQuestion("brand_name");
-            } else if (!finalRestoredInfo.industry) {
-              setCurrentQuestion("industry");
-            }
-          }
-          
-          setCurrentStep("collecting");
-        }
-      }
-      
-      if (project.logo) {
-        setUploadedLogo(project.logo.url);
-        setHasLogo(true);
-        setCurrentStep("complete");
-      }
-    }
+    // draft 모드도 아니고 DB 프로젝트도 아닌 경우 프로젝트 목록으로 이동
+    navigate("/projects");
   }, [navigate, searchParams, messages.length]);
 
-  // 첫 진입 시 환영 메시지 추가 (이미 저장된 환영 메시지가 없을 때만)
-  useEffect(() => {
-    // draft 모드인 경우는 이미 위에서 처리됨
-    if (isDraftMode) return;
-    
-    if (currentProjectId && messages.length === 0 && currentStep === "collecting") {
-      const project = projectStorage.getProject(currentProjectId);
-      if (project) {
-        // 이미 환영 메시지가 저장되어 있는지 확인
-        const hasWelcomeMessage = project.messages.some(m => 
-          m.role === "assistant" && 
-          m.content === "안녕하세요! 브랜드 정보를 수집하기 위해 몇 가지 질문을 드리겠습니다.\n\n먼저 브랜드명을 알려주세요."
-        );
-        
-        if (!hasWelcomeMessage) {
-          const welcomeMessage: Message = {
-            role: "assistant",
-            content: "안녕하세요! 브랜드 정보를 수집하기 위해 몇 가지 질문을 드리겠습니다.\n\n먼저 브랜드명을 알려주세요."
-          };
-          setMessages([welcomeMessage]);
-          setCurrentQuestion("brand_name");
-          projectStorage.addMessage(currentProjectId, welcomeMessage);
-        }
-      }
-    }
-  }, [currentProjectId, messages.length, currentStep, isDraftMode]);
 
   // 메시지 스크롤
   useEffect(() => {
@@ -573,8 +410,15 @@ const ChatPage = () => {
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
     
-    // DB 프로젝트 모드가 아니고, draft 모드도 아닌 경우 currentProjectId 필요
-    if (!dbProjectId && !isDraftMode && !currentProjectId) return;
+    // draft 모드 또는 DB 프로젝트 모드가 아닌 경우 리턴
+    if (!dbProjectId && !isDraftMode) {
+      toast({
+        title: "오류",
+        description: "프로젝트 정보가 없습니다.",
+        variant: "destructive",
+      });
+      return;
+    }
     if (currentStep !== "collecting") return;
   
     const userMessage: Message = {
@@ -584,139 +428,55 @@ const ChatPage = () => {
   
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
-    
-    // draft 모드가 아닌 경우에만 projectStorage에 저장
-    if (!isDraftMode && currentProjectId) {
-      projectStorage.addMessage(currentProjectId, userMessage);
-    }
   
-    // 🆕 DB 프로젝트 모드인 경우 백엔드 API 호출
-    if (dbProjectId) {
-      setIsLoadingChat(true);
-      try {
-        const response = await sendBrandChat({
-          message: inputMessage,
-          brand_session_id: dbProjectId.toString(),
-        });
+    // 🆕 항상 백엔드 API 호출
+    setIsLoadingChat(true);
+    try {
+      const response = await sendBrandChat({
+        message: inputMessage,
+        brand_session_id: dbProjectId?.toString(),
+        grp_nm: isDraftMode ? draftProjectInfo?.name : undefined,
+        grp_desc: isDraftMode ? draftProjectInfo?.description : undefined,
+      });
   
-        // 백엔드 응답을 assistant 메시지로 추가
-        const assistantMessage: Message = {
-          role: "assistant",
-          content: response.reply
-        };
+      // 백엔드 응답을 assistant 메시지로 추가
+      const assistantMessage: Message = {
+        role: "assistant",
+        content: response.reply
+      };
   
-        setTimeout(() => {
-          setMessages(prev => [...prev, assistantMessage]);
+      setTimeout(() => {
+        setMessages(prev => [...prev, assistantMessage]);
+        
+        // project_id가 반환되면 저장 (draft 모드에서 프로젝트 생성된 경우)
+        if (response.project_id && isDraftMode) {
+          setDbProjectId(response.project_id);
+          setIsDraftMode(false); // draft 모드 종료
           
-          // 브랜드 정보를 파싱하여 collectedInfo 업데이트
-          // (백엔드가 structured output을 주면 여기서 파싱)
-          // 현재는 단순히 메시지만 추가
+          // draft 정보 삭제
+          localStorage.removeItem('makery_draft_project');
           
-        }, 500);
-  
-      } catch (error) {
-        console.error('브랜드 챗 API 오류:', error);
-        toast({
-          title: "오류",
-          description: error instanceof Error ? error.message : "메시지 전송에 실패했습니다.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoadingChat(false);
-      }
-      
-      setInputMessage("");
-      return;
-    }
-  
-    // 🔽 기존 로컬 로직 (draft 모드나 기존 프로젝트용)
-    let assistantResponse = "";
-    let nextQuestion: string | null = null;
-  
-    const question = currentQuestion || "brand_name";
-  
-    if (question === "brand_name") {
-      setCollectedInfo(prev => ({ ...prev, brand_name: inputMessage }));
-      assistantResponse = "좋습니다! 어떤 업종이나 카테고리인가요? (예: 베이커리, 카페, IT 등)";
-      nextQuestion = "industry";
-    } else if (question === "industry") {
-      setCollectedInfo(prev => ({ ...prev, industry: inputMessage }));
-      assistantResponse = "브랜드의 분위기나 무드를 알려주세요. (선택사항, 건너뛰려면 '없음' 또는 '건너뛰기'라고 입력해주세요)";
-      nextQuestion = "mood";
-    } else if (question === "mood") {
-      if (!inputMessage.toLowerCase().includes("없음") && !inputMessage.toLowerCase().includes("건너뛰기")) {
-        setCollectedInfo(prev => ({ ...prev, mood: inputMessage }));
-      }
-      assistantResponse = "핵심 키워드를 알려주세요. (예: 친근함, 프리미엄, 혁신 등, 쉼표로 구분, 선택사항, 건너뛰려면 '없음' 입력)";
-      nextQuestion = "core_keywords";
-    } else if (question === "core_keywords") {
-      if (!inputMessage.toLowerCase().includes("없음") && !inputMessage.toLowerCase().includes("건너뛰기")) {
-        const keywords = inputMessage.split(',').map(k => k.trim()).filter(k => k);
-        setCollectedInfo(prev => ({ ...prev, core_keywords: keywords }));
-      }
-      assistantResponse = "타겟 연령대를 알려주세요. (예: 20-30대, 30-40대 등, 선택사항, 건너뛰려면 '없음' 입력)";
-      nextQuestion = "target_age";
-    } else if (question === "target_age") {
-      if (!inputMessage.toLowerCase().includes("없음") && !inputMessage.toLowerCase().includes("건너뛰기")) {
-        setCollectedInfo(prev => ({ ...prev, target_age: inputMessage }));
-      }
-      assistantResponse = "타겟 성별을 알려주세요. (예: 남성, 여성, 무관 등, 선택사항, 건너뛰려면 '없음' 입력)";
-      nextQuestion = "target_gender";
-    } else if (question === "target_gender") {
-      if (!inputMessage.toLowerCase().includes("없음") && !inputMessage.toLowerCase().includes("건너뛰기")) {
-        setCollectedInfo(prev => ({ ...prev, target_gender: inputMessage }));
-      }
-      assistantResponse = "피하고 싶은 트렌드나 스타일이 있나요? (예: 과도한 장식, 어두운 색상 등, 쉼표로 구분, 선택사항, 건너뛰려면 '없음' 입력)";
-      nextQuestion = "avoid_trends";
-    } else if (question === "avoid_trends") {
-      if (!inputMessage.toLowerCase().includes("없음") && !inputMessage.toLowerCase().includes("건너뛰기")) {
-        const trends = inputMessage.split(',').map(t => t.trim()).filter(t => t);
-        setCollectedInfo(prev => ({ ...prev, avoid_trends: trends }));
-      }
-      assistantResponse = "슬로건이나 캐치프레이즈가 있나요? (선택사항, 건너뛰려면 '없음' 입력)";
-      nextQuestion = "slogan";
-    } else if (question === "slogan") {
-      if (!inputMessage.toLowerCase().includes("없음") && !inputMessage.toLowerCase().includes("건너뛰기")) {
-        setCollectedInfo(prev => ({ ...prev, slogan: inputMessage }));
-      }
-      assistantResponse = "선호하는 색상을 알려주세요. (예: 빨강, 파랑, 주황 등, 쉼표로 구분, 선택사항, 건너뛰려면 '없음' 입력)";
-      nextQuestion = "preferred_colors";
-    } else if (question === "preferred_colors") {
-      if (!inputMessage.toLowerCase().includes("없음") && !inputMessage.toLowerCase().includes("건너뛰기")) {
-        const colors = inputMessage.split(',').map(c => c.trim()).filter(c => c);
-        setCollectedInfo(prev => ({ ...prev, preferred_colors: colors }));
-      }
-      assistantResponse = "브랜드 정보 입력이 완료되었습니다. 프로젝트를 생성하시겠습니까?";
-      nextQuestion = null;
-    }
-  
-    const assistantMessage: Message = {
-      role: "assistant",
-      content: assistantResponse
-    };
-  
-    setTimeout(() => {
-      setMessages([...newMessages, assistantMessage]);
-      
-      if (!isDraftMode && currentProjectId) {
-        projectStorage.addMessage(currentProjectId, assistantMessage);
-      }
-      
-      setCurrentQuestion(nextQuestion);
-      
-      if (nextQuestion === null && question === "preferred_colors") {
-        if (!isDraftMode && currentProjectId) {
-          const infoMessage: Message = {
-            role: "system",
-            content: JSON.stringify(collectedInfo)
-          };
-          projectStorage.addMessage(currentProjectId, infoMessage);
+          // 프로젝트 생성 완료 메시지
+          toast({
+            title: "프로젝트 생성 완료",
+            description: "브랜드 정보 수집을 계속합니다.",
+            status: "success",
+          });
         }
         
-        setCurrentStep("complete");
-      }
-    }, 500);
+      }, 500);
   
+    } catch (error) {
+      console.error('브랜드 챗 API 오류:', error);
+      toast({
+        title: "오류",
+        description: error instanceof Error ? error.message : "메시지 전송에 실패했습니다.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingChat(false);
+    }
+    
     setInputMessage("");
   };
 
@@ -964,16 +724,20 @@ const ChatPage = () => {
   };
 
   const handleGenerateClick = (type: "logo" | "short") => {
-    // 필수 필드 체크
-    if (!collectedInfo.brand_name.trim() || !collectedInfo.industry.trim()) {
+    // DB 프로젝트 모드인 경우
+    if (dbProjectId) {
       toast({
-        title: "필수 항목 미입력",
-        description: "브랜드명과 업종은 필수 항목입니다.",
-        status: "warning",
+        title: "스튜디오로 이동합니다",
+        description: type === "logo" ? "로고 생성을 시작합니다." : "숏폼 생성을 시작합니다.",
+        status: "success",
       });
+      
+      // DB 프로젝트 ID를 사용하여 Studio로 이동
+      navigate(`/studio?project=${dbProjectId}&type=${type}`);
       return;
     }
 
+    // 로컬 projectStorage 모드인 경우
     if (!currentProjectId) {
       toast({
         title: "오류",
@@ -1006,17 +770,6 @@ const ChatPage = () => {
     handleGoToStudio(currentProjectId, type, fromStyleMode);
   };
 
-  // collectedInfo가 변경될 때마다 필수 항목 완료 여부 확인 및 상태 업데이트
-  useEffect(() => {
-    if (!currentProjectId) return;
-    
-    const allRequiredComplete = checkRequiredFieldsComplete(collectedInfo);
-    
-    // 모든 필수 항목이 채워졌으면 complete 단계로 전환
-    if (allRequiredComplete && currentStep === "collecting") {
-      setCurrentStep("complete");
-    }
-  }, [collectedInfo, currentProjectId, currentStep, searchParams]);
 
   const progress = calculateProgress();
   const canSkip = collectedInfo.brand_name?.trim() !== "" && collectedInfo.industry?.trim() !== "";
@@ -1112,42 +865,20 @@ const ChatPage = () => {
               <Button 
                 size="lg" 
                 onClick={() => {
-                  // draft 모드인 경우 실제 프로젝트 생성
-                  if (isDraftMode) {
-                    // 필수 항목 체크
-                    if (!collectedInfo.brand_name.trim() || !collectedInfo.industry.trim()) {
+                  // draft 모드 또는 DB 프로젝트 모드인 경우
+                  if (isDraftMode || dbProjectId) {
+                    // 백엔드에서 이미 프로젝트가 생성되었는지 확인
+                    if (!dbProjectId) {
                       toast({
-                        title: "필수 항목 미입력",
-                        description: "브랜드명과 업종은 필수 항목입니다.",
-                        variant: "destructive",
+                        title: "프로젝트 생성 중",
+                        description: "브랜드 정보를 더 입력해주세요.",
+                        variant: "default",
                       });
                       return;
                     }
                     
-                    // draft 프로젝트 정보로 실제 프로젝트 생성
-                    const projectName = draftProjectInfo?.name || "새 프로젝트";
-                    const projectDescription = draftProjectInfo?.description || "";
-                    const project = projectStorage.createProject(projectName, projectDescription);
-                    
-                    // 수집된 정보를 system 메시지로 저장
-                    const infoMessage: Message = {
-                      role: "system",
-                      content: JSON.stringify(collectedInfo)
-                    };
-                    projectStorage.addMessage(project.id, infoMessage);
-                    
-                    // 기존 메시지들을 프로젝트에 저장
-                    messages.forEach(msg => {
-                      if (msg.role !== "system") {
-                        projectStorage.addMessage(project.id, msg);
-                      }
-                    });
-                    
                     // draft 정보 삭제
                     localStorage.removeItem('makery_draft_project');
-                    
-                    // 프로젝트 ID 설정
-                    setCurrentProjectId(project.id);
                     setIsDraftMode(false);
                     
                     // 질문을 메시지로 추가
@@ -1156,21 +887,19 @@ const ChatPage = () => {
                       content: "어떤 작업을 하시겠습니까?"
                     };
                     setMessages(prev => [...prev, confirmQuestion]);
-                    projectStorage.addMessage(project.id, confirmQuestion);
                     
                     // 바로 showProjectConfirm을 true로 설정하여 로고/숏폼 생성 버튼 표시
                     setShowProjectConfirm(true);
                     
-                    // ChatPage에 머물러서 로고/숏폼 생성 버튼을 보여줌 (대시보드로 이동하지 않음)
                     return;
                   }
                   
-                  // 기존 프로젝트가 있는 경우
+                  // 기존 프로젝트가 있는 경우 (로컬 projectStorage)
                   if (!currentProjectId) return;
                   // 질문을 메시지로 추가
                   const confirmQuestion: Message = {
                     role: "assistant",
-                    content: "어떤 작업을 하시겠습니까까?"
+                    content: "어떤 작업을 하시겠습니까?"
                   };
                   setMessages(prev => [...prev, confirmQuestion]);
                   projectStorage.addMessage(currentProjectId, confirmQuestion);
@@ -1218,7 +947,7 @@ const ChatPage = () => {
           />
           <Button
             onClick={handleSendMessage}
-            disabled={!inputMessage.trim() || currentStep === "complete" || showLogoButtons}
+            disabled={!inputMessage.trim() || currentStep === "complete" || showLogoButtons || isLoadingChat}
             size="icon"
             variant="ghost"
             className="absolute bottom-1 right-1 h-8 w-8 hover:bg-transparent"
