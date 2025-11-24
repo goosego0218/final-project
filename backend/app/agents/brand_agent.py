@@ -63,10 +63,7 @@ def build_brand_graph():
     g.add_node("persist_brand", persist_brand)
 
     # 1) 기본 진입
-    g.add_edge(START, "brand_collect")
-
-    # 2) brand_collect → brand_intention
-    g.add_edge("brand_collect", "brand_intention")
+    g.add_edge(START, "brand_intention")
 
     # # 3) brand_intention 에서 갈 수 있는 애들
     # g.add_edge("brand_intention", "trend_search")

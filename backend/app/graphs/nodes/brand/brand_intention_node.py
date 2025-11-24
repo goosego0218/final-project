@@ -237,31 +237,21 @@ def make_brand_intention_node(llm: "BaseChatModel"):
         elif label == "trend_refine":
             goto = "trend_refine"
 
+        elif label == "brand_info":
+            goto = "brand_collect"
+
         elif label == "edit_brand":
-            # 브랜드 정보 일부를 수정하고 싶은 의도.
-            # 단, 아직 brand_profile 이 거의 비어 있으면
-            # "수정"이 아니라 사실상 "처음 설명"에 가깝기 때문에
-            # 무한 루프를 막기 위해 brand_chat 으로 보낸다.
             has_any_profile = bool(brand_profile_for_validation)
             if not has_any_profile:
-                # 수집된 브랜드 정보가 사실상 없는 상태에서 edit 이 나오면
-                # 일단 일반 대화/추가 설명 플로우로 보낸다.
                 goto = "brand_chat"
             else:
-                # 이미 어느 정도 brand_profile 이 쌓여 있는 상태에서만
-                # 다시 수집 단계로 보내서 upsert 하도록 한다.
                 goto = "brand_collect"
 
         elif label == "finalize":
-            # 최종 정리를 원하는 의도
-            # - 필수 필드가 모두 채워졌으면 persist_brand 로 넘겨서
-            #   DB 저장 요청 패킷(meta.persist_request)을 만들고,
-            # - 아직 필수 필드가 부족하면 brand_chat 으로 보내
-            #   부족한 정보를 먼저 물어보도록 한다.
             if is_valid:
                 goto = "persist_brand"
             else:
-                goto = "brand_chat"
+                goto = "brand_collect"
 
         else:
             # smalltalk / brand_info / 기타
