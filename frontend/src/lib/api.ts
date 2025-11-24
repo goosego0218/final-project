@@ -69,6 +69,11 @@ async function apiRequest<T>(endpoint: string, options?: RequestInit): Promise<T
     throw new Error(errorMessage);
   }
 
+  // 204 No Content 응답은 본문이 없으므로 JSON 파싱을 건너뜀
+  if (response.status === 204) {
+    return null as T;
+  }
+
   return response.json();
 }
 
@@ -164,5 +169,12 @@ export interface ProjectDetail {
 export async function getProjectDetail(projectId: number): Promise<ProjectDetail> {
   return apiRequest<ProjectDetail>(`/projects/groups/${projectId}`, {
     method: 'GET',
+  });
+}
+
+// 프로젝트 삭제
+export async function deleteProject(projectId: number): Promise<void> {
+  return apiRequest<void>(`/projects/groups/${projectId}`, {
+    method: 'DELETE',
   });
 }

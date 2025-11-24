@@ -3,8 +3,8 @@ import * as React from "react";
 import type { ToastActionElement, ToastProps } from "@/components/ui/toast";
 import type { ToastStatus } from "@/components/ui/makery-toast";
 
-const TOAST_LIMIT = 1;
-const TOAST_REMOVE_DELAY = 1000000;
+const TOAST_LIMIT = 5; // 최대 5개까지 표시
+const TOAST_REMOVE_DELAY = 4000; // 4초 후 자동 제거
 
 type ToasterToast = ToastProps & {
   id: string;
@@ -70,13 +70,38 @@ const addToRemoveQueue = (toastId: string) => {
   toastTimeouts.set(toastId, timeout);
 };
 
+// 토스트 내용을 문자열로 변환하여 비교하는 헬퍼 함수
+const getToastKey = (toast: ToasterToast): string => {
+  const title = typeof toast.title === 'string' ? toast.title : '';
+  const description = typeof toast.description === 'string' ? toast.description : '';
+  const status = toast.status || 'default';
+  return `${status}:${title}:${description}`;
+};
+
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
-    case "ADD_TOAST":
+    case "ADD_TOAST": {
+      // 같은 내용의 토스트가 이미 있는지 확인
+      const newToastKey = getToastKey(action.toast);
+      const existingToastIndex = state.toasts.findIndex(
+        (t) => getToastKey(t) === newToastKey && t.open
+      );
+
+      if (existingToastIndex !== -1) {
+        // 같은 내용의 토스트가 이미 있으면 기존 것을 제거하고 새 것을 추가
+        const filteredToasts = state.toasts.filter((_, index) => index !== existingToastIndex);
+        return {
+          ...state,
+          toasts: [action.toast, ...filteredToasts].slice(0, TOAST_LIMIT),
+        };
+      }
+
+      // 새로운 토스트 추가
       return {
         ...state,
         toasts: [action.toast, ...state.toasts].slice(0, TOAST_LIMIT),
       };
+    }
 
     case "UPDATE_TOAST":
       return {
@@ -152,11 +177,17 @@ function toast({ ...props }: Toast) {
       ...props,
       id,
       open: true,
+      duration: props.duration ?? TOAST_REMOVE_DELAY, // 4초 후 자동 사라짐
       onOpenChange: (open) => {
         if (!open) dismiss();
       },
     },
   });
+
+  // 자동으로 dismiss하기 위한 타이머 설정
+  setTimeout(() => {
+    dismiss();
+  }, props.duration ?? TOAST_REMOVE_DELAY);
 
   return {
     id: id,
