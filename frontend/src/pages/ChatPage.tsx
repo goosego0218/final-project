@@ -866,8 +866,8 @@ const ChatPage = () => {
   
   const showLogoButtons = currentStep === "logoQuestion" && hasLogo === null;
   const canGenerate = canSkip && currentStep === "complete" && showProjectConfirm;
-  // 9개 필드가 모두 채워졌거나 필수 필드만 채워진 경우 생성하기 버튼 표시
-  const showProjectConfirmButton = (allFieldsComplete || canSkip) && currentStep === "collecting" && !showProjectConfirm;
+  // 9개 필드가 모두 채워졌을 때만 생성하기 버튼 표시
+  const showProjectConfirmButton = allFieldsComplete && currentStep === "collecting" && !showProjectConfirm;
   
   // 디버깅: canSkip 계산 확인
   console.log("canSkip 계산:", {
