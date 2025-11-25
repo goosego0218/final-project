@@ -1244,43 +1244,56 @@ const ChatPage = () => {
 
       {/* 브랜드 정보 완성 확인 다이얼로그 (9개 필드 모두 채워졌을 때) */}
       <AlertDialog open={showCompleteBrandConfirmDialog} onOpenChange={setShowCompleteBrandConfirmDialog}>
-        <AlertDialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-          <AlertDialogHeader>
-            <AlertDialogTitle>브랜드 정보 확인</AlertDialogTitle>
-            <AlertDialogDescription>
+        <AlertDialogContent className="max-w-3xl">
+          <AlertDialogHeader className="pb-3">
+            <AlertDialogTitle className="text-2xl font-bold">브랜드 정보 확인</AlertDialogTitle>
+            <AlertDialogDescription className="text-base pt-1">
               입력하신 브랜드 정보를 확인해주세요. 이대로 프로젝트를 생성하시겠습니까?
             </AlertDialogDescription>
           </AlertDialogHeader>
           
-          <div className="space-y-4 py-4">
+          <div className="space-y-4 py-2">
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">브랜드명</label>
-                <p className="mt-1 text-sm font-medium">{currentBrandInfo.brand_name || "-"}</p>
+              {/* 브랜드명 */}
+              <div className="bg-muted/50 rounded-lg p-3 border border-border">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">브랜드명</label>
+                <p className="text-sm font-semibold text-foreground">{currentBrandInfo.brand_name || "-"}</p>
               </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">업종</label>
-                <p className="mt-1 text-sm font-medium">{currentBrandInfo.category || "-"}</p>
+              
+              {/* 업종 */}
+              <div className="bg-muted/50 rounded-lg p-3 border border-border">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">업종</label>
+                <p className="text-sm font-semibold text-foreground">{currentBrandInfo.category || "-"}</p>
               </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">톤앤무드</label>
-                <p className="mt-1 text-sm font-medium">{currentBrandInfo.tone_mood || "-"}</p>
+              
+              {/* 톤앤무드 */}
+              <div className="bg-muted/50 rounded-lg p-3 border border-border">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">톤앤무드</label>
+                <p className="text-sm font-semibold text-foreground">{currentBrandInfo.tone_mood || "-"}</p>
               </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">타겟 연령</label>
-                <p className="mt-1 text-sm font-medium">{currentBrandInfo.target_age || "-"}</p>
+              
+              {/* 타겟 연령 */}
+              <div className="bg-muted/50 rounded-lg p-3 border border-border">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">타겟 연령</label>
+                <p className="text-sm font-semibold text-foreground">{currentBrandInfo.target_age || "-"}</p>
               </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">타겟 성별</label>
-                <p className="mt-1 text-sm font-medium">{currentBrandInfo.target_gender || "-"}</p>
+              
+              {/* 타겟 성별 */}
+              <div className="bg-muted/50 rounded-lg p-3 border border-border">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">타겟 성별</label>
+                <p className="text-sm font-semibold text-foreground">{currentBrandInfo.target_gender || "-"}</p>
               </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">슬로건</label>
-                <p className="mt-1 text-sm font-medium">{currentBrandInfo.slogan || "-"}</p>
+              
+              {/* 슬로건 */}
+              <div className="bg-muted/50 rounded-lg p-3 border border-border">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">슬로건</label>
+                <p className="text-sm font-semibold text-foreground">{currentBrandInfo.slogan || "-"}</p>
               </div>
-              <div className="col-span-2">
-                <label className="text-sm font-medium text-muted-foreground">핵심 키워드</label>
-                <p className="mt-1 text-sm font-medium">
+              
+              {/* 핵심 키워드 */}
+              <div className="col-span-2 bg-muted/50 rounded-lg p-3 border border-border">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">핵심 키워드</label>
+                <p className="text-sm font-semibold text-foreground">
                   {typeof currentBrandInfo.core_keywords === 'string' 
                     ? currentBrandInfo.core_keywords 
                     : Array.isArray(currentBrandInfo.core_keywords)
@@ -1288,9 +1301,11 @@ const ChatPage = () => {
                     : "-"}
                 </p>
               </div>
-              <div className="col-span-2">
-                <label className="text-sm font-medium text-muted-foreground">피하고 싶은 트렌드</label>
-                <p className="mt-1 text-sm font-medium">
+              
+              {/* 피하고 싶은 트렌드 */}
+              <div className="col-span-2 bg-muted/50 rounded-lg p-3 border border-border">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">피하고 싶은 트렌드</label>
+                <p className="text-sm font-semibold text-foreground">
                   {typeof currentBrandInfo.avoided_trends === 'string' 
                     ? currentBrandInfo.avoided_trends 
                     : Array.isArray(currentBrandInfo.avoided_trends)
@@ -1298,9 +1313,11 @@ const ChatPage = () => {
                     : "-"}
                 </p>
               </div>
-              <div className="col-span-2">
-                <label className="text-sm font-medium text-muted-foreground">선호 색상</label>
-                <p className="mt-1 text-sm font-medium">
+              
+              {/* 선호 색상 */}
+              <div className="col-span-2 bg-muted/50 rounded-lg p-3 border border-border">
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">선호 색상</label>
+                <p className="text-sm font-semibold text-foreground">
                   {typeof currentBrandInfo.preferred_colors === 'string' 
                     ? currentBrandInfo.preferred_colors 
                     : Array.isArray(currentBrandInfo.preferred_colors)
