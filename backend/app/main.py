@@ -20,6 +20,7 @@ from app.api.trend import router as trend_router
 from app.api.brand import router as brand_router
 from app.api.logo import router as logo_router
 from app.api.shorts import router as shorts_router
+from app.api.social import router as social_router
 
 from app.db.session import oracle_db
 
@@ -78,6 +79,8 @@ def create_app() -> FastAPI:
     app.include_router(brand_router)
     app.include_router(logo_router)
     app.include_router(shorts_router)
+
+    app.include_router(social_router)
     return app
 
 
