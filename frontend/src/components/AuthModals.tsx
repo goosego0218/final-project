@@ -482,7 +482,7 @@ export const AuthModals = ({
                 MAKERY
               </div>
               <DialogTitle className="text-2xl font-semibold">
-                {signUpStep === 1 ? "MAKERY 시작하기" : "계정 만들기"}
+                계정 만들기
               </DialogTitle>
               <DialogDescription className="text-muted-foreground">
                 AI로 로고와 숏폼을 만들 준비가 되셨나요?
