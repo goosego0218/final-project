@@ -5,56 +5,60 @@
 # - 2025-11-19: 초기 작성
 
 from __future__ import annotations
-from typing import Literal
 
 from langgraph.graph import StateGraph, START, END
-from langchain_core.messages import SystemMessage, AIMessage, HumanMessage, AnyMessage
-from langgraph.graph.message import add_messages
+from langgraph.checkpoint.memory import MemorySaver
 
 from app.agents.state import AppState
 from app.llm.client import get_chat_model
-from langgraph.checkpoint.memory import MemorySaver
 
-llm = get_chat_model()
+# 노드 함수들 import
+from app.graphs.nodes.shorts.decision_node import make_decision_node
+from app.graphs.nodes.shorts.general_chat_node import make_general_chat_node
+from app.graphs.nodes.shorts.trend_analysis_node import make_trend_analysis_node
+from app.graphs.nodes.shorts.check_logo_node import make_check_logo_node
+from app.graphs.nodes.shorts.fetch_logo_node import make_fetch_logo_node
+from app.graphs.nodes.shorts.generate_prompt_no_logo_node import make_generate_prompt_no_logo_node
 
 checkpointer = MemorySaver()
 
-# 이 부분은 현재 LangGraph 예시 코드입니다.
-
-def shorts_node(state: AppState) -> AppState:
-    """
-    숏폼(쇼츠/릴스/틱톡) 아이디어 및 스크립트 초안을 만드는 노드.
-    - 지금은 한 번 호출로 기획+스크립트를 같이 만들어주는 형태.
-    - 나중에 '아이디어 구상' / '스크립트 정제' / '후킹 문구 생성' 등으로 쪼갤 수 있음.
-    """
-    system_prompt = (
-        "너는 숏폼(쇼츠/릴스/틱톡) 콘텐츠 기획자야.\n"
-        "브랜드의 톤과 타깃에 맞게, 15~30초짜리 영상 콘셉트와 대본을 만들어라.\n"
-        "1) 영상 콘셉트 요약\n"
-        "2) 장면별 구성(장면 1, 2, 3...)\n"
-        "3) 자막/후킹 문구 제안\n"
-        "형식으로 한국어로 작성해라."
-    )
-
-    messages = [SystemMessage(content=system_prompt)] + state["messages"]
-
-    ai_msg = llm.invoke(messages)
-
-    return {
-        "messages": [ai_msg],
-    }
-
-
 def build_shorts_graph():
     """
-    숏폼용 LangGraph 최소 버전.
-    - START -> shorts_node -> END
+    숏폼용 LangGraph 
     """
+
+    llm = get_chat_model()
+    # 프롬프트 생성용 : gpt-5
+    # 이미지 생성 구글키도필요
+    # 그외 잡채팅은 gpt-4o-mini가 빠를듯
+    # 노드마다 다르게 넣어줄필요.
+
+    decision = make_decision_node(llm)
+    general_chat = make_general_chat_node(llm)
+    trend_analysis = make_trend_analysis_node(llm)
+    check_logo = make_check_logo_node(llm)
+    fetch_logo = make_fetch_logo_node(llm)
+    generate_prompt_no_logo = make_generate_prompt_no_logo_node(llm)
+
+    # 그래프 생성
     graph = StateGraph(AppState)
-
-    graph.add_node("shorts_chat", shorts_node)
-
-    graph.add_edge(START, "shorts_chat")
-    graph.add_edge("shorts_chat", END)
-
+    
+    # 노드 추가
+    graph.add_node("decision", decision)
+    graph.add_node("general_chat", general_chat)
+    graph.add_node("trend_analysis", trend_analysis)
+    graph.add_node("check_logo", check_logo)
+    graph.add_node("fetch_logo", fetch_logo)
+    graph.add_node("generate_prompt_no_logo", generate_prompt_no_logo)
+    
+    # 엣지 연결
+    graph.add_edge(START, "decision")
+    graph.add_edge("general_chat", END)
+    graph.add_edge("trend_analysis", END)
+    
+    graph.add_edge("fetch_logo",END)
+    graph.add_edge("generate_prompt_no_logo",END)
+    
+    # decision 노드는 Command.goto로 분기하므로 add_conditional_edges 불필요
+    
     return graph.compile(checkpointer=checkpointer)
