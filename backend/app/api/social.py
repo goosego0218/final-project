@@ -7,7 +7,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import secrets
 import json
 from urllib.parse import quote
@@ -160,7 +160,7 @@ def youtube_oauth_callback(
                 "client_id": settings.google_client_id,
                 "client_secret": settings.google_client_secret,
                 "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                "token_uri": "https://oauth2.googleapis.com/token",
+                "m_uri": "https://oauth2.googleapis.com/token",
                 "redirect_uris": [settings.google_redirect_uri]
             }
         }
@@ -191,7 +191,39 @@ def youtube_oauth_callback(
         
         access_token = credentials.token
         refresh_token = credentials.refresh_token if credentials.refresh_token else None
-        token_expires_at = credentials.expiry if credentials.expiry else None
+        
+        # 토큰 만료시간 처리 (한국 시간으로 변환)
+        token_expires_at = None
+        if credentials.expiry:
+            expiry = credentials.expiry
+            
+            # naive datetime인 경우 UTC로 가정
+            if expiry.tzinfo is None:
+                expiry = expiry.replace(tzinfo=timezone.utc)
+            
+            # 한국 시간대 (UTC+9)
+            kst = timezone(timedelta(hours=9))
+            
+            # UTC를 한국 시간으로 변환
+            if expiry.tzinfo == timezone.utc:
+                token_expires_at = expiry.astimezone(kst)
+            else:
+                # 이미 다른 타임존이면 한국 시간으로 변환
+                token_expires_at = expiry.astimezone(kst)
+            
+            # 현재 시간과 비교하여 검증
+            now_kst = datetime.now(kst)
+            if token_expires_at <= now_kst:
+                # 만료 시간이 과거인 경우, 기본 만료 시간 추가 (1시간)
+                token_expires_at = now_kst + timedelta(hours=1)
+                print(f"[WARN] Token expiry is in the past, setting to 1 hour from now (KST): {token_expires_at}")
+            else:
+                print(f"[DEBUG] Token expires at (KST): {token_expires_at}")
+        else:
+            # expiry가 없는 경우 기본 만료 시간 추가 (1시간, 한국 시간)
+            kst = timezone(timedelta(hours=9))
+            token_expires_at = datetime.now(kst) + timedelta(hours=1)
+            print(f"[WARN] No expiry provided, setting to 1 hour from now (KST): {token_expires_at}")
         
         # YouTube 사용자 정보 조회
         platform_user_id = None
