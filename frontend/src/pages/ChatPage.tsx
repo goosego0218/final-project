@@ -22,7 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Send, Plus, Upload, Image, Video, X } from "lucide-react";
+import { Send, Plus, Upload, Image, Video, X, Loader2  } from "lucide-react";
 import { projectStorage, type Message } from "@/lib/projectStorage";
 import { useToast } from "@/hooks/use-toast";
 import StudioTopBar from "@/components/StudioTopBar";
@@ -1002,6 +1002,7 @@ const ChatPage = () => {
                     
                     // 바로 showProjectConfirm을 true로 설정하여 로고/숏폼 생성 버튼 표시
                     setShowProjectConfirm(true);
+                    setCurrentStep("complete"); 
                     
                     toast({
                       title: "프로젝트 생성 완료",
