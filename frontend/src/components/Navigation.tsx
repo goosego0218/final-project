@@ -351,16 +351,16 @@ const Navigation = () => {
                         {projectsMenu.menu_nm}
                       </DropdownMenuItem>
                     )}
-                    <DropdownMenuItem onClick={() => navigate("/plans")}>
-                      <CreditCard className="h-4 w-4 mr-2" />
-                      플랜 관리
-                    </DropdownMenuItem>
                     {shortsReportMenu && (
                       <DropdownMenuItem onClick={() => navigate(shortsReportMenu.menu_path)}>
                         <BarChart3 className="h-4 w-4 mr-2" />
                         {shortsReportMenu.menu_nm}
                       </DropdownMenuItem>
                     )}
+                    <DropdownMenuItem onClick={() => navigate("/plans")}>
+                      <CreditCard className="h-4 w-4 mr-2" />
+                      플랜 관리
+                    </DropdownMenuItem>
                     
                     <DropdownMenuSeparator />
                     
