@@ -21,8 +21,9 @@ from app.db.orm import Base
 
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
+if TYPE_CHECKING: # 타입 검사할 때만 실행하고, 실제 파이썬을 실행할 때는 실행되지 않음.
     from app.models.project import ProdGroup
+    from app.models.social import SocialConnection
 
 class Role(Base):
     """
@@ -127,6 +128,13 @@ class UserInfo(Base):
     project_groups: Mapped[list["ProdGroup"]] = relationship(
         back_populates="creator",
         lazy="selectin",
+    )
+
+    social_connections: Mapped[list["SocialConnection"]] = relationship(
+        "SocialConnection",
+        back_populates="user",
+        lazy="selectin",
+        cascade="all, delete-orphan",
     )
 
 class Menu(Base):

@@ -233,3 +233,37 @@ export function getFileUrl(filePath: string | null | undefined): string | null {
   const path = filePath.startsWith("/") ? filePath : `/${filePath}`;
   return `${baseUrl}${path}`;
 }
+
+// YouTube 연동 관련 API
+export interface YouTubeAuthUrlResponse {
+  auth_url: string;
+  state: string;
+}
+
+export interface YouTubeConnectionStatus {
+  connected: boolean;
+  email: string | null;
+  platform_user_id: string | null;
+  connected_at: string | null;
+}
+
+// YouTube OAuth 인증 URL 가져오기
+export async function getYouTubeAuthUrl(): Promise<YouTubeAuthUrlResponse> {
+  return apiRequest<YouTubeAuthUrlResponse>('/social/youtube/auth-url', {
+    method: 'GET',
+  });
+}
+
+// YouTube 연동 상태 조회
+export async function getYouTubeConnectionStatus(): Promise<YouTubeConnectionStatus> {
+  return apiRequest<YouTubeConnectionStatus>('/social/youtube/status', {
+    method: 'GET',
+  });
+}
+
+// YouTube 연동 해제
+export async function disconnectYouTube(): Promise<{ message: string }> {
+  return apiRequest<{ message: string }>('/social/youtube/disconnect', {
+    method: 'DELETE',
+  });
+}

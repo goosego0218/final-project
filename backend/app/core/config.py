@@ -44,6 +44,13 @@ class Settings(BaseSettings):
     # File Server
     file_server_url: str = "https://kr.object.ncloudstorage.com/aissemble"  # 파일 서버 기본 URL
 
+    google_client_id: str = ""  # Google Cloud Console에서 발급받은 Client ID
+    google_client_secret: str = ""  # Google Cloud Console에서 발급받은 Client Secret
+    google_redirect_uri: str = "http://localhost:8000/social/youtube/callback"  # 개발 환경
+    
+    # 프론트엔드 URL (OAuth 콜백 후 리다이렉트용)
+    frontend_url: str = "http://localhost:8080"  # 프론트엔드 기본 URL
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
