@@ -393,6 +393,11 @@ const ChatPage = () => {
     // draft=true 제거, localStorage만 확인
     const dbProjectIdParam = searchParams.get('db_project'); // DB 프로젝트 ID
     
+    // 이미 dbProjectId가 설정되어 있으면 (프로젝트 생성 후) navigate하지 않음
+    if (dbProjectId) {
+      return;
+    }
+    
     // DB 프로젝트 ID가 있는 경우 (DB에서 가져온 프로젝트)
     if (dbProjectIdParam) {
       const dbId = parseInt(dbProjectIdParam);
@@ -440,8 +445,11 @@ const ChatPage = () => {
     }
     
     // draft도 없고 DB 프로젝트도 아닌 경우 프로젝트 목록으로 이동
-    navigate("/projects");
-  }, [navigate, searchParams, messages.length]);
+    // 단, 메시지가 이미 있는 경우(대화 중인 경우)는 이동하지 않음
+    if (messages.length === 0) {
+      navigate("/projects");
+    }
+  }, [navigate, searchParams, messages.length, dbProjectId]);
 
 
   // 메시지 스크롤
@@ -1001,26 +1009,29 @@ const ChatPage = () => {
           </div>
           
           {/* Right: Skip/생성하기 Button */}
-          <div className="w-24 flex justify-end">
-            <Button
-              onClick={handleSkipClick}
-              disabled={!canSkip || isLoadingChat}
-              variant={canSkip ? "default" : "ghost"}
-              className={canSkip ? "bg-primary hover:bg-primary/90" : ""}
-            >
-              {/* 프로젝트 생성 중일 때만 스피너 표시 (9개 필드가 모두 채워진 상태에서 생성하기 버튼 클릭 시) */}
-              {isLoadingChat && allFieldsComplete && currentStep === "collecting" && !showProjectConfirm ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  생성 중...
-                </>
-              ) : allFieldsComplete && currentStep === "collecting" && !showProjectConfirm ? (
-                "생성하기"
-              ) : (
-                "건너뛰기"
-              )}
-            </Button>
-          </div>
+          {/* 프로젝트가 생성된 후(showProjectConfirm이 true)에는 버튼 숨김 */}
+          {!showProjectConfirm && (
+            <div className="w-24 flex justify-end">
+              <Button
+                onClick={handleSkipClick}
+                disabled={!canSkip || isLoadingChat}
+                variant={canSkip ? "default" : "ghost"}
+                className={canSkip ? "bg-primary hover:bg-primary/90" : ""}
+              >
+                {/* 프로젝트 생성 중일 때만 스피너 표시 (9개 필드가 모두 채워진 상태에서 생성하기 버튼 클릭 시) */}
+                {isLoadingChat && allFieldsComplete && currentStep === "collecting" && !showProjectConfirm ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    생성 중...
+                  </>
+                ) : allFieldsComplete && currentStep === "collecting" && !showProjectConfirm ? (
+                  "생성하기"
+                ) : (
+                  "건너뛰기"
+                )}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
