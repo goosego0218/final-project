@@ -574,70 +574,93 @@ const ChatPage = () => {
       return;
     }
     
-    // 9개 필드가 모두 채워졌을 때: 브랜드 정보 확인 다이얼로그 표시
-    if (allFieldsComplete && currentStep === "collecting" && !showProjectConfirm) {
+    // 브랜드 정보 확인 다이얼로그 표시 (9개 모두 채워졌든 아니든 동일한 다이얼로그 사용)
+    if (currentStep === "collecting" && !showProjectConfirm) {
       setShowCompleteBrandConfirmDialog(true);
       return;
     }
     
-    // 9개가 다 채워지지 않았을 때: 기존 컨펌창 사용
-    setSkipDialogStep("confirm"); // 다이얼로그 열 때 초기 상태로 리셋
+    // 기존 로직 유지 (혹시 모를 경우를 위해)
+    setSkipDialogStep("confirm");
     setShowSkipDialog(true);
   };
 
   // 브랜드 정보 확인 다이얼로그에서 "예" 버튼 클릭 시 프로젝트 생성
   const handleCompleteBrandConfirm = async () => {
-    if (!brandSessionId) {
-      toast({
-        title: "오류",
-        description: "세션 정보가 없습니다.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setShowCompleteBrandConfirmDialog(false);
-    setIsLoadingChat(true);
-    try {
-      // 프로젝트 생성 API 호출
-      const response = await createBrandProject({
-        brand_session_id: brandSessionId,
-        grp_nm: draftProjectInfo?.name || currentBrandInfo.brand_name || undefined,
-        grp_desc: draftProjectInfo?.description || undefined,
-      });
+    
+    // 9개 필드가 모두 채워졌을 때: 프로젝트 생성
+    if (allFieldsComplete) {
+      if (!brandSessionId) {
+        toast({
+          title: "오류",
+          description: "세션 정보가 없습니다.",
+          variant: "destructive",
+        });
+        return;
+      }
 
-      // 프로젝트 ID 저장
-      setDbProjectId(response.project_id);
-      
-      // draft 정보 삭제
-      localStorage.removeItem('makery_draft_project');
-      setIsDraftMode(false);
-      
-      // 질문을 메시지로 추가
-      const confirmQuestion: Message = {
-        role: "assistant",
-        content: "어떤 작업을 하시겠습니까?"
-      };
-      setMessages(prev => [...prev, confirmQuestion]);
-      
-      // 바로 showProjectConfirm을 true로 설정하여 로고/숏폼 생성 버튼 표시
-      setShowProjectConfirm(true);
-      setCurrentStep("complete"); 
-      
-      toast({
-        title: "프로젝트 생성 완료",
-        description: "프로젝트가 생성되었습니다.",
-        status: "success",
-      });
-    } catch (error) {
-      console.error('프로젝트 생성 오류:', error);
-      toast({
-        title: "프로젝트 생성 실패",
-        description: error instanceof Error ? error.message : "프로젝트 생성에 실패했습니다.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoadingChat(false);
+      setIsLoadingChat(true);
+      try {
+        // 프로젝트 생성 API 호출
+        const response = await createBrandProject({
+          brand_session_id: brandSessionId,
+          grp_nm: draftProjectInfo?.name || currentBrandInfo.brand_name || undefined,
+          grp_desc: draftProjectInfo?.description || undefined,
+        });
+
+        // 프로젝트 생성이 성공적으로 완료된 경우에만 진행
+        if (response && response.project_id) {
+          // 프로젝트 ID 저장
+          setDbProjectId(response.project_id);
+          
+          // draft 정보 삭제
+          localStorage.removeItem('makery_draft_project');
+          setIsDraftMode(false);
+          
+          // 로딩 상태 먼저 해제 (메시지 추가 전에)
+          setIsLoadingChat(false);
+          
+          // 브랜드명 가져오기
+          const brandName = currentBrandInfo.brand_name || "브랜드";
+          
+          // 프로젝트 생성 완료 메시지 추가
+          const confirmQuestion: Message = {
+            role: "assistant",
+            content: `프로젝트가 성공적으로 생성되었습니다.\n\n${brandName}의 로고와 숏폼 중 무엇부터 만들어볼까요?`
+          };
+          setMessages(prev => [...prev, confirmQuestion]);
+          
+          // 바로 showProjectConfirm을 true로 설정하여 로고/숏폼 생성 버튼 표시
+          setShowProjectConfirm(true);
+          setCurrentStep("complete"); 
+          
+          toast({
+            title: "프로젝트 생성 완료",
+            description: "프로젝트가 생성되었습니다.",
+            status: "success",
+          });
+        } else {
+          // 응답이 정상적이지 않은 경우
+          setIsLoadingChat(false);
+          toast({
+            title: "프로젝트 생성 실패",
+            description: "프로젝트 생성 응답이 올바르지 않습니다.",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error('프로젝트 생성 오류:', error);
+        setIsLoadingChat(false);
+        toast({
+          title: "프로젝트 생성 실패",
+          description: error instanceof Error ? error.message : "프로젝트 생성에 실패했습니다.",
+          variant: "destructive",
+        });
+      }
+    } else {
+      // 9개 미만일 때: 기존 건너뛰기 로직 사용
+      handleProjectConfirmInDialog();
     }
   };
 
