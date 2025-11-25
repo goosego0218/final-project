@@ -83,6 +83,7 @@ const ChatPage = () => {
   const [isLoadingChat, setIsLoadingChat] = useState(false); // 챗 로딩 상태
   const [brandInfo, setBrandInfo] = useState<BrandInfo | null>(null); // 백엔드에서 받은 brand_info
   const [brandSessionId, setBrandSessionId] = useState<string | null>(null); // brand_session_id 저장
+  const [showCompleteBrandConfirmDialog, setShowCompleteBrandConfirmDialog] = useState(false); // 9개 필드 완성 시 브랜드 정보 확인 다이얼로그
 
 
   // localStorage에서 사용자 정보 가져오기
@@ -450,6 +451,15 @@ const ChatPage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // 로딩 상태 변경 시 스크롤 (답변 생성 중 표시를 위해)
+  useEffect(() => {
+    if (isLoadingChat) {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
+  }, [isLoadingChat]);
+
   // 로고 생성하기 버튼이 나타날 때 스크롤
   useEffect(() => {
     const shouldScroll = collectedInfo.brand_name?.trim() !== "" && 
@@ -553,9 +563,9 @@ const ChatPage = () => {
     setInputMessage("");
   };
 
-  const handleSkipClick = () => {
-    // 필수 필드 체크
-    if (!collectedInfo.brand_name.trim() || !collectedInfo.industry.trim()) {
+  const handleSkipClick = async () => {
+    // 필수 필드 체크는 이미 canSkip으로 계산되어 있으므로 사용
+    if (!canSkip) {
       toast({
         title: "필수 항목 미입력",
         description: "브랜드명과 업종은 필수 항목입니다.",
@@ -563,8 +573,72 @@ const ChatPage = () => {
       });
       return;
     }
+    
+    // 9개 필드가 모두 채워졌을 때: 브랜드 정보 확인 다이얼로그 표시
+    if (allFieldsComplete && currentStep === "collecting" && !showProjectConfirm) {
+      setShowCompleteBrandConfirmDialog(true);
+      return;
+    }
+    
+    // 9개가 다 채워지지 않았을 때: 기존 컨펌창 사용
     setSkipDialogStep("confirm"); // 다이얼로그 열 때 초기 상태로 리셋
     setShowSkipDialog(true);
+  };
+
+  // 브랜드 정보 확인 다이얼로그에서 "예" 버튼 클릭 시 프로젝트 생성
+  const handleCompleteBrandConfirm = async () => {
+    if (!brandSessionId) {
+      toast({
+        title: "오류",
+        description: "세션 정보가 없습니다.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setShowCompleteBrandConfirmDialog(false);
+    setIsLoadingChat(true);
+    try {
+      // 프로젝트 생성 API 호출
+      const response = await createBrandProject({
+        brand_session_id: brandSessionId,
+        grp_nm: draftProjectInfo?.name || currentBrandInfo.brand_name || undefined,
+        grp_desc: draftProjectInfo?.description || undefined,
+      });
+
+      // 프로젝트 ID 저장
+      setDbProjectId(response.project_id);
+      
+      // draft 정보 삭제
+      localStorage.removeItem('makery_draft_project');
+      setIsDraftMode(false);
+      
+      // 질문을 메시지로 추가
+      const confirmQuestion: Message = {
+        role: "assistant",
+        content: "어떤 작업을 하시겠습니까?"
+      };
+      setMessages(prev => [...prev, confirmQuestion]);
+      
+      // 바로 showProjectConfirm을 true로 설정하여 로고/숏폼 생성 버튼 표시
+      setShowProjectConfirm(true);
+      setCurrentStep("complete"); 
+      
+      toast({
+        title: "프로젝트 생성 완료",
+        description: "프로젝트가 생성되었습니다.",
+        status: "success",
+      });
+    } catch (error) {
+      console.error('프로젝트 생성 오류:', error);
+      toast({
+        title: "프로젝트 생성 실패",
+        description: error instanceof Error ? error.message : "프로젝트 생성에 실패했습니다.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingChat(false);
+    }
   };
 
   const handleSkipConfirm = () => {
@@ -866,8 +940,6 @@ const ChatPage = () => {
   
   const showLogoButtons = currentStep === "logoQuestion" && hasLogo === null;
   const canGenerate = canSkip && currentStep === "complete" && showProjectConfirm;
-  // 9개 필드가 모두 채워졌을 때만 생성하기 버튼 표시
-  const showProjectConfirmButton = allFieldsComplete && currentStep === "collecting" && !showProjectConfirm;
   
   // 디버깅: canSkip 계산 확인
   console.log("canSkip 계산:", {
@@ -907,15 +979,25 @@ const ChatPage = () => {
             </div>
           </div>
           
-          {/* Right: Skip Button */}
+          {/* Right: Skip/생성하기 Button */}
           <div className="w-24 flex justify-end">
             <Button
               onClick={handleSkipClick}
-              disabled={!canSkip}
+              disabled={!canSkip || isLoadingChat}
               variant={canSkip ? "default" : "ghost"}
               className={canSkip ? "bg-primary hover:bg-primary/90" : ""}
             >
-              건너뛰기
+              {/* 프로젝트 생성 중일 때만 스피너 표시 (9개 필드가 모두 채워진 상태에서 생성하기 버튼 클릭 시) */}
+              {isLoadingChat && allFieldsComplete && currentStep === "collecting" && !showProjectConfirm ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  생성 중...
+                </>
+              ) : allFieldsComplete && currentStep === "collecting" && !showProjectConfirm ? (
+                "생성하기"
+              ) : (
+                "건너뛰기"
+              )}
             </Button>
           </div>
         </div>
@@ -952,86 +1034,25 @@ const ChatPage = () => {
             </div>
           ))}
           
-          {showProjectConfirmButton && (
-            <div className="mt-4 flex justify-center">
-              <Button 
-                size="lg" 
-                onClick={async () => {
-                  // 필수 필드 체크 (brand_name과 category)
-                  if (!canSkip) {
-                    toast({
-                      title: "필수 항목 미입력",
-                      description: "브랜드명과 업종은 필수 항목입니다.",
-                      variant: "destructive",
-                    });
-                    return;
-                  }
-                  
-                  // brand_session_id가 없으면 에러
-                  if (!brandSessionId) {
-                    toast({
-                      title: "오류",
-                      description: "세션 정보가 없습니다.",
-                      variant: "destructive",
-                    });
-                    return;
-                  }
-
-                  setIsLoadingChat(true);
-                  try {
-                    // 프로젝트 생성 API 호출
-                    const response = await createBrandProject({
-                      brand_session_id: brandSessionId,
-                      grp_nm: draftProjectInfo?.name || currentBrandInfo.brand_name || undefined,
-                      grp_desc: draftProjectInfo?.description || undefined,
-                    });
-
-                    // 프로젝트 ID 저장
-                    setDbProjectId(response.project_id);
-                    
-                    // draft 정보 삭제
-                    localStorage.removeItem('makery_draft_project');
-                    setIsDraftMode(false);
-                    
-                    // 질문을 메시지로 추가
-                    const confirmQuestion: Message = {
-                      role: "assistant",
-                      content: "어떤 작업을 하시겠습니까?"
-                    };
-                    setMessages(prev => [...prev, confirmQuestion]);
-                    
-                    // 바로 showProjectConfirm을 true로 설정하여 로고/숏폼 생성 버튼 표시
-                    setShowProjectConfirm(true);
-                    setCurrentStep("complete"); 
-                    
-                    toast({
-                      title: "프로젝트 생성 완료",
-                      description: "프로젝트가 생성되었습니다.",
-                      status: "success",
-                    });
-                  } catch (error) {
-                    console.error('프로젝트 생성 오류:', error);
-                    toast({
-                      title: "프로젝트 생성 실패",
-                      description: error instanceof Error ? error.message : "프로젝트 생성에 실패했습니다.",
-                      variant: "destructive",
-                    });
-                  } finally {
-                    setIsLoadingChat(false);
-                  }
-                }} 
-                className="gap-2 bg-primary hover:bg-primary/90"
-                disabled={isLoadingChat}
-              >
-                {isLoadingChat ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    생성 중...
-                  </>
-                ) : (
-                  "생성하기"
-                )}
-              </Button>
+          {/* 로딩 인디케이터 */}
+          {isLoadingChat && (
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 mb-1">
+                <img 
+                  src="/makery-logo.png" 
+                  alt="Makery Logo" 
+                  className="h-5 w-5"
+                />
+                <span className="text-sm font-semibold text-foreground">MAKERY</span>
+              </div>
+              <div className="flex justify-start">
+                <Card className="max-w-[80%] p-4 bg-muted">
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                    <p className="text-muted-foreground">답변을 생성하고 있습니다...</p>
+                  </div>
+                </Card>
+              </div>
             </div>
           )}
           
@@ -1218,6 +1239,96 @@ const ChatPage = () => {
               </AlertDialogFooter>
             </>
           )}
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* 브랜드 정보 완성 확인 다이얼로그 (9개 필드 모두 채워졌을 때) */}
+      <AlertDialog open={showCompleteBrandConfirmDialog} onOpenChange={setShowCompleteBrandConfirmDialog}>
+        <AlertDialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <AlertDialogHeader>
+            <AlertDialogTitle>브랜드 정보 확인</AlertDialogTitle>
+            <AlertDialogDescription>
+              입력하신 브랜드 정보를 확인해주세요. 이대로 프로젝트를 생성하시겠습니까?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">브랜드명</label>
+                <p className="mt-1 text-sm font-medium">{currentBrandInfo.brand_name || "-"}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">업종</label>
+                <p className="mt-1 text-sm font-medium">{currentBrandInfo.category || "-"}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">톤앤무드</label>
+                <p className="mt-1 text-sm font-medium">{currentBrandInfo.tone_mood || "-"}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">타겟 연령</label>
+                <p className="mt-1 text-sm font-medium">{currentBrandInfo.target_age || "-"}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">타겟 성별</label>
+                <p className="mt-1 text-sm font-medium">{currentBrandInfo.target_gender || "-"}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">슬로건</label>
+                <p className="mt-1 text-sm font-medium">{currentBrandInfo.slogan || "-"}</p>
+              </div>
+              <div className="col-span-2">
+                <label className="text-sm font-medium text-muted-foreground">핵심 키워드</label>
+                <p className="mt-1 text-sm font-medium">
+                  {typeof currentBrandInfo.core_keywords === 'string' 
+                    ? currentBrandInfo.core_keywords 
+                    : Array.isArray(currentBrandInfo.core_keywords)
+                    ? currentBrandInfo.core_keywords.join(', ')
+                    : "-"}
+                </p>
+              </div>
+              <div className="col-span-2">
+                <label className="text-sm font-medium text-muted-foreground">피하고 싶은 트렌드</label>
+                <p className="mt-1 text-sm font-medium">
+                  {typeof currentBrandInfo.avoided_trends === 'string' 
+                    ? currentBrandInfo.avoided_trends 
+                    : Array.isArray(currentBrandInfo.avoided_trends)
+                    ? currentBrandInfo.avoided_trends.join(', ')
+                    : "-"}
+                </p>
+              </div>
+              <div className="col-span-2">
+                <label className="text-sm font-medium text-muted-foreground">선호 색상</label>
+                <p className="mt-1 text-sm font-medium">
+                  {typeof currentBrandInfo.preferred_colors === 'string' 
+                    ? currentBrandInfo.preferred_colors 
+                    : Array.isArray(currentBrandInfo.preferred_colors)
+                    ? currentBrandInfo.preferred_colors.join(', ')
+                    : "-"}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowCompleteBrandConfirmDialog(false)}>
+              아니오
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleCompleteBrandConfirm}
+              disabled={isLoadingChat}
+            >
+              {isLoadingChat ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  생성 중...
+                </>
+              ) : (
+                "예, 생성하기"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
