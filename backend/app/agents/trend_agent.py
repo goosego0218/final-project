@@ -3,16 +3,18 @@
 # 수정내역
 # - 2025-11-19: 초기 작성 (create_react_agent 버전)
 # - 2025-11-19: create_agent + AgentState(AppState) 버전으로 변경
+# - 2025-11-25: prompt 분리 후 get_trend_system_prompt 함수 사용
+# - 2025-11-25: mode 별 역할 프롬프트 + brand_profile 컨텍스트 추가
 
 from __future__ import annotations
 
 from typing import Any, Dict, Optional
-
+import json
 import logging
 
 from langchain.agents import create_agent
 from langgraph.checkpoint.memory import MemorySaver
-from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 
 from app.agents.state import AppState
 from app.graphs.tools.trend_tools import (
@@ -21,57 +23,17 @@ from app.graphs.tools.trend_tools import (
     apply_reranker_tool,
 )
 from app.llm.client import get_chat_model
+from app.agents.prompts.trend_prompts import (
+    TREND_AGENT_SYSTEM_PROMPT,
+    get_trend_mode_prompt,
+)
 
 logger = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------
-# 트렌드 서브에이전트 시스템 프롬프트
-# (기존 SUBAGENT1_SYSTEM_PROMPT 를 기반으로 재구성)
+# 트렌드 서브에이전트 시스템 프롬프트 (RAG/도구 사용 규칙)
 # -------------------------------------------------------------------
-SYSTEM_PROMPT = """
-너는 **RAG 통합 검색 전문 에이전트**다.
-
-# 역할
-사용자의 검색 질문을 받으면, 다음 전략으로 최적의 검색 결과를 제공한다:
-
-1. **내부 DB 우선**: 먼저 `rag_search_tool`로 내부 벡터 DB 검색
-2. **결과 평가**: 검색 결과가 충분한지 판단
-   - 관련 문서 3개 이상이면, 우선 내부 결과로 답변을 시도한다.
-   - 관련 문서가 부족하거나 내용이 빈약하면, 추가 검색이 필요하다.
-3. **웹 검색 보완**: 내부 자료가 부족하면 `tavily_web_search_tool`로 최신 정보를 추가한다.
-4. **Reranking**: 모든 검색이 완료되면 `apply_reranker_tool`로 최종 재정렬한다.
-5. **결과 통합**: 재정렬된 상위 문서들을 종합하여 한글로 친절하고 구조화된 답변을 생성한다.
-
-# 도구 사용 규칙
-
-## rag_search_tool
-- 항상 **첫 번째로 시도**되는 검색 도구
-- 내부 마크다운/트렌드 DB 검색
-- 결과가 충분하면 이것만으로도 답변 가능
-
-## tavily_web_search_tool
-- 내부 검색 결과가 부족할 때만 사용
-- 최신 트렌드, 통계, 사례가 필요한 경우
-- 검색 쿼리를 구체적으로 작성 (연도, 키워드, 타깃 포함)
-
-## apply_reranker_tool
-- **RAG + Tavily 검색이 끝난 후 반드시 한 번 이상 사용**
-- `_last_docs`에 쌓인 모든 문서를 대상으로 재정렬
-- 최종 답변을 생성하기 전 마지막 단계로 호출
-
-# 출력 형식 가이드
-
-- 가능한 한 **한글로**, 명확하고 구조화된 형식으로 답변한다.
-- 필요한 경우 다음과 같이 섹션을 나눈다.
-  1. 요약
-  2. 핵심 트렌드
-  3. 타깃별 인사이트
-  4. 실행 아이디어
-  5. 참고 자료 (필요 시)
-
-- 근거가 된 내용이 있으면 '근거' 섹션에서 간단히 정리한다.
-- 도구 호출 로그나 내부 시스템 설명은 그대로 노출하지 않는다.
-""".strip()
+SYSTEM_PROMPT = TREND_AGENT_SYSTEM_PROMPT
 
 # -------------------------------------------------------------------
 # LangGraph + LangChain v1 create_agent 기반 에이전트 생성
@@ -80,7 +42,7 @@ SYSTEM_PROMPT = """
 _memory = MemorySaver()
 
 _trend_agent = create_agent(
-    model=get_chat_model(),                  # 기존 LLM 팩토리 그대로 사용
+    model=get_chat_model(),
     tools=[
         rag_search_tool,
         tavily_web_search_tool,
@@ -95,18 +57,19 @@ _trend_agent = create_agent(
 def run_trend_query_for_api(
     query: str,
     *,
-    mode: str = "brand",
+    mode: str,  # 기본값 제거 → 필수 파라미터로 변경
     project_id: Optional[int] = None,
     brand_profile: Optional[Dict[str, Any]] = None,
     user_id: Optional[int] = None,
 ) -> str:
     """
     FastAPI API에서 직접 호출할 때 사용하는 래퍼 함수.
-
-    - AppState 구조를 맞춰서 초기 state를 구성하고
-    - _trend_agent.invoke(...) 를 호출한 뒤
-    - 마지막 AIMessage의 content만 뽑아서 문자열로 반환한다.
+    
+    Args:
+        mode: 에이전트 모드 ("brand" | "logo" | "shorts") - 필수
+    ...
     """
+    
     logger.info(
         "[trend_agent] run_trend_query_for_api user_id=%s project_id=%s mode=%s query=%s",
         user_id,
@@ -115,19 +78,31 @@ def run_trend_query_for_api(
         query,
     )
 
+    # mode 별 역할 프롬프트 + 브랜드 프로필을 컨텍스트로 제공
+    mode_prompt = get_trend_mode_prompt(mode)
+    profile_snippet = json.dumps(brand_profile or {}, ensure_ascii=False)
+
+    messages = [
+        # 이번 요청이 brand / logo / shorts 중 무엇인지 + 어떤 출력 포맷을 원하는지
+        SystemMessage(content=mode_prompt),
+        # 브랜드 프로필과 사용자 요청을 한 번에 전달
+        HumanMessage(
+            content=(
+                f"[브랜드 프로필]\n{profile_snippet}\n\n"
+                f"[사용자 요청]\n{query}"
+            )
+        ),
+    ]
+
     initial_state: AppState = {
-        "messages": [HumanMessage(content=query)],
+        "messages": messages,
         # AgentState 기본 필드(remaining_steps)는 기본값 사용
         "mode": mode,                       # "brand" / "logo" / "shorts"
         "project_id": project_id,
         "brand_profile": brand_profile or {},
-        "trend_context": {},               # 처음에는 비어 있고, 도중에 도구/에이전트가 채울 수 있음
+        "trend_context": {},                # 처음에는 비어 있고, 도중에 도구/에이전트가 채울 수 있음
         "meta": {"user_id": user_id},
     }
-
-    # thread_id를 붙이고 싶으면 config에 넣을 수 있음 (옵션)
-    # config = {"configurable": {"thread_id": f"trend:{user_id}:{project_id}"}}
-    # result_state = _trend_agent.invoke(initial_state, config=config)
 
     thread_id = f"trend:{user_id or 'anon'}:{project_id or 'none'}"
 
@@ -139,7 +114,7 @@ def run_trend_query_for_api(
             }
         },
     )
-    
+
     messages = result_state["messages"]
     if not messages:
         return "응답을 생성하지 못했습니다."
