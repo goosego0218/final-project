@@ -4,6 +4,7 @@
 # 수정내역
 # - 2025-11-18: 초기 작성
 # - 2025-11-19: response 스키마 추가
+# - 2025-11-23: ShortsResume 스키마 추가
 
 from typing import List, Optional, Literal
 from pydantic import BaseModel
@@ -42,10 +43,22 @@ class LogoChatResponse(BaseModel):
 
 class ShortsChatRequest(BaseModel):
     project_id: int
-    message: str
+    message: Optional[str] = None
     shorts_session_id: Optional[str] = None
 
 class ShortsChatResponse(BaseModel):
+    reply: str
+    project_id: int
+    shorts_session_id: str
+
+#----------------------------------------25-11-23 스키마 추가--------------------------------
+
+class ShortsResumeRequest(BaseModel):
+    project_id: int
+    shorts_session_id: str
+    answer: str  # "Y" or "N"
+
+class ShortsResumeResponse(BaseModel):
     reply: str
     project_id: int
     shorts_session_id: str
