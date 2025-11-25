@@ -12,7 +12,7 @@ from app.core.deps import get_current_user
 from app.db.orm import get_orm_session
 from app.models.auth import UserInfo
 from app.schemas.project import ProjectGrp, ProjectListItem
-from app.services.project_service import create_project_group, get_user_projects, load_project_group_entity, delete_project_group
+from app.services.project_service import create_project_group, get_user_projects, load_project_group_entity, delete_project_group, update_project_group
 
 router = APIRouter(
     prefix="/projects",
@@ -145,3 +145,39 @@ def delete_project_group_endpoint(
         )
     
     return None
+
+
+@router.put(
+    "/groups/{project_id}",
+    response_model=ProjectGrp,
+)
+def update_project_group_endpoint(
+    project_id: int,
+    payload: ProjectGrp,
+    db: Session = Depends(get_orm_session),
+    current_user: UserInfo = Depends(get_current_user),
+):
+    """
+    프로젝트 정보 수정 (이름, 설명).
+    - 본인이 생성한 프로젝트만 수정 가능
+    """
+    try:
+        project = update_project_group(
+            db=db,
+            project_id=project_id,
+            user_id=current_user.id,
+            grp_nm=payload.grp_nm,
+            grp_desc=payload.grp_desc,
+        )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
+    
+    return ProjectGrp(
+        grp_id=project.grp_id,
+        grp_nm=project.grp_nm,
+        grp_desc=project.grp_desc,
+        creator_id=project.creator_id,
+    )

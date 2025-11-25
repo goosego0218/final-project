@@ -390,7 +390,7 @@ const ChatPage = () => {
   };
 
   useEffect(() => {
-    const isDraft = searchParams.get('draft') === 'true';
+    // draft=true 제거, localStorage만 확인
     const dbProjectIdParam = searchParams.get('db_project'); // DB 프로젝트 ID
     
     // DB 프로젝트 ID가 있는 경우 (DB에서 가져온 프로젝트)
@@ -413,19 +413,17 @@ const ChatPage = () => {
       return;
     }
     
-    // draft 모드 처리
-    if (isDraft) {
+    // localStorage에 draft 프로젝트 정보가 있는지 확인
+    const draftData = localStorage.getItem('makery_draft_project');
+    if (draftData) {
       setIsDraftMode(true);
       
       // draft 프로젝트 정보 불러오기
-      const draftData = localStorage.getItem('makery_draft_project');
-      if (draftData) {
-        try {
-          const draft = JSON.parse(draftData);
-          setDraftProjectInfo({ name: draft.name, description: draft.description || "" });
-        } catch (e) {
-          console.error("Draft 프로젝트 정보 파싱 실패:", e);
-        }
+      try {
+        const draft = JSON.parse(draftData);
+        setDraftProjectInfo({ name: draft.name, description: draft.description || "" });
+      } catch (e) {
+        console.error("Draft 프로젝트 정보 파싱 실패:", e);
       }
       
       // 환영 메시지 추가
@@ -441,7 +439,7 @@ const ChatPage = () => {
       return;
     }
     
-    // draft 모드도 아니고 DB 프로젝트도 아닌 경우 프로젝트 목록으로 이동
+    // draft도 없고 DB 프로젝트도 아닌 경우 프로젝트 목록으로 이동
     navigate("/projects");
   }, [navigate, searchParams, messages.length]);
 

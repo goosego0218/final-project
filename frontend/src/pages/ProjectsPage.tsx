@@ -15,6 +15,7 @@ import { getProjects, createProject, deleteProject, ProjectListItem, CreateProje
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { updateProject } from "@/lib/api";
 
 const ProjectsPage = () => {
   const navigate = useNavigate();
@@ -115,7 +116,7 @@ const ProjectsPage = () => {
     });
 
     // draft 모드로 ChatPage로 이동하여 브랜드 정보 수집 시작
-    navigate(`/chat?draft=true`);
+    navigate(`/chat`);
   };
 
   const handleLoginSuccess = (rememberMe?: boolean, isSignUp?: boolean) => {
@@ -198,17 +199,40 @@ const ProjectsPage = () => {
     setEditProjectDescription(project.grp_desc || "");
   };
 
-  const handleUpdateProject = () => {
-    // TODO: 수정 API 구현 필요
-    if (editProjectId && editProjectName.trim()) {
+  const handleUpdateProject = async () => {
+    if (!editProjectId || !editProjectName.trim()) {
       toast({
-        title: "수정 기능 준비 중",
-        description: "프로젝트 수정 기능은 곧 제공될 예정입니다.",
-        status: "warning",
+        title: "입력 오류",
+        description: "프로젝트 이름을 입력해주세요.",
+        status: "error",
       });
+      return;
+    }
+
+    try {
+      await updateProject(editProjectId, {
+        grp_nm: editProjectName.trim(),
+        grp_desc: editProjectDescription.trim() || null,
+      });
+
+      // 프로젝트 목록 쿼리 무효화하여 다시 가져오기
+      queryClient.invalidateQueries({ queryKey: ['userProjects'] });
+
+      toast({
+        title: "프로젝트 수정 완료",
+        description: "프로젝트 정보가 수정되었습니다.",
+        status: "success",
+      });
+
       setEditProjectId(null);
       setEditProjectName("");
       setEditProjectDescription("");
+    } catch (error) {
+      toast({
+        title: "프로젝트 수정 실패",
+        description: error instanceof Error ? error.message : "프로젝트 수정에 실패했습니다.",
+        variant: "destructive",
+      });
     }
   };
 
