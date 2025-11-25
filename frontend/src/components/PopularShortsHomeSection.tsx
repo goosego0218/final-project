@@ -19,7 +19,7 @@ interface ShortFormCardProps {
 }
 
 // Generate mock short forms (same as ShortFormGallery)
-const generateMockShortForms = (): Array<{ title: string; duration: string; likes: number; comments: number; platform: string }> => {
+const generateMockShortForms = (): Array<{ title: string; thumbnailSrc: string; duration: string; likes: number; comments: number; platform: string }> => {
   const titles = [
     "오픈 1시간 전 준비 브이로그",
     "신제품 언박싱 첫 인상",
@@ -45,8 +45,33 @@ const generateMockShortForms = (): Array<{ title: string; duration: string; like
 
   const platforms = ["Instagram", "YouTube Shorts"];
 
+  // 예시 숏폼 썸네일 이미지 URL들 (9:16 비율, Unsplash 사용)
+  const shortFormThumbnails = [
+    "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=400&h=711&fit=crop",
+  ];
+
   return titles.map((title, index) => ({
     title,
+    thumbnailSrc: shortFormThumbnails[index % shortFormThumbnails.length],
     duration: `0:${String(Math.floor(Math.random() * 50) + 10).padStart(2, '0')}`,
     likes: Math.floor(Math.random() * 10000) + 100,
     comments: Math.floor(Math.random() * 1000) + 10,
@@ -55,7 +80,7 @@ const generateMockShortForms = (): Array<{ title: string; duration: string; like
 };
 
 // Get top short forms by likes (same data source as ShortFormGallery)
-const getTopShortFormsByLikes = () => {
+const getTopShortFormsByLikes = (): Array<{ title: string; thumbnailSrc: string; duration: string; likes: number; comments: number; platform: string }> => {
   const allShortForms = generateMockShortForms();
   return [...allShortForms].sort((a, b) => b.likes - a.likes).slice(0, 6);
 };
@@ -371,13 +396,13 @@ const PopularShortsHomeSection = () => {
             {duplicatedShortForms.map((shortForm, index) => (
               <ShortFormCard
                 key={`${shortForm.title}-${index}`}
-                thumbnailSrc="/placeholder.svg"
+                thumbnailSrc={shortForm.thumbnailSrc || "/placeholder.svg"}
                 title={shortForm.title}
                 duration={shortForm.duration}
                 likes={shortForm.likes}
                 comments={shortForm.comments}
                 platform={shortForm.platform}
-                onClick={() => setSelectedShort({ ...shortForm, thumbnailSrc: "/placeholder.svg" })}
+                onClick={() => setSelectedShort({ ...shortForm, thumbnailSrc: shortForm.thumbnailSrc || "/placeholder.svg" })}
               />
             ))}
           </div>

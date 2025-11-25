@@ -8,7 +8,7 @@
 
 from __future__ import annotations
 
-from typing import Literal, Optional, Dict, Any
+from typing import Literal, Optional, Dict, Any, Annotated
 from typing_extensions import TypedDict
 
 from langchain.agents import AgentState
@@ -66,6 +66,24 @@ class TrendContext(TypedDict, total=False):
     # 필요하면 키워드별 캐시, 플랫폼별 트렌드 등 확장 가능
     # e.g. "by_platform": {"instagram": "...", "tiktok": "..."}
 
+def merge_trend_context(
+    prev: "TrendContext" | None,
+    new: "TrendContext" | None,
+) -> "TrendContext":
+    """
+    trend_context 에 여러 노드가 동시에 값을 쓸 수 있도록 하는 머지 함수.
+
+    - prev: 이전까지의 trend_context
+    - new: 이번 스텝에서 새로 들어온 trend_context 업데이트
+
+    기본 정책:
+    - 둘 다 dict 라고 가정하고, new 가 있으면 prev 위에 덮어쓴다.
+    """
+    base: Dict[str, Any] = dict(prev or {})
+    if new:
+        base.update(dict(new))
+    return base  # type: ignore[return-value]
+
 class AppState(AgentState):
     """
     전체 그래프 공유할 공통 상태 스키마.
@@ -87,7 +105,7 @@ class AppState(AgentState):
     brand_profile: BrandProfile
 
     # 트렌드 분석 관련 캐시/컨텍스트
-    trend_context: TrendContext
+    trend_context: Annotated[TrendContext, merge_trend_context]
 
     # 추가로 메타데이터 보관용 (필요 시 확장)
     meta: Dict[str, Any]

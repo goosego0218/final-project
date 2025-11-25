@@ -8,8 +8,19 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { Camera, Instagram, Youtube, Eye, EyeOff } from "lucide-react";
+import { Camera, Instagram, Youtube, Eye, EyeOff, Loader2, X } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { getYouTubeAuthUrl, getYouTubeConnectionStatus, disconnectYouTube } from "@/lib/api";
 
 const AccountPage = () => {
   const { toast } = useToast();
@@ -41,16 +52,54 @@ const AccountPage = () => {
   const [instagramConnected, setInstagramConnected] = useState(getUserProfile().instagram?.connected || false);
   const [youtubeConnected, setYoutubeConnected] = useState(getUserProfile().youtube?.connected || false);
   const [isInstagramModalOpen, setIsInstagramModalOpen] = useState(false);
-  const [isYoutubeModalOpen, setIsYoutubeModalOpen] = useState(false);
   const [instagramAccessToken, setInstagramAccessToken] = useState("");
   const [instagramUserId, setInstagramUserId] = useState("");
   const [showAccessToken, setShowAccessToken] = useState(false);
   const [youtubeEmail, setYoutubeEmail] = useState("");
+  const [isYoutubeLoading, setIsYoutubeLoading] = useState(false);
+  const [isYoutubeDisconnectDialogOpen, setIsYoutubeDisconnectDialogOpen] = useState(false);
+  const [isDisconnecting, setIsDisconnecting] = useState(false);
+
+  // YouTube 연동 상태 로드 함수
+  const loadYouTubeConnectionStatus = async () => {
+    try {
+      const status = await getYouTubeConnectionStatus();
+      setYoutubeConnected(status.connected);
+      if (status.email) {
+        setYoutubeEmail(status.email);
+      }
+      // localStorage 업데이트
+      const profile = getUserProfile();
+      localStorage.setItem('userProfile', JSON.stringify({
+        ...profile,
+        youtube: {
+          connected: status.connected,
+          email: status.email || undefined,
+        }
+      }));
+      window.dispatchEvent(new Event('profileUpdated'));
+    } catch (error) {
+      console.error('YouTube 연동 상태 조회 실패:', error);
+    }
+  };
+
+  // 컴포넌트 마운트 시 연동 상태 확인
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        await loadYouTubeConnectionStatus();
+      } catch (error) {
+        // 로그인 안 되어 있으면 무시
+        console.log('연동 상태 확인 실패 (로그인 필요할 수 있음)');
+      }
+    };
+    checkConnection();
+  }, []);
 
   // URL 파라미터로 연동 완료 확인
   useEffect(() => {
     const instagramSuccess = searchParams.get('instagram_success');
-    const youtubeSuccess = searchParams.get('youtube_success');
+    const youtubeConnected = searchParams.get('youtube_connected');
     
     if (instagramSuccess === 'true') {
       setInstagramConnected(true);
@@ -73,27 +122,49 @@ const AccountPage = () => {
       setSearchParams(searchParams, { replace: true });
     }
     
-    if (youtubeSuccess === 'true') {
-      setYoutubeConnected(true);
-      // 프로필 저장
-      const profile = getUserProfile();
-      localStorage.setItem('userProfile', JSON.stringify({
-        ...profile,
-        youtube: { connected: true }
-      }));
-      window.dispatchEvent(new Event('profileUpdated'));
-      
+    if (youtubeConnected === 'success') {
       toast({
         title: "YouTube 계정이 연동되었어요",
         description: "이제 내 숏폼에서 바로 업로드할 수 있어요.",
         status: "success",
       });
-      
       // URL에서 파라미터 제거
-      searchParams.delete('youtube_success');
+      searchParams.delete('youtube_connected');
+      searchParams.delete('message');
+      setSearchParams(searchParams, { replace: true });
+      // 백엔드에서 실제 연동 정보 가져오기
+      loadYouTubeConnectionStatus();
+    } else if (youtubeConnected === 'error') {
+      const message = searchParams.get('message') || '연동에 실패했습니다.';
+      const decodedMessage = decodeURIComponent(message);
+      
+      // 에러 메시지에 따라 다른 토스트 표시
+      if (decodedMessage.includes('인증 설정') || decodedMessage.includes('Google 인증')) {
+        toast({
+          title: "YouTube 연동 준비 중",
+          description: decodedMessage,
+          variant: "default",
+          duration: 6000,
+        });
+      } else if (decodedMessage.includes('취소')) {
+        toast({
+          title: "연동 취소",
+          description: decodedMessage,
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "YouTube 연동 실패",
+          description: decodedMessage,
+          variant: "destructive",
+        });
+      }
+      
+      searchParams.delete('youtube_connected');
+      searchParams.delete('message');
       setSearchParams(searchParams, { replace: true });
     }
-  }, [searchParams, setSearchParams]);
+  }, [searchParams, setSearchParams, toast]);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -201,70 +272,60 @@ const AccountPage = () => {
     });
   };
 
-  const handleYoutubeConnect = () => {
-    setIsYoutubeModalOpen(true);
+  const handleYoutubeConnect = async () => {
+    setIsYoutubeLoading(true);
+    try {
+      // 백엔드에서 OAuth URL 받기
+      const { auth_url } = await getYouTubeAuthUrl();
+      
+      // OAuth 인증 페이지로 리다이렉트
+      window.location.href = auth_url;
+    } catch (error) {
+      setIsYoutubeLoading(false);
+      toast({
+        title: "연동 실패",
+        description: error instanceof Error ? error.message : "YouTube 연동을 시작할 수 없습니다.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleYoutubeConnectConfirm = () => {
-    if (!youtubeEmail.trim()) {
-      toast({
-        title: "입력 오류",
-        description: "이메일을 입력해주세요.",
-        status: "warning",
-      });
-      return;
-    }
-
-    // 이메일 형식 검증
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(youtubeEmail)) {
-      toast({
-        title: "입력 오류",
-        description: "올바른 이메일 형식을 입력해주세요.",
-        status: "warning",
-      });
-      return;
-    }
-
-    setIsYoutubeModalOpen(false);
-    
-    // 이메일 저장
-    setYoutubeConnected(true);
-    const profile = getUserProfile();
-    localStorage.setItem('userProfile', JSON.stringify({
-      ...profile,
-      youtube: { 
-        connected: true,
-        email: youtubeEmail
-      }
-    }));
-    window.dispatchEvent(new Event('profileUpdated'));
-    
-    // 입력 필드 초기화
-    setYoutubeEmail("");
-    
-    toast({
-      title: "YouTube 계정이 연동되었어요",
-      description: "이제 내 숏폼에서 바로 업로드할 수 있어요.",
-      status: "success",
-    });
+  const handleYoutubeDisconnectClick = () => {
+    setIsYoutubeDisconnectDialogOpen(true);
   };
 
-  const handleYoutubeDisconnect = () => {
-    setYoutubeConnected(false);
-    // 즉시 localStorage에 저장
-    const profile = getUserProfile();
-    localStorage.setItem('userProfile', JSON.stringify({
-      ...profile,
-      youtube: { connected: false }
-    }));
-    window.dispatchEvent(new Event('profileUpdated'));
-    
-    toast({
-      title: "유튜브 연동 해제",
-      description: "유튜브 연동이 해제되었습니다.",
-      status: "success",
-    });
+  const handleYoutubeDisconnect = async () => {
+    setIsDisconnecting(true);
+    try {
+      await disconnectYouTube();
+      
+      setYoutubeConnected(false);
+      setYoutubeEmail("");
+      
+      // localStorage 업데이트
+      const profile = getUserProfile();
+      localStorage.setItem('userProfile', JSON.stringify({
+        ...profile,
+        youtube: { connected: false }
+      }));
+      window.dispatchEvent(new Event('profileUpdated'));
+      
+      setIsYoutubeDisconnectDialogOpen(false);
+      
+      toast({
+        title: "YouTube 연동 해제",
+        description: "YouTube 연동이 해제되었습니다.",
+        status: "success",
+      });
+    } catch (error) {
+      toast({
+        title: "연동 해제 실패",
+        description: error instanceof Error ? error.message : "연동 해제에 실패했습니다.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDisconnecting(false);
+    }
   };
 
   const getUserInitials = () => {
@@ -423,17 +484,33 @@ const AccountPage = () => {
                     <div>
                       <p className="font-medium">YouTube</p>
                       <p className="text-sm text-muted-foreground">
-                        {youtubeConnected ? "연동됨" : "연동되지 않음"}
+                        {youtubeConnected 
+                          ? (youtubeEmail ? `연동됨 (${youtubeEmail})` : "연동됨")
+                          : "연동되지 않음"}
                       </p>
                     </div>
                   </div>
                   {youtubeConnected ? (
-                    <Button variant="outline" onClick={handleYoutubeDisconnect}>
+                    <Button variant="outline" onClick={handleYoutubeDisconnectClick}>
                       연동 끊기
                     </Button>
                   ) : (
-                    <Button onClick={handleYoutubeConnect}>
-                      연동하기
+                    <Button 
+                      onClick={handleYoutubeConnect}
+                      disabled={isYoutubeLoading}
+                      className="bg-orange-500 hover:bg-orange-600"
+                    >
+                      {isYoutubeLoading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          연동 중...
+                        </>
+                      ) : (
+                        <>
+                          <Youtube className="h-4 w-4 mr-2" />
+                          연동하기
+                        </>
+                      )}
                     </Button>
                   )}
                 </div>
@@ -514,46 +591,46 @@ const AccountPage = () => {
         </DialogContent>
       </Dialog>
 
-      {/* YouTube 연동 모달 */}
-      <Dialog open={isYoutubeModalOpen} onOpenChange={(open) => {
-        setIsYoutubeModalOpen(open);
-        if (!open) {
-          // 다이얼로그가 닫힐 때 입력 필드 초기화
-          setYoutubeEmail("");
-        }
-      }}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>YouTube 계정을 연동할까요?</DialogTitle>
-            <DialogDescription>
-              MAKERY에서 만든 숏폼을 YouTube Shorts로 바로 업로드할 수 있어요.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="youtubeEmail">이메일</Label>
-              <Input
-                id="youtubeEmail"
-                type="email"
-                placeholder="이메일을 입력하세요"
-                value={youtubeEmail}
-                onChange={(e) => setYoutubeEmail(e.target.value)}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsYoutubeModalOpen(false)} className="hover:bg-transparent hover:border-border hover:text-foreground">
-              취소
-            </Button>
-            <Button 
-              onClick={handleYoutubeConnectConfirm}
-              className="bg-orange-500 hover:bg-orange-600 text-white"
+      {/* YouTube 연동 해제 확인 다이얼로그 */}
+      <AlertDialog open={isYoutubeDisconnectDialogOpen} onOpenChange={setIsYoutubeDisconnectDialogOpen}>
+        <AlertDialogContent
+          onOverlayClick={() => setIsYoutubeDisconnectDialogOpen(false)}
+        >
+          {/* X 버튼 */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-4 top-4 h-6 w-6 rounded-sm opacity-70 ring-offset-background transition-opacity hover:bg-transparent hover:opacity-100 hover:text-foreground focus:outline-none focus:ring-0 z-10"
+            onClick={() => setIsYoutubeDisconnectDialogOpen(false)}
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </Button>
+          <AlertDialogHeader>
+            <AlertDialogTitle>YouTube 연동을 해제하시겠습니까?</AlertDialogTitle>
+            <AlertDialogDescription>
+              YouTube 연동을 해제하면 숏폼을 YouTube에 바로 업로드할 수 없습니다. 필요하시면 다시 연동할 수 있습니다.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDisconnecting}>취소</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleYoutubeDisconnect}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isDisconnecting}
             >
-              연동하기
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              {isDisconnecting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  해제 중...
+                </>
+              ) : (
+                "연동 해제"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

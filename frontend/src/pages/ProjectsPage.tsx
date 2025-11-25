@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Image, Video, MoreVertical, Trash2, Edit, X, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { getProjects, createProject, ProjectListItem, CreateProjectRequest } from "@/lib/api";
+import { getProjects, createProject, deleteProject, ProjectListItem, CreateProjectRequest } from "@/lib/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -32,10 +32,11 @@ const ProjectsPage = () => {
   const [editProjectDescription, setEditProjectDescription] = useState("");
   const [showAllProjects, setShowAllProjects] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // DB에서 프로젝트 목록 가져오기
   const { data: projects = [], isLoading: isProjectsLoading, refetch } = useQuery({
-    queryKey: ['projects'],
+    queryKey: ['userProjects'],
     queryFn: getProjects,
     enabled: isLoggedIn, // 로그인 상태일 때만 조회
     staleTime: 0,
@@ -94,36 +95,27 @@ const ProjectsPage = () => {
     }
 
     setIsCreating(true);
-    try {
-      const newProject = await createProject({
-        grp_nm: projectName.trim(),
-        grp_desc: projectDescription.trim() || null,
-      });
+    
+    // 프로젝트 정보를 localStorage에 임시 저장 (draft 모드)
+    const draftProject = {
+      name: projectName.trim(),
+      description: projectDescription.trim() || "",
+    };
+    localStorage.setItem('makery_draft_project', JSON.stringify(draftProject));
+    
+    setIsDialogOpen(false);
+    setProjectName("");
+    setProjectDescription("");
+    setIsCreating(false);
+    
+    toast({
+      title: "프로젝트 준비 완료",
+      description: "브랜드 정보를 입력해주세요.",
+      status: "success",
+    });
 
-      // 프로젝트 목록 다시 가져오기
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
-      
-      setIsDialogOpen(false);
-      setProjectName("");
-      setProjectDescription("");
-      
-      toast({
-        title: "프로젝트 생성 완료",
-        description: "프로젝트가 생성되었습니다.",
-        status: "success",
-      });
-
-      // 프로젝트 대시보드로 이동
-      navigate(`/project?project=${newProject.grp_id}`);
-    } catch (error) {
-      toast({
-        title: "프로젝트 생성 실패",
-        description: error instanceof Error ? error.message : "프로젝트 생성에 실패했습니다.",
-        status: "error",
-      });
-    } finally {
-      setIsCreating(false);
-    }
+    // draft 모드로 ChatPage로 이동하여 브랜드 정보 수집 시작
+    navigate(`/chat?draft=true`);
   };
 
   const handleLoginSuccess = (rememberMe?: boolean, isSignUp?: boolean) => {
@@ -139,7 +131,7 @@ const ProjectsPage = () => {
     setIsSignUpOpen(false);
     
     // 프로젝트 목록 다시 가져오기
-    queryClient.invalidateQueries({ queryKey: ['projects'] });
+    queryClient.invalidateQueries({ queryKey: ['userProjects'] });
     
     // 회원가입이 아닌 경우에만 로그인 토스트 표시
     if (!isSignUp) {
@@ -163,15 +155,40 @@ const ProjectsPage = () => {
     setIsLoginOpen(true);
   };
 
-  const handleDeleteProject = () => {
-    // TODO: 삭제 API 구현 필요
-    if (deleteProjectId) {
-      toast({
-        title: "삭제 기능 준비 중",
-        description: "프로젝트 삭제 기능은 곧 제공될 예정입니다.",
-        status: "warning",
+  const handleDeleteProject = async () => {
+    if (!deleteProjectId) return;
+
+    setIsDeleting(true);
+    try {
+      // Optimistic update: 즉시 UI에서 제거
+      queryClient.setQueryData<ProjectListItem[]>(['userProjects'], (old) => {
+        if (!old) return old;
+        return old.filter(project => project.grp_id !== deleteProjectId);
       });
+      
+      await deleteProject(deleteProjectId);
+      
+      // 삭제 성공 후 쿼리 무효화 (백그라운드에서 최신 데이터 가져오기)
+      queryClient.invalidateQueries({ queryKey: ['userProjects'] });
+      
+      toast({
+        title: "프로젝트 삭제",
+        description: "프로젝트가 삭제되었습니다.",
+        status: "success",
+      });
+      
       setDeleteProjectId(null);
+    } catch (error) {
+      // 실패 시 원래 데이터로 롤백
+      queryClient.invalidateQueries({ queryKey: ['userProjects'] });
+      
+      toast({
+        title: "삭제 실패",
+        description: error instanceof Error ? error.message : "프로젝트 삭제에 실패했습니다.",
+        status: "error",
+      });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -322,7 +339,7 @@ const ProjectsPage = () => {
                   <div 
                     className="cursor-pointer"
                     onClick={() => {
-                      // 프로젝트 대시보드로 이동
+                      // 프로젝트 디테일 페이지로 이동
                       navigate(`/project?project=${project.grp_id}`);
                     }}
                   >
@@ -389,9 +406,20 @@ const ProjectsPage = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>취소</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteProject} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              삭제
+            <AlertDialogCancel disabled={isDeleting}>취소</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteProject} 
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  삭제 중...
+                </>
+              ) : (
+                "삭제"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

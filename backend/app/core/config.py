@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     # LLM
     openai_api_key: str = ""
     openai_model: str = "gpt-5-nano"
+    fast_openai_model: str = "gpt-4o-mini"
     openai_embedding_model: str = "text-embedding-3-small"
     openai_temperature: float = 0.0
     
@@ -39,6 +40,16 @@ class Settings(BaseSettings):
     jina_model: str = ""  
     vector_store_dir: str = "vector_store/chroma_db"  # 상대 경로 (프로젝트 루트 기준)
     vector_store_collection: str = "RAG_md"            # 기본 컬렉션 이름
+
+    # File Server
+    file_server_url: str = "https://kr.object.ncloudstorage.com/aissemble"  # 파일 서버 기본 URL
+
+    google_client_id: str = ""  # Google Cloud Console에서 발급받은 Client ID
+    google_client_secret: str = ""  # Google Cloud Console에서 발급받은 Client Secret
+    google_redirect_uri: str = "http://localhost:8000/social/youtube/callback"  # 개발 환경
+    
+    # 프론트엔드 URL (OAuth 콜백 후 리다이렉트용)
+    frontend_url: str = "http://localhost:8080"  # 프론트엔드 기본 URL
 
     model_config = SettingsConfigDict(
         env_file=".env",

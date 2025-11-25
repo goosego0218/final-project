@@ -22,6 +22,7 @@ from app.graphs.nodes.brand.brand_chat_node import make_brand_chat_node
 from app.graphs.nodes.brand.brand_intention_node import make_brand_intention_node
 from app.graphs.nodes.brand.brand_trend_search_node import make_brand_trend_search_node
 from app.graphs.nodes.brand.brand_trend_refine_node import make_brand_trend_refine_node
+from app.graphs.nodes.brand.persist_brand_node import make_persist_brand_node
 
 
 # 세션별 대화 히스토리 유지를 위한 체크포인터
@@ -49,6 +50,7 @@ def build_brand_graph():
     brand_trend_search = make_brand_trend_search_node(llm)
     brand_trend_refine = make_brand_trend_refine_node(llm)
     brand_chat = make_brand_chat_node(llm)
+    persist_brand = make_persist_brand_node()    
 
     g = StateGraph(AppState)
 
@@ -58,7 +60,18 @@ def build_brand_graph():
     g.add_node("trend_search", brand_trend_search)
     g.add_node("trend_refine", brand_trend_refine)
     g.add_node("brand_chat", brand_chat)
+    g.add_node("persist_brand", persist_brand)
 
-    g.add_edge(START, "brand_collect")
+    # 1) 기본 진입
+    g.add_edge(START, "brand_intention")
+
+    # # 3) brand_intention 에서 갈 수 있는 애들
+    # g.add_edge("brand_intention", "trend_search")
+    # g.add_edge("brand_intention", "trend_refine")
+    # g.add_edge("brand_intention", "brand_chat")
+
+    # 4) 트렌드 라인
+    g.add_edge("trend_refine", "trend_search")
+    g.add_edge("trend_search", "brand_chat")
 
     return g.compile(checkpointer=checkpointer)

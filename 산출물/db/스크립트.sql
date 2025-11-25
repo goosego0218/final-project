@@ -75,7 +75,8 @@ CREATE TABLE menu (
     menu_nm     VARCHAR2(255)   NOT NULL,                    -- 메뉴명
     up_menu_id  NUMBER          NULL,                        -- 상위 메뉴
     menu_path   VARCHAR2(255)   NOT NULL,					 -- 메뉴 경로
-    del_yn      CHAR(1)     DEFAULT 'N' NOT NULL         -- 삭제여부
+    del_yn      CHAR(1)     DEFAULT 'N' NOT NULL,         -- 삭제여부
+    menu_order  NUMBER 			NULL
 );
 
 ALTER TABLE menu 
@@ -111,6 +112,9 @@ VALUES ('내 프로젝트', NULL, '/projects', 'N');
 
 INSERT INTO menu (menu_nm, up_menu_id, menu_path, del_yn)
 VALUES ('플랜 관리', NULL, '/plans', 'N');
+
+INSERT INTO menu (menu_nm, up_menu_id, menu_path, del_yn)
+VALUES ('숏폼 리포트', NULL, '/shortsReport', 'N');
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -221,14 +225,27 @@ CREATE TABLE brand_info (
     tone_mood       VARCHAR2(4000)       NULL,               -- 브랜드 톤/무드
     core_keywords   VARCHAR2(4000)       NULL,               -- 핵심 키워드(콤마/슬래시로 구분해도 됨)
     slogan          VARCHAR2(4000)       NULL,               -- 슬로건
-    target_age      VARCHAR2(100)        NULL,               -- 타깃 연령대 텍스트 (예: '20~30', '10대-20대 초반')
-    target_gender   VARCHAR2(20)         NULL,               -- 타깃 성별 (예: 'male', 'female', 'all' 등 코드값)
+    target_age      VARCHAR2(200)        NULL,               -- 타깃 연령대 텍스트 (예: '20~30', '10대-20대 초반')
+    target_gender   VARCHAR2(200)         NULL,               -- 타깃 성별 (예: 'male', 'female', 'all' 등 코드값)
     avoided_trends  VARCHAR2(4000)       NULL,               -- 기피 트렌드/분위기
     preferred_colors VARCHAR2(4000)      NULL,               -- 선호 색상/색감 설명
     create_dt       DATE DEFAULT SYSDATE NOT NULL,           -- 생성일
     update_dt       DATE                     NULL,           -- 수정일
     CONSTRAINT PK_BRAND_INFO PRIMARY KEY (grp_id)
 );
+
+COMMENT ON COLUMN brand_info.grp_id IS '그룹번호';
+COMMENT ON COLUMN brand_info.brand_name IS '브랜드명';
+COMMENT ON COLUMN brand_info.category IS '업종';
+COMMENT ON COLUMN brand_info.tone_mood IS '브랜드톤';
+COMMENT ON COLUMN brand_info.core_keywords IS '핵심키워드';
+COMMENT ON COLUMN brand_info.slogan IS '슬로건';
+COMMENT ON COLUMN brand_info.target_age IS '타깃연령대';
+COMMENT ON COLUMN brand_info.target_gender IS '타깃성별';
+COMMENT ON COLUMN brand_info.avoided_trends IS '기피트렌드';
+COMMENT ON COLUMN brand_info.preferred_colors IS '선호색상';
+COMMENT ON COLUMN brand_info.create_dt IS '생성일';
+COMMENT ON COLUMN brand_info.update_dt IS '수정일';
 
 
 ALTER TABLE brand_info
@@ -238,17 +255,15 @@ ALTER TABLE brand_info
 
 ------------------------------------------------------------------------------------------------------------------------
 
--- prod 테이블
+-- generation_prod 테이블
 CREATE TABLE GENERATION_PROD (
     PROD_ID      NUMBER        NOT NULL,               -- 결과물 번호 (PK)
     TYPE_ID      NUMBER        NOT NULL,               -- 타입번호  -> PROD_TYPE.TYPE_ID
     GRP_ID       NUMBER        NOT NULL,               -- 그룹번호  -> PROD_GRP.GRP_ID
-    TITLE        VARCHAR2(255) NOT NULL,               -- 제목
-    CONTENT      VARCHAR2(4000) NULL,                  -- 설명
     FILE_PATH    VARCHAR2(1000) NOT NULL,              -- 파일경로
     VIEW_CNT     NUMBER        DEFAULT 0 NOT NULL,     -- 조회수
     REF_CNT      NUMBER        DEFAULT 0 NOT NULL,     -- 참조수
-    LIKE_CNT     NUMBER        DEFAULT 0 NOT NULL,     -- 좋아요수 (※ ERD는 like 라고 되어있음)
+    LIKE_CNT     NUMBER        DEFAULT 0 NOT NULL,     -- 좋아요수
     PUB_YN       CHAR(1)       DEFAULT 'Y' NOT NULL,   -- 공개여부 (Y/N)
     CREATE_USER  NUMBER        NOT NULL,               -- 생성자 -> USER_INFO.ID
     CREATE_DT    DATE          DEFAULT SYSDATE NOT NULL, -- 생성일
