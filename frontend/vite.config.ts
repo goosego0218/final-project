@@ -15,4 +15,9 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // 환경 변수 설정
+  define: {
+    'import.meta.env.VITE_API_BASE_URL': JSON.stringify(process.env.VITE_API_BASE_URL || 'http://localhost:8000'),
+    'import.meta.env.VITE_FILE_SERVER_URL': JSON.stringify(process.env.VITE_FILE_SERVER_URL || 'https://kr.object.ncloudstorage.com/aissemble'),
+  },
 }));

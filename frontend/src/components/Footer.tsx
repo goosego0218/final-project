@@ -36,12 +36,12 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/logos" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/logo-gallery" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   로고 갤러리
                 </Link>
               </li>
               <li>
-                <Link to="/shorts" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link to="/shortform-gallery" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   숏폼 갤러리
                 </Link>
               </li>

@@ -1,22 +1,20 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart, Share2, MessageCircle, Eye, Send, Clipboard, Sparkles, Play } from "lucide-react";
+import { Heart, Share2, MessageCircle, Eye, Send, Sparkles, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { projectStorage, type Project } from "@/lib/projectStorage";
+import CreateFromStyleModal from "@/components/CreateFromStyleModal";
+import { projectStorage } from "@/lib/projectStorage";
+import { AuthModals } from "@/components/AuthModals";
 
 const MyPage = () => {
-  const navigate = useNavigate();
   const { toast } = useToast();
   const [sharedFilter, setSharedFilter] = useState<"all" | "logo" | "short">("all");
   const [likedFilter, setLikedFilter] = useState<"all" | "logo" | "short">("all");
@@ -26,13 +24,11 @@ const MyPage = () => {
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState<Array<{ author: string; authorAvatar?: string; content: string; time: string }>>([]);
   const [isCreateNewModalOpen, setIsCreateNewModalOpen] = useState(false);
-  const [isProjectSelectModalOpen, setIsProjectSelectModalOpen] = useState(false);
-  const [isNewProjectDialogOpen, setIsNewProjectDialogOpen] = useState(false);
-  const [projectName, setProjectName] = useState("");
-  const [projectDescription, setProjectDescription] = useState("");
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [likedItems, setLikedItems] = useState<Array<{ id: number; type: "logo" | "short"; image: string; title: string; likes: number }>>([]);
+  const [selectedItemForCreate, setSelectedItemForCreate] = useState<any>(null);
+  const [likedItems, setLikedItems] = useState<Array<{ id: number; type: "logo" | "short"; image: string; title: string; likes: number; comments?: number; duration?: string }>>([]);
   const [sharedItems, setSharedItems] = useState<Array<{ id: string | number; type: "logo" | "short"; image: string; title: string; likes: number; comments?: number; duration?: string }>>([]);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isSignUpOpen, setIsSignUpOpen] = useState(false);
 
   // Load liked items from localStorage
   useEffect(() => {
@@ -145,23 +141,33 @@ const MyPage = () => {
       // Filter liked items
       const likedLogosList = allLogos
         .filter((logo) => likedLogos.includes(logo.id))
-        .map((logo) => ({
-          id: logo.id,
-          type: "logo" as const,
-          image: logo.imageSrc,
-          title: logo.brandName,
-          likes: logo.likes,
-        }));
+        .map((logo) => {
+          // localStorage에서 통계 불러오기
+          const stats = JSON.parse(localStorage.getItem(`logo_stats_${logo.id}`) || '{}');
+          return {
+            id: logo.id,
+            type: "logo" as const,
+            image: logo.imageSrc,
+            title: logo.brandName,
+            likes: stats.likes !== undefined ? stats.likes : logo.likes,
+            comments: stats.comments !== undefined ? stats.comments : logo.comments,
+          };
+        });
 
       const likedShortsList = allShorts
         .filter((short) => likedShorts.includes(short.id))
-        .map((short) => ({
-          id: short.id,
-          type: "short" as const,
-          image: short.thumbnailUrl,
-          title: short.title,
-          likes: short.likes,
-        }));
+        .map((short) => {
+          // localStorage에서 통계 불러오기
+          const stats = JSON.parse(localStorage.getItem(`short_stats_${short.id}`) || '{}');
+          return {
+            id: short.id,
+            type: "short" as const,
+            image: short.thumbnailUrl,
+            title: short.title,
+            likes: stats.likes !== undefined ? stats.likes : short.likes,
+            comments: stats.comments !== undefined ? stats.comments : short.comments,
+          };
+        });
 
       setLikedItems([...likedLogosList, ...likedShortsList]);
     };
@@ -198,7 +204,7 @@ const MyPage = () => {
       const publicShortFormIds = new Set(publicShortForms.map((sf: any) => sf.id));
       
       const logoItems: Array<{ id: string | number; type: "logo" | "short"; image: string; title: string; likes: number; comments?: number; duration?: string }> = [];
-      const shortItems: Array<{ id: string | number; type: "logo" | "short"; image: string; title: string; likes: number; comments?: number; duration?: string }> = [];
+      const shortItems: Array<{ id: string | number; type: "logo" | "short"; image: string; videoUrl?: string; title: string; likes: number; comments?: number; duration?: string }> = [];
       
       // 각 프로젝트를 순회하면서 공개된 항목만 수집
       allProjects.forEach((project) => {
@@ -209,26 +215,31 @@ const MyPage = () => {
               // 공개된 로고이고 실제로 프로젝트에 존재하는지 확인
               const publicLogo = publicLogos.find((l: any) => l.id === item.id && l.projectId === project.id);
               if (publicLogo) {
+                // localStorage에서 통계 불러오기
+                const stats = JSON.parse(localStorage.getItem(`logo_stats_${item.id}`) || '{}');
                 logoItems.push({
                   id: item.id,
                   type: "logo" as const,
-                  image: item.url,
+                  image: publicLogo.url, // 워터마크가 추가된 URL 사용
                   title: item.title || "로고",
-                  likes: publicLogo.likes || 0,
-                  comments: publicLogo.comments || 0,
+                  likes: stats.likes !== undefined ? stats.likes : (publicLogo.likes || 0),
+                  comments: stats.comments !== undefined ? stats.comments : (publicLogo.comments || 0),
                 });
               }
             } else if (item.type === "short" && publicShortFormIds.has(item.id)) {
               // 공개된 숏폼이고 실제로 프로젝트에 존재하는지 확인
               const publicShortForm = publicShortForms.find((sf: any) => sf.id === item.id && sf.projectId === project.id);
               if (publicShortForm) {
+                // localStorage에서 통계 불러오기
+                const stats = JSON.parse(localStorage.getItem(`short_stats_${item.id}`) || '{}');
                 shortItems.push({
                   id: item.id,
                   type: "short" as const,
-                  image: item.url,
+                  image: publicShortForm.thumbnailUrl || publicShortForm.videoUrl || item.url, // 공개된 숏폼의 URL 사용
+                  videoUrl: publicShortForm.videoUrl || item.url, // 공개된 숏폼의 비디오 URL 사용
                   title: item.title || "숏폼",
-                  likes: publicShortForm.likes || 0,
-                  comments: publicShortForm.comments || 0,
+                  likes: stats.likes !== undefined ? stats.likes : (publicShortForm.likes || 0),
+                  comments: stats.comments !== undefined ? stats.comments : (publicShortForm.comments || 0),
                   duration: publicShortForm.duration || "0:15",
                 });
               }
@@ -243,14 +254,16 @@ const MyPage = () => {
             const publicLogo = publicLogos.find((l: any) => l.id === uploadedLogoId && l.projectId === project.id);
             if (publicLogo) {
               // 이미 추가되었는지 확인
-              if (!logoItems.some(item => item.id === uploadedLogoId && item.image === project.logo?.url)) {
+              if (!logoItems.some(item => item.id === uploadedLogoId && item.image === publicLogo.url)) {
+                // localStorage에서 통계 불러오기
+                const stats = JSON.parse(localStorage.getItem(`logo_stats_${uploadedLogoId}`) || '{}');
                 logoItems.push({
                   id: uploadedLogoId,
                   type: "logo" as const,
-                  image: project.logo.url,
+                  image: publicLogo.url, // 워터마크가 추가된 URL 사용
                   title: "업로드된 로고",
-                  likes: publicLogo.likes || 0,
-                  comments: publicLogo.comments || 0,
+                  likes: stats.likes !== undefined ? stats.likes : (publicLogo.likes || 0),
+                  comments: stats.comments !== undefined ? stats.comments : (publicLogo.comments || 0),
                 });
               }
             }
@@ -268,11 +281,44 @@ const MyPage = () => {
       loadSharedItems();
     };
     
+    const handleLogoStatsUpdate = (e: CustomEvent) => {
+      const { id, likes, comments } = e.detail;
+      setSharedItems(prev => prev.map(item => {
+        if (item.id === id && item.type === "logo") {
+          return {
+            ...item,
+            ...(likes !== undefined && { likes }),
+            ...(comments !== undefined && { comments })
+          };
+        }
+        return item;
+      }));
+    };
+    
+    const handleShortStatsUpdate = (e: CustomEvent) => {
+      const { id, likes, comments } = e.detail;
+      setSharedItems(prev => prev.map(item => {
+        const itemId = item.id || item.title?.charCodeAt(0) || 0;
+        if (itemId === id && item.type === "short") {
+          return {
+            ...item,
+            ...(likes !== undefined && { likes }),
+            ...(comments !== undefined && { comments })
+          };
+        }
+        return item;
+      }));
+    };
+    
     window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('logoStatsUpdated', handleLogoStatsUpdate as EventListener);
+    window.addEventListener('shortStatsUpdated', handleShortStatsUpdate as EventListener);
     const interval = setInterval(loadSharedItems, 1000);
     
     return () => {
       window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('logoStatsUpdated', handleLogoStatsUpdate as EventListener);
+      window.removeEventListener('shortStatsUpdated', handleShortStatsUpdate as EventListener);
       clearInterval(interval);
     };
   }, []);
@@ -296,26 +342,51 @@ const MyPage = () => {
     return liked ? new Set(JSON.parse(liked)) : new Set();
   };
 
-  // Reset likes count when item changes
+  // Reset likes count and load comments when item changes
   useEffect(() => {
     if (selectedItem) {
       setLikesCount(0);
       if (selectedItem.type === "logo") {
         const liked = getLikedLogos();
         setIsLiked(liked.has(selectedItem.id));
+        
+        // Load comments from localStorage
+        const savedComments = localStorage.getItem(`logo_comments_${selectedItem.id}`);
+        if (savedComments) {
+          setComments(JSON.parse(savedComments));
+        } else {
+          setComments([]);
+        }
       } else {
         const liked = getLikedShorts();
         const shortId = selectedItem.id || selectedItem.title?.charCodeAt(0) || 0;
         setIsLiked(liked.has(shortId));
+        
+        // Load comments from localStorage
+        const savedComments = localStorage.getItem(`short_comments_${shortId}`);
+        if (savedComments) {
+          setComments(JSON.parse(savedComments));
+        } else {
+          setComments([]);
+        }
       }
+    } else {
+      setComments([]);
     }
   }, [selectedItem]);
 
   const handleLike = () => {
     if (!selectedItem) return;
+    
+    // 로그인 상태 확인
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+    if (!isLoggedIn) {
+      setIsLoginOpen(true);
+      return;
+    }
+    
     const newLikedState = !isLiked;
     setIsLiked(newLikedState);
-    setLikesCount(prev => newLikedState ? prev + 1 : prev - 1);
     
     // Save to localStorage
     if (selectedItem.type === "logo") {
@@ -331,6 +402,39 @@ const MyPage = () => {
         }
       }
       localStorage.setItem('liked_logos', JSON.stringify(liked));
+      
+      // 카드 목록의 좋아요 수 업데이트
+      const updatedLikes = Math.max(0, newLikedState ? (selectedItem.likes || 0) + 1 : (selectedItem.likes || 0) - 1);
+      
+      // 선택된 아이템의 좋아요 수 즉시 업데이트
+      setSelectedItem(prev => prev ? { ...prev, likes: updatedLikes } : null);
+      
+      setSharedItems(prev => prev.map(item => {
+        if (item.id === selectedItem.id && item.type === "logo") {
+          return {
+            ...item,
+            likes: updatedLikes
+          };
+        }
+        return item;
+      }));
+      setLikedItems(prev => prev.map(item => {
+        if (item.id === selectedItem.id && item.type === "logo") {
+          return {
+            ...item,
+            likes: updatedLikes
+          };
+        }
+        return item;
+      }));
+      
+      // localStorage에 좋아요 수 저장
+      const stats = JSON.parse(localStorage.getItem(`logo_stats_${selectedItem.id}`) || '{}');
+      stats.likes = updatedLikes;
+      localStorage.setItem(`logo_stats_${selectedItem.id}`, JSON.stringify(stats));
+      
+      // storage 이벤트 발생시켜 다른 컴포넌트에도 알림
+      window.dispatchEvent(new CustomEvent('logoStatsUpdated', { detail: { id: selectedItem.id, likes: updatedLikes } }));
     } else {
       const liked = JSON.parse(localStorage.getItem('liked_shorts') || '[]');
       const shortId = selectedItem.id || selectedItem.title?.charCodeAt(0) || 0;
@@ -345,25 +449,144 @@ const MyPage = () => {
         }
       }
       localStorage.setItem('liked_shorts', JSON.stringify(liked));
+      
+      // 카드 목록의 좋아요 수 업데이트
+      const currentLikes = typeof selectedItem.likes === 'number' ? selectedItem.likes : 0;
+      const updatedLikes = Math.max(0, newLikedState ? currentLikes + 1 : currentLikes - 1);
+      
+      // 선택된 아이템의 좋아요 수 즉시 업데이트
+      setSelectedItem(prev => prev ? { ...prev, likes: updatedLikes } : null);
+      
+      setSharedItems(prev => prev.map(item => {
+        const itemId = item.id || item.title?.charCodeAt(0) || 0;
+        if (itemId === shortId && item.type === "short") {
+          return {
+            ...item,
+            likes: updatedLikes
+          };
+        }
+        return item;
+      }));
+      setLikedItems(prev => prev.map(item => {
+        const itemId = item.id || item.title?.charCodeAt(0) || 0;
+        if (itemId === shortId && item.type === "short") {
+          return {
+            ...item,
+            likes: updatedLikes
+          };
+        }
+        return item;
+      }));
+      
+      // localStorage에 좋아요 수 저장
+      const stats = JSON.parse(localStorage.getItem(`short_stats_${shortId}`) || '{}');
+      stats.likes = updatedLikes;
+      localStorage.setItem(`short_stats_${shortId}`, JSON.stringify(stats));
+      
+      // storage 이벤트 발생시켜 다른 컴포넌트에도 알림
+      window.dispatchEvent(new CustomEvent('shortStatsUpdated', { detail: { id: shortId, likes: updatedLikes } }));
     }
     
-    toast({ description: newLikedState ? "좋아요를 눌렀습니다" : "좋아요를 취소했습니다" });
+    toast({ 
+      description: newLikedState ? "좋아요를 눌렀습니다" : "좋아요를 취소했습니다",
+      status: "default",
+    });
     
     // Reload liked items
     window.dispatchEvent(new Event('storage'));
   };
 
   const handleComment = () => {
-    if (commentText.trim()) {
+    if (commentText.trim() && selectedItem) {
+      // 로그인 상태 확인
+      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+      if (!isLoggedIn) {
+        setIsLoginOpen(true);
+        return;
+      }
+      
       const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
       const newComment = {
-        author: userProfile.nickname || "나",
+        author: userProfile.nickname || "익명",
         authorAvatar: userProfile.avatar || undefined,
         content: commentText,
         time: "방금 전"
       };
-      setComments([newComment, ...comments]);
-      toast({ description: "댓글이 등록되었습니다" });
+      const updatedComments = [newComment, ...comments];
+      setComments(updatedComments);
+      
+      // Save comments to localStorage
+      if (selectedItem.type === "logo") {
+        localStorage.setItem(`logo_comments_${selectedItem.id}`, JSON.stringify(updatedComments));
+        
+        // 카드 목록의 댓글 수 업데이트
+        const updatedCommentsCount = updatedComments.length;
+        setSharedItems(prev => prev.map(item => {
+          if (item.id === selectedItem.id && item.type === "logo") {
+            return {
+              ...item,
+              comments: updatedCommentsCount
+            };
+          }
+          return item;
+        }));
+        setLikedItems(prev => prev.map(item => {
+          if (item.id === selectedItem.id && item.type === "logo") {
+            return {
+              ...item,
+              comments: updatedCommentsCount
+            };
+          }
+          return item;
+        }));
+        
+        // localStorage에 댓글 수 저장
+        const stats = JSON.parse(localStorage.getItem(`logo_stats_${selectedItem.id}`) || '{}');
+        stats.comments = updatedCommentsCount;
+        localStorage.setItem(`logo_stats_${selectedItem.id}`, JSON.stringify(stats));
+        
+        // storage 이벤트 발생시켜 다른 컴포넌트에도 알림
+        window.dispatchEvent(new CustomEvent('logoStatsUpdated', { detail: { id: selectedItem.id, comments: updatedCommentsCount } }));
+      } else {
+        const shortId = selectedItem.id || selectedItem.title?.charCodeAt(0) || 0;
+        localStorage.setItem(`short_comments_${shortId}`, JSON.stringify(updatedComments));
+        
+        // 카드 목록의 댓글 수 업데이트
+        const updatedCommentsCount = updatedComments.length;
+        setSharedItems(prev => prev.map(item => {
+          const itemId = item.id || item.title?.charCodeAt(0) || 0;
+          if (itemId === shortId && item.type === "short") {
+            return {
+              ...item,
+              comments: updatedCommentsCount
+            };
+          }
+          return item;
+        }));
+        setLikedItems(prev => prev.map(item => {
+          const itemId = item.id || item.title?.charCodeAt(0) || 0;
+          if (itemId === shortId && item.type === "short") {
+            return {
+              ...item,
+              comments: updatedCommentsCount
+            };
+          }
+          return item;
+        }));
+        
+        // localStorage에 댓글 수 저장
+        const stats = JSON.parse(localStorage.getItem(`short_stats_${shortId}`) || '{}');
+        stats.comments = updatedCommentsCount;
+        localStorage.setItem(`short_stats_${shortId}`, JSON.stringify(stats));
+        
+        // storage 이벤트 발생시켜 다른 컴포넌트에도 알림
+        window.dispatchEvent(new CustomEvent('shortStatsUpdated', { detail: { id: shortId, comments: updatedCommentsCount } }));
+      }
+      
+      toast({ 
+        description: "댓글이 등록되었습니다",
+        status: "default",
+      });
       setCommentText("");
     }
   };
@@ -371,47 +594,24 @@ const MyPage = () => {
   const handleShare = () => {
     const url = selectedItem ? `${window.location.origin}/${selectedItem.type === "logo" ? "logos" : "shorts"}?${selectedItem.type === "logo" ? "logo" : "short"}=${selectedItem.id}` : window.location.href;
     navigator.clipboard.writeText(url);
-    toast({ description: "링크가 복사되었습니다" });
+    toast({ 
+      description: "링크가 복사되었습니다",
+      status: "default",
+    });
   };
 
   const handleCreateNew = () => {
+    if (!selectedItem || selectedItem.type !== "logo") return;
+    // 선택된 로고를 별도 state에 저장
+    setSelectedItemForCreate(selectedItem);
+    // 아이템 상세 모달 닫기
     setSelectedItem(null);
     setIsLiked(false);
     setLikesCount(0);
     setComments([]);
     setCommentText("");
-    setTimeout(() => {
-      setIsCreateNewModalOpen(true);
-    }, 100);
-  };
-
-  const handleContinueExistingProject = () => {
-    setIsCreateNewModalOpen(false);
-    setIsProjectSelectModalOpen(true);
-    setProjects(projectStorage.getProjects());
-  };
-
-  const handleSelectProject = (projectId: string) => {
-    setIsProjectSelectModalOpen(false);
-    projectStorage.setCurrentProject(projectId);
-    navigate(`/chat?project=${projectId}`);
-  };
-
-  const handleStartNewProject = () => {
-    setIsCreateNewModalOpen(false);
-    setIsNewProjectDialogOpen(true);
-    setProjectName("");
-    setProjectDescription("");
-  };
-
-  const handleCreateProject = () => {
-    if (projectName.trim()) {
-      const newProject = projectStorage.createProject(projectName, projectDescription);
-      setIsNewProjectDialogOpen(false);
-      setProjectName("");
-      setProjectDescription("");
-      navigate(`/chat?project=${newProject.id}&skipLogoUpload=true`);
-    }
+    // 모달 열기
+    setIsCreateNewModalOpen(true);
   };
 
   return (
@@ -445,7 +645,11 @@ const MyPage = () => {
                 </Badge>
                 <Badge 
                   variant={sharedFilter === "logo" ? "default" : "outline"}
-                  className="cursor-pointer px-4 py-2"
+                  className={`cursor-pointer px-4 py-2 ${
+                    sharedFilter === "logo" 
+                      ? "bg-[#7C22C8] text-white hover:bg-[#6B1DB5]" 
+                      : ""
+                  }`}
                   onClick={() => setSharedFilter("logo")}
                 >
                   로고
@@ -484,7 +688,7 @@ const MyPage = () => {
                                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                                   <div className="flex items-center gap-4">
                                     <span className="flex items-center gap-1">
-                                      <Heart className="w-4 h-4" />
+                                      <Heart className={`w-4 h-4 ${getLikedLogos().has(Number(item.id)) ? "text-destructive fill-destructive" : ""}`} />
                                       {item.likes.toLocaleString()}
                                     </span>
                                     <span className="flex items-center gap-1">
@@ -540,7 +744,7 @@ const MyPage = () => {
                               <div className="flex items-center justify-between text-sm text-muted-foreground">
                                 <div className="flex items-center gap-4">
                                   <div className="flex items-center gap-1">
-                                    <Heart className="w-4 h-4 text-destructive fill-destructive" />
+                                    <Heart className={`w-4 h-4 ${getLikedShorts().has(Number(item.id)) ? "text-destructive fill-destructive" : ""}`} />
                                     <span>{item.likes.toLocaleString()}</span>
                                   </div>
                                   <div className="flex items-center gap-1">
@@ -644,7 +848,11 @@ const MyPage = () => {
                 </Badge>
                 <Badge 
                   variant={likedFilter === "logo" ? "default" : "outline"}
-                  className="cursor-pointer px-4 py-2"
+                  className={`cursor-pointer px-4 py-2 ${
+                    likedFilter === "logo" 
+                      ? "bg-[#7C22C8] text-white hover:bg-[#6B1DB5]" 
+                      : ""
+                  }`}
                   onClick={() => setLikedFilter("logo")}
                 >
                   로고
@@ -683,8 +891,12 @@ const MyPage = () => {
                                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                                   <div className="flex items-center gap-4">
                                     <span className="flex items-center gap-1">
-                                      <Heart className="w-4 h-4" />
+                                      <Heart className={`w-4 h-4 ${getLikedLogos().has(Number(item.id)) ? "text-destructive fill-destructive" : ""}`} />
                                       {item.likes.toLocaleString()}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                      <MessageCircle className="w-4 h-4" />
+                                      {item.comments || 0}
                                     </span>
                                   </div>
                                 </div>
@@ -735,8 +947,12 @@ const MyPage = () => {
                               <div className="flex items-center justify-between text-sm text-muted-foreground">
                                 <div className="flex items-center gap-4">
                                   <div className="flex items-center gap-1">
-                                    <Heart className="w-4 h-4 text-destructive fill-destructive" />
+                                    <Heart className={`w-4 h-4 ${getLikedShorts().has(Number(item.id)) ? "text-destructive fill-destructive" : ""}`} />
                                     <span>{item.likes.toLocaleString()}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <MessageCircle className="w-4 h-4" />
+                                    <span>{item.comments || 0}</span>
                                   </div>
                                 </div>
                               </div>
@@ -768,8 +984,12 @@ const MyPage = () => {
                             <div className="flex items-center justify-between text-sm text-muted-foreground">
                               <div className="flex items-center gap-4">
                                 <span className="flex items-center gap-1">
-                                  <Heart className="w-4 h-4" />
+                                  <Heart className={`w-4 h-4 ${getLikedLogos().has(Number(item.id)) ? "text-destructive fill-destructive" : ""}`} />
                                   {item.likes.toLocaleString()}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <MessageCircle className="w-4 h-4" />
+                                  {item.comments || 0}
                                 </span>
                               </div>
                             </div>
@@ -803,8 +1023,12 @@ const MyPage = () => {
                           <div className="flex items-center justify-between text-sm text-muted-foreground">
                             <div className="flex items-center gap-4">
                               <div className="flex items-center gap-1">
-                                <Heart className="w-4 h-4 text-destructive fill-destructive" />
+                                <Heart className={`w-4 h-4 ${getLikedShorts().has(Number(item.id)) ? "text-destructive fill-destructive" : ""}`} />
                                 <span>{item.likes.toLocaleString()}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <MessageCircle className="w-4 h-4" />
+                                <span>{item.comments || 0}</span>
                               </div>
                             </div>
                           </div>
@@ -821,12 +1045,37 @@ const MyPage = () => {
 
       {/* Detail Modal - Logo */}
       {selectedItem?.type === "logo" && (
-        <Dialog open={!!selectedItem} onOpenChange={() => {
-          setSelectedItem(null);
-          setIsLiked(false);
-          setLikesCount(0);
-          setComments([]);
-          setCommentText("");
+        <Dialog open={!!selectedItem} onOpenChange={(open) => {
+          if (!open) {
+            // 창 닫을 때 카드에 반영
+            if (selectedItem) {
+              setSharedItems(prev => prev.map(item => {
+                if (item.id === selectedItem.id && item.type === "logo") {
+                  return {
+                    ...item,
+                    likes: selectedItem.likes || 0,
+                    comments: comments.length
+                  };
+                }
+                return item;
+              }));
+              setLikedItems(prev => prev.map(item => {
+                if (item.id === selectedItem.id && item.type === "logo") {
+                  return {
+                    ...item,
+                    likes: selectedItem.likes || 0,
+                    comments: comments.length
+                  };
+                }
+                return item;
+              }));
+            }
+            setSelectedItem(null);
+            setIsLiked(false);
+            setLikesCount(0);
+            setComments([]);
+            setCommentText("");
+          }
         }}>
           <DialogContent className="max-w-[800px] w-[90vw] overflow-hidden p-0 gap-0">
             <div className="flex md:flex-row flex-col">
@@ -842,7 +1091,7 @@ const MyPage = () => {
               {/* Right: Comments and Actions */}
               <div className="flex flex-col bg-background w-full md:w-[400px] md:flex-shrink-0 aspect-square md:aspect-auto md:h-[400px] rounded-r-lg">
                 {/* Comments Section - Top */}
-                <div className="flex-1 min-h-0 overflow-y-auto p-6 border-b border-border">
+                <div className="flex-1 min-h-0 overflow-y-auto p-6">
                   <div className="space-y-4">
                     {comments.length === 0 ? (
                       <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
@@ -873,42 +1122,51 @@ const MyPage = () => {
                 </div>
 
                 {/* Action Buttons - Middle */}
-                <div className="p-4 border-b border-border space-y-3">
+                <div className={`p-3 border-t-[1px] border-border space-y-2`}>
                   <div className="flex items-center gap-3">
                     <Button 
                       variant="ghost" 
                       onClick={handleLike}
-                      className="h-9 px-3 gap-2"
+                      className={`h-8 px-3 gap-2 ${selectedItem?.type === "logo" ? "hover:bg-[#7C22C8]/10 hover:text-[#7C22C8]" : "hover:bg-primary/10 hover:text-primary"}`}
                     >
-                      <Heart className={`h-5 w-5 ${isLiked ? "fill-destructive text-destructive" : ""}`} />
+                      <Heart className={`h-4 w-4 ${isLiked ? "fill-destructive text-destructive" : ""}`} />
                       <span className="text-sm font-semibold text-foreground">
-                        {(selectedItem ? selectedItem.likes + likesCount : 0).toLocaleString()}
+                        {selectedItem ? selectedItem.likes.toLocaleString() : "0"}
+                      </span>
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      className={`h-8 px-3 gap-2 ${selectedItem?.type === "logo" ? "hover:bg-[#7C22C8]/10 hover:text-[#7C22C8]" : "hover:bg-primary/10 hover:text-primary"}`}
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                      <span className="text-sm font-semibold text-foreground">
+                        {comments.length.toLocaleString()}
                       </span>
                     </Button>
                     <Button 
                       variant="ghost" 
                       size="icon"
                       onClick={handleShare}
-                      className="h-9 w-9"
+                      className={`h-8 w-8 ${selectedItem?.type === "logo" ? "hover:bg-[#7C22C8]/10 hover:text-[#7C22C8]" : "hover:bg-primary/10 hover:text-primary"}`}
                     >
-                      <Clipboard className="h-5 w-5" />
+                      <Share2 className="h-4 w-4" />
                     </Button>
                   </div>
-                  <Button onClick={handleCreateNew} className="w-full bg-primary hover:bg-primary/90">
+                  <Button onClick={handleCreateNew} className={`w-full h-9 text-white text-sm ${selectedItem?.type === "logo" ? "bg-[#7C22C8] hover:bg-[#6B1DB5]" : "bg-primary hover:bg-primary/90"}`}>
                     <Sparkles className="w-4 h-4 mr-2" />
                     이 스타일로 새로운 작품 만들기
                   </Button>
                 </div>
 
                 {/* Comment Input - Bottom */}
-                <div className="p-4 border-t border-border">
+                <div className="p-3 border-t-[1px] border-border">
                   <div className="flex gap-2">
                     <Textarea 
                       placeholder="댓글을 입력하세요..." 
                       value={commentText} 
                       onChange={(e) => setCommentText(e.target.value)} 
-                      className="min-h-[60px] resize-none flex-1" 
-                      rows={2}
+                      className={`h-[40px] min-h-[40px] max-h-[40px] resize-none flex-1 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-2 ${selectedItem?.type === "logo" ? "focus-visible:border-[#7C22C8]" : "focus-visible:border-primary"}`}
+                      rows={1}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
                           e.preventDefault();
@@ -921,7 +1179,7 @@ const MyPage = () => {
                     <Button 
                       onClick={handleComment} 
                       disabled={!commentText.trim()} 
-                      className="h-[60px] px-6"
+                      className={`h-[40px] px-6 text-white disabled:opacity-50 ${selectedItem?.type === "logo" ? "bg-[#7C22C8] hover:bg-[#6B1DB5]" : "bg-primary hover:bg-primary/90"}`}
                     >
                       등록
                     </Button>
@@ -935,30 +1193,60 @@ const MyPage = () => {
 
       {/* Detail Modal - Short Form */}
       {selectedItem?.type === "short" && (
-        <Dialog open={!!selectedItem} onOpenChange={() => {
-          setSelectedItem(null);
-          setIsLiked(false);
-          setLikesCount(0);
-          setComments([]);
-          setCommentText("");
+        <Dialog open={!!selectedItem} onOpenChange={(open) => {
+          if (!open) {
+            // 창 닫을 때 카드에 반영
+            if (selectedItem) {
+              const shortId = selectedItem.id || selectedItem.title?.charCodeAt(0) || 0;
+              setSharedItems(prev => prev.map(item => {
+                const itemId = item.id || item.title?.charCodeAt(0) || 0;
+                if (itemId === shortId && item.type === "short") {
+                  return {
+                    ...item,
+                    likes: selectedItem.likes || 0,
+                    comments: comments.length
+                  };
+                }
+                return item;
+              }));
+              setLikedItems(prev => prev.map(item => {
+                const itemId = item.id || item.title?.charCodeAt(0) || 0;
+                if (itemId === shortId && item.type === "short") {
+                  return {
+                    ...item,
+                    likes: selectedItem.likes || 0,
+                    comments: comments.length
+                  };
+                }
+                return item;
+              }));
+            }
+            setSelectedItem(null);
+            setIsLiked(false);
+            setLikesCount(0);
+            setComments([]);
+            setCommentText("");
+          }
         }}>
           <DialogContent className="max-w-[800px] w-[90vw] overflow-hidden p-0 gap-0">
             <div className="flex md:flex-row flex-col">
-              {/* Left: Short Form Image (9:16 ratio) */}
-              <div className="bg-background flex items-center justify-center p-0 border-r border-border aspect-[9/16] w-full md:w-[300px] md:flex-shrink-0 rounded-l-lg overflow-hidden relative group">
-                <img 
-                  src={selectedItem.image} 
-                  alt={selectedItem.title} 
-                  className="w-full h-full object-cover"
-                />
-                {selectedItem.videoUrl && (
+              {/* Left: Short Form Video (9:16 ratio) */}
+              <div className="bg-background flex items-center justify-center p-0 border-r border-border aspect-[9/16] w-full md:w-[300px] md:flex-shrink-0 rounded-l-lg overflow-hidden relative">
+                {selectedItem.type === "short" && (selectedItem.videoUrl || selectedItem.image) ? (
                   <video
-                    src={selectedItem.videoUrl}
-                    className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    src={selectedItem.videoUrl || selectedItem.image}
+                    className="w-full h-full object-cover"
                     autoPlay
                     loop
                     muted
                     playsInline
+                    controls
+                  />
+                ) : (
+                  <img 
+                    src={selectedItem.image} 
+                    alt={selectedItem.title} 
+                    className="w-full h-full object-cover"
                   />
                 )}
               </div>
@@ -966,7 +1254,7 @@ const MyPage = () => {
               {/* Right: Comments and Actions */}
               <div className="flex flex-col bg-background w-full md:w-[500px] md:flex-shrink-0 aspect-[9/16] md:aspect-auto md:h-[533px] rounded-r-lg">
                 {/* Comments Section - Top */}
-                <div className="flex-1 min-h-0 overflow-y-auto p-6 border-b border-border">
+                <div className="flex-1 min-h-0 overflow-y-auto p-6">
                   <div className="space-y-4">
                     {comments.length === 0 ? (
                       <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
@@ -997,38 +1285,47 @@ const MyPage = () => {
                 </div>
 
                 {/* Action Buttons - Middle */}
-                <div className="p-4 border-b border-border">
+                <div className={`p-3 border-t-[1px] border-border space-y-2`}>
                   <div className="flex items-center gap-3">
                     <Button 
                       variant="ghost" 
                       onClick={handleLike}
-                      className="h-9 px-3 gap-2"
+                      className={`h-8 px-3 gap-2 ${selectedItem?.type === "logo" ? "hover:bg-[#7C22C8]/10 hover:text-[#7C22C8]" : "hover:bg-primary/10 hover:text-primary"}`}
                     >
-                      <Heart className={`h-5 w-5 ${isLiked ? "fill-destructive text-destructive" : ""}`} />
+                      <Heart className={`h-4 w-4 ${isLiked ? "fill-destructive text-destructive" : ""}`} />
                       <span className="text-sm font-semibold text-foreground">
-                        {(selectedItem ? (selectedItem.likes || 0) + likesCount : 0).toLocaleString()}
+                        {Math.max(0, selectedItem ? (selectedItem.likes || 0) + likesCount : 0).toLocaleString()}
+                      </span>
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      className={`h-8 px-3 gap-2 ${selectedItem?.type === "logo" ? "hover:bg-[#7C22C8]/10 hover:text-[#7C22C8]" : "hover:bg-primary/10 hover:text-primary"}`}
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                      <span className="text-sm font-semibold text-foreground">
+                        {comments.length.toLocaleString()}
                       </span>
                     </Button>
                     <Button 
                       variant="ghost" 
                       size="icon"
                       onClick={handleShare}
-                      className="h-9 w-9"
+                      className={`h-8 w-8 ${selectedItem?.type === "logo" ? "hover:bg-[#7C22C8]/10 hover:text-[#7C22C8]" : "hover:bg-primary/10 hover:text-primary"}`}
                     >
-                      <Clipboard className="h-5 w-5" />
+                      <Share2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
 
                 {/* Comment Input - Bottom */}
-                <div className="p-4 border-t border-border">
+                <div className="p-3 border-t-[1px] border-border">
                   <div className="flex gap-2">
                     <Textarea 
                       placeholder="댓글을 입력하세요..." 
                       value={commentText} 
                       onChange={(e) => setCommentText(e.target.value)} 
-                      className="min-h-[60px] resize-none flex-1" 
-                      rows={2}
+                      className={`h-[40px] min-h-[40px] max-h-[40px] resize-none flex-1 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-2 ${selectedItem?.type === "logo" ? "focus-visible:border-[#7C22C8]" : "focus-visible:border-primary"}`}
+                      rows={1}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
                           e.preventDefault();
@@ -1041,7 +1338,7 @@ const MyPage = () => {
                     <Button 
                       onClick={handleComment} 
                       disabled={!commentText.trim()} 
-                      className="h-[60px] px-6"
+                      className={`h-[40px] px-6 text-white disabled:opacity-50 ${selectedItem?.type === "logo" ? "bg-[#7C22C8] hover:bg-[#6B1DB5]" : "bg-primary hover:bg-primary/90"}`}
                     >
                       등록
                     </Button>
@@ -1053,134 +1350,43 @@ const MyPage = () => {
         </Dialog>
       )}
 
-      {/* 새로운 작품 만들기 선택 모달 */}
-      <Dialog open={isCreateNewModalOpen} onOpenChange={setIsCreateNewModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>새로운 작품 만들기</DialogTitle>
-            <DialogDescription>
-              어떻게 진행하시겠습니까?
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col gap-3 py-4">
-            <Button 
-              onClick={handleContinueExistingProject}
-              variant="outline"
-              className="w-full h-auto py-6"
-            >
-              <div className="flex flex-col items-start gap-1">
-                <span className="font-semibold">내가 하던 프로젝트에서 계속하기</span>
-                <span className="text-sm text-muted-foreground">기존 프로젝트를 선택하여 이어서 작업합니다</span>
-              </div>
-            </Button>
-            <Button 
-              onClick={handleStartNewProject}
-              className="w-full h-auto py-6 bg-primary hover:bg-primary/90"
-            >
-              <div className="flex flex-col items-start gap-1">
-                <span className="font-semibold">새 프로젝트로 시작하기</span>
-                <span className="text-sm text-primary-foreground/80">새로운 프로젝트를 생성하여 시작합니다</span>
-              </div>
-            </Button>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsCreateNewModalOpen(false)}>
-              취소
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* 새로운 작품 만들기 모달 - 로고일 때만 표시 */}
+      {selectedItemForCreate && selectedItemForCreate.type === "logo" && (
+        <CreateFromStyleModal
+          open={isCreateNewModalOpen}
+          onOpenChange={(open) => {
+            setIsCreateNewModalOpen(open);
+            // 모달이 완전히 닫힐 때만 selectedItemForCreate를 null로 설정
+            // CreateFromStyleModal 내부에서 프로젝트 선택 모달이 열려있을 때는
+            // onOpenChange(false)를 호출하지 않으므로 안전하게 null로 설정 가능
+            if (!open) {
+              setSelectedItemForCreate(null);
+            }
+          }}
+          baseAssetType="logo"
+          baseAssetId={selectedItemForCreate.id}
+          baseAssetImageUrl={selectedItemForCreate.image}
+        />
+      )}
 
-      {/* 프로젝트 선택 모달 */}
-      <Dialog open={isProjectSelectModalOpen} onOpenChange={setIsProjectSelectModalOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh]">
-          <DialogHeader>
-            <DialogTitle>프로젝트 선택</DialogTitle>
-            <DialogDescription>
-              계속 작업할 프로젝트를 선택해주세요
-            </DialogDescription>
-          </DialogHeader>
-          <div className="overflow-y-auto max-h-[60vh] space-y-2 py-4">
-            {projects.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                프로젝트가 없습니다
-              </div>
-            ) : (
-              projects.map((project) => (
-                <Card 
-                  key={project.id}
-                  className="cursor-pointer hover:bg-muted/50 transition-colors"
-                  onClick={() => handleSelectProject(project.id)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-foreground">{project.name}</h3>
-                        {project.description && (
-                          <p className="text-sm text-muted-foreground mt-1">{project.description}</p>
-                        )}
-                        <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                          <span>로고 {project.logoCount}개</span>
-                          <span>숏폼 {project.shortFormCount}개</span>
-                          <span>{project.date}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsProjectSelectModalOpen(false)}>
-              취소
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* 새 프로젝트 만들기 다이얼로그 */}
-      <Dialog open={isNewProjectDialogOpen} onOpenChange={setIsNewProjectDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>새 프로젝트 만들기</DialogTitle>
-            <DialogDescription>
-              프로젝트 정보를 입력하고 시작하세요.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="project-name">프로젝트 이름</Label>
-              <Input
-                id="project-name"
-                placeholder="예: 브랜드 A 마케팅"
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="project-description">설명 (선택)</Label>
-              <Textarea
-                id="project-description"
-                placeholder="프로젝트에 대한 간단한 설명을 입력하세요"
-                value={projectDescription}
-                onChange={(e) => setProjectDescription(e.target.value)}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsNewProjectDialogOpen(false)}>
-              취소
-            </Button>
-            <Button 
-              onClick={handleCreateProject}
-              disabled={!projectName.trim()}
-            >
-              다음으로
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AuthModals
+        isLoginOpen={isLoginOpen}
+        isSignUpOpen={isSignUpOpen}
+        onLoginClose={() => setIsLoginOpen(false)}
+        onSignUpClose={() => setIsSignUpOpen(false)}
+        onSwitchToSignUp={() => {
+          setIsLoginOpen(false);
+          setIsSignUpOpen(true);
+        }}
+        onSwitchToLogin={() => {
+          setIsSignUpOpen(false);
+          setIsLoginOpen(true);
+        }}
+        onLoginSuccess={(rememberMe) => {
+          setIsLoginOpen(false);
+          setIsSignUpOpen(false);
+        }}
+      />
       
       <Footer />
     </div>

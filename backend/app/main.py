@@ -20,8 +20,11 @@ from app.api.trend import router as trend_router
 from app.api.brand import router as brand_router
 from app.api.logo import router as logo_router
 from app.api.shorts import router as shorts_router
+from app.api.social import router as social_router
 
 from app.db.session import oracle_db
+
+from fastapi.middleware.cors import CORSMiddleware
 
 # 앱 라이프사이클 관리 
 # 앱 시작 시 Oracle DB 풀 초기화
@@ -57,6 +60,15 @@ def create_app() -> FastAPI:
         version=settings.app_version,
         lifespan=lifespan,
     )
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["http://localhost:8080", "http://127.0.0.1:8080", "http://localhost:8081", "http://127.0.0.1:8081"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
     app.include_router(health_router)
     app.include_router(db_router)
     app.include_router(auth_router)
@@ -67,6 +79,8 @@ def create_app() -> FastAPI:
     app.include_router(brand_router)
     app.include_router(logo_router)
     app.include_router(shorts_router)
+
+    app.include_router(social_router)
     return app
 
 

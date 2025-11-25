@@ -8,8 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { Camera, Instagram, Youtube } from "lucide-react";
+import { Camera, Instagram, Youtube, Eye, EyeOff, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { getYouTubeAuthUrl, getYouTubeConnectionStatus, disconnectYouTube } from "@/lib/api";
 
 const AccountPage = () => {
   const { toast } = useToast();
@@ -41,12 +42,52 @@ const AccountPage = () => {
   const [instagramConnected, setInstagramConnected] = useState(getUserProfile().instagram?.connected || false);
   const [youtubeConnected, setYoutubeConnected] = useState(getUserProfile().youtube?.connected || false);
   const [isInstagramModalOpen, setIsInstagramModalOpen] = useState(false);
-  const [isYoutubeModalOpen, setIsYoutubeModalOpen] = useState(false);
+  const [instagramAccessToken, setInstagramAccessToken] = useState("");
+  const [instagramUserId, setInstagramUserId] = useState("");
+  const [showAccessToken, setShowAccessToken] = useState(false);
+  const [youtubeEmail, setYoutubeEmail] = useState("");
+  const [isYoutubeLoading, setIsYoutubeLoading] = useState(false);
+
+  // YouTube 연동 상태 로드 함수
+  const loadYouTubeConnectionStatus = async () => {
+    try {
+      const status = await getYouTubeConnectionStatus();
+      setYoutubeConnected(status.connected);
+      if (status.email) {
+        setYoutubeEmail(status.email);
+      }
+      // localStorage 업데이트
+      const profile = getUserProfile();
+      localStorage.setItem('userProfile', JSON.stringify({
+        ...profile,
+        youtube: {
+          connected: status.connected,
+          email: status.email || undefined,
+        }
+      }));
+      window.dispatchEvent(new Event('profileUpdated'));
+    } catch (error) {
+      console.error('YouTube 연동 상태 조회 실패:', error);
+    }
+  };
+
+  // 컴포넌트 마운트 시 연동 상태 확인
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        await loadYouTubeConnectionStatus();
+      } catch (error) {
+        // 로그인 안 되어 있으면 무시
+        console.log('연동 상태 확인 실패 (로그인 필요할 수 있음)');
+      }
+    };
+    checkConnection();
+  }, []);
 
   // URL 파라미터로 연동 완료 확인
   useEffect(() => {
     const instagramSuccess = searchParams.get('instagram_success');
-    const youtubeSuccess = searchParams.get('youtube_success');
+    const youtubeConnected = searchParams.get('youtube_connected');
     
     if (instagramSuccess === 'true') {
       setInstagramConnected(true);
@@ -61,6 +102,7 @@ const AccountPage = () => {
       toast({
         title: "Instagram 계정이 연동되었어요",
         description: "이제 내 숏폼에서 바로 업로드할 수 있어요.",
+        status: "success",
       });
       
       // URL에서 파라미터 제거
@@ -68,26 +110,49 @@ const AccountPage = () => {
       setSearchParams(searchParams, { replace: true });
     }
     
-    if (youtubeSuccess === 'true') {
-      setYoutubeConnected(true);
-      // 프로필 저장
-      const profile = getUserProfile();
-      localStorage.setItem('userProfile', JSON.stringify({
-        ...profile,
-        youtube: { connected: true }
-      }));
-      window.dispatchEvent(new Event('profileUpdated'));
-      
+    if (youtubeConnected === 'success') {
       toast({
         title: "YouTube 계정이 연동되었어요",
         description: "이제 내 숏폼에서 바로 업로드할 수 있어요.",
+        status: "success",
       });
-      
       // URL에서 파라미터 제거
-      searchParams.delete('youtube_success');
+      searchParams.delete('youtube_connected');
+      searchParams.delete('message');
+      setSearchParams(searchParams, { replace: true });
+      // 백엔드에서 실제 연동 정보 가져오기
+      loadYouTubeConnectionStatus();
+    } else if (youtubeConnected === 'error') {
+      const message = searchParams.get('message') || '연동에 실패했습니다.';
+      const decodedMessage = decodeURIComponent(message);
+      
+      // 에러 메시지에 따라 다른 토스트 표시
+      if (decodedMessage.includes('인증 설정') || decodedMessage.includes('Google 인증')) {
+        toast({
+          title: "YouTube 연동 준비 중",
+          description: decodedMessage,
+          variant: "default",
+          duration: 6000,
+        });
+      } else if (decodedMessage.includes('취소')) {
+        toast({
+          title: "연동 취소",
+          description: decodedMessage,
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "YouTube 연동 실패",
+          description: decodedMessage,
+          variant: "destructive",
+        });
+      }
+      
+      searchParams.delete('youtube_connected');
+      searchParams.delete('message');
       setSearchParams(searchParams, { replace: true });
     }
-  }, [searchParams, setSearchParams]);
+  }, [searchParams, setSearchParams, toast]);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -97,7 +162,7 @@ const AccountPage = () => {
         toast({
           title: "파일이 너무 큽니다",
           description: "5MB 이하의 이미지를 선택해주세요.",
-          variant: "destructive",
+          status: "warning",
         });
         return;
       }
@@ -111,6 +176,7 @@ const AccountPage = () => {
         toast({
           title: "사진이 업로드되었습니다",
           description: "변경사항 저장 버튼을 눌러 프로필을 저장하세요.",
+          status: "success",
         });
       };
       reader.readAsDataURL(file);
@@ -133,6 +199,7 @@ const AccountPage = () => {
     toast({
       title: "프로필이 저장되었습니다",
       description: "변경사항이 성공적으로 저장되었습니다.",
+      status: "success",
     });
   };
 
@@ -141,27 +208,39 @@ const AccountPage = () => {
   };
 
   const handleInstagramConnectConfirm = () => {
-    setIsInstagramModalOpen(false);
-    // 실제 OAuth 연동 시작 (여기서는 시뮬레이션)
-    // 실제 구현 시 Instagram OAuth URL로 리다이렉트
-    // window.location.href = 'https://api.instagram.com/oauth/authorize?...';
-    
-    // 시뮬레이션: OAuth 완료 후 돌아온 것으로 가정
-    // 실제로는 OAuth 콜백에서 youtube_success 파라미터와 함께 리다이렉트됨
-    setTimeout(() => {
-      setInstagramConnected(true);
-      const profile = getUserProfile();
-      localStorage.setItem('userProfile', JSON.stringify({
-        ...profile,
-        instagram: { connected: true }
-      }));
-      window.dispatchEvent(new Event('profileUpdated'));
-      
+    if (!instagramAccessToken.trim() || !instagramUserId.trim()) {
       toast({
-        title: "Instagram 계정이 연동되었어요",
-        description: "이제 내 숏폼에서 바로 업로드할 수 있어요.",
+        title: "입력 오류",
+        description: "ACCESS_TOKEN과 IG_USER_ID를 모두 입력해주세요.",
+        status: "warning",
       });
-    }, 1000);
+      return;
+    }
+
+    setIsInstagramModalOpen(false);
+    
+    // ACCESS_TOKEN과 IG_USER_ID 저장
+    setInstagramConnected(true);
+    const profile = getUserProfile();
+    localStorage.setItem('userProfile', JSON.stringify({
+      ...profile,
+      instagram: { 
+        connected: true,
+        accessToken: instagramAccessToken,
+        userId: instagramUserId
+      }
+    }));
+    window.dispatchEvent(new Event('profileUpdated'));
+    
+    // 입력 필드 초기화
+    setInstagramAccessToken("");
+    setInstagramUserId("");
+    
+    toast({
+      title: "Instagram 계정이 연동되었어요",
+      description: "이제 내 숏폼에서 바로 업로드할 수 있어요.",
+      status: "success",
+    });
   };
 
   const handleInstagramDisconnect = () => {
@@ -177,51 +256,55 @@ const AccountPage = () => {
     toast({
       title: "인스타그램 연동 해제",
       description: "인스타그램 연동이 해제되었습니다.",
+      status: "success",
     });
   };
 
-  const handleYoutubeConnect = () => {
-    setIsYoutubeModalOpen(true);
+  const handleYoutubeConnect = async () => {
+    setIsYoutubeLoading(true);
+    try {
+      // 백엔드에서 OAuth URL 받기
+      const { auth_url } = await getYouTubeAuthUrl();
+      
+      // OAuth 인증 페이지로 리다이렉트
+      window.location.href = auth_url;
+    } catch (error) {
+      setIsYoutubeLoading(false);
+      toast({
+        title: "연동 실패",
+        description: error instanceof Error ? error.message : "YouTube 연동을 시작할 수 없습니다.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleYoutubeConnectConfirm = () => {
-    setIsYoutubeModalOpen(false);
-    // 실제 OAuth 연동 시작 (여기서는 시뮬레이션)
-    // 실제 구현 시 YouTube OAuth URL로 리다이렉트
-    // window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?...';
-    
-    // 시뮬레이션: OAuth 완료 후 돌아온 것으로 가정
-    // 실제로는 OAuth 콜백에서 youtube_success 파라미터와 함께 리다이렉트됨
-    setTimeout(() => {
-      setYoutubeConnected(true);
+  const handleYoutubeDisconnect = async () => {
+    try {
+      await disconnectYouTube();
+      
+      setYoutubeConnected(false);
+      setYoutubeEmail("");
+      
+      // localStorage 업데이트
       const profile = getUserProfile();
       localStorage.setItem('userProfile', JSON.stringify({
         ...profile,
-        youtube: { connected: true }
+        youtube: { connected: false }
       }));
       window.dispatchEvent(new Event('profileUpdated'));
       
       toast({
-        title: "YouTube 계정이 연동되었어요",
-        description: "이제 내 숏폼에서 바로 업로드할 수 있어요.",
+        title: "YouTube 연동 해제",
+        description: "YouTube 연동이 해제되었습니다.",
+        status: "success",
       });
-    }, 1000);
-  };
-
-  const handleYoutubeDisconnect = () => {
-    setYoutubeConnected(false);
-    // 즉시 localStorage에 저장
-    const profile = getUserProfile();
-    localStorage.setItem('userProfile', JSON.stringify({
-      ...profile,
-      youtube: { connected: false }
-    }));
-    window.dispatchEvent(new Event('profileUpdated'));
-    
-    toast({
-      title: "유튜브 연동 해제",
-      description: "유튜브 연동이 해제되었습니다.",
-    });
+    } catch (error) {
+      toast({
+        title: "연동 해제 실패",
+        description: error instanceof Error ? error.message : "연동 해제에 실패했습니다.",
+        variant: "destructive",
+      });
+    }
   };
 
   const getUserInitials = () => {
@@ -289,6 +372,7 @@ const AccountPage = () => {
                             toast({
                               title: "사진이 제거되었습니다",
                               description: "변경사항 저장 버튼을 눌러 프로필을 저장하세요.",
+                              status: "success",
                             });
                           }}
                         >
@@ -379,7 +463,9 @@ const AccountPage = () => {
                     <div>
                       <p className="font-medium">YouTube</p>
                       <p className="text-sm text-muted-foreground">
-                        {youtubeConnected ? "연동됨" : "연동되지 않음"}
+                        {youtubeConnected 
+                          ? (youtubeEmail ? `연동됨 (${youtubeEmail})` : "연동됨")
+                          : "연동되지 않음"}
                       </p>
                     </div>
                   </div>
@@ -388,8 +474,22 @@ const AccountPage = () => {
                       연동 끊기
                     </Button>
                   ) : (
-                    <Button onClick={handleYoutubeConnect}>
-                      연동하기
+                    <Button 
+                      onClick={handleYoutubeConnect}
+                      disabled={isYoutubeLoading}
+                      className="bg-orange-500 hover:bg-orange-600"
+                    >
+                      {isYoutubeLoading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          연동 중...
+                        </>
+                      ) : (
+                        <>
+                          <Youtube className="h-4 w-4 mr-2" />
+                          연동하기
+                        </>
+                      )}
                     </Button>
                   )}
                 </div>
@@ -402,50 +502,74 @@ const AccountPage = () => {
       <Footer />
 
       {/* Instagram 연동 모달 */}
-      <Dialog open={isInstagramModalOpen} onOpenChange={setIsInstagramModalOpen}>
+      <Dialog open={isInstagramModalOpen} onOpenChange={(open) => {
+        setIsInstagramModalOpen(open);
+        if (!open) {
+          // 다이얼로그가 닫힐 때 입력 필드 초기화
+          setInstagramAccessToken("");
+          setInstagramUserId("");
+          setShowAccessToken(false);
+        }
+      }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Instagram 계정을 연동할까요?</DialogTitle>
             <DialogDescription>
-              Makery에서 만든 숏폼을 인스타그램 Reels로 바로 업로드할 수 있어요.
+              MAKERY에서 만든 숏폼을 Instagram Reels로 바로 업로드할 수 있어요.
             </DialogDescription>
           </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="accessToken">ACCESS_TOKEN</Label>
+              <div className="relative">
+                <Input
+                  id="accessToken"
+                  type={showAccessToken ? "text" : "password"}
+                  placeholder="ACCESS_TOKEN을 입력하세요"
+                  value={instagramAccessToken}
+                  onChange={(e) => setInstagramAccessToken(e.target.value)}
+                  className="pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                  onClick={() => setShowAccessToken(!showAccessToken)}
+                >
+                  {showAccessToken ? (
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="userId">IG_USER_ID</Label>
+              <Input
+                id="userId"
+                type="text"
+                placeholder="IG_USER_ID를 입력하세요"
+                value={instagramUserId}
+                onChange={(e) => setInstagramUserId(e.target.value)}
+              />
+            </div>
+          </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsInstagramModalOpen(false)}>
+            <Button variant="outline" onClick={() => setIsInstagramModalOpen(false)} className="hover:bg-transparent hover:border-border hover:text-foreground">
               취소
             </Button>
             <Button 
               onClick={handleInstagramConnectConfirm}
               className="bg-orange-500 hover:bg-orange-600 text-white"
             >
-              Instagram으로 계속
+              연동하기
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* YouTube 연동 모달 */}
-      <Dialog open={isYoutubeModalOpen} onOpenChange={setIsYoutubeModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>YouTube 계정을 연동할까요?</DialogTitle>
-            <DialogDescription>
-              Makery에서 만든 숏폼을 YouTube Shorts로 바로 업로드할 수 있어요.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsYoutubeModalOpen(false)}>
-              취소
-            </Button>
-            <Button 
-              onClick={handleYoutubeConnectConfirm}
-              className="bg-orange-500 hover:bg-orange-600 text-white"
-            >
-              YouTube로 계속
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

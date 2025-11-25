@@ -101,28 +101,15 @@ def make_brand_collect_node(llm: "BaseChatModel"):
 
     이런 식으로 사용.
     """
-    def brand_collect(state: "AppState") -> Command[Literal["brand_intention"]]:
+    def brand_collect(state: "AppState") -> Command[Literal["brand_chat"]]:
         """
         마지막 사용자 발화에서 브랜드 정보를 추출해
         state.brand_profile 에 누적/병합하는 노드.
         """
-        # 1) 의도가 smalltalk 이면 아무 것도 하지 않고 반환
-        meta: Dict[str, Any] = dict(state.get("meta") or {})
-        intent_label = None
-        intent_info = meta.get("intent") or {}
-        if isinstance(intent_info, dict):
-            il = intent_info.get("label")
-            if isinstance(il, str):
-                intent_label = il
-
-        if intent_label == "smalltalk":
-            # 일상 대화일 때는 brand_profile 을 건드리지 않고 그대로 brand_intention 으로 넘김
-            return Command(update={}, goto="brand_intention")
 
         user_text = get_last_user_message(state)
         if not user_text:
-            # 유저 발화가 없으면 상태 변경 없이 brand_intention 으로 넘김
-            return Command(update={}, goto="brand_intention")
+            return Command(update={}, goto="brand_chat")
 
         current_profile: Dict[str, Any] = dict(state.get("brand_profile") or {})
         current_profile_json = json.dumps(current_profile, ensure_ascii=False)
@@ -160,7 +147,7 @@ def make_brand_collect_node(llm: "BaseChatModel"):
         updates = parsed.get("brand_profile_updates") or {}
         if not isinstance(updates, dict) or not updates:
             # 업데이트가 없으면 아무 변화 없음
-            return Command(update={}, goto="brand_intention")
+            return Command(update={}, goto="brand_chat")
 
         merged_profile = _merge_brand_profile(current_profile, updates)
 
@@ -173,7 +160,7 @@ def make_brand_collect_node(llm: "BaseChatModel"):
                 "brand_profile": merged_profile,
                 "meta": new_meta,
             },
-            goto="brand_intention",
+            goto="brand_chat",
         )
 
     return brand_collect

@@ -21,8 +21,9 @@ from app.db.orm import Base
 
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
+if TYPE_CHECKING: # 타입 검사할 때만 실행하고, 실제 파이썬을 실행할 때는 실행되지 않음.
     from app.models.project import ProdGroup
+    from app.models.social import SocialConnection
 
 class Role(Base):
     """
@@ -129,6 +130,13 @@ class UserInfo(Base):
         lazy="selectin",
     )
 
+    social_connections: Mapped[list["SocialConnection"]] = relationship(
+        "SocialConnection",
+        back_populates="user",
+        lazy="selectin",
+        cascade="all, delete-orphan",
+    )
+
 class Menu(Base):
     """
     메뉴 테이블 (menu)
@@ -154,6 +162,11 @@ class Menu(Base):
         String(255),
         nullable=False,
         comment="메뉴경로",
+    )
+    menu_order: Mapped[int | None] = mapped_column(
+        Integer,
+        nullable=True,
+        comment="메뉴순서",
     )
     del_yn: Mapped[str] = mapped_column(
         String(1),

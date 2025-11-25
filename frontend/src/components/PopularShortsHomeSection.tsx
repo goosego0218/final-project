@@ -1,4 +1,4 @@
-import { Heart, MessageCircle, Clipboard } from "lucide-react";
+import { Heart, MessageCircle, Share2 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AuthModals } from "@/components/AuthModals";
 
 interface ShortFormCardProps {
   thumbnailSrc: string;
@@ -18,7 +19,7 @@ interface ShortFormCardProps {
 }
 
 // Generate mock short forms (same as ShortFormGallery)
-const generateMockShortForms = (): Array<{ title: string; duration: string; likes: number; comments: number; platform: string }> => {
+const generateMockShortForms = (): Array<{ title: string; thumbnailSrc: string; duration: string; likes: number; comments: number; platform: string }> => {
   const titles = [
     "오픈 1시간 전 준비 브이로그",
     "신제품 언박싱 첫 인상",
@@ -44,8 +45,33 @@ const generateMockShortForms = (): Array<{ title: string; duration: string; like
 
   const platforms = ["Instagram", "YouTube Shorts"];
 
+  // 예시 숏폼 썸네일 이미지 URL들 (9:16 비율, Unsplash 사용)
+  const shortFormThumbnails = [
+    "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=711&fit=crop",
+    "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=400&h=711&fit=crop",
+  ];
+
   return titles.map((title, index) => ({
     title,
+    thumbnailSrc: shortFormThumbnails[index % shortFormThumbnails.length],
     duration: `0:${String(Math.floor(Math.random() * 50) + 10).padStart(2, '0')}`,
     likes: Math.floor(Math.random() * 10000) + 100,
     comments: Math.floor(Math.random() * 1000) + 10,
@@ -54,7 +80,7 @@ const generateMockShortForms = (): Array<{ title: string; duration: string; like
 };
 
 // Get top short forms by likes (same data source as ShortFormGallery)
-const getTopShortFormsByLikes = () => {
+const getTopShortFormsByLikes = (): Array<{ title: string; thumbnailSrc: string; duration: string; likes: number; comments: number; platform: string }> => {
   const allShortForms = generateMockShortForms();
   return [...allShortForms].sort((a, b) => b.likes - a.likes).slice(0, 6);
 };
@@ -106,6 +132,8 @@ const PopularShortsHomeSection = () => {
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState<Array<{ author: string; authorAvatar?: string; content: string; time: string }>>([]);
   const { toast } = useToast();
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isSignUpOpen, setIsSignUpOpen] = useState(false);
 
   // Get top short forms by likes from the same data source as ShortFormGallery
   const [shortForms, setShortForms] = useState(getTopShortFormsByLikes());
@@ -159,7 +187,7 @@ const PopularShortsHomeSection = () => {
     localStorage.setItem('liked_shorts', JSON.stringify(Array.from(liked)));
   };
 
-  // Reset likes count when short form changes
+  // Reset likes count and load comments when short form changes
   useEffect(() => {
     if (selectedShort) {
       setLikesCount(0);
@@ -168,19 +196,59 @@ const PopularShortsHomeSection = () => {
       const shortId = selectedShort.id || selectedShort.title?.charCodeAt(0) || 0;
       const likedState = liked.has(shortId);
       setIsLiked(likedState);
+      
+      // Load comments from localStorage
+      const savedComments = localStorage.getItem(`short_comments_${shortId}`);
+      if (savedComments) {
+        setComments(JSON.parse(savedComments));
+      } else {
+        setComments([]);
+      }
     } else {
       setIsLiked(false);
+      setComments([]);
     }
   }, [selectedShort]);
 
   // Listen to storage events to update liked status
   useEffect(() => {
     const handleStorageChange = () => {
-      // 카드 목록이 자동으로 업데이트되도록 함
-      setShortForms(prev => [...prev]);
+      // localStorage에서 통계 불러와서 업데이트
+      setShortForms(prev => prev.map(shortForm => {
+        const formId = shortForm.title?.charCodeAt(0) || 0;
+        const stats = JSON.parse(localStorage.getItem(`short_stats_${formId}`) || '{}');
+        if (stats.likes !== undefined || stats.comments !== undefined) {
+          return {
+            ...shortForm,
+            likes: stats.likes !== undefined ? stats.likes : shortForm.likes,
+            comments: stats.comments !== undefined ? stats.comments : shortForm.comments
+          };
+        }
+        return shortForm;
+      }));
     };
+    
+    const handleShortStatsUpdate = (e: CustomEvent) => {
+      const { id, likes, comments } = e.detail;
+      setShortForms(prev => prev.map(shortForm => {
+        const formId = shortForm.title?.charCodeAt(0) || 0;
+        if (formId === id) {
+          return {
+            ...shortForm,
+            ...(likes !== undefined && { likes }),
+            ...(comments !== undefined && { comments })
+          };
+        }
+        return shortForm;
+      }));
+    };
+    
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener('shortStatsUpdated', handleShortStatsUpdate as EventListener);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('shortStatsUpdated', handleShortStatsUpdate as EventListener);
+    };
   }, []);
 
   const handleMouseEnter = () => {
@@ -193,63 +261,121 @@ const PopularShortsHomeSection = () => {
 
   const handleLike = () => {
     if (!selectedShort) return;
+    
+    // 로그인 상태 확인
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+    if (!isLoggedIn) {
+      setIsLoginOpen(true);
+      return;
+    }
+    
     const newLikedState = !isLiked;
     setIsLiked(newLikedState);
-    setLikesCount(prev => newLikedState ? prev + 1 : prev - 1);
     // selectedShort.id가 없을 수 있으므로 title이나 다른 고유 식별자 사용
     const shortId = selectedShort.id || selectedShort.title?.charCodeAt(0) || 0;
-    saveLikedShort(shortId, newLikedState);
     
     // 카드 목록의 좋아요 수 업데이트
+    const currentLikes = typeof selectedShort.likes === 'number' ? selectedShort.likes : 0;
+    const updatedLikes = Math.max(0, newLikedState ? currentLikes + 1 : currentLikes - 1);
+    
+    // 선택된 숏폼의 좋아요 수 즉시 업데이트
+    setSelectedShort(prev => prev ? { ...prev, likes: updatedLikes } : null);
+    
     setShortForms(prev => prev.map(shortForm => {
       const formId = shortForm.title?.charCodeAt(0) || 0;
       if (formId === shortId) {
         return {
           ...shortForm,
-          likes: newLikedState ? (typeof shortForm.likes === 'number' ? shortForm.likes + 1 : 0) : Math.max(0, (typeof shortForm.likes === 'number' ? shortForm.likes - 1 : 0))
+          likes: updatedLikes
         };
       }
       return shortForm;
     }));
     
+    saveLikedShort(shortId, newLikedState);
+    
+    // localStorage에 좋아요 수 저장
+    const stats = JSON.parse(localStorage.getItem(`short_stats_${shortId}`) || '{}');
+    stats.likes = updatedLikes;
+    localStorage.setItem(`short_stats_${shortId}`, JSON.stringify(stats));
+    
     // storage 이벤트 발생시켜 다른 컴포넌트에도 알림
     window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new CustomEvent('shortStatsUpdated', { detail: { id: shortId, likes: updatedLikes } }));
     
     toast({
       description: newLikedState ? "좋아요를 눌렀습니다" : "좋아요를 취소했습니다",
+      status: "default",
     });
   };
 
   const handleComment = () => {
-    if (commentText.trim()) {
+    if (commentText.trim() && selectedShort) {
+      // 로그인 상태 확인
+      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+      if (!isLoggedIn) {
+        setIsLoginOpen(true);
+        return;
+      }
+      
       const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
       const newComment = {
-        author: userProfile.nickname || "나",
+        author: userProfile.nickname || "익명",
         authorAvatar: userProfile.avatar || undefined,
         content: commentText,
         time: "방금 전"
       };
-      setComments([newComment, ...comments]);
+      const updatedComments = [newComment, ...comments];
+      setComments(updatedComments);
+      
+      // Save comments to localStorage
+      const shortId = selectedShort.id || selectedShort.title?.charCodeAt(0) || 0;
+      localStorage.setItem(`short_comments_${shortId}`, JSON.stringify(updatedComments));
+      
+      // 카드 목록의 댓글 수 업데이트
+      const updatedCommentsCount = updatedComments.length;
+      setShortForms(prev => prev.map(shortForm => {
+        const formId = shortForm.title?.charCodeAt(0) || 0;
+        if (formId === shortId) {
+          return {
+            ...shortForm,
+            comments: updatedCommentsCount
+          };
+        }
+        return shortForm;
+      }));
+      
+      // localStorage에 댓글 수 저장
+      const stats = JSON.parse(localStorage.getItem(`short_stats_${shortId}`) || '{}');
+      stats.comments = updatedCommentsCount;
+      localStorage.setItem(`short_stats_${shortId}`, JSON.stringify(stats));
+      
+      // storage 이벤트 발생시켜 다른 컴포넌트에도 알림
+      window.dispatchEvent(new Event('storage'));
+      window.dispatchEvent(new CustomEvent('shortStatsUpdated', { detail: { id: shortId, comments: updatedCommentsCount } }));
+      
       toast({
         description: "댓글이 등록되었습니다",
+        status: "default",
       });
       setCommentText("");
     }
   };
 
   const handleShare = () => {
-    const url = selectedShort ? `${window.location.origin}/shorts?short=${selectedShort.id || ''}` : window.location.href;
+    const url = selectedShort ? `${window.location.origin}/shortform-gallery?short=${selectedShort.id || ''}` : window.location.href;
     navigator.clipboard.writeText(url);
     toast({
       description: "링크가 복사되었습니다",
+      status: "default",
     });
   };
 
   return (
     <>
       <section className="w-full py-24 bg-gradient-to-b from-background to-secondary/20">
-        <div className="w-full px-12">
-          <div className="text-center mb-12">
+        <div className="w-full px-12 mb-12">
+          <div className="text-center">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
               가장 인기 있는 숏폼
             </h2>
@@ -257,57 +383,77 @@ const PopularShortsHomeSection = () => {
               커뮤니티에서 가장 사랑받는 숏폼 디자인을 만나보세요
             </p>
           </div>
+        </div>
 
-          {/* Scrolling gallery */}
-          <div
-            ref={scrollContainerRef}
-            className="overflow-x-hidden overflow-y-visible scrollbar-hide"
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-          >
-            <div className="flex gap-6 py-8">
-              {duplicatedShortForms.map((shortForm, index) => (
-                <ShortFormCard
-                  key={`${shortForm.title}-${index}`}
-                  thumbnailSrc="/placeholder.svg"
-                  title={shortForm.title}
-                  duration={shortForm.duration}
-                  likes={shortForm.likes}
-                  comments={shortForm.comments}
-                  platform={shortForm.platform}
-                  onClick={() => setSelectedShort({ ...shortForm, thumbnailSrc: "/placeholder.svg" })}
-                />
-              ))}
-            </div>
+        {/* Scrolling gallery */}
+        <div
+          ref={scrollContainerRef}
+          className="overflow-x-hidden overflow-y-visible scrollbar-hide"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
+          <div className="flex gap-6 py-8">
+            {duplicatedShortForms.map((shortForm, index) => (
+              <ShortFormCard
+                key={`${shortForm.title}-${index}`}
+                thumbnailSrc={shortForm.thumbnailSrc || "/placeholder.svg"}
+                title={shortForm.title}
+                duration={shortForm.duration}
+                likes={shortForm.likes}
+                comments={shortForm.comments}
+                platform={shortForm.platform}
+                onClick={() => setSelectedShort({ ...shortForm, thumbnailSrc: shortForm.thumbnailSrc || "/placeholder.svg" })}
+              />
+            ))}
           </div>
         </div>
       </section>
 
       {/* Short Form Detail Modal */}
-      <Dialog open={!!selectedShort} onOpenChange={() => {
-        setSelectedShort(null);
-        setIsLiked(false);
-        setLikesCount(0);
-        setComments([]);
-        setCommentText("");
+      <Dialog open={!!selectedShort} onOpenChange={(open) => {
+        if (!open) {
+          // 창 닫을 때 카드에 반영
+          if (selectedShort) {
+            const shortId = selectedShort.id || selectedShort.title?.charCodeAt(0) || 0;
+            setShortForms(prev => prev.map(shortForm => {
+              const formId = shortForm.title?.charCodeAt(0) || 0;
+              if (formId === shortId) {
+                const currentLikes = typeof selectedShort.likes === 'number' ? selectedShort.likes : 0;
+                return {
+                  ...shortForm,
+                  likes: currentLikes,
+                  comments: comments.length
+                };
+              }
+              return shortForm;
+            }));
+          }
+          setSelectedShort(null);
+          setIsLiked(false);
+          setLikesCount(0);
+          setComments([]);
+          setCommentText("");
+        }
       }}>
         <DialogContent className="max-w-[800px] w-[90vw] overflow-hidden p-0 gap-0">
           <div className="flex md:flex-row flex-col">
-            {/* Left: Short Form Image (9:16 ratio) */}
-            <div className="bg-background flex items-center justify-center p-0 border-r border-border aspect-[9/16] w-full md:w-[300px] md:flex-shrink-0 rounded-l-lg overflow-hidden relative group">
-              <img 
-                src={selectedShort?.thumbnailSrc || selectedShort?.thumbnailUrl || "/placeholder.svg"} 
-                alt={selectedShort?.title} 
-                className="w-full h-full object-cover"
-              />
-              {selectedShort?.videoUrl && (
+            {/* Left: Short Form Video (9:16 ratio) */}
+            <div className="bg-background flex items-center justify-center p-0 border-r border-border aspect-[9/16] w-full md:w-[300px] md:flex-shrink-0 rounded-l-lg overflow-hidden relative">
+              {selectedShort?.videoUrl || (selectedShort?.thumbnailUrl && !selectedShort.thumbnailUrl.endsWith('.svg') && !selectedShort.thumbnailUrl.endsWith('.jpg') && !selectedShort.thumbnailUrl.endsWith('.png')) ? (
                 <video
-                  src={selectedShort.videoUrl}
-                  className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  src={selectedShort?.videoUrl || selectedShort?.thumbnailUrl}
+                  className="w-full h-full object-cover"
                   autoPlay
                   loop
                   muted
                   playsInline
+                  controls
+                />
+              ) : (
+                <img 
+                  src={selectedShort?.thumbnailSrc || selectedShort?.thumbnailUrl || "/placeholder.svg"} 
+                  alt={selectedShort?.title} 
+                  className="w-full h-full object-cover"
                 />
               )}
             </div>
@@ -315,7 +461,7 @@ const PopularShortsHomeSection = () => {
             {/* Right: Comments and Actions */}
             <div className="flex flex-col bg-background w-full md:w-[500px] md:flex-shrink-0 aspect-[9/16] md:aspect-auto md:h-[533px] rounded-r-lg">
               {/* Comments Section - Top */}
-              <div className="flex-1 min-h-0 overflow-y-auto p-6 border-b border-border">
+              <div className="flex-1 min-h-0 overflow-y-auto p-6">
                 <div className="space-y-4">
                   {comments.length === 0 ? (
                     <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
@@ -346,38 +492,47 @@ const PopularShortsHomeSection = () => {
               </div>
 
               {/* Action Buttons - Middle */}
-              <div className="p-4 border-b border-border">
+              <div className="p-3 border-t-[1px] border-border space-y-2">
                 <div className="flex items-center gap-3">
                   <Button 
                     variant="ghost" 
                     onClick={handleLike}
-                    className="h-9 px-3 gap-2"
+                    className="h-8 px-3 gap-2 hover:bg-primary/10 hover:text-primary"
                   >
-                    <Heart className={`h-5 w-5 ${isLiked ? "fill-destructive text-destructive" : ""}`} />
+                    <Heart className={`h-4 w-4 ${isLiked ? "fill-destructive text-destructive" : ""}`} />
                     <span className="text-sm font-semibold text-foreground">
-                      {(selectedShort ? (selectedShort.likes || 0) + likesCount : 0).toLocaleString()}
+                        {selectedShort ? (selectedShort.likes || 0).toLocaleString() : "0"}
+                    </span>
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="h-8 px-3 gap-2 hover:bg-primary/10 hover:text-primary"
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                    <span className="text-sm font-semibold text-foreground">
+                      {comments.length.toLocaleString()}
                     </span>
                   </Button>
                   <Button 
                     variant="ghost" 
                     size="icon"
                     onClick={handleShare}
-                    className="h-9 w-9"
+                    className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
                   >
-                    <Clipboard className="h-5 w-5" />
+                    <Share2 className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
 
               {/* Comment Input - Bottom */}
-              <div className="p-4 border-t border-border">
+              <div className="p-3 border-t-[1px] border-border">
                 <div className="flex gap-2">
                   <Textarea 
                     placeholder="댓글을 입력하세요..." 
                     value={commentText} 
                     onChange={(e) => setCommentText(e.target.value)} 
-                    className="min-h-[60px] resize-none flex-1" 
-                    rows={2}
+                    className="h-[40px] min-h-[40px] max-h-[40px] resize-none flex-1 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-primary focus-visible:border-2" 
+                    rows={1}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
@@ -390,7 +545,7 @@ const PopularShortsHomeSection = () => {
                   <Button 
                     onClick={handleComment} 
                     disabled={!commentText.trim()} 
-                    className="h-[60px] px-6"
+                    className="h-[40px] px-6 bg-primary hover:bg-primary/90 text-white disabled:opacity-50"
                   >
                     등록
                   </Button>
@@ -400,6 +555,25 @@ const PopularShortsHomeSection = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <AuthModals
+        isLoginOpen={isLoginOpen}
+        isSignUpOpen={isSignUpOpen}
+        onLoginClose={() => setIsLoginOpen(false)}
+        onSignUpClose={() => setIsSignUpOpen(false)}
+        onSwitchToSignUp={() => {
+          setIsLoginOpen(false);
+          setIsSignUpOpen(true);
+        }}
+        onSwitchToLogin={() => {
+          setIsSignUpOpen(false);
+          setIsLoginOpen(true);
+        }}
+        onLoginSuccess={(rememberMe) => {
+          setIsLoginOpen(false);
+          setIsSignUpOpen(false);
+        }}
+      />
     </>
   );
 };

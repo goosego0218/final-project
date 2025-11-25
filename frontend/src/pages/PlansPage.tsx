@@ -110,6 +110,7 @@ const PlansPage = () => {
             </div>
           </div>
         </div>
+        <Footer />
       </div>
     );
   }

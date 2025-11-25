@@ -7,6 +7,7 @@ import { ThemeProvider } from "next-themes";
 import Index from "./pages/Index";
 import LogosPage from "./pages/LogosPage";
 import ShortsPage from "./pages/ShortsPage";
+import ShortsReportPage from "./pages/ShortsReportPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import ProjectDashboardPage from "./pages/ProjectDashboardPage";
 import PlansPage from "./pages/PlansPage";
@@ -21,15 +22,16 @@ const queryClient = new QueryClient();
 const App = () => {
   return (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
       <TooltipProvider>
         <Toaster />
         <Sonner />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/logos" element={<LogosPage />} />
-            <Route path="/shorts" element={<ShortsPage />} />
+            <Route path="/logo-gallery" element={<LogosPage />} />
+            <Route path="/shortform-gallery" element={<ShortsPage />} />
+            <Route path="/shortsReport" element={<ShortsReportPage />} />
             <Route path="/projects" element={<ProjectsPage />} />
             <Route path="/project" element={<ProjectDashboardPage />} />
             <Route path="/plans" element={<PlansPage />} />
