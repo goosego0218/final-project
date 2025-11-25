@@ -54,6 +54,25 @@ async function apiRequest<T>(endpoint: string, options?: RequestInit): Promise<T
   });
 
   if (!response.ok) {
+    // 401 Unauthorized 에러 발생 시 자동 로그아웃 처리
+    if (response.status === 401) {
+      // 로그인 상태 초기화
+      localStorage.removeItem('isLoggedIn');
+      sessionStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('accessToken');
+      sessionStorage.removeItem('accessToken');
+      localStorage.removeItem('userProfile');
+      
+      // 프로필 업데이트 이벤트 발생 (다른 컴포넌트에서 감지)
+      window.dispatchEvent(new Event('profileUpdated'));
+      window.dispatchEvent(new Event('logout'));
+      
+      // 로그인 페이지로 리다이렉트 (현재 페이지가 로그인이 필요한 페이지인 경우)
+      if (window.location.pathname !== '/' && !window.location.pathname.includes('/logo-gallery') && !window.location.pathname.includes('/shortform-gallery')) {
+        window.location.href = '/';
+      }
+    }
+    
     const errorText = await response.text();
     let errorMessage = `API request failed: ${response.statusText}`;
     

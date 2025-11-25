@@ -8,8 +8,18 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { Camera, Instagram, Youtube, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Camera, Instagram, Youtube, Eye, EyeOff, Loader2, X } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { getYouTubeAuthUrl, getYouTubeConnectionStatus, disconnectYouTube } from "@/lib/api";
 
 const AccountPage = () => {
@@ -47,6 +57,8 @@ const AccountPage = () => {
   const [showAccessToken, setShowAccessToken] = useState(false);
   const [youtubeEmail, setYoutubeEmail] = useState("");
   const [isYoutubeLoading, setIsYoutubeLoading] = useState(false);
+  const [isYoutubeDisconnectDialogOpen, setIsYoutubeDisconnectDialogOpen] = useState(false);
+  const [isDisconnecting, setIsDisconnecting] = useState(false);
 
   // YouTube 연동 상태 로드 함수
   const loadYouTubeConnectionStatus = async () => {
@@ -278,7 +290,12 @@ const AccountPage = () => {
     }
   };
 
+  const handleYoutubeDisconnectClick = () => {
+    setIsYoutubeDisconnectDialogOpen(true);
+  };
+
   const handleYoutubeDisconnect = async () => {
+    setIsDisconnecting(true);
     try {
       await disconnectYouTube();
       
@@ -293,6 +310,8 @@ const AccountPage = () => {
       }));
       window.dispatchEvent(new Event('profileUpdated'));
       
+      setIsYoutubeDisconnectDialogOpen(false);
+      
       toast({
         title: "YouTube 연동 해제",
         description: "YouTube 연동이 해제되었습니다.",
@@ -304,6 +323,8 @@ const AccountPage = () => {
         description: error instanceof Error ? error.message : "연동 해제에 실패했습니다.",
         variant: "destructive",
       });
+    } finally {
+      setIsDisconnecting(false);
     }
   };
 
@@ -470,7 +491,7 @@ const AccountPage = () => {
                     </div>
                   </div>
                   {youtubeConnected ? (
-                    <Button variant="outline" onClick={handleYoutubeDisconnect}>
+                    <Button variant="outline" onClick={handleYoutubeDisconnectClick}>
                       연동 끊기
                     </Button>
                   ) : (
@@ -570,6 +591,46 @@ const AccountPage = () => {
         </DialogContent>
       </Dialog>
 
+      {/* YouTube 연동 해제 확인 다이얼로그 */}
+      <AlertDialog open={isYoutubeDisconnectDialogOpen} onOpenChange={setIsYoutubeDisconnectDialogOpen}>
+        <AlertDialogContent
+          onOverlayClick={() => setIsYoutubeDisconnectDialogOpen(false)}
+        >
+          {/* X 버튼 */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-4 top-4 h-6 w-6 rounded-sm opacity-70 ring-offset-background transition-opacity hover:bg-transparent hover:opacity-100 hover:text-foreground focus:outline-none focus:ring-0 z-10"
+            onClick={() => setIsYoutubeDisconnectDialogOpen(false)}
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </Button>
+          <AlertDialogHeader>
+            <AlertDialogTitle>YouTube 연동을 해제하시겠습니까?</AlertDialogTitle>
+            <AlertDialogDescription>
+              YouTube 연동을 해제하면 숏폼을 YouTube에 바로 업로드할 수 없습니다. 필요하시면 다시 연동할 수 있습니다.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDisconnecting}>취소</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleYoutubeDisconnect}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isDisconnecting}
+            >
+              {isDisconnecting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  해제 중...
+                </>
+              ) : (
+                "연동 해제"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
