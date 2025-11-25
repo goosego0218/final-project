@@ -70,8 +70,8 @@ const CreateFromStyleModal = ({
       setProjectName("");
       setProjectDescription("");
       
-      // ChatPage로 이동 (draft 모드 + from_style 정보)
-      navigate(`/chat?draft=true&skipLogoUpload=true&from_style=true&baseAssetType=${baseAssetType}&baseAssetId=${baseAssetId}`);
+      // ChatPage로 이동 (draft=true만 제거, 나머지 파라미터는 유지)
+      navigate(`/chat?skipLogoUpload=true&from_style=true&baseAssetType=${baseAssetType}&baseAssetId=${baseAssetId}`);
     }
   };
 

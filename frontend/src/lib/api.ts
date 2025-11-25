@@ -232,6 +232,22 @@ export async function deleteProject(projectId: number): Promise<void> {
   });
 }
 
+// 프로젝트 수정
+export interface UpdateProjectRequest {
+  grp_nm: string;
+  grp_desc?: string | null;
+}
+
+export async function updateProject(
+  projectId: number,
+  data: UpdateProjectRequest
+): Promise<ProjectDetail> {
+  return apiRequest<ProjectDetail>(`/projects/groups/${projectId}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
 /**
  * 파일 경로를 완전한 파일 서버 URL로 변환합니다.
  * @param filePath 상대 경로 (예: "/media/logo/edited_output.png") 또는 완전한 URL

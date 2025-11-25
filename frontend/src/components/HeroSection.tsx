@@ -54,7 +54,7 @@ const HeroSection = () => {
       setProjectName("");
       setProjectDescription("");
       // ChatPage로 이동 (draft 모드)
-      navigate(`/chat?draft=true`);
+      navigate(`/chat`);
     }
   };
 
