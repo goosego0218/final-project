@@ -4,8 +4,10 @@
 # 수정내역
 
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
+from langgraph.types import Command
+from langgraph.graph import END 
 from langchain_core.messages import SystemMessage
 
 from app.graphs.nodes.shorts.prompts import GENERAL_CHAT_SYSTEM_PROMPT
@@ -18,15 +20,18 @@ def make_general_chat_node(llm: "BaseChatModel"):
     """
     일반 대화 노드 팩토리.
     """
-    def general_chat_node(state: "AppState") -> dict:
+    def general_chat_node(state: "AppState") -> Command[Literal["__end__"]]:
         """
         일상 대화 노드
         """
         messages = [SystemMessage(content=GENERAL_CHAT_SYSTEM_PROMPT)] + list(state.get("messages", []))
         ai_msg = llm.invoke(messages)
         
-        return {
-            "messages": [ai_msg]
-        }
+        return Command(
+            update={
+                "messages": [ai_msg],
+            },
+            goto=END,
+        )
     
     return general_chat_node
