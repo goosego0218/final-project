@@ -22,7 +22,7 @@ from app.db.orm import Base
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING: # 타입 검사할 때만 실행하고, 실제 파이썬을 실행할 때는 실행되지 않음.
-    from app.models.project import ProdGroup
+    from app.models.project import ProdGroup, GenerationProd
     from app.models.social import SocialConnection
 
 class Role(Base):
@@ -107,7 +107,7 @@ class UserInfo(Base):
         DateTime,
         server_default=func.sysdate(),
         onupdate=func.sysdate(),
-        nullable=True,
+        nullable=False,  # NOT NULL로 변경
         comment="수정일",
     )
 
@@ -126,7 +126,23 @@ class UserInfo(Base):
 
     # 이 유저가 생성한 프로젝트 그룹들 (1:N)
     project_groups: Mapped[list["ProdGroup"]] = relationship(
+        "ProdGroup",
+        foreign_keys="[ProdGroup.creator_id]",
         back_populates="creator",
+        lazy="selectin",
+    )
+
+    # 이 유저가 생성한 생성물들 (1:N)
+    created_products: Mapped[list["GenerationProd"]] = relationship(
+        "GenerationProd",
+        foreign_keys="[GenerationProd.create_user]",
+        lazy="selectin",
+    )
+
+    # 이 유저가 수정한 생성물들 (1:N)
+    updated_products: Mapped[list["GenerationProd"]] = relationship(
+        "GenerationProd",
+        foreign_keys="[GenerationProd.update_user]",
         lazy="selectin",
     )
 
