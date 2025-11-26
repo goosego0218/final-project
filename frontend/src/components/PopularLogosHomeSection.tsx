@@ -429,7 +429,10 @@ const PopularLogosHomeSection = () => {
         setCommentText("");
       }
     }}>
-      <DialogContent className="max-w-[800px] w-[90vw] overflow-hidden p-0 gap-0">
+      <DialogContent 
+        className="max-w-[800px] w-[90vw] overflow-hidden p-0 gap-0"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <div className="flex md:flex-row flex-col">
           {/* Left: Logo Image */}
           <div className="bg-background flex items-center justify-center p-0 border-r border-border aspect-square w-full md:w-[400px] md:flex-shrink-0 rounded-l-lg overflow-hidden">
@@ -479,7 +482,7 @@ const PopularLogosHomeSection = () => {
                 <Button 
                   variant="ghost" 
                   onClick={handleLike}
-                  className="h-8 px-3 gap-2 hover:bg-[#7C22C8]/10 hover:text-[#7C22C8]"
+                  className="h-8 px-3 gap-2 hover:bg-[#7C22C8]/10 hover:text-[#7C22C8] focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                 >
                   <Heart className={`h-4 w-4 ${isLiked ? "fill-destructive text-destructive" : ""}`} />
                     <span className="text-sm font-semibold text-foreground">
@@ -504,10 +507,6 @@ const PopularLogosHomeSection = () => {
                   <Share2 className="h-4 w-4" />
                 </Button>
               </div>
-              <Button onClick={handleCreateNew} className="w-full h-9 bg-[#7C22C8] hover:bg-[#6B1DB5] text-white text-sm">
-                <Sparkles className="w-4 h-4 mr-2" />
-                이 스타일로 새로운 작품 만들기
-              </Button>
             </div>
 
             {/* Comment Input - Bottom */}
