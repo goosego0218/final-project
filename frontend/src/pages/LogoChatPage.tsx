@@ -525,7 +525,7 @@ const LogoChatPage = () => {
 
       <div className="flex-1 min-h-0">
         <ResizablePanelGroup direction="horizontal" className="h-full">
-          <ResizablePanel defaultSize={70} minSize={60} maxSize={85}>
+          <ResizablePanel defaultSize={60} minSize={60} maxSize={85}>
             <div className="h-full flex flex-col bg-background">
               <div className="flex-1 min-h-0 overflow-hidden">
                 {!hasResultPanel && !selectedResult ? (
@@ -641,7 +641,7 @@ const LogoChatPage = () => {
 
           <ResizableHandle className="w-1 bg-transparent hover:bg-transparent" withHandle />
 
-          <ResizablePanel defaultSize={30} minSize={15} maxSize={40}>
+          <ResizablePanel defaultSize={40} minSize={15} maxSize={40}>
             <div className="h-full p-4">
               <div className="h-full flex flex-col rounded-2xl bg-studio-chat-panel border border-border shadow-lg overflow-hidden">
                 <div className="flex-1 overflow-y-auto p-4 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' } as React.CSSProperties}>
