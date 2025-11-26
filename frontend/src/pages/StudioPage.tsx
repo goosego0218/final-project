@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { projectStorage, type Message, type Project, type SavedItem } from "@/lib/projectStorage";
 import StudioTopBar from "@/components/StudioTopBar";
-import { getShortsIntro } from "@/lib/api";
+import { getShortsIntro, getLogoIntro } from "@/lib/api";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -31,6 +31,8 @@ const StudioPage = () => {
   const [searchParams] = useSearchParams();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [logoMessages, setLogoMessages] = useState<Message[]>([]); // 로고 탭 메시지
+  const [shortMessages, setShortMessages] = useState<Message[]>([]); // 숏폼 탭 메시지
   const [inputValue, setInputValue] = useState("");
   const [hasResultPanel, setHasResultPanel] = useState(false);
   const [hasStartedChat, setHasStartedChat] = useState(false);
@@ -75,6 +77,7 @@ const StudioPage = () => {
   const [baseAssetId, setBaseAssetId] = useState<string | null>(null);
   const [isChatLoaded, setIsChatLoaded] = useState(false); // 프로젝트 대화 로딩 완료 여부
   const [isLoadingShortsIntro, setIsLoadingShortsIntro] = useState(false); // 숏폼 intro API 로딩 상태
+  const [isLoadingLogoIntro, setIsLoadingLogoIntro] = useState(false); // 로고 intro API 로딩 상태
 
   // localStorage에서 사용자 정보 가져오기
   const getUserProfile = () => {
@@ -161,6 +164,23 @@ const StudioPage = () => {
     }
   }, [fromStyle, assetType, assetId]);
 
+  // studioType 변경 시 해당 탭의 메시지 복원
+  useEffect(() => {
+    if (studioType === "logo") {
+      if (logoMessages.length > 0) {
+        setMessages(logoMessages);
+      } else {
+        setMessages([]);
+      }
+    } else if (studioType === "short") {
+      if (shortMessages.length > 0) {
+        setMessages(shortMessages);
+      } else {
+        setMessages([]);
+      }
+    }
+  }, [studioType]); // logoMessages, shortMessages는 dependency에서 제거하여 무한 루프 방지
+
   // 프로젝트 로드
   useEffect(() => {
     const currentLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
@@ -217,6 +237,46 @@ const StudioPage = () => {
         return; // DB 프로젝트 처리 후 종료
       }
       
+      // DB 프로젝트 ID이고 로고 타입인 경우: projectStorage에 없어도 intro API 호출
+      if (isDbProjectId && studioType === "logo" && !project) {
+        const dbProjectIdNum = parseInt(projectId);
+        setCurrentProjectId(projectId);
+        
+        // 로딩 상태 시작 및 채팅 시작 표시
+        setIsLoadingLogoIntro(true);
+        setHasStartedChat(true);
+        
+        getLogoIntro({ project_id: dbProjectIdNum })
+          .then((response) => {
+            const introMessage: Message = {
+              role: "assistant",
+              content: response.reply,
+              studioType: "logo"
+            };
+            setMessages([introMessage]);
+            setLogoMessages([introMessage]); // 로고 탭 메시지 저장
+          })
+          .catch((error) => {
+            console.error('로고 intro API 호출 실패:', error);
+            toast({
+              title: "브랜드 정보 로드 실패",
+              description: "브랜드 요약 정보를 가져오는데 실패했습니다.",
+              variant: "destructive",
+            });
+            const fallbackMessage: Message = {
+              role: "assistant",
+              content: `${userProfile.name}님, 로고를 만들어볼까요?`,
+              studioType: "logo"
+            };
+            setMessages([fallbackMessage]);
+            setLogoMessages([fallbackMessage]); // 로고 탭 메시지 저장
+          })
+          .finally(() => {
+            setIsLoadingLogoIntro(false);
+          });
+        return; // DB 프로젝트 처리 후 종료
+      }
+      
       if (project) {
         setCurrentProjectId(projectId);
         // type=logo일 때 로고 관련 대화가 있는지 확인
@@ -268,6 +328,7 @@ const StudioPage = () => {
             // 로고 타입 선택 이후의 메시지만 표시 (ChatPage 대화 제외)
             const logoMessages = chatMessages.slice(logoTypeUserMessageIndex);
             setMessages(logoMessages);
+            setLogoMessages(logoMessages); // 로고 탭 메시지 저장
             setHasStartedChat(true);
             setLogoTypeSelected(true);
             
@@ -422,26 +483,72 @@ const StudioPage = () => {
               }
             }
           } else if (!fromStyle) {
-            // 로고 타입 선택 메시지가 없고 from_style 모드가 아닐 때는 아직 선택하지 않은 상태
-            // 초기 안내 메시지를 assistant 메시지로 추가
-            const initialMessage: Message = {
-              role: "assistant",
-              content: brandInfo ? `${brandInfo.brand_name} ${brandInfo.industry}을 위한 세 가지 로고 디자인 방향을 제안해 드리겠습니다.` : "세 가지 로고 디자인 방향을 제안해 드리겠습니다.",
-              images: [
-                getLogoImagesByType("text")[0] || "",
-                getLogoImagesByType("text-icon")[0] || "",
-                getLogoImagesByType("emblem")[0] || ""
-              ].filter(Boolean), // 빈 문자열 제거
-              studioType: "logo"
-            };
-            setMessages([initialMessage]);
-            setHasStartedChat(true);
-            setLogoTypeSelected(false);
+            // 로고 타입 선택 메시지가 없고 from_style 모드가 아닐 때
+            // DB 프로젝트 ID인지 확인 (숫자로만 이루어진 경우)
+            const isDbProjectId = /^\d+$/.test(projectId);
+            
+            if (isDbProjectId) {
+              // DB 프로젝트 ID인 경우: intro API 호출하여 브랜드 요약 정보 가져오기
+              const dbProjectIdNum = parseInt(projectId);
+              
+              // 로딩 상태 시작 및 채팅 시작 표시
+              setIsLoadingLogoIntro(true);
+              setHasStartedChat(true);
+              
+              getLogoIntro({ project_id: dbProjectIdNum })
+                .then((response) => {
+                  const introMessage: Message = {
+                    role: "assistant",
+                    content: response.reply,
+                    studioType: "logo"
+                  };
+                  setMessages([introMessage]);
+                  setLogoMessages([introMessage]); // 로고 탭 메시지 저장
+                  // projectStorage에는 저장하지 않음 (DB 프로젝트이므로)
+                })
+                .catch((error) => {
+                  console.error('로고 intro API 호출 실패:', error);
+                  toast({
+                    title: "브랜드 정보 로드 실패",
+                    description: "브랜드 요약 정보를 가져오는데 실패했습니다.",
+                    variant: "destructive",
+                  });
+                  // 실패 시 기본 메시지 표시
+                  const fallbackMessage: Message = {
+                    role: "assistant",
+                    content: `${userProfile.name}님, 로고를 만들어볼까요?`,
+                    studioType: "logo"
+                  };
+                  setMessages([fallbackMessage]);
+                  setLogoMessages([fallbackMessage]); // 로고 탭 메시지 저장
+                })
+                .finally(() => {
+                  setIsLoadingLogoIntro(false);
+                });
+            } else {
+              // 로컬 프로젝트인 경우: 기존 로직 사용
+              // 초기 안내 메시지를 assistant 메시지로 추가
+              const initialMessage: Message = {
+                role: "assistant",
+                content: brandInfo ? `${brandInfo.brand_name} ${brandInfo.industry}을 위한 세 가지 로고 디자인 방향을 제안해 드리겠습니다.` : "세 가지 로고 디자인 방향을 제안해 드리겠습니다.",
+                images: [
+                  getLogoImagesByType("text")[0] || "",
+                  getLogoImagesByType("text-icon")[0] || "",
+                  getLogoImagesByType("emblem")[0] || ""
+                ].filter(Boolean), // 빈 문자열 제거
+                studioType: "logo"
+              };
+              setMessages([initialMessage]);
+              setLogoMessages([initialMessage]); // 로고 탭 메시지 저장
+              setHasStartedChat(true);
+              setLogoTypeSelected(false);
+            }
           }
           
           // from_style 모드일 때는 기존 대화 전체를 표시
           if (fromStyle && studioType === "logo") {
             setMessages(chatMessages);
+            setLogoMessages(chatMessages); // 로고 탭 메시지 저장
             setHasStartedChat(true);
             setLogoTypeSelected(false); // from_style 모드일 때는 항상 선택지를 보여줌
           }
@@ -547,6 +654,7 @@ const StudioPage = () => {
                     studioType: "short"
                   };
                   setMessages([introMessage]);
+                  setShortMessages([introMessage]); // 숏폼 탭 메시지 저장
                   // projectStorage에는 저장하지 않음 (DB 프로젝트이므로)
                   setShortFormQuestionStep(null);
                 })
@@ -564,6 +672,7 @@ const StudioPage = () => {
                     studioType: "short"
                   };
                   setMessages([fallbackMessage]);
+                  setShortMessages([fallbackMessage]); // 숏폼 탭 메시지 저장
                   setShortFormQuestionStep(null);
                 })
                 .finally(() => {
@@ -616,6 +725,7 @@ const StudioPage = () => {
                 studioType: "short"
               };
               setMessages([initialMessage]);
+              setShortMessages([initialMessage]); // 숏폼 탭 메시지 저장
               projectStorage.addMessage(projectId, initialMessage);
               setHasStartedChat(true);
               setShortFormQuestionStep(null);
@@ -657,7 +767,7 @@ const StudioPage = () => {
     }
 
     // 프로젝트 리스트 로드
-  }, [isLoggedIn, navigate, searchParams, studioType]);
+  }, [isLoggedIn, navigate, searchParams]); // studioType 제거하여 탭 전환 시 재로드 방지
 
   // from_style 모드일 때 프로젝트 대화 로딩 완료 후 메시지 추가
   useEffect(() => {
@@ -773,6 +883,15 @@ const StudioPage = () => {
       }, 100);
     }
   }, [isLoadingShortsIntro]);
+
+  // 로고 intro 로딩 상태 변경 시 스크롤
+  useEffect(() => {
+    if (isLoadingLogoIntro) {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
+  }, [isLoadingLogoIntro]);
 
   // 선택 버튼이 표시될 때 스크롤
   useEffect(() => {
@@ -1158,7 +1277,16 @@ const StudioPage = () => {
       images: attachedImages.length > 0 ? attachedImages : undefined,
       studioType: studioType || undefined
     };
-    setMessages(prev => [...prev, userMessage]);
+    setMessages(prev => {
+      const newMessages = [...prev, userMessage];
+      // 탭별 메시지도 업데이트
+      if (studioType === "logo") {
+        setLogoMessages(newMessages);
+      } else if (studioType === "short") {
+        setShortMessages(newMessages);
+      }
+      return newMessages;
+    });
     
     // 프로젝트에 메시지 저장
     projectStorage.addMessage(currentProjectId, userMessage);
@@ -2268,7 +2396,7 @@ const StudioPage = () => {
                 <div className="space-y-3">
 
 
-                  {/* Onboarding Message - 숏폼 intro 로딩 중일 때는 표시하지 않음 */}
+                  {/* Onboarding Message - intro 로딩 중일 때는 표시하지 않음 */}
                   {!hasStartedChat && studioType !== "logo" && !isLoadingShortsIntro && (
                     <div className="mb-6">
                       <p className="text-xs text-muted-foreground mb-3">Nov 16, 2025</p>
@@ -2295,7 +2423,29 @@ const StudioPage = () => {
                         <Card className="max-w-[80%] p-4 bg-muted">
                           <div className="flex items-center gap-2">
                             <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                            <p className="text-muted-foreground">답변을 생성하고 있습니다...</p>
+                            <p className="text-muted-foreground">브랜드 정보와 트렌드 정보를 제공 중입니다...</p>
+                          </div>
+                        </Card>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 로고 Intro 로딩 인디케이터 */}
+                  {isLoadingLogoIntro && studioType === "logo" && (
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <img 
+                          src="/makery-logo.png" 
+                          alt="Makery Logo" 
+                          className="h-5 w-5"
+                        />
+                        <span className="text-sm font-semibold text-foreground">MAKERY</span>
+                      </div>
+                      <div className="flex justify-start">
+                        <Card className="max-w-[80%] p-4 bg-muted">
+                          <div className="flex items-center gap-2">
+                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                            <p className="text-muted-foreground">브랜드 정보와 트렌드 정보를 제공 중입니다...</p>
                           </div>
                         </Card>
                       </div>
