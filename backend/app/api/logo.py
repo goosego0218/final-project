@@ -64,7 +64,7 @@ def get_logo_intro(
         )
     
     try:
-        brand_summary = summarize_brand_profile_with_llm(brand_profile)
+        brand_summary = summarize_brand_profile_with_llm(brand_profile, mode="logo")
     except Exception as e:
         # LLM 호출 실패 시 기본 요약 생성
         brand_name = brand_profile.get("brand_name", "브랜드")
@@ -101,6 +101,13 @@ def chat_logo(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="logo 챗봇 호출 시 project_id 는 필수입니다.",
+        )
+    
+    # message 확인 (chat 엔드포인트에서는 필수)
+    if not req.message or not req.message.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="logo 챗봇 호출 시 message 는 필수입니다.",
         )
     
     # TODO: logo 에이전트 호출

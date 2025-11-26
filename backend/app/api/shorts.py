@@ -145,7 +145,7 @@ def get_shorts_intro(
         )
     
     try:
-        brand_summary = summarize_brand_profile_with_llm(brand_profile)
+        brand_summary = summarize_brand_profile_with_llm(brand_profile, mode="shorts")
     except Exception as e:
         # LLM 호출 실패 시 기본 요약 생성
         brand_name = brand_profile.get("brand_name", "브랜드")
