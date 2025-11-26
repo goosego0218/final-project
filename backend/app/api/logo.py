@@ -103,6 +103,13 @@ def chat_logo(
             detail="logo 챗봇 호출 시 project_id 는 필수입니다.",
         )
     
+    # message 확인 (chat 엔드포인트에서는 필수)
+    if not req.message or not req.message.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="logo 챗봇 호출 시 message 는 필수입니다.",
+        )
+    
     # TODO: logo 에이전트 호출
     from app.services.project_service import load_brand_profile_for_agent
     brand_profile = load_brand_profile_for_agent(db, req.project_id)

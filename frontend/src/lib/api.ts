@@ -251,6 +251,22 @@ export async function getLogoIntro(data: LogoChatRequest): Promise<LogoChatRespo
   });
 }
 
+// 로고 챗봇 API 호출
+export async function sendLogoChat(data: LogoChatRequest): Promise<LogoChatResponse> {
+  return apiRequest<LogoChatResponse>('/logo/chat', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+// 숏폼 챗봇 API 호출
+export async function sendShortsChat(data: ShortsChatRequest): Promise<ShortsChatResponse> {
+  return apiRequest<ShortsChatResponse>('/shorts/chat', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
 // 프로젝트 상세 조회 (브랜드 정보 포함)
 export interface ProjectDetail {
   grp_id: number;

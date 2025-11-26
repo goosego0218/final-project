@@ -33,7 +33,7 @@ class CreateBrandProjectResponse(BaseModel):
 
 class LogoChatRequest(BaseModel):
     project_id: int                    
-    message: str
+    message: Optional[str] = None  # intro 호출 시에는 None 가능
     logo_session_id: Optional[str] = None
 
 class LogoChatResponse(BaseModel):

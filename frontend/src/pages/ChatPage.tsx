@@ -177,7 +177,7 @@ const ChatPage = () => {
   const checkRequiredFieldsComplete = (info: BrandInfo): boolean => {
     // 필수 항목: brand_name, category만 확인
     const brandName = info.brand_name?.trim() || "";
-    const category = info.category?.trim() || "";
+    const category = info.industry?.trim() || "";
     return brandName !== "" && category !== "";
   };
 
@@ -187,17 +187,17 @@ const ChatPage = () => {
     const coreKeywords = Array.isArray(info.core_keywords) 
       ? info.core_keywords.join(', ') 
       : info.core_keywords;
-    const avoidedTrends = Array.isArray(info.avoided_trends)
-      ? info.avoided_trends.join(', ')
-      : info.avoided_trends;
+    const avoidedTrends = Array.isArray(info.avoid_trends)
+      ? info.avoid_trends.join(', ')
+      : info.avoid_trends;
     const preferredColors = Array.isArray(info.preferred_colors)
       ? info.preferred_colors.join(', ')
       : info.preferred_colors;
     
     const fields = [
       info.brand_name,
-      info.category,
-      info.tone_mood,
+      info.industry,
+      info.mood,
       coreKeywords,
       info.target_age,
       info.target_gender,
@@ -310,12 +310,12 @@ const ChatPage = () => {
     // 백엔드에서 받은 brand_info가 있으면 그것을 사용, 없으면 collectedInfo 사용
     const info = brandInfo || {
       brand_name: collectedInfo.brand_name,
-      category: collectedInfo.industry,
-      tone_mood: collectedInfo.mood,
+      industry: collectedInfo.industry,
+      mood: collectedInfo.mood,
       core_keywords: collectedInfo.core_keywords.join(', '),
       target_age: collectedInfo.target_age,
       target_gender: collectedInfo.target_gender,
-      avoided_trends: collectedInfo.avoid_trends.join(', '),
+      avoid_trends: collectedInfo.avoid_trends.join(', '),
       slogan: collectedInfo.slogan,
       preferred_colors: collectedInfo.preferred_colors.join(', '),
     };
@@ -323,12 +323,12 @@ const ChatPage = () => {
     // 총 9개 필드 체크
     const fields = [
       info.brand_name,
-      info.category,
-      info.tone_mood,
+      info.industry,
+      info.mood,
       info.core_keywords,
       info.target_age,
       info.target_gender,
-      info.avoided_trends,
+      info.avoid_trends,
       info.slogan,
       info.preferred_colors,
     ];
@@ -375,8 +375,7 @@ const ChatPage = () => {
     };
     projectStorage.addMessage(projectId, infoMessage);
 
-    // Studio로 이동
-    const typeParam = type ? `&type=${type}` : "";
+    // Studio로 이동 (type 파라미터 제거)
     const fromStyleParam = fromStyle && baseAssetType && baseAssetId 
       ? `&from_style=true&baseAssetType=${baseAssetType}&baseAssetId=${baseAssetId}` 
       : "";
@@ -386,7 +385,7 @@ const ChatPage = () => {
       status: "success",
     });
     
-    navigate(`/studio?project=${projectId}${typeParam}${fromStyleParam}`);
+    navigate(`/studio?project=${projectId}${fromStyleParam}`);
   };
 
   useEffect(() => {
@@ -680,7 +679,7 @@ const ChatPage = () => {
     // 필수 항목 체크 - brandInfo (백엔드 정보) 우선 사용, 없으면 collectedInfo 사용
     // brandInfo는 category 사용, collectedInfo는 industry 사용
     const brandNameValue = (brandInfo?.brand_name || collectedInfo.brand_name || "").trim();
-    const categoryValue = (brandInfo?.category || collectedInfo.industry || "").trim();
+    const categoryValue = (brandInfo?.industry || collectedInfo.industry || "").trim();
     
     if (!brandNameValue || !categoryValue) {
       toast({
@@ -990,12 +989,12 @@ const ChatPage = () => {
   // brandInfo를 우선 사용, 없으면 collectedInfo 사용
   const currentBrandInfo: ApiBrandInfo = brandInfo || {
     brand_name: collectedInfo.brand_name,
-    category: collectedInfo.industry,
-    tone_mood: collectedInfo.mood,
+    industry: collectedInfo.industry,
+    mood: collectedInfo.mood,
     core_keywords: collectedInfo.core_keywords.join(', '),
     target_age: collectedInfo.target_age,
     target_gender: collectedInfo.target_gender,
-    avoided_trends: collectedInfo.avoid_trends.join(', '),
+    avoid_trends: collectedInfo.avoid_trends.join(', '),
     slogan: collectedInfo.slogan,
     preferred_colors: collectedInfo.preferred_colors.join(', '),
   };
@@ -1333,13 +1332,13 @@ const ChatPage = () => {
               {/* 업종 */}
               <div className="bg-muted/50 rounded-lg p-3 border border-border">
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">업종</label>
-                <p className="text-sm font-semibold text-foreground">{currentBrandInfo.category || "-"}</p>
+                <p className="text-sm font-semibold text-foreground">{currentBrandInfo.industry || "-"}</p>
               </div>
               
               {/* 톤앤무드 */}
               <div className="bg-muted/50 rounded-lg p-3 border border-border">
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">톤앤무드</label>
-                <p className="text-sm font-semibold text-foreground">{currentBrandInfo.tone_mood || "-"}</p>
+                <p className="text-sm font-semibold text-foreground">{currentBrandInfo.mood || "-"}</p>
               </div>
               
               {/* 타겟 연령 */}
@@ -1376,10 +1375,10 @@ const ChatPage = () => {
               <div className="col-span-2 bg-muted/50 rounded-lg p-3 border border-border">
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">피하고 싶은 트렌드</label>
                 <p className="text-sm font-semibold text-foreground">
-                  {typeof currentBrandInfo.avoided_trends === 'string' 
-                    ? currentBrandInfo.avoided_trends 
-                    : Array.isArray(currentBrandInfo.avoided_trends)
-                    ? currentBrandInfo.avoided_trends.join(', ')
+                  {typeof currentBrandInfo.avoid_trends === 'string' 
+                    ? currentBrandInfo.avoid_trends 
+                    : Array.isArray(currentBrandInfo.avoid_trends)
+                    ? currentBrandInfo.avoid_trends.join(', ')
                     : "-"}
                 </p>
               </div>
