@@ -172,9 +172,47 @@ const StudioPage = () => {
     const projectId = searchParams.get('project');
     if (projectId) {
       const project = projectStorage.getProject(projectId);
-      if (project) {
+      
+      // DB 프로젝트 ID인지 확인 (숫자로만 이루어진 경우)
+      const isDbProjectId = /^\d+$/.test(projectId);
+      
+      // DB 프로젝트 ID이고 숏폼 타입인 경우: projectStorage에 없어도 intro API 호출
+      if (isDbProjectId && studioType === "short" && !project) {
+        const dbProjectIdNum = parseInt(projectId);
         setCurrentProjectId(projectId);
         
+        getShortsIntro({ project_id: dbProjectIdNum })
+          .then((response) => {
+            const introMessage: Message = {
+              role: "assistant",
+              content: response.reply,
+              studioType: "short"
+            };
+            setMessages([introMessage]);
+            setHasStartedChat(true);
+            setShortFormQuestionStep(null);
+          })
+          .catch((error) => {
+            console.error('숏폼 intro API 호출 실패:', error);
+            toast({
+              title: "브랜드 정보 로드 실패",
+              description: "브랜드 요약 정보를 가져오는데 실패했습니다.",
+              variant: "destructive",
+            });
+            const fallbackMessage: Message = {
+              role: "assistant",
+              content: `${userProfile.name}님, 숏폼을 만들어볼까요?`,
+              studioType: "short"
+            };
+            setMessages([fallbackMessage]);
+            setHasStartedChat(true);
+            setShortFormQuestionStep(null);
+          });
+        return; // DB 프로젝트 처리 후 종료
+      }
+      
+      if (project) {
+        setCurrentProjectId(projectId);
         // type=logo일 때 로고 관련 대화가 있는지 확인
         if (studioType === "logo") {
           // system 메시지에서 브랜드 정보 추출
