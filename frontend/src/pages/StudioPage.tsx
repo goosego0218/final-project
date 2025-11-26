@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Send, Zap, ChevronLeft, ChevronRight, Download, RefreshCw, Star, Plus, Upload, X, FolderOpen, Instagram, Youtube, Trash2, Info, Check, Image, Video } from "lucide-react";
+import { Send, Zap, ChevronLeft, ChevronRight, Download, RefreshCw, Star, Plus, Upload, X, FolderOpen, Instagram, Youtube, Trash2, Info, Check, Image, Video, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { projectStorage, type Message, type Project, type SavedItem } from "@/lib/projectStorage";
@@ -74,6 +74,7 @@ const StudioPage = () => {
   const [baseAssetType, setBaseAssetType] = useState<"logo" | "shortform" | null>(null);
   const [baseAssetId, setBaseAssetId] = useState<string | null>(null);
   const [isChatLoaded, setIsChatLoaded] = useState(false); // 프로젝트 대화 로딩 완료 여부
+  const [isLoadingShortsIntro, setIsLoadingShortsIntro] = useState(false); // 숏폼 intro API 로딩 상태
 
   // localStorage에서 사용자 정보 가져오기
   const getUserProfile = () => {
@@ -181,6 +182,10 @@ const StudioPage = () => {
         const dbProjectIdNum = parseInt(projectId);
         setCurrentProjectId(projectId);
         
+        // 로딩 상태 시작 및 채팅 시작 표시
+        setIsLoadingShortsIntro(true);
+        setHasStartedChat(true);
+        
         getShortsIntro({ project_id: dbProjectIdNum })
           .then((response) => {
             const introMessage: Message = {
@@ -189,7 +194,6 @@ const StudioPage = () => {
               studioType: "short"
             };
             setMessages([introMessage]);
-            setHasStartedChat(true);
             setShortFormQuestionStep(null);
           })
           .catch((error) => {
@@ -205,8 +209,10 @@ const StudioPage = () => {
               studioType: "short"
             };
             setMessages([fallbackMessage]);
-            setHasStartedChat(true);
             setShortFormQuestionStep(null);
+          })
+          .finally(() => {
+            setIsLoadingShortsIntro(false);
           });
         return; // DB 프로젝트 처리 후 종료
       }
@@ -528,6 +534,11 @@ const StudioPage = () => {
             if (isDbProjectId) {
               // DB 프로젝트 ID인 경우: intro API 호출하여 브랜드 요약 정보 가져오기
               const dbProjectIdNum = parseInt(projectId);
+              
+              // 로딩 상태 시작 및 채팅 시작 표시
+              setIsLoadingShortsIntro(true);
+              setHasStartedChat(true);
+              
               getShortsIntro({ project_id: dbProjectIdNum })
                 .then((response) => {
                   const introMessage: Message = {
@@ -537,7 +548,6 @@ const StudioPage = () => {
                   };
                   setMessages([introMessage]);
                   // projectStorage에는 저장하지 않음 (DB 프로젝트이므로)
-                  setHasStartedChat(true);
                   setShortFormQuestionStep(null);
                 })
                 .catch((error) => {
@@ -554,8 +564,10 @@ const StudioPage = () => {
                     studioType: "short"
                   };
                   setMessages([fallbackMessage]);
-                  setHasStartedChat(true);
                   setShortFormQuestionStep(null);
+                })
+                .finally(() => {
+                  setIsLoadingShortsIntro(false);
                 });
             } else {
               // 로컬 프로젝트인 경우: 기존 로직 사용
@@ -752,6 +764,15 @@ const StudioPage = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // 숏폼 intro 로딩 상태 변경 시 스크롤
+  useEffect(() => {
+    if (isLoadingShortsIntro) {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
+  }, [isLoadingShortsIntro]);
 
   // 선택 버튼이 표시될 때 스크롤
   useEffect(() => {
@@ -2247,13 +2268,35 @@ const StudioPage = () => {
                 <div className="space-y-3">
 
 
-                  {/* Onboarding Message */}
-                  {!hasStartedChat && studioType !== "logo" && (
+                  {/* Onboarding Message - 숏폼 intro 로딩 중일 때는 표시하지 않음 */}
+                  {!hasStartedChat && studioType !== "logo" && !isLoadingShortsIntro && (
                     <div className="mb-6">
                       <p className="text-xs text-muted-foreground mb-3">Nov 16, 2025</p>
                       <div className="flex justify-start">
                         <Card className="max-w-[80%] p-4 bg-muted">
                           <p className="whitespace-pre-wrap">안녕하세요! MAKERY에 오신 것을 환영합니다.</p>
+                        </Card>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 숏폼 Intro 로딩 인디케이터 */}
+                  {isLoadingShortsIntro && studioType === "short" && (
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <img 
+                          src="/makery-logo.png" 
+                          alt="Makery Logo" 
+                          className="h-5 w-5"
+                        />
+                        <span className="text-sm font-semibold text-foreground">MAKERY</span>
+                      </div>
+                      <div className="flex justify-start">
+                        <Card className="max-w-[80%] p-4 bg-muted">
+                          <div className="flex items-center gap-2">
+                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                            <p className="text-muted-foreground">답변을 생성하고 있습니다...</p>
+                          </div>
                         </Card>
                       </div>
                     </div>
