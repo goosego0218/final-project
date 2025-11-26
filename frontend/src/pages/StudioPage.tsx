@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { projectStorage, type Message, type Project, type SavedItem } from "@/lib/projectStorage";
 import StudioTopBar from "@/components/StudioTopBar";
+import { getShortsIntro } from "@/lib/api";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -483,54 +484,92 @@ const StudioPage = () => {
             }
           } else {
             // 아직 숏폼 안내가 한 번도 없던 프로젝트면, 새로 시작
-            // 입장 시 안내 메시지 생성
-            const systemMessage = project.messages.find(m => m.role === "system");
-            let brandInfoForShort: { brand_name?: string; industry?: string; mood?: string; core_keywords?: string[]; target_age?: string; target_gender?: string; avoid_trends?: string[]; slogan?: string; preferred_colors?: string[] } = {};
+            // DB 프로젝트 ID인지 확인 (숫자로만 이루어진 경우)
+            const isDbProjectId = /^\d+$/.test(projectId);
             
-            if (systemMessage) {
-              try {
-                brandInfoForShort = JSON.parse(systemMessage.content);
-              } catch (e) {
-                // 파싱 실패 시 무시
+            if (isDbProjectId) {
+              // DB 프로젝트 ID인 경우: intro API 호출하여 브랜드 요약 정보 가져오기
+              const dbProjectIdNum = parseInt(projectId);
+              getShortsIntro({ project_id: dbProjectIdNum })
+                .then((response) => {
+                  const introMessage: Message = {
+                    role: "assistant",
+                    content: response.reply,
+                    studioType: "short"
+                  };
+                  setMessages([introMessage]);
+                  // projectStorage에는 저장하지 않음 (DB 프로젝트이므로)
+                  setHasStartedChat(true);
+                  setShortFormQuestionStep(null);
+                })
+                .catch((error) => {
+                  console.error('숏폼 intro API 호출 실패:', error);
+                  toast({
+                    title: "브랜드 정보 로드 실패",
+                    description: "브랜드 요약 정보를 가져오는데 실패했습니다.",
+                    variant: "destructive",
+                  });
+                  // 실패 시 기본 메시지 표시
+                  const fallbackMessage: Message = {
+                    role: "assistant",
+                    content: `${userProfile.name}님, 숏폼을 만들어볼까요?`,
+                    studioType: "short"
+                  };
+                  setMessages([fallbackMessage]);
+                  setHasStartedChat(true);
+                  setShortFormQuestionStep(null);
+                });
+            } else {
+              // 로컬 프로젝트인 경우: 기존 로직 사용
+              // 입장 시 안내 메시지 생성
+              const systemMessage = project.messages.find(m => m.role === "system");
+              let brandInfoForShort: { brand_name?: string; industry?: string; mood?: string; core_keywords?: string[]; target_age?: string; target_gender?: string; avoid_trends?: string[]; slogan?: string; preferred_colors?: string[] } = {};
+              
+              if (systemMessage) {
+                try {
+                  brandInfoForShort = JSON.parse(systemMessage.content);
+                } catch (e) {
+                  // 파싱 실패 시 무시
+                }
               }
+              
+              // 이전 대화 내용 요약 생성 (실제로는 ChatPage의 메시지에서 추출)
+              const chatPageMessages = allChatMessages.filter(m => !m.studioType || m.studioType !== "short");
+              const summaryParts: string[] = [];
+              
+              if (brandInfoForShort.brand_name) {
+                summaryParts.push(`브랜드명: ${brandInfoForShort.brand_name}`);
+              }
+              if (brandInfoForShort.industry) {
+                summaryParts.push(`업종: ${brandInfoForShort.industry}`);
+              }
+              if (brandInfoForShort.mood) {
+                summaryParts.push(`분위기: ${brandInfoForShort.mood}`);
+              }
+              if (brandInfoForShort.core_keywords && brandInfoForShort.core_keywords.length > 0) {
+                summaryParts.push(`핵심 키워드: ${brandInfoForShort.core_keywords.join(", ")}`);
+              }
+              
+              const summaryText = summaryParts.length > 0 
+                ? `방금 입력한 브랜드 정보예요.\n${summaryParts.join("\n")}`
+                : "";
+              
+              const trendAnalysis = "최근 숏폼 트렌드 분석 결과, 짧고 임팩트 있는 영상이 주목받고 있습니다.";
+              
+              const welcomeMessage = summaryText 
+                ? `${summaryText}\n\n${trendAnalysis}\n\n${userProfile.name}님은 어떤 것이 궁금하신가요?`
+                : `${trendAnalysis}\n\n${userProfile.name}님은 어떤 것이 궁금하신가요?`;
+              
+              const initialMessage: Message = {
+                role: "assistant",
+                content: welcomeMessage,
+                studioType: "short"
+              };
+              setMessages([initialMessage]);
+              projectStorage.addMessage(projectId, initialMessage);
+              setHasStartedChat(true);
+              setShortFormQuestionStep(null);
             }
-            
-            // 이전 대화 내용 요약 생성 (실제로는 ChatPage의 메시지에서 추출)
-            const chatPageMessages = allChatMessages.filter(m => !m.studioType || m.studioType !== "short");
-            const summaryParts: string[] = [];
-            
-            if (brandInfoForShort.brand_name) {
-              summaryParts.push(`브랜드명: ${brandInfoForShort.brand_name}`);
-            }
-            if (brandInfoForShort.industry) {
-              summaryParts.push(`업종: ${brandInfoForShort.industry}`);
-            }
-            if (brandInfoForShort.mood) {
-              summaryParts.push(`분위기: ${brandInfoForShort.mood}`);
-            }
-            if (brandInfoForShort.core_keywords && brandInfoForShort.core_keywords.length > 0) {
-              summaryParts.push(`핵심 키워드: ${brandInfoForShort.core_keywords.join(", ")}`);
-            }
-            
-            const summaryText = summaryParts.length > 0 
-              ? `방금 입력한 브랜드 정보예요.\n${summaryParts.join("\n")}`
-              : "";
-            
-            const trendAnalysis = "최근 숏폼 트렌드 분석 결과, 짧고 임팩트 있는 영상이 주목받고 있습니다.";
-            
-            const welcomeMessage = summaryText 
-              ? `${summaryText}\n\n${trendAnalysis}\n\n${userProfile.name}님은 어떤 것이 궁금하신가요?`
-              : `${trendAnalysis}\n\n${userProfile.name}님은 어떤 것이 궁금하신가요?`;
-            
-            const initialMessage: Message = {
-              role: "assistant",
-              content: welcomeMessage,
-              studioType: "short"
-            };
-            setMessages([initialMessage]);
-            projectStorage.addMessage(projectId, initialMessage);
-            setHasStartedChat(true);
-            setShortFormQuestionStep(null);
           }
 
           setSelectedLogoForShort(null);
