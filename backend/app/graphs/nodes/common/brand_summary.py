@@ -83,6 +83,6 @@ def summarize_brand_profile_with_llm(brand_profile: BrandProfile) -> str:
     ]
     
     ai_msg = llm.invoke(messages)
-    summary = "브랜드 정보를 요약해드리겠습니다.\n"+ai_msg.content.strip()
+    summary = ai_msg.content.strip()
     
     return summary
