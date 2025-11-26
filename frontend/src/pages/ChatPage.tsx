@@ -26,7 +26,7 @@ import { Send, Plus, Upload, Image, Video, X, Loader2  } from "lucide-react";
 import { projectStorage, type Message } from "@/lib/projectStorage";
 import { useToast } from "@/hooks/use-toast";
 import StudioTopBar from "@/components/StudioTopBar";
-import { sendBrandChat, createBrandProject, BrandInfo } from "@/lib/api";
+import { sendBrandChat, createBrandProject, BrandInfo as ApiBrandInfo } from "@/lib/api";
 
 type InfoStep = "collecting" | "logoQuestion" | "complete";
 
@@ -81,7 +81,7 @@ const ChatPage = () => {
   const [baseAssetId, setBaseAssetId] = useState<string | null>(null);
   const [dbProjectId, setDbProjectId] = useState<number | null>(null); // DB 프로젝트 ID
   const [isLoadingChat, setIsLoadingChat] = useState(false); // 챗 로딩 상태
-  const [brandInfo, setBrandInfo] = useState<BrandInfo | null>(null); // 백엔드에서 받은 brand_info
+  const [brandInfo, setBrandInfo] = useState<ApiBrandInfo | null>(null); // 백엔드에서 받은 brand_info
   const [brandSessionId, setBrandSessionId] = useState<string | null>(null); // brand_session_id 저장
   const [showCompleteBrandConfirmDialog, setShowCompleteBrandConfirmDialog] = useState(false); // 9개 필드 완성 시 브랜드 정보 확인 다이얼로그
 
@@ -676,56 +676,94 @@ const ChatPage = () => {
     setSkipDialogStep("project");
   };
   
-  const handleProjectConfirmInDialog = () => {
-    // draft 모드인 경우 실제 프로젝트 생성
-    if (isDraftMode) {
-      // 필수 항목 체크
-      if (!collectedInfo.brand_name.trim() || !collectedInfo.industry.trim()) {
-        toast({
-          title: "필수 항목 미입력",
-          description: "브랜드명과 업종은 필수 항목입니다.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      // draft 프로젝트 정보로 실제 프로젝트 생성
-      const projectName = draftProjectInfo?.name || "새 프로젝트";
-      const projectDescription = draftProjectInfo?.description || "";
-      const project = projectStorage.createProject(projectName, projectDescription);
-      
-      // 수집된 정보를 system 메시지로 저장
-      const infoMessage: Message = {
-        role: "system",
-        content: JSON.stringify(collectedInfo)
-      };
-      projectStorage.addMessage(project.id, infoMessage);
-      
-      // 기존 메시지들을 프로젝트에 저장
-      messages.forEach(msg => {
-        if (msg.role !== "system") {
-          projectStorage.addMessage(project.id, msg);
-        }
-      });
-      
-      // draft 정보 삭제
-      localStorage.removeItem('makery_draft_project');
-      
-      // 프로젝트 ID 설정
-      setCurrentProjectId(project.id);
-      setIsDraftMode(false);
-    } else if (!currentProjectId) {
-      // draft 모드가 아니고 currentProjectId도 없으면 에러
+  const handleProjectConfirmInDialog = async () => {
+    // 필수 항목 체크 - brandInfo (백엔드 정보) 우선 사용, 없으면 collectedInfo 사용
+    // brandInfo는 category 사용, collectedInfo는 industry 사용
+    const brandNameValue = (brandInfo?.brand_name || collectedInfo.brand_name || "").trim();
+    const categoryValue = (brandInfo?.category || collectedInfo.industry || "").trim();
+    
+    if (!brandNameValue || !categoryValue) {
       toast({
-        title: "오류",
-        description: "프로젝트를 찾을 수 없습니다.",
-        status: "error",
+        title: "필수 항목 미입력",
+        description: "브랜드명과 업종은 필수 항목입니다.",
+        variant: "destructive",
       });
       return;
     }
     
-    // 다이얼로그 내부 단계를 "type"으로 변경 (로고/숏폼 선택 단계)
-    setSkipDialogStep("type");
+    // brandSessionId가 없으면 에러
+    if (!brandSessionId) {
+      toast({
+        title: "오류",
+        description: "세션 정보가 없습니다.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // DB에 프로젝트 생성 (9개 다 채운 경우와 동일한 로직)
+    setIsLoadingChat(true);
+    try {
+      // 프로젝트 생성 API 호출
+      const response = await createBrandProject({
+        brand_session_id: brandSessionId,
+        grp_nm: draftProjectInfo?.name || brandNameValue || undefined,
+        grp_desc: draftProjectInfo?.description || undefined,
+      });
+      
+      // 프로젝트 생성이 성공적으로 완료된 경우에만 진행
+      if (response && response.project_id) {
+        // 프로젝트 ID 저장
+        setDbProjectId(response.project_id);
+        
+        // draft 정보 삭제
+        localStorage.removeItem('makery_draft_project');
+        setIsDraftMode(false);
+        
+        // 로딩 상태 먼저 해제 (메시지 추가 전에)
+        setIsLoadingChat(false);
+        
+        // 브랜드명 가져오기
+        const brandName = brandNameValue || "브랜드";
+        
+        // 프로젝트 생성 완료 메시지 추가
+        const confirmQuestion: Message = {
+          role: "assistant",
+          content: `프로젝트가 성공적으로 생성되었습니다.\n\n${brandName}의 로고와 숏폼 중 무엇부터 만들어볼까요?`
+        };
+        setMessages(prev => [...prev, confirmQuestion]);
+        
+        // 바로 showProjectConfirm을 true로 설정하여 로고/숏폼 생성 버튼 표시
+        setShowProjectConfirm(true);
+        setCurrentStep("complete");
+        
+        // 건너뛰기 다이얼로그 닫기
+        setShowSkipDialog(false);
+        setSkipDialogStep("confirm");
+        
+        toast({
+          title: "프로젝트 생성 완료",
+          description: "프로젝트가 생성되었습니다.",
+          status: "success",
+        });
+      } else {
+        // 응답이 정상적이지 않은 경우
+        setIsLoadingChat(false);
+        toast({
+          title: "프로젝트 생성 실패",
+          description: "프로젝트 생성 응답이 올바르지 않습니다.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('프로젝트 생성 오류:', error);
+      setIsLoadingChat(false);
+      toast({
+        title: "프로젝트 생성 실패",
+        description: error instanceof Error ? error.message : "프로젝트 생성에 실패했습니다.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleLogoQuestion = (hasLogoFile: boolean, fromDialog: boolean = false) => {
@@ -950,7 +988,7 @@ const ChatPage = () => {
   const progress = calculateProgress();
   
   // brandInfo를 우선 사용, 없으면 collectedInfo 사용
-  const currentBrandInfo: BrandInfo = brandInfo || {
+  const currentBrandInfo: ApiBrandInfo = brandInfo || {
     brand_name: collectedInfo.brand_name,
     category: collectedInfo.industry,
     tone_mood: collectedInfo.mood,
