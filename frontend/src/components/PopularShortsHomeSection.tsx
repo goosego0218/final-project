@@ -435,7 +435,10 @@ const PopularShortsHomeSection = () => {
           setCommentText("");
         }
       }}>
-        <DialogContent className="max-w-[800px] w-[90vw] overflow-hidden p-0 gap-0">
+        <DialogContent 
+          className="max-w-[800px] w-[90vw] overflow-hidden p-0 gap-0"
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
           <div className="flex md:flex-row flex-col">
             {/* Left: Short Form Video (9:16 ratio) */}
             <div className="bg-background flex items-center justify-center p-0 border-r border-border aspect-[9/16] w-full md:w-[300px] md:flex-shrink-0 rounded-l-lg overflow-hidden relative">
@@ -497,7 +500,7 @@ const PopularShortsHomeSection = () => {
                   <Button 
                     variant="ghost" 
                     onClick={handleLike}
-                    className="h-8 px-3 gap-2 hover:bg-primary/10 hover:text-primary"
+                    className="h-8 px-3 gap-2 hover:bg-primary/10 hover:text-primary focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                   >
                     <Heart className={`h-4 w-4 ${isLiked ? "fill-destructive text-destructive" : ""}`} />
                     <span className="text-sm font-semibold text-foreground">

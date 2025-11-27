@@ -240,3 +240,37 @@ def persist_brand_project(
     db.refresh(group)
 
     return group
+
+
+def update_project_group(
+    db: Session,
+    project_id: int,
+    user_id: int,
+    grp_nm: str | None = None,
+    grp_desc: str | None = None,
+) -> ProdGroup:
+    """
+    프로젝트 그룹 정보 수정 (grp_nm, grp_desc).
+    - 본인이 생성한 프로젝트만 수정 가능
+    """
+    project = load_project_group_entity(db, project_id)
+    
+    if project is None:
+        raise ValueError(f"project_id={project_id} 프로젝트를 찾을 수 없습니다.")
+    
+    if project.creator_id != user_id:
+        raise ValueError("본인이 생성한 프로젝트만 수정할 수 있습니다.")
+    
+    if project.del_yn == "Y":
+        raise ValueError("이미 삭제된 프로젝트입니다.")
+    
+    # 프로젝트 정보 업데이트
+    if grp_nm is not None:
+        project.grp_nm = grp_nm
+    if grp_desc is not None:
+        project.grp_desc = grp_desc
+    
+    db.commit()
+    db.refresh(project)
+    
+    return project

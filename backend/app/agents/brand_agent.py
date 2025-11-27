@@ -14,7 +14,7 @@ from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import MemorySaver
 
 from app.agents.state import AppState
-from app.llm.client import get_chat_model
+from app.llm.client import get_chat_model, get_fast_chat_model
 
 # 노드 함수
 from app.graphs.nodes.brand.brand_collect_node import make_brand_collect_node
@@ -43,13 +43,14 @@ def build_brand_graph():
     """
     # 여기서 한 번만 LLM 생성
     llm = get_chat_model()
+    fast_llm = get_fast_chat_model()
 
     # 노드 함수 생성
-    brand_collect = make_brand_collect_node(llm)
+    brand_collect = make_brand_collect_node(fast_llm)
     brand_intention = make_brand_intention_node(llm)
     brand_trend_search = make_brand_trend_search_node(llm)
     brand_trend_refine = make_brand_trend_refine_node(llm)
-    brand_chat = make_brand_chat_node(llm)
+    brand_chat = make_brand_chat_node(fast_llm)
     persist_brand = make_persist_brand_node()    
 
     g = StateGraph(AppState)
@@ -62,15 +63,7 @@ def build_brand_graph():
     g.add_node("brand_chat", brand_chat)
     g.add_node("persist_brand", persist_brand)
 
-    # 1) 기본 진입
     g.add_edge(START, "brand_intention")
-
-    # # 3) brand_intention 에서 갈 수 있는 애들
-    # g.add_edge("brand_intention", "trend_search")
-    # g.add_edge("brand_intention", "trend_refine")
-    # g.add_edge("brand_intention", "brand_chat")
-
-    # 4) 트렌드 라인
     g.add_edge("trend_refine", "trend_search")
     g.add_edge("trend_search", "brand_chat")
 

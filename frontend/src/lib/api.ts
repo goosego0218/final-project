@@ -54,6 +54,25 @@ async function apiRequest<T>(endpoint: string, options?: RequestInit): Promise<T
   });
 
   if (!response.ok) {
+    // 401 Unauthorized 에러 발생 시 자동 로그아웃 처리
+    if (response.status === 401) {
+      // 로그인 상태 초기화
+      localStorage.removeItem('isLoggedIn');
+      sessionStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('accessToken');
+      sessionStorage.removeItem('accessToken');
+      localStorage.removeItem('userProfile');
+      
+      // 프로필 업데이트 이벤트 발생 (다른 컴포넌트에서 감지)
+      window.dispatchEvent(new Event('profileUpdated'));
+      window.dispatchEvent(new Event('logout'));
+      
+      // 로그인 페이지로 리다이렉트 (현재 페이지가 로그인이 필요한 페이지인 경우)
+      if (window.location.pathname !== '/' && !window.location.pathname.includes('/logo-gallery') && !window.location.pathname.includes('/shortform-gallery')) {
+        window.location.href = '/';
+      }
+    }
+    
     const errorText = await response.text();
     let errorMessage = `API request failed: ${response.statusText}`;
     
@@ -190,6 +209,64 @@ export async function createBrandProject(data: CreateBrandProjectRequest): Promi
   });
 }
 
+// 숏폼 챗 관련 인터페이스
+export interface ShortsChatRequest {
+  project_id: number;
+  message?: string;
+  shorts_session_id?: string;
+}
+
+export interface ShortsChatResponse {
+  reply: string;
+  project_id: number;
+  shorts_session_id: string;
+}
+
+// 숏폼 intro API 호출 (브랜드 요약 정보)
+export async function getShortsIntro(data: ShortsChatRequest): Promise<ShortsChatResponse> {
+  return apiRequest<ShortsChatResponse>('/shorts/intro', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+// 로고 챗봇 관련 API
+export interface LogoChatRequest {
+  project_id: number;
+  message?: string;
+  logo_session_id?: string;
+}
+
+export interface LogoChatResponse {
+  reply: string;
+  project_id: number;
+  logo_session_id: string;
+}
+
+// 로고 intro API 호출 (브랜드 요약 정보)
+export async function getLogoIntro(data: LogoChatRequest): Promise<LogoChatResponse> {
+  return apiRequest<LogoChatResponse>('/logo/intro', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+// 로고 챗봇 API 호출
+export async function sendLogoChat(data: LogoChatRequest): Promise<LogoChatResponse> {
+  return apiRequest<LogoChatResponse>('/logo/chat', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+// 숏폼 챗봇 API 호출
+export async function sendShortsChat(data: ShortsChatRequest): Promise<ShortsChatResponse> {
+  return apiRequest<ShortsChatResponse>('/shorts/chat', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
 // 프로젝트 상세 조회 (브랜드 정보 포함)
 export interface ProjectDetail {
   grp_id: number;
@@ -210,6 +287,22 @@ export async function getProjectDetail(projectId: number): Promise<ProjectDetail
 export async function deleteProject(projectId: number): Promise<void> {
   return apiRequest<void>(`/projects/groups/${projectId}`, {
     method: 'DELETE',
+  });
+}
+
+// 프로젝트 수정
+export interface UpdateProjectRequest {
+  grp_nm: string;
+  grp_desc?: string | null;
+}
+
+export async function updateProject(
+  projectId: number,
+  data: UpdateProjectRequest
+): Promise<ProjectDetail> {
+  return apiRequest<ProjectDetail>(`/projects/groups/${projectId}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
   });
 }
 

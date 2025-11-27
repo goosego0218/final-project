@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { signUp, login, LoginRequest } from "@/lib/api";
+import { signUp, login, LoginRequest, getYouTubeConnectionStatus } from "@/lib/api";
 
 interface AuthModalsProps {
   isLoginOpen: boolean;
@@ -118,11 +118,32 @@ export const AuthModals = ({
       // 사용자 프로필 정보 저장
       // 백엔드 로그인 API는 토큰만 반환하므로, loginId를 기반으로 기본 정보 저장
       // 실제 닉네임 등은 나중에 사용자 정보 조회 API가 생기면 업데이트 가능
-      const userProfile = {
+      const userProfile: {
+        id: string;
+        login_id: string;
+        nickname: string;
+        youtube?: {
+          connected: boolean;
+          email?: string;
+        };
+      } = {
         id: loginId.trim(),
         login_id: loginId.trim(),
         nickname: loginId.trim(), // 임시로 loginId 사용, 나중에 업데이트 가능
       };
+
+      // 소셜 미디어 연동 상태 조회
+      try {
+        const youtubeStatus = await getYouTubeConnectionStatus();
+        userProfile.youtube = {
+          connected: youtubeStatus.connected,
+          email: youtubeStatus.email || undefined,
+        };
+      } catch (error) {
+        // 소셜 미디어 연동 상태 조회 실패해도 로그인은 계속 진행
+        console.error('소셜 미디어 연동 상태 조회 실패:', error);
+        userProfile.youtube = { connected: false };
+      }
       
       localStorage.setItem('userProfile', JSON.stringify(userProfile));
       localStorage.setItem('isLoggedIn', 'true');
@@ -461,7 +482,7 @@ export const AuthModals = ({
                 MAKERY
               </div>
               <DialogTitle className="text-2xl font-semibold">
-                {signUpStep === 1 ? "MAKERY 시작하기" : "계정 만들기"}
+                계정 만들기
               </DialogTitle>
               <DialogDescription className="text-muted-foreground">
                 AI로 로고와 숏폼을 만들 준비가 되셨나요?

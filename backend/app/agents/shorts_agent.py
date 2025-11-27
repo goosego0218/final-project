@@ -10,7 +10,7 @@ from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import MemorySaver
 
 from app.agents.state import AppState
-from app.llm.client import get_chat_model
+from app.llm.client import get_chat_model, get_fast_chat_model
 
 # 노드 함수들 import
 from app.graphs.nodes.shorts.decision_node import make_decision_node
@@ -28,13 +28,15 @@ def build_shorts_graph():
     """
 
     llm = get_chat_model()
+    fast_llm = get_fast_chat_model()
+
     # 프롬프트 생성용 : gpt-5
     # 이미지 생성 구글키도필요
     # 그외 잡채팅은 gpt-4o-mini가 빠를듯
     # 노드마다 다르게 넣어줄필요.
 
     decision = make_decision_node(llm)
-    general_chat = make_general_chat_node(llm)
+    general_chat = make_general_chat_node(fast_llm)
     trend_analysis = make_trend_analysis_node(llm)
     check_logo = make_check_logo_node(llm)
     fetch_logo = make_fetch_logo_node(llm)

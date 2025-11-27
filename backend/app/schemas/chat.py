@@ -38,7 +38,7 @@ class CreateBrandProjectResponse(BaseModel):
 
 class LogoChatRequest(BaseModel):
     project_id: int
-    message: str
+    message: Optional[str] = None  # intro 엔드포인트에서는 메시지가 없을 수 있음
     logo_type: Optional[str] = None  # 예: wordmark, symbol_plus_text, emblem
     trend_choice: Optional[str] = None  # 예: 타입별 트렌드 선택값
     logo_session_id: Optional[str] = None

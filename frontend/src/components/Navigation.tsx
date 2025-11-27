@@ -26,8 +26,12 @@ const Navigation = () => {
   const queryClient = useQueryClient();
 
   // 초기 로그인 상태를 즉시 확인하여 깜빡임 방지
+  // 토큰이 있는지도 함께 확인
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    return localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+    const hasLoginFlag = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+    const hasToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+    // 로그인 플래그와 토큰이 모두 있어야 로그인 상태로 인식
+    return hasLoginFlag && !!hasToken;
   });
 
   // 메뉴 데이터 가져오기 - 로그인 상태를 queryKey에 포함하여 로그인 상태 변경 시 자동으로 다시 가져오기
@@ -72,7 +76,9 @@ const Navigation = () => {
   // localStorage 변경 감지
   useEffect(() => {
     const handleStorageChange = () => {
-      const newLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+      const hasLoginFlag = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+      const hasToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+      const newLoggedIn = hasLoginFlag && !!hasToken;
       setIsLoggedIn(newLoggedIn);
       setUserProfile(getUserProfile());
     };
@@ -81,12 +87,21 @@ const Navigation = () => {
       setUserProfile(getUserProfile());
     };
     
+    const handleLogout = () => {
+      setIsLoggedIn(false);
+      setUserProfile({ nickname: "사용자", id: "user123", avatar: null });
+      queryClient.invalidateQueries({ queryKey: ['menus'] });
+    };
+    
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('profileUpdated', handleProfileUpdate);
+    window.addEventListener('logout', handleLogout);
     
     // 같은 탭에서의 변경도 감지하기 위해 interval 사용 (5초로 변경하여 깜빡임 최소화)
     const interval = setInterval(() => {
-      const currentLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+      const hasLoginFlag = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+      const hasToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+      const currentLoggedIn = hasLoginFlag && !!hasToken;
       // 상태가 실제로 변경된 경우에만 업데이트
       if (currentLoggedIn !== isLoggedInRef.current) {
         setIsLoggedIn(currentLoggedIn);
@@ -98,9 +113,10 @@ const Navigation = () => {
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('profileUpdated', handleProfileUpdate);
+      window.removeEventListener('logout', handleLogout);
       clearInterval(interval);
     };
-  }, []);
+  }, [queryClient]);
 
   // 더미 토큰 데이터
   const tokenData = {
@@ -335,16 +351,16 @@ const Navigation = () => {
                         {projectsMenu.menu_nm}
                       </DropdownMenuItem>
                     )}
-                    <DropdownMenuItem onClick={() => navigate("/plans")}>
-                      <CreditCard className="h-4 w-4 mr-2" />
-                      플랜 관리
-                    </DropdownMenuItem>
                     {shortsReportMenu && (
                       <DropdownMenuItem onClick={() => navigate(shortsReportMenu.menu_path)}>
                         <BarChart3 className="h-4 w-4 mr-2" />
                         {shortsReportMenu.menu_nm}
                       </DropdownMenuItem>
                     )}
+                    <DropdownMenuItem onClick={() => navigate("/plans")}>
+                      <CreditCard className="h-4 w-4 mr-2" />
+                      플랜 관리
+                    </DropdownMenuItem>
                     
                     <DropdownMenuSeparator />
                     

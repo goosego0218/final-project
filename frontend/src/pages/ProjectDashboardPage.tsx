@@ -113,11 +113,23 @@ const ProjectDashboardPage = () => {
   // 프로젝트 로드 실패 시 처리
   useEffect(() => {
     if (projectError) {
-      toast({
-        title: "프로젝트를 찾을 수 없습니다",
-        description: "프로젝트가 삭제되었거나 존재하지 않습니다.",
-        status: "error",
-      });
+      // React Query 에러에서 상태 코드 확인
+      const error = projectError as any;
+      const statusCode = error?.response?.status || error?.status;
+      
+      if (statusCode === 403 || (projectError instanceof Error && projectError.message.includes("접근 권한"))) {
+        toast({
+          title: "접근 권한 없음",
+          description: "이 프로젝트에 접근할 수 없습니다.",
+          status: "error",
+        });
+      } else {
+        toast({
+          title: "프로젝트를 찾을 수 없습니다",
+          description: "프로젝트가 삭제되었거나 존재하지 않습니다.",
+          status: "error",
+        });
+      }
       navigate("/projects");
     }
   }, [projectError, navigate, toast]);
@@ -133,14 +145,14 @@ const ProjectDashboardPage = () => {
 
   const handleCreateLogo = () => {
     if (!project || !projectId) return;
-    // 로고 스튜디오로 이동 (DB 프로젝트 ID 사용)
-    navigate(`/studio?project=${projectId}&type=logo`);
+    // 로고 챗봇으로 이동
+    navigate(`/chat/logo?project=${projectId}`);
   };
 
   const handleCreateShort = () => {
     if (!project || !projectId) return;
-    // 숏폼 스튜디오로 이동 (DB 프로젝트 ID 사용)
-    navigate(`/studio?project=${projectId}&type=short`);
+    // 숏폼 챗봇으로 이동
+    navigate(`/chat/shorts?project=${projectId}`);
   };
 
   const handleDeleteProject = async () => {
