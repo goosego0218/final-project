@@ -53,7 +53,19 @@ class Settings(BaseSettings):
     
     # 프론트엔드 URL (OAuth 콜백 후 리다이렉트용)
     frontend_url: str = "http://localhost:8080"  # 프론트엔드 기본 URL
+    
+    # Google GenAI (로고 생성용 - Gemini 이미지 생성)
+    google_genai_model: str = "gemini-2.0-flash-exp"
 
+    # Google Cloud / Vertex AI (Veo 3.1)
+    google_genai_api_key: str = ""  
+    google_cloud_project: str = ""
+    google_cloud_location: str = ""
+    veo_model: str = ""
+    veo_duration_seconds: int = 8
+    veo_aspect_ratio: str = ""
+    veo_resolution: str = ""
+    
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", extra="ignore"
     )

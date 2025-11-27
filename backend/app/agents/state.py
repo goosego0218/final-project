@@ -27,6 +27,18 @@ class ShortsState(TypedDict, total=False):
     save_choice: Optional[Literal["save", "regenerate"]]
 
 
+class LogoState(TypedDict, total=False):
+    """
+    로고 에이전트 전용 State 
+    
+    AppState 내부에 logo_state: LogoState 형태로 사용
+    """
+    generated_prompt: Optional[str]
+    logo_url: Optional[str]
+    logo_size_bytes: Optional[int]
+    logo_generated_at: Optional[float]
+
+
 class BrandProfile(TypedDict, total=False):
     """
     브랜드(프로젝트) 기본 정보.
@@ -111,8 +123,11 @@ class AppState(AgentState):
     # 트렌드 분석 관련 캐시/컨텍스트
     trend_context: Annotated[TrendContext, merge_trend_context]
 
+    # 숏폼 에이전트 
+    shorts_state: ShortsState
+
+    # 로고 에이전트 전용 State
+    logo_state: LogoState
+
     # 추가로 메타데이터 보관용 (필요 시 확장)
     meta: Dict[str, Any]
-
-    # 숏폼 에이전트 전용 State - 11-22 추가
-    shorts_state: ShortsState
