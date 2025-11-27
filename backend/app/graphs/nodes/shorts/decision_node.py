@@ -2,6 +2,7 @@
 # 작성자: 주후상
 # 작성일: 2025-11-22
 # 수정내역
+# - 2025-11-27: check_logo 우회, 바로 generate_prompt_no_logo로 분기
 
 from __future__ import annotations
 from typing import TYPE_CHECKING, Literal
@@ -48,10 +49,14 @@ def make_decision_node(llm: "BaseChatModel"):
         
         # 분기 로직
         if "check_logo" in content:
-            return Command(goto="check_logo")
+            # return Command(goto="check_logo")
+            # return Command(goto="generate_prompt_no_logo")
+            return Command(goto="generate_prompt_no_logo")
         elif "general_chat" in content:
             return Command(goto="general_chat")
         elif "trend_analysis" in content:
             return Command(goto="trend_analysis")
+
+        return Command(goto="generate_prompt_no_logo")    
     
     return decision_node
