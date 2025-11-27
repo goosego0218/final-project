@@ -755,12 +755,14 @@ const LogoChatPage = () => {
                       placeholder="메시지를 입력하세요..."
                       className="min-h-[40px] max-h-[40px] resize-none pr-12 pl-12 py-2 text-sm w-full focus-visible:ring-[#7C22C8]"
                       rows={1}
+                      disabled={isLoadingLogoIntro || isLoadingLogoChat}
                     />
                     <Button
                       size="icon"
                       onClick={() => fileInputRef.current?.click()}
                       variant="ghost"
                       className="absolute bottom-1 left-2 h-8 w-8 p-0 bg-transparent border-0 hover:bg-transparent"
+                      disabled={isLoadingLogoIntro || isLoadingLogoChat}
                     >
                       <Plus className="h-4 w-4" style={{ color: '#7C22C8' }} />
                     </Button>
@@ -769,9 +771,9 @@ const LogoChatPage = () => {
                       size="icon"
                       variant="ghost"
                       className="absolute bottom-1 right-1 h-8 w-8 hover:bg-transparent"
-                      disabled={(!inputValue.trim() && attachedImages.length === 0) || isLoadingLogoChat}
+                      disabled={(!inputValue.trim() && attachedImages.length === 0) || isLoadingLogoIntro || isLoadingLogoChat}
                     >
-                      {isLoadingLogoChat ? (
+                      {(isLoadingLogoIntro || isLoadingLogoChat) ? (
                         <RefreshCw className="h-4 w-4 animate-spin" style={{ color: '#7C22C8' }} />
                       ) : (
                         <Send className="h-4 w-4" style={{ color: '#7C22C8' }} />

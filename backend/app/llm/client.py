@@ -73,3 +73,19 @@ def get_genai_client():
         project=settings.google_cloud_project,
         location=settings.google_cloud_location
     )
+
+@lru_cache
+def get_gemini_image_client():
+    """
+    Google Gemini 이미지 생성 클라이언트 (로고용)
+    """
+    from google import genai
+    
+    if not settings.google_genai_api_key:
+        raise ValueError(
+            "GOOGLE_GENAI_API_KEY가 설정되지 않았습니다.\n"
+            ".env 파일에 GOOGLE_GENAI_API_KEY를 추가하세요."
+        )
+    
+    # API Key 모드로 클라이언트 생성 (Veo와 다름!)
+    return genai.Client(api_key=settings.google_genai_api_key)    
