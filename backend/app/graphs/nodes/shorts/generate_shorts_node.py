@@ -87,7 +87,8 @@ def make_generate_shorts_node(genai_client: "Client"):
             success_msg = AIMessage(
                 content=(
                     f"쇼츠 영상이 생성되었습니다!\n"
-                    f"재생 버튼을 눌러 큰 화면으로 보거나, 저장 버튼을 눌러 보관함에 저장하세요."
+                    f"재생 버튼을 눌러 큰 화면으로 보거나, 저장 버튼을 눌러 보관함에 저장하세요.\n"
+                    f"[VIDEO_URL]{video_data_url}[/VIDEO_URL]"
                 )
             )
             
