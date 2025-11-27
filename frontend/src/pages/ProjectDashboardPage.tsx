@@ -145,14 +145,14 @@ const ProjectDashboardPage = () => {
 
   const handleCreateLogo = () => {
     if (!project || !projectId) return;
-    // 로고 스튜디오로 이동 (DB 프로젝트 ID 사용)
-    navigate(`/studio?project=${projectId}&type=logo`);
+    // 로고 챗봇으로 이동
+    navigate(`/chat/logo?project=${projectId}`);
   };
 
   const handleCreateShort = () => {
     if (!project || !projectId) return;
-    // 숏폼 스튜디오로 이동 (DB 프로젝트 ID 사용)
-    navigate(`/studio?project=${projectId}&type=short`);
+    // 숏폼 챗봇으로 이동
+    navigate(`/chat/shorts?project=${projectId}`);
   };
 
   const handleDeleteProject = async () => {

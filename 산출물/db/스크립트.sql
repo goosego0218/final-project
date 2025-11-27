@@ -4,7 +4,7 @@ CREATE TABLE user_info (
     login_id      VARCHAR2(255) NOT NULL,         -- 아이디
     password_hash VARCHAR2(255) NOT NULL,         -- 비밀번호
     nickname      VARCHAR2(255) NOT NULL,         -- 닉네임
-    status        VARCHAR2(255) DEFAULT 'Y' NOT NULL, -- 상태
+    status        CHAR(1) DEFAULT 'Y' NOT NULL, -- 상태
     create_dt     DATE DEFAULT SYSDATE NOT NULL,      -- 생성일
     update_dt     DATE DEFAULT SYSDATE NOT NULL,      -- 수정일
     role_id       NUMBER NOT NULL,         -- 권한
@@ -57,16 +57,17 @@ ALTER TABLE USER_INFO
 
 INSERT INTO ROLE_MST
 (ROLE_ID, ROLE_NM, DEL_YN)
-VALUES('SYSTEM', 'N');
+VALUES(0, 'SYSTEM', 'N');
 INSERT INTO ROLE_MST
 (ROLE_ID, ROLE_NM, DEL_YN)
-VALUES('ADMIN', 'N');
+VALUES(1, 'ADMIN', 'N');
 INSERT INTO ROLE_MST
 (ROLE_ID, ROLE_NM, DEL_YN)
-VALUES('GENERAL', 'N');
+VALUES(2, 'GENERAL', 'N');
 INSERT INTO ROLE_MST
 (ROLE_ID, ROLE_NM, DEL_YN)
-VALUES('ALL', 'N');
+VALUES(3, 'ALL', 'N');
+
 ------------------------------------------------------------------------------------------------------------------------
 
 -- menu 테이블
@@ -172,11 +173,14 @@ INSERT INTO role_menu (role_id, menu_id) VALUES (3, 5);
 
 -- prod_grp 테이블
 CREATE TABLE prod_grp (
-    grp_id        NUMBER          NOT NULL,     -- 그룹번호
-    grp_nm        VARCHAR2(255)   NOT NULL,     -- 그룹명
-    grp_desc   VARCHAR2(255)   NULL,         -- 그룹설명
-    creator_id 	  NUMBER		  NOT NULL,  -- 생성자
-    del_yn        CHAR(1)     DEFAULT 'N'   NOT NULL,   -- 삭제여부
+    grp_id        NUMBER          NOT NULL,                 -- 그룹번호
+    grp_nm        VARCHAR2(255)   NOT NULL,                 -- 그룹명
+    grp_desc      VARCHAR2(1000)   NULL,                     -- 그룹설명
+    creator_id    NUMBER          NOT NULL,                 -- 생성자 (user_info.id)
+    updater_id    NUMBER          NULL,                     -- 수정자 (user_info.id)
+    create_dt     DATE            DEFAULT SYSDATE NOT NULL, -- 생성일
+    update_dt     DATE            NULL,                     -- 수정일
+    del_yn        CHAR(1)         DEFAULT 'N' NOT NULL,     -- 삭제여부
     CONSTRAINT PK_PROD_GRP PRIMARY KEY (grp_id)
 );
 
@@ -197,6 +201,11 @@ END;
 ALTER TABLE prod_grp
     ADD CONSTRAINT FK_PROD_USER
         FOREIGN KEY (creator_id) REFERENCES user_info(id);
+
+ALTER TABLE prod_grp
+    ADD CONSTRAINT FK_PROD_UPD_USER
+        FOREIGN KEY (updater_id) REFERENCES user_info(id);
+
 ------------------------------------------------------------------------------------------------------------------------
 
 -- prod_type 테이블
@@ -220,17 +229,17 @@ VALUES(2, '숏폼', 'N' );
 -- brand_info 테이블
 CREATE TABLE brand_info (
     grp_id          NUMBER           NOT NULL,               -- 프로젝트/브랜드 번호 (FK)
-    brand_name      VARCHAR2(200)    NOT NULL,               -- 브랜드명
-    category        VARCHAR2(100)    NOT NULL,               -- 업종 카테고리(카페, 음식점, 패션 등)
-    tone_mood       VARCHAR2(4000)       NULL,               -- 브랜드 톤/무드
-    core_keywords   VARCHAR2(4000)       NULL,               -- 핵심 키워드(콤마/슬래시로 구분해도 됨)
-    slogan          VARCHAR2(4000)       NULL,               -- 슬로건
-    target_age      VARCHAR2(200)        NULL,               -- 타깃 연령대 텍스트 (예: '20~30', '10대-20대 초반')
-    target_gender   VARCHAR2(200)         NULL,               -- 타깃 성별 (예: 'male', 'female', 'all' 등 코드값)
-    avoided_trends  VARCHAR2(4000)       NULL,               -- 기피 트렌드/분위기
-    preferred_colors VARCHAR2(4000)      NULL,               -- 선호 색상/색감 설명
+    brand_name      VARCHAR2(255)    NOT NULL,               -- 브랜드명
+    category        VARCHAR2(255)    NOT NULL,               -- 업종 카테고리(카페, 음식점, 패션 등)
+    tone_mood       VARCHAR2(255)       NULL,               -- 브랜드 톤/무드
+    core_keywords   VARCHAR2(1000)       NULL,               -- 핵심 키워드(콤마/슬래시로 구분해도 됨)
+    slogan          VARCHAR2(500)       NULL,               -- 슬로건
+    target_age      VARCHAR2(100)        NULL,               -- 타깃 연령대 텍스트 (예: '20~30', '10대-20대 초반')
+    target_gender   VARCHAR2(50)         NULL,               -- 타깃 성별 (예: 'male', 'female', 'all' 등 코드값)
+    avoided_trends  VARCHAR2(1000)       NULL,               -- 기피 트렌드/분위기
+    preferred_colors VARCHAR2(500)      NULL,               -- 선호 색상/색감 설명
     create_dt       DATE DEFAULT SYSDATE NOT NULL,           -- 생성일
-    update_dt       DATE                     NULL,           -- 수정일
+    update_dt       DATE                 NOT NULL,           -- 수정일
     CONSTRAINT PK_BRAND_INFO PRIMARY KEY (grp_id)
 );
 
@@ -297,4 +306,99 @@ END;
 
 ------------------------------------------------------------------------------------------------------------------------
 
+-- social_connection 테이블
+CREATE TABLE social_connection (
+    conn_id           NUMBER           NOT NULL,              -- 연동ID (PK)
+    user_id           NUMBER           NOT NULL,              -- 유저번호 (FK → user_info.id)
+    platform          VARCHAR2(50)     NOT NULL,              -- 플랫폼 (youtube, instagram 등)
+    platform_user_id  VARCHAR2(255)    NULL,                  -- 플랫폼 사용자 ID (채널 ID 등)
+    email             VARCHAR2(255)    NULL,                  -- 연동된 이메일
+    access_token      VARCHAR2(2000)   NOT NULL,              -- 액세스 토큰 (암호화 저장)
+    refresh_token     VARCHAR2(2000)   NULL,                  -- 리프레시 토큰 (암호화 저장)
+    token_expires_at  DATE             NULL,                  -- 토큰 만료 시간
+    connected_at      DATE             DEFAULT SYSDATE NOT NULL, -- 연동일
+    del_yn            VARCHAR2(1)      DEFAULT 'N' NOT NULL      -- 삭제여부
+);
 
+ALTER TABLE social_connection
+    ADD CONSTRAINT PK_SOCIAL_CONNECTION
+        PRIMARY KEY (conn_id);
+
+ALTER TABLE social_connection
+    ADD CONSTRAINT FK_SOCIAL_CONN_USER
+        FOREIGN KEY (user_id)
+        REFERENCES user_info (id);
+
+CREATE SEQUENCE SEQ_SOCIAL_CONNECTION
+    START WITH 1
+    INCREMENT BY 1
+    NOCACHE
+    NOCYCLE;
+
+CREATE OR REPLACE TRIGGER TRG_SOCIAL_CONNECTION_PK
+BEFORE INSERT ON social_connection
+FOR EACH ROW
+WHEN (NEW.conn_id IS NULL)
+BEGIN
+    SELECT SEQ_SOCIAL_CONNECTION.NEXTVAL
+      INTO :NEW.conn_id
+      FROM dual;
+END;
+
+COMMENT ON TABLE social_connection IS '소셜 미디어 연동 테이블';
+
+COMMENT ON COLUMN social_connection.conn_id          IS '연동ID';
+COMMENT ON COLUMN social_connection.user_id          IS '유저번호';
+COMMENT ON COLUMN social_connection.platform         IS '플랫폼 (youtube, instagram)';
+COMMENT ON COLUMN social_connection.platform_user_id IS '플랫폼 사용자 ID (YouTube 채널 ID 등)';
+COMMENT ON COLUMN social_connection.email            IS '연동된 이메일';
+COMMENT ON COLUMN social_connection.access_token     IS '액세스 토큰 (암호화 저장)';
+COMMENT ON COLUMN social_connection.refresh_token    IS '리프레시 토큰 (암호화 저장)';
+COMMENT ON COLUMN social_connection.token_expires_at IS '토큰 만료 시간';
+COMMENT ON COLUMN social_connection.connected_at     IS '연동일';
+COMMENT ON COLUMN social_connection.del_yn           IS '삭제여부';
+
+------------------------------------------------------------------------------------------------------------------------
+
+-- generation_like 테이블
+CREATE TABLE generation_like (
+    prod_id    NUMBER       NOT NULL,              -- 생성물 번호 (FK → GENERATION_PROD.PROD_ID)
+    user_id    NUMBER       NOT NULL,              -- 유저 번호   (FK → USER_INFO.ID)
+    create_dt  DATE         DEFAULT SYSDATE NOT NULL,  -- 좋아요한 일시
+    CONSTRAINT PK_GENERATION_LIKE PRIMARY KEY (prod_id, user_id)
+);
+
+-- FK: 생성물
+ALTER TABLE generation_like
+    ADD CONSTRAINT FK_GEN_LIKE_PROD
+        FOREIGN KEY (prod_id)
+        REFERENCES GENERATION_PROD (PROD_ID);
+
+-- FK: 유저
+ALTER TABLE generation_like
+    ADD CONSTRAINT FK_GEN_LIKE_USER
+        FOREIGN KEY (user_id)
+        REFERENCES USER_INFO (ID);
+
+CREATE OR REPLACE TRIGGER trg_gen_like_ai
+AFTER INSERT ON generation_like
+FOR EACH ROW
+BEGIN
+    UPDATE generation_prod
+       SET like_cnt = like_cnt + 1
+     WHERE prod_id = :NEW.prod_id;
+END;
+
+CREATE OR REPLACE TRIGGER trg_gen_like_ad
+AFTER DELETE ON generation_like
+FOR EACH ROW
+BEGIN
+    UPDATE generation_prod
+       SET like_cnt = like_cnt - 1
+     WHERE prod_id = :OLD.prod_id;
+END;
+
+COMMENT ON TABLE generation_like IS '유저별 생성물 좋아요 테이블';
+COMMENT ON COLUMN generation_like.prod_id   IS '생성물 번호';
+COMMENT ON COLUMN generation_like.user_id   IS '유저 번호';
+COMMENT ON COLUMN generation_like.create_dt IS '좋아요 일시';

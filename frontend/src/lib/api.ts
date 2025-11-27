@@ -209,6 +209,64 @@ export async function createBrandProject(data: CreateBrandProjectRequest): Promi
   });
 }
 
+// 숏폼 챗 관련 인터페이스
+export interface ShortsChatRequest {
+  project_id: number;
+  message?: string;
+  shorts_session_id?: string;
+}
+
+export interface ShortsChatResponse {
+  reply: string;
+  project_id: number;
+  shorts_session_id: string;
+}
+
+// 숏폼 intro API 호출 (브랜드 요약 정보)
+export async function getShortsIntro(data: ShortsChatRequest): Promise<ShortsChatResponse> {
+  return apiRequest<ShortsChatResponse>('/shorts/intro', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+// 로고 챗봇 관련 API
+export interface LogoChatRequest {
+  project_id: number;
+  message?: string;
+  logo_session_id?: string;
+}
+
+export interface LogoChatResponse {
+  reply: string;
+  project_id: number;
+  logo_session_id: string;
+}
+
+// 로고 intro API 호출 (브랜드 요약 정보)
+export async function getLogoIntro(data: LogoChatRequest): Promise<LogoChatResponse> {
+  return apiRequest<LogoChatResponse>('/logo/intro', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+// 로고 챗봇 API 호출
+export async function sendLogoChat(data: LogoChatRequest): Promise<LogoChatResponse> {
+  return apiRequest<LogoChatResponse>('/logo/chat', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+// 숏폼 챗봇 API 호출
+export async function sendShortsChat(data: ShortsChatRequest): Promise<ShortsChatResponse> {
+  return apiRequest<ShortsChatResponse>('/shorts/chat', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
 // 프로젝트 상세 조회 (브랜드 정보 포함)
 export interface ProjectDetail {
   grp_id: number;

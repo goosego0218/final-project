@@ -129,8 +129,32 @@ def get_shorts_intro(
     
     from app.services.project_service import load_brand_profile_for_agent
     
-    brand_profile = load_brand_profile_for_agent(db, req.project_id)
-    brand_summary = summarize_brand_profile_with_llm(brand_profile)
+    try:
+        brand_profile = load_brand_profile_for_agent(db, req.project_id)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e),
+        )
+    
+    # 브랜드 프로필이 비어있거나 필수 정보가 없는 경우
+    if not brand_profile or not brand_profile.get("brand_name") or not brand_profile.get("category"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="브랜드 정보가 충분하지 않습니다. 브랜드명과 업종이 필요합니다.",
+        )
+    
+    try:
+        brand_summary = summarize_brand_profile_with_llm(brand_profile, mode="shorts")
+    except Exception as e:
+        # LLM 호출 실패 시 기본 요약 생성
+        brand_name = brand_profile.get("brand_name", "브랜드")
+        category = brand_profile.get("category", "")
+        brand_summary = f"{brand_name}은(는) {category} 업종의 브랜드입니다. 숏폼을 만들어볼까요?"
+        # 로그는 남기되 사용자에게는 기본 메시지 반환
+        import logging
+        logging.error(f"브랜드 요약 생성 실패: {e}")
+    
     shorts_session_id = req.shorts_session_id or str(uuid4())
 
     return ShortsChatResponse(

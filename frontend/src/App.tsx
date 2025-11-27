@@ -15,6 +15,8 @@ import StudioPage from "./pages/StudioPage";
 import AccountPage from "./pages/AccountPage";
 import MyPage from "./pages/MyPage";
 import ChatPage from "./pages/ChatPage";
+import LogoChatPage from "./pages/LogoChatPage";
+import ShortsChatPage from "./pages/ShortsChatPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +38,8 @@ const App = () => {
             <Route path="/project" element={<ProjectDashboardPage />} />
             <Route path="/plans" element={<PlansPage />} />
             <Route path="/chat" element={<ChatPage />} />
+            <Route path="/chat/logo" element={<LogoChatPage />} />
+            <Route path="/chat/shorts" element={<ShortsChatPage />} />
             <Route path="/studio" element={<StudioPage />} />
             <Route path="/mypage" element={<MyPage />} />
             <Route path="/account" element={<AccountPage />} />
