@@ -387,7 +387,7 @@ const ShortsChatPage = () => {
       
       toast({
         title: "숏폼이 저장되었습니다",
-        description: "하단 보관함에서 확인할 수 있습니다.",
+        description: "보관함에 저장되었고, 파일이 다운로드됩니다.",
       });
       return updated;
     });
@@ -558,17 +558,27 @@ const ShortsChatPage = () => {
                         />
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg pointer-events-none">
                           <div className="flex flex-col gap-2 justify-center items-center pointer-events-auto">
-                            <Button 
+                          <Button 
                               size="sm" 
                               variant="secondary"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleSave(selectedResult.url, "short", selectedResult.index);
+                                
+                                // 로컬에 다운로드
+                                const link = document.createElement('a');
+                                link.href = selectedResult.url;
+                                link.download = `shorts_${Date.now()}.mp4`;
+                                link.click();
+                                
+                                toast({
+                                  title: "다운로드 시작",
+                                  description: "쇼츠 영상을 로컬에 저장합니다.",
+                                });
                               }}
                               className="bg-background/90 hover:bg-background"
                             >
                               <Star className="h-4 w-4 mr-2" />
-                              저장
+                              로컬로 저장
                             </Button>
                             <Button 
                               size="sm" 
@@ -680,7 +690,70 @@ const ShortsChatPage = () => {
                                   ))}
                                 </div>
                               )}
-                              <p className="whitespace-pre-wrap">{message.content}</p>
+                              
+                              {(() => {
+                                const videoUrlMatch = message.content.match(/\[VIDEO_URL\](.*?)\[\/VIDEO_URL\]/);
+                                
+                                if (videoUrlMatch && message.role === "assistant") {
+                                  const videoUrl = videoUrlMatch[1];
+                                  const textContent = message.content
+                                    .replace(/\[VIDEO_URL\].*?\[\/VIDEO_URL\]/, '')
+                                    .trim();
+                                  
+                                  return (
+                                    <>
+                                      {textContent && <p className="whitespace-pre-wrap mb-3">{textContent}</p>}
+                                      <div className="mt-2 bg-black/5 rounded-lg p-2">
+                                        <video 
+                                          src={videoUrl} 
+                                          className="w-48 h-auto rounded-md mx-auto"
+                                          controls
+                                          autoPlay
+                                          loop
+                                          muted
+                                          playsInline
+                                          style={{ aspectRatio: '9/16' }}
+                                        />
+                                        <div className="flex gap-2 mt-2 justify-center">
+                                          <Button 
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => {
+                                              // 왼쪽 패널에서 재생
+                                              setSelectedResult({
+                                                type: "short",
+                                                url: videoUrl,
+                                                index: savedShorts.length,
+                                              });
+                                              setHasResultPanel(false);
+                                            }}
+                                          >
+                                            <Video className="h-4 w-4 mr-1" />
+                                            재생
+                                          </Button>
+                                          <Button 
+                                            size="sm" 
+                                            onClick={() => {
+                                              // 보관함에만 저장 (다운로드 안 함)
+                                              handleSave(videoUrl, "short", Date.now());
+                                            }}
+                                          >
+                                            <Star className="h-4 w-4 mr-1" />
+                                            저장
+                                          </Button>
+                                          <Button size="sm" variant="outline">
+                                            <Upload className="h-4 w-4 mr-1" />
+                                            업로드
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    </>
+                                  );
+                                }
+                                
+                                // VIDEO_URL이 없으면 기존 텍스트 렌더링
+                                return <p className="whitespace-pre-wrap">{message.content}</p>;
+                              })()}
                             </Card>
                           </div>
                         )}

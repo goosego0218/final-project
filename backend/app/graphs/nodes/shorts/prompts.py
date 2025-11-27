@@ -10,6 +10,7 @@ DECISION_SYSTEM_PROMPT = """
 
 분류 기준:
 1. check_logo: 숏폼/쇼츠/릴스 영상 제작 요청
+   (참고: 현재는 로고 분기 없이 바로 생성됨) 
 2. general_chat: 일반적인 인사, 잡담, 간단한 질문
 3. trend_analysis: 트렌드 분석, 시장 조사 요청
 

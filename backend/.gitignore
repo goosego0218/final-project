@@ -57,3 +57,7 @@ index.faiss
 index.pkl
 
 chroma_db/
+
+# Google Cloud 서비스 계정 키
+credentials/
+*.json
