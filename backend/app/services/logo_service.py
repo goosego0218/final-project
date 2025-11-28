@@ -63,9 +63,19 @@ def get_logo_list(
 ) -> list[GenerationProd]:
     """
     프로젝트의 로고 목록 조회
+    - relationship 로딩 비활성화하여 성능 최적화
     """
+    from sqlalchemy.orm import noload
+    
     return (
         db.query(GenerationProd)
+        .options(
+            noload(GenerationProd.type),  # 불필요한 JOIN 제거
+            noload(GenerationProd.group),  # 불필요한 JOIN 제거
+            noload(GenerationProd.creator),  # 불필요한 JOIN 제거
+            noload(GenerationProd.updater),  # 불필요한 JOIN 제거
+            noload(GenerationProd.comments),  # 불필요한 로딩 제거
+        )
         .filter(
             GenerationProd.grp_id == project_id,
             GenerationProd.type_id == prod_type_id,

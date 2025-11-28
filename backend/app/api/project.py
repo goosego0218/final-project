@@ -62,37 +62,46 @@ def get_user_projects_endpoint(
 ):
     """
     현재 로그인한 사용자의 프로젝트 목록 조회.
-    - 로고/숏폼 개수는 generation_prod에서 조회
+    - 로고/숏폼 개수는 generation_prod에서 조회 (N+1 쿼리 해결)
     """
     from app.models.project import GenerationProd
     from sqlalchemy import func
     
     projects = get_user_projects(db, current_user.id)
     
-    # ProjectListItem으로 변환 (로고/숏폼 개수 조회)
+    if not projects:
+        return []
+    
+    # 프로젝트 ID 리스트
+    project_ids = [p.grp_id for p in projects]
+    
+    # 한 번의 쿼리로 모든 프로젝트의 로고/숏폼 개수 조회
+    counts = (
+        db.query(
+            GenerationProd.grp_id,
+            GenerationProd.type_id,
+            func.count(GenerationProd.prod_id).label('count')
+        )
+        .filter(
+            GenerationProd.grp_id.in_(project_ids),
+            GenerationProd.del_yn == 'N'
+        )
+        .group_by(GenerationProd.grp_id, GenerationProd.type_id)
+        .all()
+    )
+    
+    # 딕셔너리로 변환: {grp_id: {type_id: count}}
+    count_dict = {}
+    for grp_id, type_id, count in counts:
+        if grp_id not in count_dict:
+            count_dict[grp_id] = {}
+        count_dict[grp_id][type_id] = count
+    
+    # ProjectListItem으로 변환
     result = []
     for project in projects:
-        # 로고 개수 조회 (type_id=1)
-        logo_count = (
-            db.query(func.count(GenerationProd.prod_id))
-            .filter(
-                GenerationProd.grp_id == project.grp_id,
-                GenerationProd.type_id == 1,  # 로고 타입 ID
-                GenerationProd.del_yn == 'N'
-            )
-            .scalar() or 0
-        )
-        
-        # 숏폼 개수 조회 (type_id=2)
-        shortform_count = (
-            db.query(func.count(GenerationProd.prod_id))
-            .filter(
-                GenerationProd.grp_id == project.grp_id,
-                GenerationProd.type_id == 2,  # 숏폼 타입 ID
-                GenerationProd.del_yn == 'N'
-            )
-            .scalar() or 0
-        )
+        logo_count = count_dict.get(project.grp_id, {}).get(1, 0)  # type_id=1
+        shortform_count = count_dict.get(project.grp_id, {}).get(2, 0)  # type_id=2
         
         result.append(ProjectListItem(
             grp_id=project.grp_id,

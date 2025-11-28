@@ -5,6 +5,7 @@
 # - 2025-10-28: 초기 작성
 # - 2025-11-18: 세션 발급 테스트 추가
 # - 2025-11-19: 트렌드 에이전트 테스트 엔드포인트 추가
+# - 2025-11-28: 댓글 라우터 추가
 
 import os
 from fastapi import FastAPI
@@ -21,6 +22,7 @@ from app.api.brand import router as brand_router
 from app.api.logo import router as logo_router
 from app.api.shorts import router as shorts_router
 from app.api.social import router as social_router
+from app.api.comment import router as comment_router
 
 from app.db.session import oracle_db
 
@@ -62,6 +64,42 @@ async def lifespan(app: FastAPI):
         print(f"[WARN] Oracle pool close failed: {e}")
 
 
+# 앱 라이프사이클 관리 
+# 앱 시작 시 Oracle DB 풀 초기화
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    try:
+        if settings.langsmith_tracing and settings.langsmith_api_key:
+            os.environ["LANGCHAIN_TRACING_V2"] = "true"
+            os.environ["LANGCHAIN_API_KEY"] = settings.langsmith_api_key
+
+        # endpoint / project 는 있을 때만 세팅
+        if settings.langsmith_endpoint:
+            os.environ["LANGCHAIN_ENDPOINT"] = settings.langsmith_endpoint
+        if settings.langsmith_project:
+            os.environ["LANGCHAIN_PROJECT"] = settings.langsmith_project
+
+        oracle_db.init_pool()
+        print("Oracle pool initialized on startup.")
+        
+        # Kanana Safeguard GPU 서버 연결 확인 (선택적)
+        if getattr(settings, 'safeguard_enabled', False):
+            safeguard_url = getattr(settings, 'safeguard_server_url', '')
+            if safeguard_url:
+                print(f"[Startup] Kanana Safeguard GPU 서버: {safeguard_url}")
+            else:
+                print("[Startup] ⚠️ safeguard_enabled=True이지만 safeguard_server_url이 설정되지 않았습니다")
+    except Exception as e:
+        print(f"[WARN] Oracle pool init failed: {e}")
+    yield # yield 앞은 startup, 뒤는 shutdown 시점
+    # 종료 시 DB 풀 종료
+    try:
+        oracle_db.close_pool()
+        print("Oracle pool closed on shutdown.")
+    except Exception as e:
+        print(f"[WARN] Oracle pool close failed: {e}")
+        
+
 def create_app() -> FastAPI:
     app = FastAPI(
         title=settings.app_name,
@@ -89,6 +127,7 @@ def create_app() -> FastAPI:
     app.include_router(shorts_router)
 
     app.include_router(social_router)
+    app.include_router(comment_router)    
     return app
 
 

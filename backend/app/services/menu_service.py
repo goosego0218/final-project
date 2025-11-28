@@ -13,9 +13,15 @@ def get_menus_by_role(db: Session, role_id: int) -> list[Menu]:
     - role_menu 조인
     - 삭제되지 않은 메뉴(del_yn = 'N')만 조회
     - menu_order로 정렬
+    - relationship 로딩 비활성화하여 성능 최적화
     """
+    from sqlalchemy.orm import noload
+    
     return (
         db.query(Menu)
+        .options(
+            noload(Menu.role_menus),  # 불필요한 로딩 제거
+        )
         .join(RoleMenu, RoleMenu.menu_id == Menu.menu_id)
         .filter(
             RoleMenu.role_id == role_id,
