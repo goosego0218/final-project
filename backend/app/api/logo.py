@@ -6,13 +6,16 @@
 # - 2025-11-24: intro 엔드포인트 추가
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from typing import List
 from sqlalchemy.orm import Session
 
 from app.schemas.chat import LogoChatRequest, LogoChatResponse
 from app.db.orm import get_orm_session
 from app.core.deps import get_current_user
 from app.models.auth import UserInfo
-
+from app.schemas.logo import SaveLogoRequest, SaveLogoResponse, LogoListItemResponse
+from app.services.logo_service import save_logo_to_storage_and_db, get_logo_list
+from app.utils.file_utils import get_file_url
 from langchain_core.messages import HumanMessage
 from app.agents.state import AppState 
 from app.agents.logo_agent import build_logo_graph
@@ -142,3 +145,89 @@ def chat_logo(
         project_id=req.project_id,
         logo_session_id=logo_session_id,
     )
+
+@router.post("/save", response_model=SaveLogoResponse, summary="로고 저장")
+def save_logo_endpoint(
+    req: SaveLogoRequest,
+    db: Session = Depends(get_orm_session),
+    current_user: UserInfo = Depends(get_current_user),
+):
+    """
+    생성된 로고를 NCP Object Storage에 업로드하고 DB에 저장
+    """
+    if not req.project_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="project_id는 필수입니다."
+        )
+    
+    try:
+        prod = save_logo_to_storage_and_db(
+            db=db,
+            base64_image=req.base64_image,
+            project_id=req.project_id,
+            prod_type_id=req.prod_type_id or 1,
+            user_id=current_user.id,
+        )
+        
+        from app.utils.file_utils import get_file_url
+        file_url = get_file_url(prod.file_path)
+        
+        return SaveLogoResponse(
+            success=True,
+            message="로고가 성공적으로 저장되었습니다.",
+            prod_id=prod.prod_id,
+            file_path=prod.file_path,
+            file_url=file_url,
+        )
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"로고 저장 실패: {str(e)}"
+        )
+
+@router.get("/list", response_model=List[LogoListItemResponse], summary="로고 목록 조회")
+def get_logo_list_endpoint(
+    project_id: int,
+    db: Session = Depends(get_orm_session),
+    current_user: UserInfo = Depends(get_current_user),
+):
+    """
+    프로젝트의 저장된 로고 목록 조회
+    
+    - project_id: 프로젝트 그룹 ID (query parameter)
+    - 현재 로그인한 사용자가 생성한 프로젝트의 로고만 조회 가능
+    """
+    # 프로젝트 접근 권한 확인
+    from app.services.project_service import load_project_group_entity
+    
+    project = load_project_group_entity(db, project_id)
+    if project is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="프로젝트를 찾을 수 없습니다.",
+        )
+    
+    # 본인이 생성한 프로젝트인지 확인
+    if project.creator_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="접근 권한이 없습니다.",
+        )
+    
+    # 로고 목록 조회
+    logo_list = get_logo_list(db=db, project_id=project_id, prod_type_id=1)
+    
+    # 응답 모델로 변환
+    result = []
+    for prod in logo_list:
+        file_url = get_file_url(prod.file_path)
+        result.append(LogoListItemResponse(
+            prod_id=prod.prod_id,
+            file_path=prod.file_path,
+            file_url=file_url,
+            create_dt=prod.create_dt.isoformat() if prod.create_dt else None,
+        ))
+    
+    return result    

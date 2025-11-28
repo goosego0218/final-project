@@ -101,7 +101,7 @@ def make_generate_logo_node(genai_client: "Client"):
             # 프론트로 메시지 전달 
             success_msg = AIMessage(
                 content=(
-                    f"로고가 생성되었습니다!\n\n"
+                    f"로고가 생성되었습니다!\n"
                     f"[LOGO_URL]{logo_data_url}[/LOGO_URL]\n\n"
                     f"저장 버튼을 눌러 보관함에 저장하세요."
                 )

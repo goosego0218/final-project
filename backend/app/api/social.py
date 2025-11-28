@@ -36,8 +36,10 @@ router = APIRouter(
 )
 
 # OAuth 2.0 스코프 (YouTube 업로드 권한)
-YOUTUBE_SCOPES = ['https://www.googleapis.com/auth/youtube.upload']
-
+YOUTUBE_SCOPES = [
+    'https://www.googleapis.com/auth/youtube.upload',  # 비디오 업로드
+    'https://www.googleapis.com/auth/youtube.readonly'  # 채널 정보 조회 (읽기 전용)
+]
 
 @router.get("/youtube/auth-url")
 def get_youtube_auth_url(

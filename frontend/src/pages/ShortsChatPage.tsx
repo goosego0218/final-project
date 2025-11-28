@@ -527,7 +527,7 @@ const ShortsChatPage = () => {
       const response = await saveShorts({
         base64_video: base64Video,
         project_id: parseInt(currentProjectId),
-        prod_type_id: 1,
+        prod_type_id: 2,
       });
 
       toast({
