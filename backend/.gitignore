@@ -1,5 +1,7 @@
 instantclient_19_28
 
+models/
+
 .env
 *.env
 .env.*

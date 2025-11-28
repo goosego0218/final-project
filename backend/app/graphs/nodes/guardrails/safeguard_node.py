@@ -1,9 +1,10 @@
 """
 가드레일 체크 노드
 사용자 입력 안전성 검사 (intent 노드 이전에 실행)
+GPU 서버로 HTTP 요청
 """
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 from langchain_core.messages import HumanMessage, AIMessage
 from langgraph.types import Command
 from langgraph.graph import END
@@ -14,13 +15,13 @@ if TYPE_CHECKING:
 
 def make_safeguard_check_node():
     """
-    사용자 입력 가드레일 체크 노드
+    사용자 입력 가드레일 체크 노드 (GPU 서버로 HTTP 요청)
     
     설정에서 safeguard_enabled=False면 바로 통과
     유해 입력이면 바로 END로 종료
     """
     from app.core.config import settings
-    from app.guardrails.kanana_safeguard import get_safeguard_instance
+    from app.guardrails.kanana_safeguard_client import get_safeguard_client
     
     # 설정이 꺼져있으면 바로 통과하는 노드 반환
     if not getattr(settings, 'safeguard_enabled', False):
@@ -28,11 +29,9 @@ def make_safeguard_check_node():
             return state
         return bypass_node
     
-    # 가드레일 인스턴스 (한 번만 로드)
-    safeguard = get_safeguard_instance("general")
-    
-    def check_safeguard(state: "AppState") -> "AppState" | Command:
-        """사용자 입력 안전성 체크"""
+    def check_safeguard(state: "AppState") -> Union["AppState", Command]:
+        """사용자 입력 안전성 체크 (GPU 서버로 요청)"""
+        
         messages = state.get("messages", [])
         
         if not messages:
@@ -44,8 +43,14 @@ def make_safeguard_check_node():
         if isinstance(last_message, HumanMessage):
             user_input = last_message.content
             
-            # 안전성 검사
-            result = safeguard.check(user_input)
+            # GPU 서버로 안전성 검사 요청
+            try:
+                client = get_safeguard_client()
+                result = client.check(user_input, assistant_prompt="")  # Input 체크
+            except Exception as e:
+                print(f"[Safeguard Node] 가드레일 체크 중 오류, 통과: {e}")
+                # 오류 발생 시 안전하다고 가정하고 통과
+                return state
             
             if not result["is_safe"]:
                 # 유해 입력 발견 - 차단 메시지 반환하고 종료
