@@ -112,17 +112,27 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
   // Load public short forms from localStorage
   const loadPublicShortForms = () => {
     const publicShortForms = JSON.parse(localStorage.getItem('public_shortforms') || '[]');
-    const publicShortFormsFormatted: ShortForm[] = publicShortForms.map((sf: any) => ({
-      id: sf.id,
-      title: sf.title,
-      thumbnailUrl: sf.thumbnailUrl || "/placeholder.svg",
-      videoUrl: sf.videoUrl || sf.thumbnailUrl, // videoUrl이 없으면 thumbnailUrl을 비디오 URL로 사용
-      likes: sf.likes || 0,
-      comments: sf.comments || 0,
-      duration: sf.duration || "0:15",
-      createdAt: new Date(sf.createdAt),
-      tags: sf.tags || [],
-    }));
+    const publicShortFormsFormatted: ShortForm[] = publicShortForms.map((sf: any) => {
+      // localStorage에서 실제 댓글 수 가져오기
+      const savedComments = localStorage.getItem(`short_comments_${sf.id}`);
+      const actualCommentsCount = savedComments ? JSON.parse(savedComments).length : 0;
+      
+      // localStorage에서 통계 가져오기 (댓글 수가 있으면 우선 사용)
+      const stats = JSON.parse(localStorage.getItem(`short_stats_${sf.id}`) || '{}');
+      const commentsCount = stats.comments !== undefined ? stats.comments : actualCommentsCount;
+      
+      return {
+        id: sf.id,
+        title: sf.title,
+        thumbnailUrl: sf.thumbnailUrl || "/placeholder.svg",
+        videoUrl: sf.videoUrl || sf.thumbnailUrl, // videoUrl이 없으면 thumbnailUrl을 비디오 URL로 사용
+        likes: stats.likes !== undefined ? stats.likes : (sf.likes || 0),
+        comments: commentsCount, // 실제 댓글 수 사용
+        duration: sf.duration || "0:15",
+        createdAt: new Date(sf.createdAt),
+        tags: sf.tags || [],
+      };
+    });
     
     // Combine with mock short forms (public short forms first, mock forms with fixed order)
     setAllShortForms([...publicShortFormsFormatted, ...mockShortFormsRef.current]);
@@ -142,10 +152,18 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
       
       // Load comments from localStorage
       const savedComments = localStorage.getItem(`short_comments_${selectedShort.id}`);
+      let loadedComments: Array<{ author: string; authorAvatar?: string; content: string; time: string }> = [];
       if (savedComments) {
-        setComments(JSON.parse(savedComments));
+        loadedComments = JSON.parse(savedComments);
+        setComments(loadedComments);
       } else {
         setComments([]);
+      }
+      
+      // 댓글 수를 실제 로드된 댓글 수로 업데이트
+      const actualCommentsCount = loadedComments.length;
+      if (selectedShort.comments !== actualCommentsCount) {
+        setSelectedShort(prev => prev ? { ...prev, comments: actualCommentsCount } : null);
       }
     } else {
       setIsLiked(false);
@@ -399,32 +417,61 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
               onClick={() => setSelectedShort(shortForm)}
             >
               {/* 9:16 Video */}
-              <div className="aspect-[9/16] bg-secondary/30 relative">
-                {shortForm.videoUrl ? (
+              <div className="aspect-[9/16] bg-secondary/30 relative group">
+                {shortForm.thumbnailUrl && (shortForm.thumbnailUrl.startsWith('data:image') || shortForm.thumbnailUrl.endsWith('.png') || shortForm.thumbnailUrl.endsWith('.jpg') || shortForm.thumbnailUrl.endsWith('.jpeg') || shortForm.thumbnailUrl.endsWith('.svg')) ? (
+                  // 썸네일 이미지가 있는 경우
+                  <img
+                    src={shortForm.thumbnailUrl}
+                    alt={shortForm.title}
+                    className="w-full h-full object-cover"
+                  />
+                ) : shortForm.videoUrl ? (
+                  // 비디오만 있는 경우 - 썸네일로 표시 (호버 시 재생)
                   <video
                     src={shortForm.videoUrl}
                     className="w-full h-full object-cover"
                     muted
-                    loop
                     playsInline
-                    autoPlay
+                    preload="metadata"
+                    onMouseEnter={(e) => {
+                      e.currentTarget.play().catch(() => {});
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.pause();
+                      e.currentTarget.currentTime = 0;
+                    }}
                   />
-                ) : shortForm.thumbnailUrl && !shortForm.thumbnailUrl.endsWith('.svg') && !shortForm.thumbnailUrl.endsWith('.jpg') && !shortForm.thumbnailUrl.endsWith('.png') ? (
-                  // thumbnailUrl이 비디오 URL일 수 있음
+                ) : shortForm.thumbnailUrl ? (
+                  // thumbnailUrl이 비디오 URL일 수 있음 - 썸네일로 표시 (호버 시 재생)
                   <video
                     src={shortForm.thumbnailUrl}
                     className="w-full h-full object-cover"
                     muted
-                    loop
                     playsInline
-                    autoPlay
+                    preload="metadata"
+                    onMouseEnter={(e) => {
+                      e.currentTarget.play().catch(() => {});
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.pause();
+                      e.currentTarget.currentTime = 0;
+                    }}
                   />
                 ) : (
                   <img
-                    src={shortForm.thumbnailUrl || "/placeholder.svg"}
+                    src="/placeholder.svg"
                     alt={shortForm.title}
                     className="w-full h-full object-cover"
                   />
+                )}
+                
+                {/* 재생 아이콘 오버레이 (비디오인 경우) */}
+                {(shortForm.videoUrl || (shortForm.thumbnailUrl && !shortForm.thumbnailUrl.startsWith('data:image') && !shortForm.thumbnailUrl.endsWith('.png') && !shortForm.thumbnailUrl.endsWith('.jpg') && !shortForm.thumbnailUrl.endsWith('.jpeg') && !shortForm.thumbnailUrl.endsWith('.svg'))) && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-t-lg pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="bg-white/90 rounded-full p-3">
+                      <Play className="h-6 w-6 text-primary fill-primary" />
+                    </div>
+                  </div>
                 )}
 
                 {/* Duration badge */}

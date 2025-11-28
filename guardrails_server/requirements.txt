@@ -1,0 +1,12 @@
+# Kanana Safeguard GPU 서버 의존성
+
+fastapi==0.115.0
+uvicorn==0.30.6
+pydantic==2.9.2
+python-dotenv==1.0.1
+
+# Transformers 및 PyTorch
+transformers>=4.51.3
+torch>=2.0.0
+accelerate>=0.20.0
+

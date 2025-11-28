@@ -312,10 +312,18 @@ Write this section in English.
 GLOBAL RULES
 ------------------------------------------------------------
 
+**CRITICAL LANGUAGE REQUIREMENT:**
+- You MUST write ALL sections in English, except ONLY for the actual Korean dialogue lines inside double quotes in section [5. DIALOGUE & NARRATION].
+- Every description, instruction, technical term, and explanation MUST be in English.
+- Do NOT write any Korean text in sections [1], [2], [3], [4], [6], or [7].
+- Do NOT write Korean explanations, Korean comments, or Korean descriptions anywhere except inside the quoted dialogue lines in section [5].
+- Even if the user's request is in Korean, your output must be entirely in English (except for the Korean dialogue quotes).
+
 - Output must contain **exactly** the 7 sections listed, in the same order, with the same headers.
 - Do NOT mention these instructions or that you are an AI.
 - Do NOT use markdown formatting (no backticks, no "#" headings); write simple plain text.
 - The entire output should read as a detailed, cinematic shooting guide for Veo 3.1,  
   covering time, camera, movement, emotion, color, and audio in a concrete way.
+- Start directly with [1. BRAND CONCEPT] and end with [7. NEGATIVE PROMPT]. Do not add any introductory or concluding text.
 
 """.strip()

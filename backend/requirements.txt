@@ -36,3 +36,6 @@ proto-plus==1.26.1
 protobuf==6.33.1
 Pillow>=10.4.0
 boto3==1.28.85
+
+# HTTP 클라이언트 (Kanana Safeguard GPU 서버용)
+httpx>=0.25.0

@@ -33,6 +33,9 @@ class Settings(BaseSettings):
     jwt_secret_key: str = "" 
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
+    
+    # Encryption (토큰 암호화용 - AES-256-GCM)
+    encryption_key: str = ""  # Base64 인코딩된 32바이트(256-bit) 키 (선택적, 없으면 jwt_secret_key 기반으로 생성)
 
     # Trend / RAG / Search
     tavily_api_key: str = ""        
@@ -72,6 +75,10 @@ class Settings(BaseSettings):
     ncp_region: str = ""
     ncp_endpoint: str = ""
     ncp_bucket_name: str = ""
+
+    # Kanana Safeguard (가드레일)
+    safeguard_enabled: bool = False
+    safeguard_server_url: str = ""  # GPU 서버 URL (예: "http://gpu-server:8001")
 
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -227,9 +227,11 @@ class GenerationProd(Base):
     creator: Mapped["UserInfo"] = relationship(
         foreign_keys=[create_user],
         lazy="joined",
+        overlaps="created_products",
     )
 
     updater: Mapped["UserInfo | None"] = relationship(
         foreign_keys=[update_user],
         lazy="joined",
+        overlaps="updated_products",
     )
