@@ -63,6 +63,9 @@ class Settings(BaseSettings):
     veo_aspect_ratio: str = ""
     veo_resolution: str = ""
     
+    # Kanana Safeguard (가드레일)
+    safeguard_enabled: bool = False  # 기본값 False - 필요시 .env에서 True로 설정
+    
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
