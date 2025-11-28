@@ -36,11 +36,13 @@ const ProjectsPage = () => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   // DB에서 프로젝트 목록 가져오기
-  const { data: projects = [], isLoading: isProjectsLoading, refetch } = useQuery({
+  const { data: projects = [], isLoading: isProjectsLoading } = useQuery({
     queryKey: ['userProjects'],
     queryFn: getProjects,
     enabled: isLoggedIn, // 로그인 상태일 때만 조회
-    staleTime: 0,
+    staleTime: 5 * 60 * 1000, // 5분간 캐시 유지
+    refetchOnWindowFocus: false, // 윈도우 포커스 시 자동 refetch 비활성화
+    refetchOnMount: false, // 마운트 시 자동 refetch 비활성화
   });
 
   useEffect(() => {
@@ -50,10 +52,8 @@ const ProjectsPage = () => {
       setIsLoggedIn(isNowLoggedIn);
       if (!isNowLoggedIn) {
         navigate("/");
-      } else {
-        // 로그인 상태면 프로젝트 목록 다시 가져오기
-        refetch();
       }
+      // refetch() 제거 - interval에서는 refetch 하지 않음
     };
 
     // 초기 로드
@@ -66,14 +66,12 @@ const ProjectsPage = () => {
     }
 
     window.addEventListener('storage', handleStorageChange);
-    // 같은 탭에서의 변경도 감지하기 위해 interval 사용
-    const interval = setInterval(handleStorageChange, 1000);
+    // interval 제거 - 불필요한 반복 호출 방지
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
-      clearInterval(interval);
     };
-  }, [navigate, refetch]);
+  }, [navigate]);
 
   const handleNewProjectClick = () => {
     // localStorage와 sessionStorage에서 직접 확인하여 최신 로그인 상태 반영

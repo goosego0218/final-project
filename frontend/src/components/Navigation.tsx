@@ -34,11 +34,14 @@ const Navigation = () => {
     return hasLoginFlag && !!hasToken;
   });
 
-  // 메뉴 데이터 가져오기 - 로그인 상태를 queryKey에 포함하여 로그인 상태 변경 시 자동으로 다시 가져오기
+  // 메뉴 데이터 가져오기 - queryKey 고정하여 중복 호출 방지
   const { data: menus = [], isLoading: isMenusLoading } = useQuery({
-    queryKey: ['menus', isLoggedIn],
+    queryKey: ['menus'], // queryKey 고정 (isLoggedIn 제거하여 중복 호출 방지)
     queryFn: getMenus,
-    staleTime: 0, // 로그인 상태 변경 시 즉시 다시 가져오기 위해 staleTime을 0으로 설정
+    staleTime: 5 * 60 * 1000, // 5분간 캐시 유지
+    gcTime: 10 * 60 * 1000, // 10분간 메모리 유지
+    refetchOnWindowFocus: false, // 탭 전환 시 자동 refetch 방지
+    refetchOnMount: false, // 마운트 시 refetch 방지
   });
 
   // localStorage에서 사용자 정보 가져오기
@@ -146,7 +149,7 @@ const Navigation = () => {
     setIsLoginOpen(false);
     setIsSignUpOpen(false);
     
-    // 메뉴 쿼리 무효화 및 다시 가져오기
+    // 메뉴 쿼리 무효화 및 다시 가져오기 (한 번만 호출)
     queryClient.invalidateQueries({ queryKey: ['menus'] });
     
     // 회원가입이 아닌 경우에만 로그인 토스트 표시

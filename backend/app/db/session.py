@@ -38,9 +38,11 @@ class OracleDB:
                 user=settings.oracle_user,
                 password=settings.oracle_password,
                 dsn=settings.oracle_dsn,
-                min=1,
-                max=4,
-                increment=1
+                min=2,  # 최소 커넥션 (1 → 2)
+                max=20,  # 최대 커넥션 (4 → 20)
+                increment=2,  # 증가 단위 (1 → 2)
+                timeout=30,  # 커넥션 대기 시간 (초)
+                max_lifetime_session=3600,  # 세션 최대 수명 (초)
             )
             logger.info("Oracle connection pool initialized successfully")
         except Exception as e:

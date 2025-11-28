@@ -1,7 +1,7 @@
 from typing import Optional
 
 from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, noload
 
 from app.models.auth import UserInfo
 from app.schemas.auth import UserCreate
@@ -10,9 +10,18 @@ from app.core.security import get_password_hash, verify_password
 def get_user_by_login_id(db: Session, login_id: str) -> Optional[UserInfo]:
     """
     login_id로 유저 한 명 조회.
+    성능 최적화: 불필요한 relationship 로딩 방지
     """
     return (
         db.query(UserInfo)
+        .options(
+            noload(UserInfo.project_groups),
+            noload(UserInfo.created_products),
+            noload(UserInfo.updated_products),
+            noload(UserInfo.social_connections),
+            noload(UserInfo.comments),
+            noload(UserInfo.role),  # role_id만 필요하므로 role 객체 불필요
+        )
         .filter(UserInfo.login_id == login_id)
         .first()
     )
@@ -45,7 +54,8 @@ def create_user(db: Session, user_in: UserCreate) -> UserInfo:
     # 4) DB 반영
     db.add(user)
     db.commit()
-    db.refresh(user)
+    # refresh 제거: commit 후 이미 user 객체에 id 등이 설정되어 있음
+    # 불필요한 relationship 로딩 방지
 
     return user
 

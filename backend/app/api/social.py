@@ -12,6 +12,8 @@ import secrets
 import json
 from urllib.parse import quote
 
+from app.schemas.social import YouTubeUploadRequest, YouTubeUploadResponse
+from app.services.social_service import upload_video_to_youtube, YOUTUBE_SCOPES
 from app.db.orm import get_orm_session
 from app.core.deps import get_current_user
 from app.models.auth import UserInfo
@@ -34,12 +36,6 @@ router = APIRouter(
     prefix="/social",
     tags=["social"],
 )
-
-# OAuth 2.0 스코프 (YouTube 업로드 권한)
-YOUTUBE_SCOPES = [
-    'https://www.googleapis.com/auth/youtube.upload',  # 비디오 업로드
-    'https://www.googleapis.com/auth/youtube.readonly'  # 채널 정보 조회 (읽기 전용)
-]
 
 @router.get("/youtube/auth-url")
 def get_youtube_auth_url(
@@ -320,4 +316,44 @@ def disconnect_youtube(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"연동 해제에 실패했습니다: {str(e)}",
+        )
+
+
+@router.post("/youtube/upload", response_model=YouTubeUploadResponse)
+def upload_video_to_youtube_endpoint(
+    request: YouTubeUploadRequest,
+    current_user: UserInfo = Depends(get_current_user),
+    db: Session = Depends(get_orm_session),
+):
+    """
+    YouTube에 비디오 업로드
+    """
+    if not GOOGLE_AVAILABLE:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Google OAuth 라이브러리가 설치되지 않았습니다.",
+        )
+    
+    try:
+        result = upload_video_to_youtube(
+            db=db,
+            user_id=current_user.id,
+            video_url=request.video_url,
+            title=request.title,
+            description=request.description or "",
+            tags=request.tags or [],
+            privacy=request.privacy,
+        )
+        
+        return YouTubeUploadResponse(**result)
+        
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"업로드 중 오류 발생: {str(e)}"
         )

@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { getProjectDetail, deleteProject, ProjectDetail, ProjectListItem, getShortsList, getLogoList } from "@/lib/api";
+import { getProjectDetail, deleteProject, ProjectDetail, ProjectListItem, getShortsList, getLogoList, uploadToYouTube } from "@/lib/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { 
@@ -73,7 +73,10 @@ const ProjectDashboardPage = () => {
     queryKey: ['project', projectId],
     queryFn: () => getProjectDetail(Number(projectId)),
     enabled: !!projectId && isLoggedIn,
-    staleTime: 0,
+    staleTime: 5 * 60 * 1000, // 5분간 캐시 유지 (중복 호출 방지)
+    gcTime: 10 * 60 * 1000, // 10분간 메모리 유지
+    refetchOnWindowFocus: false, // 탭 전환 시 자동 refetch 방지
+    refetchOnMount: false, // 마운트 시 refetch 방지
   });
 
   // localStorage 변경 감지하여 로그인 상태 업데이트
@@ -86,12 +89,10 @@ const ProjectDashboardPage = () => {
     };
     
     window.addEventListener('storage', handleStorageChange);
-    // 같은 탭에서의 변경도 감지하기 위해 interval 사용
-    const interval = setInterval(handleStorageChange, 1000);
+    // interval 제거: 불필요한 반복 호출 방지
     
     return () => {
       window.removeEventListener('storage', handleStorageChange);
-      clearInterval(interval);
     };
   }, []);
 
@@ -716,23 +717,48 @@ const ProjectDashboardPage = () => {
   };
 
   // 업로드 실행
-  const handleConfirmUpload = () => {
+  const handleConfirmUpload = async () => {
     if (selectedShortFormForUpload && selectedPlatforms.size > 0) {
       const platforms = Array.from(selectedPlatforms);
       const platformNames = platforms.map(p => p === "instagram" ? "Instagram" : "YouTube").join(", ");
       
-      // 업로드 상태 저장 (savedItems의 ID 사용, URL도 함께 전달)
-      const savedItemId = getShortFormSavedItemId(selectedShortFormForUpload.id, selectedShortFormForUpload.url);
-      platforms.forEach(platform => {
-        saveShortFormUploadStatus(savedItemId, platform as "instagram" | "youtube", true);
-      });
-      
-      // 실제 업로드 로직 (여기서는 더미)
-      toast({
-        title: "업로드 완료",
-        description: `숏폼이 ${platformNames}에 성공적으로 업로드되었습니다.`,
-        status: "success",
-      });
+      try {
+        // YouTube 업로드
+        if (platforms.includes('youtube')) {
+          await uploadToYouTube({
+            video_url: selectedShortFormForUpload.url,
+            title: selectedShortFormForUpload.title || "숏폼",
+            description: "",
+            tags: [],
+            privacy: 'public'
+          });
+        }
+        
+        // Instagram 업로드는 추후 구현
+        if (platforms.includes('instagram')) {
+          // TODO: Instagram 업로드 구현
+        }
+        
+        // 업로드 상태 저장 (savedItems의 ID 사용, URL도 함께 전달)
+        const savedItemId = getShortFormSavedItemId(selectedShortFormForUpload.id, selectedShortFormForUpload.url);
+        platforms.forEach(platform => {
+          saveShortFormUploadStatus(savedItemId, platform as "instagram" | "youtube", true);
+        });
+        
+        toast({
+          title: "업로드 완료",
+          description: `숏폼이 ${platformNames}에 성공적으로 업로드되었습니다.`,
+          status: "success",
+        });
+      } catch (error: any) {
+        console.error('업로드 실패:', error);
+        toast({
+          title: "업로드 실패",
+          description: error.message || "업로드 중 오류가 발생했습니다.",
+          status: "error",
+        });
+        return; // 에러 시 상태 저장하지 않음
+      }
       
       setIsUploadDialogOpen(false);
       setSelectedShortFormForUpload(null);

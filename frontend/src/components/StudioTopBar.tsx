@@ -33,6 +33,7 @@ interface StudioTopBarProps {
   userAvatar?: string | null;
   instagramConnected?: boolean;
   youtubeConnected?: boolean;
+  studioType?: "logo" | "shorts";
 }
 
 const StudioTopBar = ({
@@ -46,11 +47,12 @@ const StudioTopBar = ({
   userAvatar,
   instagramConnected = false,
   youtubeConnected = false,
+  studioType,
 }: StudioTopBarProps) => {
   const userInitials = userName?.charAt(0) || "U";
 
   return (
-    <header className="border-b border-border bg-background/80 backdrop-blur-xl flex-shrink-0">
+    <header className="border-b border-border bg-background/80 backdrop-blur-xl flex-shrink-0 relative">
       <div className="w-full px-12 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={onBack} className="h-9 w-9 hover:bg-transparent">
@@ -65,7 +67,13 @@ const StudioTopBar = ({
               alt="Makery Logo" 
               className="h-8 w-8 flex-shrink-0"
             />
-            MAKERY
+            <span>MAKERY</span>
+            {studioType === "logo" && (
+              <span className="text-[#7C22C8] font-handwriting">Logo</span>
+            )}
+            {studioType === "shorts" && (
+              <span className="text-[#FF8B3D] font-handwriting">Shorts</span>
+            )}
           </Link>
         </div>
 

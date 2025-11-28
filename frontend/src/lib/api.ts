@@ -361,6 +361,31 @@ export async function disconnectYouTube(): Promise<{ message: string }> {
   });
 }
 
+// YouTube 업로드 관련 인터페이스
+export interface YouTubeUploadRequest {
+  video_url: string;
+  title: string;
+  description?: string;
+  tags?: string[];
+  privacy?: 'public' | 'private' | 'unlisted';
+}
+
+export interface YouTubeUploadResponse {
+  success: boolean;
+  video_id: string;
+  video_url: string;
+  shorts_url: string;
+  message: string;
+}
+
+// YouTube에 비디오 업로드
+export async function uploadToYouTube(data: YouTubeUploadRequest): Promise<YouTubeUploadResponse> {
+  return apiRequest<YouTubeUploadResponse>('/social/youtube/upload', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
 // 쇼츠 저장 API 호출
 export async function saveShorts(data: SaveShortsRequest): Promise<SaveShortsResponse> {
   return apiRequest<SaveShortsResponse>('/shorts/save', {
@@ -434,5 +459,17 @@ export async function saveLogo(data: SaveLogoRequest): Promise<SaveLogoResponse>
 export async function getLogoList(projectId: number): Promise<LogoListItem[]> {
   return apiRequest<LogoListItem[]>(`/logo/list?project_id=${projectId}`, {
     method: 'GET',
+  });
+}
+
+// 로고 삭제 API 호출
+export interface DeleteLogoResponse {
+  success: boolean;
+  message: string;
+}
+
+export async function deleteLogo(prodId: number): Promise<DeleteLogoResponse> {
+  return apiRequest<DeleteLogoResponse>(`/logo/${prodId}`, {
+    method: 'DELETE',
   });
 }
