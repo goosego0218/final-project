@@ -243,7 +243,7 @@ def save_shorts(
             db=db,
             base64_video=req.base64_video,
             project_id=req.project_id,
-            prod_type_id=req.prod_type_id or 1,
+            prod_type_id=req.prod_type_id or 2,
             user_id=current_user.id,
         )
         
@@ -294,7 +294,7 @@ def get_shorts_list_endpoint(
         )
     
     # 쇼츠 목록 조회
-    shorts_list = get_shorts_list(db=db, project_id=project_id, prod_type_id=1)
+    shorts_list = get_shorts_list(db=db, project_id=project_id, prod_type_id=2)
     
     # 응답 모델로 변환
     result = []
