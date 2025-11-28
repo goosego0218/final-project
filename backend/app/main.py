@@ -43,6 +43,14 @@ async def lifespan(app: FastAPI):
 
         oracle_db.init_pool()
         print("Oracle pool initialized on startup.")
+        
+        # Kanana Safeguard GPU 서버 연결 확인 (선택적)
+        if getattr(settings, 'safeguard_enabled', False):
+            safeguard_url = getattr(settings, 'safeguard_server_url', '')
+            if safeguard_url:
+                print(f"[Startup] Kanana Safeguard GPU 서버: {safeguard_url}")
+            else:
+                print("[Startup] ⚠️ safeguard_enabled=True이지만 safeguard_server_url이 설정되지 않았습니다")
     except Exception as e:
         print(f"[WARN] Oracle pool init failed: {e}")
     yield # yield 앞은 startup, 뒤는 shutdown 시점
