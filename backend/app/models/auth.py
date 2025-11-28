@@ -22,7 +22,7 @@ from app.db.orm import Base
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING: # 타입 검사할 때만 실행하고, 실제 파이썬을 실행할 때는 실행되지 않음.
-    from app.models.project import ProdGroup, GenerationProd
+    from app.models.project import ProdGroup, GenerationProd, Comment
     from app.models.social import SocialConnection
 
 class Role(Base):
@@ -149,6 +149,14 @@ class UserInfo(Base):
     social_connections: Mapped[list["SocialConnection"]] = relationship(
         "SocialConnection",
         back_populates="user",
+        lazy="selectin",
+        cascade="all, delete-orphan",
+    )
+    
+    # 이 유저가 작성한 댓글들 (1:N)
+    comments: Mapped[list["Comment"]] = relationship(
+        "Comment",
+        foreign_keys="[Comment.user_id]",
         lazy="selectin",
         cascade="all, delete-orphan",
     )
