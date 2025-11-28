@@ -62,7 +62,17 @@ class Settings(BaseSettings):
     veo_duration_seconds: int = 8
     veo_aspect_ratio: str = ""
     veo_resolution: str = ""
+
+    # File Server
+    file_server_url: str = "https://kr.object.ncloudstorage.com/aissemble"
     
+    # NCP Object Storage  
+    ncp_access_key: str = ""
+    ncp_secret_key: str = ""
+    ncp_region: str = ""
+    ncp_endpoint: str = ""
+    ncp_bucket_name: str = ""
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
