@@ -42,6 +42,22 @@ interface BrandInfo {
   preferred_colors: string[];
 }
 
+// 프론트엔드에서 사용하는 통합 BrandInfo 타입 (백엔드와 로컬 모두 지원)
+interface UnifiedBrandInfo {
+  brand_name?: string;
+  industry?: string;
+  category?: string; // 백엔드 필드명
+  mood?: string;
+  tone_mood?: string; // 백엔드 필드명
+  core_keywords?: string | string[];
+  target_age?: string;
+  target_gender?: string;
+  avoid_trends?: string | string[];
+  avoided_trends?: string; // 백엔드 필드명
+  slogan?: string;
+  preferred_colors?: string | string[];
+}
+
 const ChatPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -174,30 +190,30 @@ const ChatPage = () => {
   };
 
   // 필수 항목이 모두 채워졌는지 확인 (건너뛰기용: brand_name과 category만)
-  const checkRequiredFieldsComplete = (info: BrandInfo): boolean => {
+  const checkRequiredFieldsComplete = (info: UnifiedBrandInfo): boolean => {
     // 필수 항목: brand_name, category만 확인
-    const brandName = info.brand_name?.trim() || "";
-    const category = info.industry?.trim() || "";
+    const brandName = (info.brand_name || "").trim();
+    const category = (info.industry || info.category || "").trim(); // 둘 다 체크
     return brandName !== "" && category !== "";
   };
 
   // 모든 필드가 채워졌는지 확인 (9개 필드 모두)
-  const checkAllFieldsComplete = (info: BrandInfo): boolean => {
+  const checkAllFieldsComplete = (info: UnifiedBrandInfo): boolean => {
     // core_keywords, avoided_trends, preferred_colors는 문자열 또는 배열일 수 있음
     const coreKeywords = Array.isArray(info.core_keywords) 
       ? info.core_keywords.join(', ') 
-      : info.core_keywords;
+      : (info.core_keywords || "");
     const avoidedTrends = Array.isArray(info.avoid_trends)
       ? info.avoid_trends.join(', ')
-      : info.avoid_trends;
+      : (info.avoid_trends || info.avoided_trends || ""); // 둘 다 체크
     const preferredColors = Array.isArray(info.preferred_colors)
       ? info.preferred_colors.join(', ')
-      : info.preferred_colors;
+      : (info.preferred_colors || "");
     
     const fields = [
       info.brand_name,
-      info.industry,
-      info.mood,
+      info.industry || info.category, // 둘 다 체크
+      info.mood || info.tone_mood, // 둘 다 체크
       coreKeywords,
       info.target_age,
       info.target_gender,
@@ -308,27 +324,59 @@ const ChatPage = () => {
   // 프로그레스 계산 (백엔드 brand_info 기반)
   const calculateProgress = () => {
     // 백엔드에서 받은 brand_info가 있으면 그것을 사용, 없으면 collectedInfo 사용
-    const info = brandInfo || {
-      brand_name: collectedInfo.brand_name,
-      industry: collectedInfo.industry,
-      mood: collectedInfo.mood,
-      core_keywords: collectedInfo.core_keywords.join(', '),
-      target_age: collectedInfo.target_age,
-      target_gender: collectedInfo.target_gender,
-      avoid_trends: collectedInfo.avoid_trends.join(', '),
-      slogan: collectedInfo.slogan,
-      preferred_colors: collectedInfo.preferred_colors.join(', '),
+    // 백엔드는 category, tone_mood, avoided_trends를 사용하므로 매핑 필요
+    let info: {
+      brand_name?: string;
+      industry?: string;
+      category?: string;
+      mood?: string;
+      tone_mood?: string;
+      core_keywords?: string;
+      target_age?: string;
+      target_gender?: string;
+      avoid_trends?: string;
+      avoided_trends?: string;
+      slogan?: string;
+      preferred_colors?: string;
     };
+    
+    if (brandInfo) {
+      // 백엔드 brandInfo 사용 (필드명 매핑)
+      info = {
+        brand_name: brandInfo.brand_name,
+        industry: brandInfo.category, // 백엔드는 category, 프론트는 industry로 사용
+        mood: brandInfo.tone_mood, // 백엔드는 tone_mood, 프론트는 mood로 사용
+        core_keywords: brandInfo.core_keywords,
+        target_age: brandInfo.target_age,
+        target_gender: brandInfo.target_gender,
+        avoid_trends: brandInfo.avoided_trends, // 백엔드는 avoided_trends, 프론트는 avoid_trends로 사용
+        slogan: brandInfo.slogan,
+        preferred_colors: brandInfo.preferred_colors,
+      };
+    } else {
+      // collectedInfo 사용
+      info = {
+        brand_name: collectedInfo.brand_name,
+        industry: collectedInfo.industry,
+        mood: collectedInfo.mood,
+        core_keywords: collectedInfo.core_keywords.join(', '),
+        target_age: collectedInfo.target_age,
+        target_gender: collectedInfo.target_gender,
+        avoid_trends: collectedInfo.avoid_trends.join(', '),
+        slogan: collectedInfo.slogan,
+        preferred_colors: collectedInfo.preferred_colors.join(', '),
+      };
+    }
 
-    // 총 9개 필드 체크
+    // 총 9개 필드 체크 (프론트엔드 필드명 기준)
     const fields = [
       info.brand_name,
-      info.industry,
-      info.mood,
+      info.industry || info.category, // 둘 다 체크
+      info.mood || info.tone_mood, // 둘 다 체크
       info.core_keywords,
       info.target_age,
       info.target_gender,
-      info.avoid_trends,
+      info.avoid_trends || info.avoided_trends, // 둘 다 체크
       info.slogan,
       info.preferred_colors,
     ];
@@ -348,8 +396,11 @@ const ChatPage = () => {
   };
 
   // 공통 Studio 이동 함수
-  const handleGoToStudio = (projectId: string, type?: "logo" | "short", fromStyle?: boolean) => {
-    if (!projectId) {
+  const handleGoToStudio = (projectId: string | number, type?: "logo" | "short", fromStyle?: boolean) => {
+    // DB 프로젝트 ID를 우선 사용, 없으면 로컬 프로젝트 ID 사용
+    const finalProjectId = dbProjectId || projectId;
+    
+    if (!finalProjectId) {
       toast({
         title: "오류",
         description: "프로젝트를 찾을 수 없습니다.",
@@ -358,7 +409,20 @@ const ChatPage = () => {
       return;
     }
 
-    const project = projectStorage.getProject(projectId);
+    // type이 지정된 경우: 별도 페이지로 이동 (/chat/logo 또는 /chat/shorts)
+    if (type) {
+      const projectIdStr = String(finalProjectId);
+      if (type === "logo") {
+        navigate(`/chat/logo?project=${projectIdStr}`);
+      } else if (type === "short") {
+        navigate(`/chat/shorts?project=${projectIdStr}`);
+      }
+      return;
+    }
+
+    // type이 없는 경우: 기존 로직 (로컬 프로젝트만 지원)
+    const projectIdStr = String(projectId);
+    const project = projectStorage.getProject(projectIdStr);
     if (!project) {
       toast({
         title: "오류",
@@ -373,7 +437,7 @@ const ChatPage = () => {
       role: "system",
       content: JSON.stringify(collectedInfo)
     };
-    projectStorage.addMessage(projectId, infoMessage);
+    projectStorage.addMessage(projectIdStr, infoMessage);
 
     // Studio로 이동 (type 파라미터 제거)
     const fromStyleParam = fromStyle && baseAssetType && baseAssetId 
@@ -385,7 +449,7 @@ const ChatPage = () => {
       status: "success",
     });
     
-    navigate(`/studio?project=${projectId}${fromStyleParam}`);
+    navigate(`/studio?project=${projectIdStr}${fromStyleParam}`);
   };
 
   useEffect(() => {
@@ -679,7 +743,7 @@ const ChatPage = () => {
     // 필수 항목 체크 - brandInfo (백엔드 정보) 우선 사용, 없으면 collectedInfo 사용
     // brandInfo는 category 사용, collectedInfo는 industry 사용
     const brandNameValue = (brandInfo?.brand_name || collectedInfo.brand_name || "").trim();
-    const categoryValue = (brandInfo?.industry || collectedInfo.industry || "").trim();
+    const categoryValue = (brandInfo?.category || collectedInfo.industry || "").trim();
     
     if (!brandNameValue || !categoryValue) {
       toast({
@@ -939,14 +1003,12 @@ const ChatPage = () => {
   const handleGenerateClick = (type: "logo" | "short") => {
     // DB 프로젝트 모드인 경우
     if (dbProjectId) {
-      toast({
-        title: "스튜디오로 이동합니다",
-        description: type === "logo" ? "로고 생성을 시작합니다." : "숏폼 생성을 시작합니다.",
-        status: "success",
-      });
-      
-      // DB 프로젝트 ID를 사용하여 Studio로 이동
-      navigate(`/studio?project=${dbProjectId}&type=${type}`);
+      // DB 프로젝트 ID를 사용하여 별도 페이지로 이동
+      if (type === "logo") {
+        navigate(`/chat/logo?project=${dbProjectId}`);
+      } else if (type === "short") {
+        navigate(`/chat/shorts?project=${dbProjectId}`);
+      }
       return;
     }
 
@@ -987,7 +1049,21 @@ const ChatPage = () => {
   const progress = calculateProgress();
   
   // brandInfo를 우선 사용, 없으면 collectedInfo 사용
-  const currentBrandInfo: ApiBrandInfo = brandInfo || {
+  // 백엔드는 category, tone_mood, avoided_trends를 사용하므로 프론트엔드 필드명으로 매핑
+  const currentBrandInfo: UnifiedBrandInfo = brandInfo ? {
+    brand_name: brandInfo.brand_name,
+    industry: brandInfo.category, // 백엔드는 category, 프론트는 industry로 사용
+    category: brandInfo.category, // 백엔드 필드명도 유지
+    mood: brandInfo.tone_mood, // 백엔드는 tone_mood, 프론트는 mood로 사용
+    tone_mood: brandInfo.tone_mood, // 백엔드 필드명도 유지
+    core_keywords: brandInfo.core_keywords,
+    target_age: brandInfo.target_age,
+    target_gender: brandInfo.target_gender,
+    avoid_trends: brandInfo.avoided_trends, // 백엔드는 avoided_trends, 프론트는 avoid_trends로 사용
+    avoided_trends: brandInfo.avoided_trends, // 백엔드 필드명도 유지
+    slogan: brandInfo.slogan,
+    preferred_colors: brandInfo.preferred_colors,
+  } : {
     brand_name: collectedInfo.brand_name,
     industry: collectedInfo.industry,
     mood: collectedInfo.mood,
@@ -1263,7 +1339,8 @@ const ChatPage = () => {
               <AlertDialogFooter className="flex-col sm:flex-row gap-2">
                 <Button
                   onClick={() => {
-                    if (!currentProjectId) {
+                    const projectId = dbProjectId || currentProjectId;
+                    if (!projectId) {
                       toast({
                         title: "오류",
                         description: "프로젝트를 찾을 수 없습니다.",
@@ -1273,7 +1350,7 @@ const ChatPage = () => {
                     }
                     setShowSkipDialog(false);
                     setSkipDialogStep("confirm");
-                    handleGoToStudio(currentProjectId, "logo");
+                    handleGoToStudio(projectId, "logo");
                   }}
                   className="flex-1 border border-neutral-300 dark:border-neutral-700 text-white group transition-all"
                   style={{ backgroundColor: '#7C22C8' }}
@@ -1285,7 +1362,8 @@ const ChatPage = () => {
                 </Button>
                 <Button
                   onClick={() => {
-                    if (!currentProjectId) {
+                    const projectId = dbProjectId || currentProjectId;
+                    if (!projectId) {
                       toast({
                         title: "오류",
                         description: "프로젝트를 찾을 수 없습니다.",
@@ -1295,7 +1373,7 @@ const ChatPage = () => {
                     }
                     setShowSkipDialog(false);
                     setSkipDialogStep("confirm");
-                    handleGoToStudio(currentProjectId, "short");
+                    handleGoToStudio(projectId, "short");
                   }}
                   className="flex-1 border border-neutral-300 dark:border-neutral-700 text-white group transition-all"
                   style={{ backgroundColor: '#FF8A3D' }}
@@ -1332,13 +1410,13 @@ const ChatPage = () => {
               {/* 업종 */}
               <div className="bg-muted/50 rounded-lg p-3 border border-border">
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">업종</label>
-                <p className="text-sm font-semibold text-foreground">{currentBrandInfo.industry || "-"}</p>
+                <p className="text-sm font-semibold text-foreground">{currentBrandInfo.industry || currentBrandInfo.category || "-"}</p>
               </div>
               
               {/* 톤앤무드 */}
               <div className="bg-muted/50 rounded-lg p-3 border border-border">
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">톤앤무드</label>
-                <p className="text-sm font-semibold text-foreground">{currentBrandInfo.mood || "-"}</p>
+                <p className="text-sm font-semibold text-foreground">{currentBrandInfo.mood || currentBrandInfo.tone_mood || "-"}</p>
               </div>
               
               {/* 타겟 연령 */}
@@ -1375,11 +1453,15 @@ const ChatPage = () => {
               <div className="col-span-2 bg-muted/50 rounded-lg p-3 border border-border">
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">피하고 싶은 트렌드</label>
                 <p className="text-sm font-semibold text-foreground">
-                  {typeof currentBrandInfo.avoid_trends === 'string' 
-                    ? currentBrandInfo.avoid_trends 
-                    : Array.isArray(currentBrandInfo.avoid_trends)
-                    ? currentBrandInfo.avoid_trends.join(', ')
-                    : "-"}
+                  {(() => {
+                    const avoidTrends = currentBrandInfo.avoid_trends || currentBrandInfo.avoided_trends;
+                    if (typeof avoidTrends === 'string') {
+                      return avoidTrends;
+                    } else if (Array.isArray(avoidTrends)) {
+                      return avoidTrends.join(', ');
+                    }
+                    return "-";
+                  })()}
                 </p>
               </div>
               
@@ -1443,8 +1525,9 @@ const ChatPage = () => {
             <Button
               onClick={() => {
                 setShowGenerateTypeDialog(false);
-                if (currentProjectId) {
-                  handleGoToStudio(currentProjectId, "logo");
+                const projectId = dbProjectId || currentProjectId;
+                if (projectId) {
+                  handleGoToStudio(projectId, "logo");
                 }
               }}
               className="flex-1 text-white gap-2"
@@ -1458,8 +1541,9 @@ const ChatPage = () => {
             <Button
               onClick={() => {
                 setShowGenerateTypeDialog(false);
-                if (currentProjectId) {
-                  handleGoToStudio(currentProjectId, "short");
+                const projectId = dbProjectId || currentProjectId;
+                if (projectId) {
+                  handleGoToStudio(projectId, "short");
                 }
               }}
               className="flex-1 bg-primary hover:bg-primary/90 gap-2"
