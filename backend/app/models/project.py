@@ -89,7 +89,7 @@ class ProdGroup(Base):
     creator: Mapped["UserInfo"] = relationship(
         foreign_keys=[creator_id],
         back_populates="project_groups",
-        lazy="joined",
+        lazy="select",
     )
 
     brand_info = relationship(
@@ -221,22 +221,22 @@ class GenerationProd(Base):
 
     # 관계 설정
     type: Mapped["ProdType"] = relationship(
-        lazy="joined",
+        lazy="select",
     )
 
     group: Mapped["ProdGroup"] = relationship(
-        lazy="joined",
+        lazy="select",
     )
 
     creator: Mapped["UserInfo"] = relationship(
         foreign_keys=[create_user],
-        lazy="joined",
+        lazy="select",
         overlaps="created_products",
     )
 
     updater: Mapped["UserInfo | None"] = relationship(
         foreign_keys=[update_user],
-        lazy="joined",
+        lazy="select",
         overlaps="updated_products",
     )
     
@@ -305,11 +305,11 @@ class Comment(Base):
     # 관계 설정
     product: Mapped["GenerationProd"] = relationship(
         back_populates="comments",
-        lazy="joined",
+        lazy="select",
     )
-    
+
     user: Mapped["UserInfo"] = relationship(
         foreign_keys=[user_id],
-        lazy="joined",
+        lazy="select",
         overlaps="comments",
     )

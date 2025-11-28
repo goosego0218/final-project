@@ -24,8 +24,13 @@ class Base(DeclarativeBase):
 # 엔진 생성
 engine = create_engine(
     DATABASE_URL,
-    pool_pre_ping=True, # 죽은 커넥션 자동 감지
-    future=True, # SQLAlchemy 2.x 스타일
+    pool_pre_ping=True,  # 죽은 커넥션 자동 감지
+    future=True,  # SQLAlchemy 2.x 스타일
+    pool_size=10,  # 기본 커넥션 풀 크기
+    max_overflow=20,  # 추가 커넥션 최대 개수 (총 30개까지 가능)
+    pool_timeout=30,  # 커넥션 대기 시간 (초)
+    pool_recycle=3600,  # 1시간마다 커넥션 재생성 (DB 타임아웃 방지)
+    echo=True,  # SQL 로깅 (디버깅 시 True)
 )
 
 # 세션 팩토리

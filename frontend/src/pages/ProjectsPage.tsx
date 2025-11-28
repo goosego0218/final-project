@@ -36,17 +36,26 @@ const ProjectsPage = () => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   // DB에서 프로젝트 목록 가져오기
-  const { data: projects = [], isLoading: isProjectsLoading, refetch } = useQuery({
+  const { data: projects = [], isLoading: isProjectsLoading } = useQuery({
     queryKey: ['userProjects'],
     queryFn: getProjects,
     enabled: isLoggedIn, // 로그인 상태일 때만 조회
-    staleTime: 5 * 60 * 1000, // 5분간 캐시 유지 (중복 호출 방지)
-    gcTime: 10 * 60 * 1000, // 10분간 메모리 유지
-    refetchOnWindowFocus: false, // 탭 전환 시 자동 refetch 방지
-    refetchOnMount: false, // 마운트 시 refetch 방지
+    staleTime: 5 * 60 * 1000, // 5분간 캐시 유지
+    refetchOnWindowFocus: false, // 윈도우 포커스 시 자동 refetch 비활성화
+    refetchOnMount: false, // 마운트 시 자동 refetch 비활성화
   });
 
   useEffect(() => {
+    // localStorage 변경 감지
+    const handleStorageChange = () => {
+      const isNowLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+      setIsLoggedIn(isNowLoggedIn);
+      if (!isNowLoggedIn) {
+        navigate("/");
+      }
+      // refetch() 제거 - interval에서는 refetch 하지 않음
+    };
+
     // 초기 로드
     const loggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
     setIsLoggedIn(loggedIn);
@@ -56,26 +65,13 @@ const ProjectsPage = () => {
       return;
     }
 
-    // localStorage 변경 감지 (다른 탭에서의 변경만 감지)
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'isLoggedIn' || e.key === 'accessToken') {
-        const isNowLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
-        setIsLoggedIn(isNowLoggedIn);
-        if (!isNowLoggedIn) {
-          navigate("/");
-        } else {
-          // 로그인 상태면 프로젝트 목록 다시 가져오기 (한 번만)
-          queryClient.invalidateQueries({ queryKey: ['userProjects'] });
-        }
-      }
-    };
-
     window.addEventListener('storage', handleStorageChange);
+    // interval 제거 - 불필요한 반복 호출 방지
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, [navigate, queryClient]);
+  }, [navigate]);
 
   const handleNewProjectClick = () => {
     // localStorage와 sessionStorage에서 직접 확인하여 최신 로그인 상태 반영
