@@ -18,3 +18,10 @@ class SaveShortsResponse(BaseModel):
     prod_id: int
     file_path: str
     file_url: str
+
+
+class ShortsListItemResponse(BaseModel):
+    prod_id: int
+    file_path: str
+    file_url: str
+    create_dt: str | None = None    
