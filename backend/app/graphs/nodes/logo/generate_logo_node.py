@@ -11,6 +11,7 @@ import base64
 from langgraph.types import Command
 from langgraph.graph import END
 from langchain_core.messages import AIMessage
+from google.genai import types 
 
 from app.core.config import settings
 
@@ -19,7 +20,7 @@ if TYPE_CHECKING:
     from google.genai import Client
 
 
-def make_generate_logo_node(gemini_image_client: "Client"):  # ← 이름 명확하게
+def make_generate_logo_node(genai_client: "Client"):  
     """
     생성된 프롬프트로 Gemini 로고 생성 노드 팩토리
     """
@@ -37,27 +38,51 @@ def make_generate_logo_node(gemini_image_client: "Client"):  # ← 이름 명확
             return Command(update={"messages": [error_msg]}, goto=END)
         
         try:
-            print(f"로고 생성 중...")
+            print(f"로고 생성 중... (API Key 방식)")
+            
+            generate_content_config = types.GenerateContentConfig(
+                temperature=1,
+                top_p=0.95,
+                response_modalities=["IMAGE"],
+                image_config=types.ImageConfig(
+                    aspect_ratio="1:1",
+                    image_size="1K",
+                    output_mime_type="image/png",
+                ),
+            )
             
             # Gemini 이미지 생성 호출
-            response = gemini_image_client.models.generate_content(
+            response = genai_client.models.generate_content(
                 model=settings.google_genai_model,
-                contents=[prompt],
+                contents=prompt,  
+                config=generate_content_config,
             )
             
             print(f"이미지 데이터 추출 중...")
             
-            # 생성된 이미지 가져오기
             image_bytes = None
             for part in response.parts:
-                img = part.as_image()
-                if img:
-                    # PIL Image → bytes
-                    import io
-                    img_bytes_io = io.BytesIO()
-                    img.save(img_bytes_io, format='PNG')
-                    image_bytes = img_bytes_io.getvalue()
+                if hasattr(part, 'inline_data') and part.inline_data:
+                    image_bytes = part.inline_data.data
                     break
+                elif hasattr(part, 'file_data') and part.file_data:
+                    # 파일 데이터인 경우 다운로드 필요
+                    print(f"파일 URI: {part.file_data.file_uri}")
+                    # TODO: 파일 다운로드 로직
+                else:
+                    # as_image() 시도 (PIL Image일 경우)
+                    try:
+                        import io
+                        from PIL import Image
+                        img = part.as_image()
+                        if img and isinstance(img, Image.Image):
+                            img_bytes_io = io.BytesIO()
+                            img.save(img_bytes_io, format='PNG')
+                            image_bytes = img_bytes_io.getvalue()
+                            break
+                    except Exception as e:
+                        print(f"이미지 변환 실패: {e}")
+                        continue
             
             if not image_bytes:
                 error_msg = AIMessage(content="이미지 데이터를 가져올 수 없습니다.")

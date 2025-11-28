@@ -681,7 +681,69 @@ const LogoChatPage = () => {
                                   ))}
                                 </div>
                               )}
-                              <p className="whitespace-pre-wrap">{message.content}</p>
+                              {(() => {
+                                const logoUrlMatch = message.content.match(/\[LOGO_URL\](.*?)\[\/LOGO_URL\]/);
+                                
+                                if (logoUrlMatch && message.role === "assistant") {
+                                  const logoUrl = logoUrlMatch[1];
+                                  const textContent = message.content
+                                    .replace(/\[LOGO_URL\].*?\[\/LOGO_URL\]/g, '')
+                                    .trim();
+                                  
+                                  return (
+                                    <>
+                                      {textContent && <p className="whitespace-pre-wrap break-words mb-3">{textContent}</p>}
+                                      <div className="mt-3 relative group">
+                                        <img 
+                                          src={logoUrl} 
+                                          alt="Generated Logo"
+                                          className="w-full max-w-xs rounded-lg shadow-md"
+                                        />
+                                        <div className="mt-3 flex gap-2">
+                                          <Button 
+                                            size="sm"
+                                            onClick={() => {
+                                              setSelectedResult({
+                                                type: "logo",
+                                                url: logoUrl,
+                                                index: messages.length - 1
+                                              });
+                                              setHasResultPanel(true);
+                                            }}
+                                          >
+                                            재생
+                                          </Button>
+                                          <Button
+                                            size="sm"
+                                            variant="secondary"
+                                            onClick={() => {
+                                              const newLogo: SavedItem = {
+                                                id: Date.now().toString(),
+                                                type: "logo",
+                                                url: logoUrl,
+                                                title: `로고 ${savedLogos.length + 1}`,
+                                                timestamp: new Date().toISOString(),
+                                                projectId: currentProjectId || undefined,
+                                              };
+                                              const updated = projectStorage.addItem(newLogo);
+                                              setSavedLogos(updated.filter((item) => item.type === "logo"));
+                                              toast({
+                                                title: "저장 완료",
+                                                description: "로고가 보관함에 저장되었습니다.",
+                                              });
+                                            }}
+                                          >
+                                            <Star className="h-4 w-4 mr-2" />
+                                            저장
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    </>
+                                  );
+                                }
+                                
+                                return <p className="whitespace-pre-wrap break-words">{message.content}</p>;
+                              })()}                              
                             </Card>
                           </div>
                         )}

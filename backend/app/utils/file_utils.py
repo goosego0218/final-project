@@ -5,6 +5,11 @@
 
 from urllib.parse import urljoin
 from app.core.config import settings
+import base64
+import uuid
+from datetime import datetime
+import boto3
+from botocore.client import Config
 
 
 def get_file_url(file_path: str | None) -> str | None:
@@ -64,3 +69,64 @@ def get_file_path_from_url(url: str | None) -> str | None:
     
     return relative_path
 
+def upload_base64_to_ncp(
+    base64_data: str,
+    file_type: str = "shorts",  # "shorts" or "logo"
+    project_id: int | None = None
+) -> str:
+    """
+    Base64 데이터를 NCP Object Storage에 업로드하고 파일 경로 반환
+    
+    Args:
+        base64_data: Base64 인코딩된 데이터 (data:video/mp4;base64,... 형식도 가능)
+        file_type: "shorts" 또는 "logo"
+        project_id: 프로젝트 ID (선택)
+        
+    Returns:
+        업로드된 파일의 상대 경로 (예: "/media/shorts/20251128/uuid.mp4")
+    """
+    # data:video/mp4;base64, 또는 data:image/png;base64, 제거
+    if "," in base64_data:
+        base64_data = base64_data.split(",", 1)[1]
+    
+    # Base64 디코딩
+    file_bytes = base64.b64decode(base64_data)
+    
+    # 파일 확장자 결정
+    extension = "mp4" if file_type == "shorts" else "png"
+    
+    # 파일명 생성: 날짜/UUID.확장자
+    today = datetime.now().strftime("%Y%m%d")
+    filename = f"{uuid.uuid4()}.{extension}"
+    
+    # 경로 생성: /media/{file_type}/{날짜}/{파일명}
+    file_path = f"/media/{file_type}/{today}/{filename}"
+    
+    # NCP Object Storage 업로드
+    try:
+        s3_client = boto3.client(
+            's3',
+            aws_access_key_id=settings.ncp_access_key,
+            aws_secret_access_key=settings.ncp_secret_key,
+            endpoint_url=settings.ncp_endpoint,
+            region_name=settings.ncp_region,
+            config=Config(signature_version='s3v4')
+        )
+        
+        # 파일 업로드 (버킷명/media/shorts/날짜/파일명.mp4)
+        s3_key = file_path.lstrip("/")  # 앞의 "/" 제거
+        
+        content_type = "video/mp4" if file_type == "shorts" else "image/png"
+        
+        s3_client.put_object(
+            Bucket=settings.ncp_bucket_name,
+            Key=s3_key,
+            Body=file_bytes,
+            ContentType=content_type,
+            ACL='public-read'  # 공개 읽기 (필요시 조정)
+        )
+        
+        return file_path
+        
+    except Exception as e:
+        raise RuntimeError(f"NCP Object Storage 업로드 실패: {str(e)}")
