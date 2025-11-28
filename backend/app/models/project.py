@@ -17,6 +17,10 @@ from app.db.orm import Base
 from app.models.auth import UserInfo
 from datetime import datetime
 from sqlalchemy import DateTime, func
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.auth import UserInfo
 
 
 class ProdGroup(Base):
@@ -234,4 +238,77 @@ class GenerationProd(Base):
         foreign_keys=[update_user],
         lazy="joined",
         overlaps="updated_products",
+    )
+    
+    # 댓글 관계 (1:N)
+    comments: Mapped[list["Comment"]] = relationship(
+        back_populates="product",
+        lazy="selectin",
+        cascade="all, delete-orphan",
+    )
+
+
+class Comment(Base):
+    """
+    생성물 댓글 테이블 (comments)
+    """
+    __tablename__ = "comments"
+    
+    comment_id: Mapped[int] = mapped_column(
+        Integer,
+        primary_key=True,
+        comment="댓글 번호",
+    )
+    
+    prod_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("generation_prod.prod_id"),
+        nullable=False,
+        comment="생성물 번호",
+    )
+    
+    user_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("user_info.id"),
+        nullable=False,
+        comment="작성자 유저 번호",
+    )
+    
+    content: Mapped[str] = mapped_column(
+        String(2000),
+        nullable=False,
+        comment="댓글 내용",
+    )
+    
+    create_dt: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.sysdate(),
+        nullable=False,
+        comment="작성일",
+    )
+    
+    update_dt: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.sysdate(),
+        onupdate=func.sysdate(),
+        nullable=False,
+        comment="수정일",
+    )
+    
+    del_yn: Mapped[str] = mapped_column(
+        String(1),
+        nullable=False,
+        server_default=text("'N'"),
+        comment="삭제여부",
+    )
+    
+    # 관계 설정
+    product: Mapped["GenerationProd"] = relationship(
+        back_populates="comments",
+        lazy="joined",
+    )
+    
+    user: Mapped["UserInfo"] = relationship(
+        foreign_keys=[user_id],
+        lazy="joined",
     )
