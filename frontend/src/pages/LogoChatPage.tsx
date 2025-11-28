@@ -15,7 +15,7 @@ import StudioTopBar from "@/components/StudioTopBar";
 import { getLogoIntro, sendLogoChat, getProjectDetail } from "@/lib/api";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import ThemeToggle from "@/components/ThemeToggle";
-import { saveLogo, getLogoList } from "@/lib/api";
+import { saveLogo, getLogoList, deleteLogo } from "@/lib/api";
 import { Save } from "lucide-react";
 
 interface SelectedResult {
@@ -567,6 +567,68 @@ const LogoChatPage = () => {
     }
   };
 
+  // 프로젝트에서 삭제 핸들러
+  const handleDeleteFromStorage = async () => {
+    if (!selectedResult || !currentProjectId) {
+      return;
+    }
+
+    // savedLogos에서 현재 선택된 로고 찾기
+    const savedLogo = savedLogos.find(
+      item => item.url === selectedResult.url && item.type === selectedResult.type
+    );
+
+    if (!savedLogo) {
+      toast({
+        title: "삭제 실패",
+        description: "저장된 로고를 찾을 수 없습니다.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // prod_id 추출 (id가 "db_123" 형식이므로 숫자 부분만 추출)
+    const prodId = parseInt(savedLogo.id.replace('db_', ''));
+
+    if (isNaN(prodId)) {
+      toast({
+        title: "삭제 실패",
+        description: "유효하지 않은 로고 ID입니다.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await deleteLogo(prodId);
+
+      toast({
+        title: "삭제 완료",
+        description: "로고가 프로젝트에서 삭제되었습니다.",
+      });
+      
+      // 삭제 성공 후 목록 새로고침
+      if (currentProjectId) {
+        await loadLogosFromDb(parseInt(currentProjectId));
+      }
+    } catch (error: any) {
+      console.error("로고 삭제 실패:", error);
+      toast({
+        title: "삭제 실패",
+        description: error.message || "로고 삭제에 실패했습니다.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // 현재 선택된 로고가 저장되어 있는지 확인
+  const isLogoSaved = selectedResult ? savedLogos.some(
+    item => item.url === selectedResult.url && item.type === selectedResult.type
+  ) : false;
+
   const currentLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
   if (!currentLoggedIn) {
     return (
@@ -630,25 +692,6 @@ const LogoChatPage = () => {
                     <div className="p-4 flex items-center justify-between flex-shrink-0">
                       <h2 className="text-lg font-semibold">로고 #{selectedResult.index + 1}</h2>
                       <div className="flex items-center gap-2">
-                        <Button
-                          variant="default"
-                          size="sm"
-                          onClick={handleSaveToStorage}
-                          disabled={isSaving}
-                          className="bg-primary hover:bg-primary/90"
-                        >
-                          {isSaving ? (
-                            <>
-                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                              저장 중...
-                            </>
-                          ) : (
-                            <>
-                              <Save className="h-4 w-4 mr-2" />
-                              보관함에 저장
-                            </>
-                          )}
-                        </Button>
                         {savedLogos.some(
                           item => item.url === selectedResult.url && item.type === selectedResult.type
                         ) && (
@@ -710,12 +753,35 @@ const LogoChatPage = () => {
                               variant="secondary"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleSave(selectedResult.url, "logo", selectedResult.index);
+                                if (isLogoSaved) {
+                                  handleDeleteFromStorage();
+                                } else {
+                                  handleSaveToStorage();
+                                }
                               }}
+                              disabled={isSaving}
                               className="bg-background/90 hover:bg-background"
                             >
-                              <Star className="h-4 w-4 mr-2" />
-                              저장
+                              {isSaving ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  {isLogoSaved ? "삭제 중..." : "저장 중..."}
+                                </>
+                              ) : (
+                                <>
+                                  {isLogoSaved ? (
+                                    <>
+                                      <Trash2 className="h-4 w-4 mr-2" />
+                                      프로젝트에서 삭제
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Save className="h-4 w-4 mr-2" />
+                                      프로젝트에 저장
+                                    </>
+                                  )}
+                                </>
+                              )}
                             </Button>
                           </div>
                         </div>

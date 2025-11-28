@@ -56,17 +56,20 @@ const StudioTopBar = ({
           <Button variant="ghost" size="icon" onClick={onBack} className="h-9 w-9 hover:bg-transparent">
             <ChevronLeft className="h-5 w-5" />
           </Button>
-          <Link
-            to="/"
-            className="flex items-center gap-2 text-2xl font-bold tracking-tight text-foreground hover:opacity-80 transition-opacity"
-          >
-            <img 
-              src="/makery-logo.png" 
-              alt="Makery Logo" 
-              className="h-8 w-8 flex-shrink-0"
-            />
-            MAKERY
-          </Link>
+          <div className="flex flex-col">
+            <Link
+              to="/"
+              className="flex items-center gap-2 text-2xl font-bold tracking-tight text-foreground hover:opacity-80 transition-opacity"
+            >
+              <img 
+                src="/makery-logo.png" 
+                alt="Makery Logo" 
+                className="h-8 w-8 flex-shrink-0"
+              />
+              MAKERY
+            </Link>
+            <span className="text-xs text-muted-foreground ml-10">로고 생성하기</span>
+          </div>
         </div>
 
         <div className="flex items-center gap-3">

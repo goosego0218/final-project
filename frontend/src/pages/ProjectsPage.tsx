@@ -40,22 +40,13 @@ const ProjectsPage = () => {
     queryKey: ['userProjects'],
     queryFn: getProjects,
     enabled: isLoggedIn, // 로그인 상태일 때만 조회
-    staleTime: 0,
+    staleTime: 5 * 60 * 1000, // 5분간 캐시 유지 (중복 호출 방지)
+    gcTime: 10 * 60 * 1000, // 10분간 메모리 유지
+    refetchOnWindowFocus: false, // 탭 전환 시 자동 refetch 방지
+    refetchOnMount: false, // 마운트 시 refetch 방지
   });
 
   useEffect(() => {
-    // localStorage 변경 감지
-    const handleStorageChange = () => {
-      const isNowLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
-      setIsLoggedIn(isNowLoggedIn);
-      if (!isNowLoggedIn) {
-        navigate("/");
-      } else {
-        // 로그인 상태면 프로젝트 목록 다시 가져오기
-        refetch();
-      }
-    };
-
     // 초기 로드
     const loggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
     setIsLoggedIn(loggedIn);
@@ -65,15 +56,26 @@ const ProjectsPage = () => {
       return;
     }
 
+    // localStorage 변경 감지 (다른 탭에서의 변경만 감지)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'isLoggedIn' || e.key === 'accessToken') {
+        const isNowLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+        setIsLoggedIn(isNowLoggedIn);
+        if (!isNowLoggedIn) {
+          navigate("/");
+        } else {
+          // 로그인 상태면 프로젝트 목록 다시 가져오기 (한 번만)
+          queryClient.invalidateQueries({ queryKey: ['userProjects'] });
+        }
+      }
+    };
+
     window.addEventListener('storage', handleStorageChange);
-    // 같은 탭에서의 변경도 감지하기 위해 interval 사용
-    const interval = setInterval(handleStorageChange, 1000);
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
-      clearInterval(interval);
     };
-  }, [navigate, refetch]);
+  }, [navigate, queryClient]);
 
   const handleNewProjectClick = () => {
     // localStorage와 sessionStorage에서 직접 확인하여 최신 로그인 상태 반영

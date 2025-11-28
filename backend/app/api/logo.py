@@ -14,7 +14,7 @@ from app.db.orm import get_orm_session
 from app.core.deps import get_current_user
 from app.models.auth import UserInfo
 from app.schemas.logo import SaveLogoRequest, SaveLogoResponse, LogoListItemResponse
-from app.services.logo_service import save_logo_to_storage_and_db, get_logo_list
+from app.services.logo_service import save_logo_to_storage_and_db, get_logo_list, delete_logo
 from app.utils.file_utils import get_file_url
 from langchain_core.messages import HumanMessage
 from app.agents.state import AppState 
@@ -230,4 +230,39 @@ def get_logo_list_endpoint(
             create_dt=prod.create_dt.isoformat() if prod.create_dt else None,
         ))
     
-    return result    
+    return result
+
+@router.delete("/{prod_id}", summary="로고 삭제")
+def delete_logo_endpoint(
+    prod_id: int,
+    db: Session = Depends(get_orm_session),
+    current_user: UserInfo = Depends(get_current_user),
+):
+    """
+    로고 삭제 (소프트 삭제)
+    
+    - prod_id: 삭제할 로고의 생성물 ID (path parameter)
+    - 본인이 생성한 로고만 삭제 가능
+    """
+    try:
+        delete_logo(
+            db=db,
+            prod_id=prod_id,
+            user_id=current_user.id,
+        )
+        
+        return {
+            "success": True,
+            "message": "로고가 삭제되었습니다."
+        }
+        
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"로고 삭제 실패: {str(e)}"
+        )    

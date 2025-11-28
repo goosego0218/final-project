@@ -311,4 +311,5 @@ class Comment(Base):
     user: Mapped["UserInfo"] = relationship(
         foreign_keys=[user_id],
         lazy="joined",
+        overlaps="comments",
     )

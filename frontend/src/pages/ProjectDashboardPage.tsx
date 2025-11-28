@@ -73,7 +73,10 @@ const ProjectDashboardPage = () => {
     queryKey: ['project', projectId],
     queryFn: () => getProjectDetail(Number(projectId)),
     enabled: !!projectId && isLoggedIn,
-    staleTime: 0,
+    staleTime: 5 * 60 * 1000, // 5분간 캐시 유지 (중복 호출 방지)
+    gcTime: 10 * 60 * 1000, // 10분간 메모리 유지
+    refetchOnWindowFocus: false, // 탭 전환 시 자동 refetch 방지
+    refetchOnMount: false, // 마운트 시 refetch 방지
   });
 
   // localStorage 변경 감지하여 로그인 상태 업데이트
@@ -86,12 +89,10 @@ const ProjectDashboardPage = () => {
     };
     
     window.addEventListener('storage', handleStorageChange);
-    // 같은 탭에서의 변경도 감지하기 위해 interval 사용
-    const interval = setInterval(handleStorageChange, 1000);
+    // interval 제거: 불필요한 반복 호출 방지
     
     return () => {
       window.removeEventListener('storage', handleStorageChange);
-      clearInterval(interval);
     };
   }, []);
 
