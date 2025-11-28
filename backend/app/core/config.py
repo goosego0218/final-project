@@ -33,6 +33,9 @@ class Settings(BaseSettings):
     jwt_secret_key: str = "" 
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
+    
+    # Encryption (토큰 암호화용 - AES-256-GCM)
+    encryption_key: str = ""  # Base64 인코딩된 32바이트(256-bit) 키 (선택적, 없으면 jwt_secret_key 기반으로 생성)
 
     # Trend / RAG / Search
     tavily_api_key: str = ""        
@@ -52,17 +55,31 @@ class Settings(BaseSettings):
     frontend_url: str = "http://localhost:8080"  # 프론트엔드 기본 URL
     
     # Google GenAI (로고 생성용 - Gemini 이미지 생성)
-    google_genai_model: str = "gemini-2.0-flash-exp"
+    google_genai_api_key: str = ""  
+    google_genai_model: str = ""
 
     # Google Cloud / Vertex AI (Veo 3.1)
-    google_genai_api_key: str = ""  
     google_cloud_project: str = ""
     google_cloud_location: str = ""
     veo_model: str = ""
     veo_duration_seconds: int = 8
     veo_aspect_ratio: str = ""
     veo_resolution: str = ""
+
+    # File Server
+    file_server_url: str = "https://kr.object.ncloudstorage.com/aissemble"
     
+    # NCP Object Storage  
+    ncp_access_key: str = ""
+    ncp_secret_key: str = ""
+    ncp_region: str = ""
+    ncp_endpoint: str = ""
+    ncp_bucket_name: str = ""
+
+    # Kanana Safeguard (가드레일)
+    safeguard_enabled: bool = False
+    safeguard_server_url: str = ""  # GPU 서버 URL (예: "http://gpu-server:8001")
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

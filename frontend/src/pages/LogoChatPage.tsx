@@ -8,13 +8,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Send, ChevronLeft, RefreshCw, Star, Plus, X, FolderOpen, Trash2, Image, Loader2 } from "lucide-react";
+import { Send, ChevronLeft, RefreshCw, Star, Plus, X, FolderOpen, Trash2, Image, Loader2, Download } from "lucide-react";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { projectStorage, type Message, type SavedItem } from "@/lib/projectStorage";
 import StudioTopBar from "@/components/StudioTopBar";
 import { getLogoIntro, sendLogoChat, getProjectDetail } from "@/lib/api";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import ThemeToggle from "@/components/ThemeToggle";
+import { saveLogo, getLogoList } from "@/lib/api";
+import { Save } from "lucide-react";
 
 interface SelectedResult {
   type: "logo";
@@ -65,6 +67,7 @@ const LogoChatPage = () => {
   const [hasCalledLogoIntro, setHasCalledLogoIntro] = useState(false);
   const [logoSessionId, setLogoSessionId] = useState<string | null>(null);
   const [isLoadingLogoChat, setIsLoadingLogoChat] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const introCalledRef = useRef(false); // 중복 호출 방지용 ref
 
   // localStorage에서 사용자 정보 가져오기
@@ -252,6 +255,13 @@ const LogoChatPage = () => {
       setIsChatLoaded(false);
     }
   }, [isLoggedIn, navigate, searchParams, hasCalledLogoIntro, userProfile.name, toast]);
+
+  // 프로젝트 로드 시 DB에서 로고 목록 불러오기
+  useEffect(() => {
+    if (currentProjectId && isLoggedIn) {
+      loadLogosFromDb(parseInt(currentProjectId));
+    }
+  }, [currentProjectId, isLoggedIn]);
 
   const handleSendMessage = async () => {
     if ((!inputValue.trim() && attachedImages.length === 0) || !currentProjectId) return;
@@ -472,6 +482,91 @@ const LogoChatPage = () => {
     }
   };
 
+  // DB에서 로고 목록 불러오기
+  const loadLogosFromDb = async (projectId: number) => {
+    try {
+      const logoList = await getLogoList(projectId);
+      // DB에서 가져온 데이터를 SavedItem 형식으로 변환
+      // 오래된 것일수록 낮은 번호를 가지도록 역순으로 번호 매기기
+      const dbLogos: SavedItem[] = logoList.map((item, index) => ({
+        id: `db_${item.prod_id}`,
+        url: item.file_url,
+        type: "logo" as const,
+        index: index,
+        title: `로고 ${logoList.length - index}`, // 역순으로 번호 매기기
+        createdAt: item.create_dt || new Date().toISOString(),
+      }));
+      setSavedLogos(dbLogos);
+    } catch (error) {
+      console.error("로고 목록 로드 실패:", error);
+      // 에러 발생 시 빈 배열로 설정
+      setSavedLogos([]);
+    }
+  };
+
+  // 이미지를 base64로 변환하는 함수
+  const convertImageToBase64 = async (imageUrl: string): Promise<string> => {
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64String = reader.result as string;
+          resolve(base64String);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      throw new Error("이미지를 변환하는데 실패했습니다.");
+    }
+  };
+
+  // 보관함에 저장 핸들러
+  const handleSaveToStorage = async () => {
+    if (!selectedResult || !currentProjectId) {
+      toast({
+        title: "저장 실패",
+        description: "프로젝트 정보가 없습니다.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      // 이미지를 base64로 변환
+      const base64Image = await convertImageToBase64(selectedResult.url);
+      
+      // API 호출
+      const response = await saveLogo({
+        base64_image: base64Image,
+        project_id: parseInt(currentProjectId),
+        prod_type_id: 1,
+      });
+
+      toast({
+        title: "저장 완료",
+        description: response.message || "로고가 보관함에 저장되었습니다.",
+      });
+      
+      // 저장 성공 후 목록 새로고침
+      if (currentProjectId) {
+        await loadLogosFromDb(parseInt(currentProjectId));
+      }
+    } catch (error: any) {
+      console.error("로고 저장 실패:", error);
+      toast({
+        title: "저장 실패",
+        description: error.message || "로고 저장에 실패했습니다.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const currentLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
   if (!currentLoggedIn) {
     return (
@@ -535,6 +630,25 @@ const LogoChatPage = () => {
                     <div className="p-4 flex items-center justify-between flex-shrink-0">
                       <h2 className="text-lg font-semibold">로고 #{selectedResult.index + 1}</h2>
                       <div className="flex items-center gap-2">
+                        <Button
+                          variant="default"
+                          size="sm"
+                          onClick={handleSaveToStorage}
+                          disabled={isSaving}
+                          className="bg-primary hover:bg-primary/90"
+                        >
+                          {isSaving ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              저장 중...
+                            </>
+                          ) : (
+                            <>
+                              <Save className="h-4 w-4 mr-2" />
+                              보관함에 저장
+                            </>
+                          )}
+                        </Button>
                         {savedLogos.some(
                           item => item.url === selectedResult.url && item.type === selectedResult.type
                         ) && (
@@ -561,27 +675,50 @@ const LogoChatPage = () => {
                       </div>
                     </div>
                     <div className="flex-1 flex items-center justify-center p-8 overflow-auto bg-background">
-                      <div className={`relative max-w-full max-h-full ${recommendationStep === "none" ? "group" : ""}`}>
+                      <div className="relative max-w-xs max-h-full group">
                         <img 
                           src={selectedResult.url} 
                           alt={`로고 ${selectedResult.index + 1}`}
-                          className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
+                          className="w-full h-auto object-contain rounded-lg shadow-lg"
                         />
-                        {recommendationStep === "none" && (
-                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
-                            <div className="flex flex-wrap gap-2 justify-center items-center">
-                              <Button 
-                                size="sm" 
-                                variant="secondary"
-                                onClick={() => handleSave(selectedResult.url, "logo", selectedResult.index)}
-                                className="bg-background/90 hover:bg-background"
-                              >
-                                <Star className="h-4 w-4 mr-2" />
-                                저장
-                              </Button>
-                            </div>
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg pointer-events-none">
+                          <div className="flex flex-col gap-2 justify-center items-center pointer-events-auto">
+                            <Button 
+                              size="sm" 
+                              variant="secondary"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                
+                                // 로컬에 다운로드
+                                const link = document.createElement('a');
+                                link.href = selectedResult.url;
+                                link.download = `logo_${Date.now()}.png`;
+                                link.click();
+                                
+                                toast({
+                                  title: "다운로드 시작",
+                                  description: "로고를 로컬에 저장합니다.",
+                                });
+                              }}
+                              className="bg-background/90 hover:bg-background"
+                            >
+                              <Download className="h-4 w-4 mr-2" />
+                              다운로드
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="secondary"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleSave(selectedResult.url, "logo", selectedResult.index);
+                              }}
+                              className="bg-background/90 hover:bg-background"
+                            >
+                              <Star className="h-4 w-4 mr-2" />
+                              저장
+                            </Button>
                           </div>
-                        )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -681,7 +818,46 @@ const LogoChatPage = () => {
                                   ))}
                                 </div>
                               )}
-                              <p className="whitespace-pre-wrap">{message.content}</p>
+                              {(() => {
+                                const logoUrlMatch = message.content.match(/\[LOGO_URL\](.*?)\[\/LOGO_URL\]/);
+                                
+                                if (logoUrlMatch && message.role === "assistant") {
+                                  const logoUrl = logoUrlMatch[1];
+                                  const textContent = message.content
+                                    .replace(/\[LOGO_URL\].*?\[\/LOGO_URL\]/g, '')
+                                    .trim();
+                                  
+                                  return (
+                                    <>
+                                      {textContent && <p className="whitespace-pre-wrap break-words mb-2">{textContent}</p>}
+                                      <div className="mt-1 bg-black/5 rounded-lg p-2">
+                                        <div 
+                                          className="relative w-48 mx-auto cursor-pointer hover:opacity-80 transition-opacity"
+                                          onClick={() => {
+                                            // 클릭 시 왼쪽 패널에서 보기
+                                            setSelectedResult({
+                                              type: "logo",
+                                              url: logoUrl,
+                                              index: savedLogos.length,
+                                            });
+                                            setHasResultPanel(false);
+                                          }}
+                                        >
+                                          <img 
+                                            src={logoUrl} 
+                                            alt="Generated Logo"
+                                            className="w-full h-auto rounded-md object-contain"
+                                          />
+                                        </div>
+                                        <p className="text-center text-sm text-muted-foreground mt-2 mb-2">
+                                        </p>
+                                      </div>
+                                    </>
+                                  );
+                                }
+                                
+                                return <p className="whitespace-pre-wrap break-words">{message.content}</p>;
+                              })()}                              
                             </Card>
                           </div>
                         )}

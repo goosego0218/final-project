@@ -11,6 +11,7 @@
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from typing import List
 
 from langgraph.types import Command
 from langgraph.errors import GraphInterrupt
@@ -24,6 +25,9 @@ from app.models.auth import UserInfo
 
 from app.agents.state import AppState 
 from app.agents.shorts_agent import build_shorts_graph
+from app.services.shorts_service import save_shorts_to_storage_and_db, get_shorts_list
+from app.schemas.shorts import SaveShortsRequest, SaveShortsResponse, ShortsListItemResponse
+from app.utils.file_utils import get_file_url
 
 from uuid import uuid4
 
@@ -218,3 +222,89 @@ def resume_shorts(
         project_id=req.project_id,
         shorts_session_id=req.shorts_session_id,
     )
+
+@router.post("/save", response_model=SaveShortsResponse, summary="쇼츠 저장")
+def save_shorts(
+    req: SaveShortsRequest,
+    db: Session = Depends(get_orm_session),
+    current_user: UserInfo = Depends(get_current_user),
+):
+    """
+    생성된 쇼츠를 NCP Object Storage에 업로드하고 DB에 저장
+    """
+    if not req.project_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="project_id는 필수입니다."
+        )
+    
+    try:
+        prod = save_shorts_to_storage_and_db(
+            db=db,
+            base64_video=req.base64_video,
+            project_id=req.project_id,
+            prod_type_id=req.prod_type_id or 2,
+            user_id=current_user.id,
+        )
+        
+        from app.utils.file_utils import get_file_url
+        file_url = get_file_url(prod.file_path)
+        
+        return SaveShortsResponse(
+            success=True,
+            message="쇼츠가 성공적으로 저장되었습니다.",
+            prod_id=prod.prod_id,
+            file_path=prod.file_path,
+            file_url=file_url,
+        )
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"쇼츠 저장 실패: {str(e)}"
+        )
+
+@router.get("/list", response_model=List[ShortsListItemResponse], summary="쇼츠 목록 조회")
+def get_shorts_list_endpoint(
+    project_id: int,
+    db: Session = Depends(get_orm_session),
+    current_user: UserInfo = Depends(get_current_user),
+):
+    """
+    프로젝트의 저장된 쇼츠 목록 조회
+    
+    - project_id: 프로젝트 그룹 ID (query parameter)
+    - 현재 로그인한 사용자가 생성한 프로젝트의 쇼츠만 조회 가능
+    """
+    # 프로젝트 접근 권한 확인
+    from app.services.project_service import load_project_group_entity
+    
+    project = load_project_group_entity(db, project_id)
+    if project is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="프로젝트를 찾을 수 없습니다.",
+        )
+    
+    # 본인이 생성한 프로젝트인지 확인
+    if project.creator_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="접근 권한이 없습니다.",
+        )
+    
+    # 쇼츠 목록 조회
+    shorts_list = get_shorts_list(db=db, project_id=project_id, prod_type_id=2)
+    
+    # 응답 모델로 변환
+    result = []
+    for prod in shorts_list:
+        file_url = get_file_url(prod.file_path)
+        result.append(ShortsListItemResponse(
+            prod_id=prod.prod_id,
+            file_path=prod.file_path,
+            file_url=file_url,
+            create_dt=prod.create_dt.isoformat() if prod.create_dt else None,
+        ))
+    
+    return result

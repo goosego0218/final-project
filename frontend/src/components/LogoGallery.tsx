@@ -107,15 +107,25 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
   // Load public logos from localStorage
   const loadPublicLogos = () => {
     const publicLogos = JSON.parse(localStorage.getItem('public_logos') || '[]');
-    const publicLogosFormatted: Logo[] = publicLogos.map((logo: any) => ({
-      id: logo.id,
-      imageSrc: logo.url,
-      brandName: logo.brandName,
-      likes: logo.likes || 0,
-      comments: logo.comments || 0,
-      createdAt: new Date(logo.createdAt),
-      tags: logo.tags || [],
-    }));
+    const publicLogosFormatted: Logo[] = publicLogos.map((logo: any) => {
+      // localStorage에서 실제 댓글 수 가져오기
+      const savedComments = localStorage.getItem(`logo_comments_${logo.id}`);
+      const actualCommentsCount = savedComments ? JSON.parse(savedComments).length : 0;
+      
+      // localStorage에서 통계 가져오기 (댓글 수가 있으면 우선 사용)
+      const stats = JSON.parse(localStorage.getItem(`logo_stats_${logo.id}`) || '{}');
+      const commentsCount = stats.comments !== undefined ? stats.comments : actualCommentsCount;
+      
+      return {
+        id: logo.id,
+        imageSrc: logo.url,
+        brandName: logo.brandName,
+        likes: stats.likes !== undefined ? stats.likes : (logo.likes || 0),
+        comments: commentsCount, // 실제 댓글 수 사용
+        createdAt: new Date(logo.createdAt),
+        tags: logo.tags || [],
+      };
+    });
     
     // Combine with mock logos (public logos first, mock logos with fixed order)
     setAllLogos([...publicLogosFormatted, ...mockLogosRef.current]);
@@ -135,10 +145,18 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
       
       // Load comments from localStorage
       const savedComments = localStorage.getItem(`logo_comments_${selectedLogo.id}`);
+      let loadedComments: Array<{ author: string; authorAvatar?: string; content: string; time: string }> = [];
       if (savedComments) {
-        setComments(JSON.parse(savedComments));
+        loadedComments = JSON.parse(savedComments);
+        setComments(loadedComments);
       } else {
         setComments([]);
+      }
+      
+      // 댓글 수를 실제 로드된 댓글 수로 업데이트
+      const actualCommentsCount = loadedComments.length;
+      if (selectedLogo.comments !== actualCommentsCount) {
+        setSelectedLogo(prev => prev ? { ...prev, comments: actualCommentsCount } : null);
       }
     } else {
       setIsLiked(false);

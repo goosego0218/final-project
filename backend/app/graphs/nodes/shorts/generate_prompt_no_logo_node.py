@@ -46,13 +46,11 @@ def make_generate_prompt_no_logo_node(llm: "BaseChatModel"):
 
         # 2) HumanMessage 내용 구성
         user_prompt = (
-            "You are given the following brand profile and the latest user request.\n\n"
-            "[BRAND PROFILE]\n"
+            f"Create an 8-second short-form video prompt based on the following brand information:\n\n"
+            f"[BRAND PROFILE]\n"
             f"{brand_profile_json}\n\n"
-            "[LATEST USER REQUEST]\n"
-            f"{last_user_text}\n\n"
-            "Using the system instructions, create a single Veo 3.1 video prompt "
-            "following the 7-section format."
+            f"Using the system instructions, create a single Veo 3.1 video prompt following the 7-section format.\n\n"
+            f"**CRITICAL: Write ALL sections in English. Only the Korean dialogue lines in section [5. DIALOGUE & NARRATION] should be in Korean.**"
         )
 
         messages = [

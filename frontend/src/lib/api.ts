@@ -360,3 +360,79 @@ export async function disconnectYouTube(): Promise<{ message: string }> {
     method: 'DELETE',
   });
 }
+
+// 쇼츠 저장 API 호출
+export async function saveShorts(data: SaveShortsRequest): Promise<SaveShortsResponse> {
+  return apiRequest<SaveShortsResponse>('/shorts/save', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+// 쇼츠 저장 관련 인터페이스
+export interface SaveShortsRequest {
+  base64_video: string;
+  project_id: number;
+  prod_type_id?: number;
+}
+
+export interface SaveShortsResponse {
+  success: boolean;
+  message: string;
+  prod_id: number;
+  file_path: string;
+  file_url: string;
+}
+
+// 쇼츠 목록 조회 인터페이스
+export interface ShortsListItem {
+  prod_id: number;
+  file_path: string;
+  file_url: string;
+  create_dt: string | null;
+}
+
+// 쇼츠 목록 조회 API 호출
+export async function getShortsList(projectId: number): Promise<ShortsListItem[]> {
+  return apiRequest<ShortsListItem[]>(`/shorts/list?project_id=${projectId}`, {
+    method: 'GET',
+  });
+}
+
+// 로고 저장 관련 인터페이스
+export interface SaveLogoRequest {
+  base64_image: string;
+  project_id: number;
+  prod_type_id?: number;
+}
+
+export interface SaveLogoResponse {
+  success: boolean;
+  message: string;
+  prod_id: number;
+  file_path: string;
+  file_url: string;
+}
+
+// 로고 목록 조회 인터페이스
+export interface LogoListItem {
+  prod_id: number;
+  file_path: string;
+  file_url: string;
+  create_dt: string | null;
+}
+
+// 로고 저장 API 호출
+export async function saveLogo(data: SaveLogoRequest): Promise<SaveLogoResponse> {
+  return apiRequest<SaveLogoResponse>('/logo/save', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+// 로고 목록 조회 API 호출
+export async function getLogoList(projectId: number): Promise<LogoListItem[]> {
+  return apiRequest<LogoListItem[]>(`/logo/list?project_id=${projectId}`, {
+    method: 'GET',
+  });
+}
