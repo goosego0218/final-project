@@ -752,7 +752,7 @@ const ShortsChatPage = () => {
                                 }
                                 
                                 // VIDEO_URL이 없으면 기존 텍스트 렌더링
-                                return <p className="whitespace-pre-wrap">{message.content}</p>;
+                                return <p className="whitespace-pre-wrap break-words">{message.content}</p>;
                               })()}
                             </Card>
                           </div>
