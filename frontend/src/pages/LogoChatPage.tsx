@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Send, ChevronLeft, RefreshCw, Star, Plus, X, FolderOpen, Trash2, Image, Loader2, Download } from "lucide-react";
+import { Send, ChevronLeft, RefreshCw, Star, Plus, X, FolderOpen, Folder, Trash2, Image, Loader2, Download } from "lucide-react";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { projectStorage, type Message, type SavedItem } from "@/lib/projectStorage";
 import StudioTopBar from "@/components/StudioTopBar";
@@ -45,7 +45,7 @@ const LogoChatPage = () => {
   
   // 저장된 로고 추적
   const [savedLogos, setSavedLogos] = useState<SavedItem[]>([]);
-  const [activeStorageTab, setActiveStorageTab] = useState<"logos" | null>(null);
+  const [activeStorageTab, setActiveStorageTab] = useState<"logos" | null>("logos"); // 기본적으로 열려있음
   
   // 로고 생성 시 브랜드 정보 및 디자인 방향
   const [brandInfo, setBrandInfo] = useState<{ brand_name: string; industry: string } | null>(null);
@@ -496,6 +496,7 @@ const LogoChatPage = () => {
         title: `로고 ${logoList.length - index}`, // 역순으로 번호 매기기
         createdAt: item.create_dt || new Date().toISOString(),
       }));
+      // 상태 업데이트 - 이렇게 하면 isLogoSaved가 자동으로 재계산됨
       setSavedLogos(dbLogos);
     } catch (error) {
       console.error("로고 목록 로드 실패:", error);
@@ -546,14 +547,44 @@ const LogoChatPage = () => {
         prod_type_id: 1,
       });
 
+      // 저장 성공 시 즉시 savedLogos에 추가하여 버튼이 즉시 업데이트되도록 함
+      // response.file_url과 selectedResult.url이 다를 수 있으므로 둘 다 저장
+      const newSavedItem: SavedItem = {
+        id: `db_${response.prod_id}`,
+        url: response.file_url || selectedResult.url, // API 응답의 file_url 우선, 없으면 원본 URL
+        type: "logo",
+        index: savedLogos.length,
+        title: `로고 ${savedLogos.length + 1}`,
+        createdAt: new Date().toISOString(),
+      };
+      
+      // savedLogos에 즉시 추가 (이렇게 하면 isLogoSaved가 즉시 true가 됨)
+      setSavedLogos(prev => {
+        // 중복 체크 (file_url 또는 원본 URL로 비교)
+        if (prev.some(item => item.url === response.file_url || item.url === selectedResult.url)) {
+          return prev;
+        }
+        return [...prev, newSavedItem];
+      });
+      
+      // selectedResult.url도 업데이트 (저장된 파일 URL로)
+      if (response.file_url && response.file_url !== selectedResult.url) {
+        setSelectedResult({
+          ...selectedResult,
+          url: response.file_url,
+        });
+      }
+
       toast({
         title: "저장 완료",
         description: response.message || "로고가 보관함에 저장되었습니다.",
       });
       
-      // 저장 성공 후 목록 새로고침
+      // 백그라운드에서 목록 새로고침 (UI는 이미 업데이트됨)
       if (currentProjectId) {
-        await loadLogosFromDb(parseInt(currentProjectId));
+        loadLogosFromDb(parseInt(currentProjectId)).catch(error => {
+          console.error("로고 목록 새로고침 실패:", error);
+        });
       }
     } catch (error: any) {
       console.error("로고 저장 실패:", error);
@@ -678,6 +709,7 @@ const LogoChatPage = () => {
         userAvatar={userProfile.avatar}
         instagramConnected={userProfile.instagram}
         youtubeConnected={userProfile.youtube}
+        studioType="logo"
       />
 
       <div className="flex-1 min-h-0">
@@ -834,7 +866,11 @@ const LogoChatPage = () => {
                     className={activeStorageTab === "logos" ? "text-white" : "hover:bg-[#7C22C8] hover:text-white hover:border-[#7C22C8]"}
                     style={activeStorageTab === "logos" ? { backgroundColor: '#7C22C8' } : {}}
                   >
-                    <FolderOpen className="h-4 w-4 mr-2" />
+                    {activeStorageTab === "logos" ? (
+                      <FolderOpen className="h-4 w-4 mr-2" />
+                    ) : (
+                      <Folder className="h-4 w-4 mr-2" />
+                    )}
                     로고 보관함
                   </Button>
                 </div>

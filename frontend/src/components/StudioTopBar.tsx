@@ -33,6 +33,7 @@ interface StudioTopBarProps {
   userAvatar?: string | null;
   instagramConnected?: boolean;
   youtubeConnected?: boolean;
+  studioType?: "logo" | "shorts";
 }
 
 const StudioTopBar = ({
@@ -46,30 +47,34 @@ const StudioTopBar = ({
   userAvatar,
   instagramConnected = false,
   youtubeConnected = false,
+  studioType,
 }: StudioTopBarProps) => {
   const userInitials = userName?.charAt(0) || "U";
 
   return (
-    <header className="border-b border-border bg-background/80 backdrop-blur-xl flex-shrink-0">
+    <header className="border-b border-border bg-background/80 backdrop-blur-xl flex-shrink-0 relative">
       <div className="w-full px-12 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={onBack} className="h-9 w-9 hover:bg-transparent">
             <ChevronLeft className="h-5 w-5" />
           </Button>
-          <div className="flex flex-col">
-            <Link
-              to="/"
-              className="flex items-center gap-2 text-2xl font-bold tracking-tight text-foreground hover:opacity-80 transition-opacity"
-            >
-              <img 
-                src="/makery-logo.png" 
-                alt="Makery Logo" 
-                className="h-8 w-8 flex-shrink-0"
-              />
-              MAKERY
-            </Link>
-            <span className="text-xs text-muted-foreground ml-10">로고 생성하기</span>
-          </div>
+          <Link
+            to="/"
+            className="flex items-center gap-2 text-2xl font-bold tracking-tight text-foreground hover:opacity-80 transition-opacity"
+          >
+            <img 
+              src="/makery-logo.png" 
+              alt="Makery Logo" 
+              className="h-8 w-8 flex-shrink-0"
+            />
+            <span>MAKERY</span>
+            {studioType === "logo" && (
+              <span className="text-[#7C22C8] font-handwriting">Logo</span>
+            )}
+            {studioType === "shorts" && (
+              <span className="text-[#FF8B3D] font-handwriting">Shorts</span>
+            )}
+          </Link>
         </div>
 
         <div className="flex items-center gap-3">

@@ -600,6 +600,7 @@ const ShortsChatPage = () => {
         userAvatar={userProfile.avatar}
         instagramConnected={userProfile.instagram}
         youtubeConnected={userProfile.youtube}
+        studioType="shorts"
       />
 
       <div className="flex-1 min-h-0">
