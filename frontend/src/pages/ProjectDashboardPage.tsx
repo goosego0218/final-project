@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { getProjectDetail, deleteProject, ProjectDetail, ProjectListItem } from "@/lib/api";
+import { getProjectDetail, deleteProject, ProjectDetail, ProjectListItem, getShortsList, getLogoList } from "@/lib/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { 
@@ -22,6 +22,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Trash2, Image, Video, Calendar, X, Upload, Instagram, Youtube, Download } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
@@ -136,12 +137,51 @@ const ProjectDashboardPage = () => {
 
   // 로고/숏폼 목록은 일단 빈 배열로 설정 (나중에 generation_prod 조인하여 추가)
   useEffect(() => {
-    if (project) {
-      // TODO: DB에서 로고/숏폼 목록 가져오기 (generation_prod 테이블)
-      setLogos([]);
-      setShortForms([]);
+    if (project && projectId) {
+      // DB에서 로고 목록 가져오기
+      const loadLogos = async () => {
+        try {
+          const logoList = await getLogoList(Number(projectId));
+          // DB에서 가져온 데이터를 LogoItem 형식으로 변환
+          // 오래된 것일수록 낮은 번호를 가지도록 역순으로 번호 매기기
+          const dbLogos: LogoItem[] = logoList.map((item, index) => ({
+            id: `db_${item.prod_id}`,
+            url: item.file_url,
+            createdAt: item.create_dt || new Date().toISOString(),
+            title: `로고 ${logoList.length - index}`, // 역순으로 번호 매기기
+            isPublic: false, // 기본값 (나중에 DB에서 가져올 수 있음)
+          }));
+          setLogos(dbLogos);
+        } catch (error) {
+          console.error("로고 목록 로드 실패:", error);
+          setLogos([]);
+        }
+      };
+      
+      // DB에서 숏폼 목록 가져오기
+      const loadShorts = async () => {
+        try {
+          const shortsList = await getShortsList(Number(projectId));
+          // DB에서 가져온 데이터를 ShortFormItem 형식으로 변환
+          // 오래된 것일수록 낮은 번호를 가지도록 역순으로 번호 매기기
+          const dbShortForms: ShortFormItem[] = shortsList.map((item, index) => ({
+            id: `db_${item.prod_id}`,
+            url: item.file_url,
+            createdAt: item.create_dt || new Date().toISOString(),
+            title: `숏폼 ${shortsList.length - index}`, // 역순으로 번호 매기기
+            isPublic: false, // 기본값 (나중에 DB에서 가져올 수 있음)
+          }));
+          setShortForms(dbShortForms);
+        } catch (error) {
+          console.error("숏폼 목록 로드 실패:", error);
+          setShortForms([]);
+        }
+      };
+      
+      loadLogos();
+      loadShorts();
     }
-  }, [project]);
+  }, [project, projectId]);
 
   const handleCreateLogo = () => {
     if (!project || !projectId) return;
@@ -250,7 +290,7 @@ const ProjectDashboardPage = () => {
       // 기존 공개 로고 가져오기
       const existingPublicLogos = JSON.parse(localStorage.getItem('public_logos') || '[]');
       // 현재 프로젝트의 로고 제거 후 새로 추가
-      const filteredLogos = existingPublicLogos.filter((l: any) => l.projectId !== project?.id);
+      const filteredLogos = existingPublicLogos.filter((l: any) => l.projectId !== projectId);
       const updatedPublicLogos = [...filteredLogos, ...publicLogosData];
       localStorage.setItem('public_logos', JSON.stringify(updatedPublicLogos));
       
@@ -352,46 +392,91 @@ const ProjectDashboardPage = () => {
         return;
       }
     } else {
-      setShortForms(prevShortForms => {
-        const updatedShortForms = prevShortForms.map(shortForm => 
-          shortForm.id === pendingToggleItem.id 
-            ? { ...shortForm, isPublic: true }
-            : shortForm
-        );
-        
-        // 공개된 숏폼을 localStorage에 저장
-        const publicShortForms = updatedShortForms.filter(sf => sf.isPublic);
-        const publicShortFormsData = publicShortForms.map(sf => ({
-          id: sf.id,
-          thumbnailUrl: sf.url, // 비디오 URL (썸네일로도 사용)
-          videoUrl: sf.url, // 실제 비디오 URL
-          title: sf.title || "숏폼",
-          likes: 0,
-          comments: 0,
-          duration: "0:15",
-          createdAt: new Date(sf.createdAt),
-          tags: [],
-          projectId: project.id,
-        }));
-        
-        // 기존 공개 숏폼 가져오기
-        const existingPublicShortForms = JSON.parse(localStorage.getItem('public_shortforms') || '[]');
-        // 현재 프로젝트의 숏폼 제거 후 새로 추가
-        const filteredShortForms = existingPublicShortForms.filter((sf: any) => sf.projectId !== projectId);
-        const updatedPublicShortForms = [...filteredShortForms, ...publicShortFormsData];
-        localStorage.setItem('public_shortforms', JSON.stringify(updatedPublicShortForms));
-        
-        // 커스텀 이벤트 발생시켜 갤러리에 알림
-        window.dispatchEvent(new CustomEvent('publicShortFormsUpdated'));
-        
-        return updatedShortForms;
-      });
+      // 숏폼 게시
+      const shortForm = shortForms.find(sf => sf.id === pendingToggleItem.id);
+      if (!shortForm) return;
       
-      toast({
-        title: "게시되었습니다",
-        description: "숏폼 갤러리에 게시되었습니다.",
-        status: "success",
-      });
+      try {
+        // 워터마크 추가 (썸네일)
+        const watermarkedThumbnail = await addWatermarkToVideo(shortForm.url);
+        
+        setShortForms(prevShortForms => {
+          const updatedShortForms = prevShortForms.map(sf => 
+            sf.id === pendingToggleItem.id 
+              ? { ...sf, isPublic: true }
+              : sf
+          );
+          
+          // 공개된 숏폼을 localStorage에 저장
+          const publicShortForms = updatedShortForms.filter(sf => sf.isPublic);
+          
+          // 모든 공개된 숏폼에 워터마크 추가 (비동기 처리)
+          Promise.all(publicShortForms.map(async (sf) => {
+            // 현재 게시하는 숏폼은 이미 워터마크가 추가된 썸네일 사용
+            if (sf.id === pendingToggleItem.id) {
+              return {
+                id: sf.id,
+                thumbnailUrl: watermarkedThumbnail.thumbnailUrl, // 워터마크가 추가된 썸네일
+                videoUrl: sf.url, // 원본 비디오 URL
+                title: sf.title || "숏폼",
+                likes: 0,
+                comments: 0,
+                duration: "0:15",
+                createdAt: new Date(sf.createdAt),
+                tags: [],
+                projectId: projectId || "",
+              };
+            }
+            // 이미 공개된 다른 숏폼들도 워터마크 추가
+            const watermarkedThumbnailForOther = await addWatermarkToVideo(sf.url);
+            return {
+              id: sf.id,
+              thumbnailUrl: watermarkedThumbnailForOther.thumbnailUrl, // 워터마크가 추가된 썸네일
+              videoUrl: sf.url, // 원본 비디오 URL
+              title: sf.title || "숏폼",
+              likes: 0,
+              comments: 0,
+              duration: "0:15",
+              createdAt: new Date(sf.createdAt),
+              tags: [],
+              projectId: projectId || "",
+            };
+          })).then((publicShortFormsData) => {
+            // 기존 공개 숏폼 가져오기
+            const existingPublicShortForms = JSON.parse(localStorage.getItem('public_shortforms') || '[]');
+            // 현재 프로젝트의 숏폼 제거 후 새로 추가
+            const filteredShortForms = existingPublicShortForms.filter((sf: any) => sf.projectId !== projectId);
+            const updatedPublicShortForms = [...filteredShortForms, ...publicShortFormsData];
+            localStorage.setItem('public_shortforms', JSON.stringify(updatedPublicShortForms));
+            
+            // 커스텀 이벤트 발생시켜 갤러리에 알림
+            window.dispatchEvent(new CustomEvent('publicShortFormsUpdated'));
+          }).catch((error) => {
+            console.error('워터마크 추가 실패:', error);
+            toast({
+              title: "오류",
+              description: "워터마크 추가 중 오류가 발생했습니다.",
+              status: "error",
+            });
+          });
+          
+          return updatedShortForms;
+        });
+        
+        toast({
+          title: "게시되었습니다",
+          description: "숏폼 갤러리에 게시되었습니다.",
+          status: "success",
+        });
+      } catch (error) {
+        console.error('워터마크 추가 실패:', error);
+        toast({
+          title: "오류",
+          description: "워터마크 추가 중 오류가 발생했습니다.",
+          status: "error",
+        });
+        return;
+      }
     }
     
     setIsShareDialogOpen(false);
@@ -432,7 +517,7 @@ const ProjectDashboardPage = () => {
       // 기존 공개 숏폼 가져오기
       const existingPublicShortForms = JSON.parse(localStorage.getItem('public_shortforms') || '[]');
       // 현재 프로젝트의 숏폼 제거 후 새로 추가
-      const filteredShortForms = existingPublicShortForms.filter((sf: any) => sf.projectId !== project?.id);
+      const filteredShortForms = existingPublicShortForms.filter((sf: any) => sf.projectId !== projectId);
       const updatedPublicShortForms = [...filteredShortForms, ...publicShortFormsData];
       localStorage.setItem('public_shortforms', JSON.stringify(updatedPublicShortForms));
       
@@ -811,18 +896,37 @@ const ProjectDashboardPage = () => {
                   {shortForms.map((shortForm) => (
                     <Card key={shortForm.id} className="overflow-hidden hover:shadow-lg transition-shadow relative group cursor-pointer" onClick={() => setSelectedImage({ url: shortForm.url, title: shortForm.title || "숏폼", type: "short" })}>
                       <CardContent className="p-0">
-                        <div className="aspect-[9/16] bg-muted rounded-t-lg overflow-hidden relative">
-                          <video
-                            src={shortForm.url}
-                            className="w-full h-full object-cover"
-                            muted
-                            loop
-                            playsInline
-                            autoPlay
-                          />
-                          <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded z-10">
-                            숏폼
+                      <div className="aspect-[9/16] bg-muted rounded-t-lg overflow-hidden relative">
+                        <video
+                          src={shortForm.url}
+                          className="w-full h-full object-cover"
+                          muted
+                          playsInline
+                          preload="metadata"
+                          onLoadedMetadata={(e) => {
+                            // 메타데이터 로드 후 명시적으로 정지 상태로 설정
+                            e.currentTarget.pause();
+                            e.currentTarget.currentTime = 0;
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.play().catch(() => {
+                              // 재생 실패 시 무시 (브라우저 정책 등)
+                            });
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.pause();
+                            e.currentTarget.currentTime = 0;
+                          }}
+                        />
+                        {/* 재생 아이콘 오버레이 */}
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-t-lg pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="bg-white/90 rounded-full p-3">
+                            <Video className="h-6 w-6 text-primary" />
                           </div>
+                        </div>
+                        <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded z-10">
+                          숏폼
+                        </div>
                           {/* 업로드 버튼 - 왼쪽 하단 */}
                           <Button
                             variant="ghost"
@@ -847,11 +951,12 @@ const ProjectDashboardPage = () => {
                           </Button>
                         </div>
                         <div className="p-4">
-                          <div className="flex items-center justify-between mb-3">
-                            <p className="text-xs text-muted-foreground">
-                              {formatDate(shortForm.createdAt)}
-                            </p>
-                          </div>
+                          <h3 className="font-semibold text-foreground mb-1">
+                            {shortForm.title || "숏폼"}
+                          </h3>
+                          <p className="text-xs text-muted-foreground mb-3">
+                            {formatDate(shortForm.createdAt)}
+                          </p>
                           <div className="flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
                             <span className="text-xs text-muted-foreground">
                               {shortForm.isPublic ? "게시" : "비게시"}
@@ -1140,6 +1245,7 @@ const ProjectDashboardPage = () => {
       {/* 이미지/비디오 확대 보기 다이얼로그 */}
       <Dialog open={!!selectedImage} onOpenChange={(open) => !open && setSelectedImage(null)}>
         <DialogContent className="max-w-none w-auto p-0 bg-transparent border-none shadow-none [&>button]:hidden">
+          <DialogTitle className="sr-only">{selectedImage?.title || "미리보기"}</DialogTitle>  
           <div className="relative flex items-center justify-center min-w-[300px] min-h-[533px]">
             {selectedImage && (
               selectedImage.type === "short" ? (

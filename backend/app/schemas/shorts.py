@@ -9,7 +9,7 @@ from pydantic import BaseModel
 class SaveShortsRequest(BaseModel):
     base64_video: str  # Data URL 형식
     project_id: int
-    prod_type_id: int | None = 1  # 쇼츠 타입 ID (기본값)
+    prod_type_id: int | None = 2  # 쇼츠 타입 ID (기본값)
 
 
 class SaveShortsResponse(BaseModel):
@@ -18,3 +18,10 @@ class SaveShortsResponse(BaseModel):
     prod_id: int
     file_path: str
     file_url: str
+
+
+class ShortsListItemResponse(BaseModel):
+    prod_id: int
+    file_path: str
+    file_url: str
+    create_dt: str | None = None    

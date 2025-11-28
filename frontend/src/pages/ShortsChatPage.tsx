@@ -12,9 +12,11 @@ import { Send, ChevronLeft, RefreshCw, Star, Plus, X, FolderOpen, Trash2, Video,
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { projectStorage, type Message, type SavedItem } from "@/lib/projectStorage";
 import StudioTopBar from "@/components/StudioTopBar";
-import { getShortsIntro, sendShortsChat, getProjectDetail } from "@/lib/api";
+import { getShortsIntro, sendShortsChat, getProjectDetail, getShortsList } from "@/lib/api";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import ThemeToggle from "@/components/ThemeToggle";
+import { saveShorts } from "@/lib/api";
+import { Save } from "lucide-react";
 
 interface SelectedResult {
   type: "short";
@@ -51,6 +53,7 @@ const ShortsChatPage = () => {
   const [shortsSessionId, setShortsSessionId] = useState<string | null>(null);
   const [isLoadingShortsChat, setIsLoadingShortsChat] = useState(false);
   const introCalledRef = useRef(false); // 중복 호출 방지용 ref
+  const [isSaving, setIsSaving] = useState(false);
 
   // localStorage에서 사용자 정보 가져오기
   const getUserProfile = () => {
@@ -138,6 +141,12 @@ const ShortsChatPage = () => {
       const isDbProjectId = /^\d+$/.test(projectId);
       
       setCurrentProjectId(projectId);
+      
+      // DB 프로젝트 ID인 경우 숏츠 목록 불러오기
+      if (isDbProjectId) {
+        const dbProjectIdNum = parseInt(projectId);
+        loadShortsFromDb(dbProjectIdNum);
+      }
       
       if (isDbProjectId && !project) {
         setIsChatLoaded(true);
@@ -457,6 +466,91 @@ const ShortsChatPage = () => {
     }
   };
 
+  // DB에서 숏츠 목록 불러오기
+  const loadShortsFromDb = async (projectId: number) => {
+    try {
+      const shortsList = await getShortsList(projectId);
+      // DB에서 가져온 데이터를 SavedItem 형식으로 변환
+      // 오래된 것일수록 낮은 번호를 가지도록 역순으로 번호 매기기
+      const dbShorts: SavedItem[] = shortsList.map((item, index) => ({
+        id: `db_${item.prod_id}`,
+        url: item.file_url,
+        type: "short" as const,
+        index: index,
+        title: `숏폼 ${shortsList.length - index}`, // 역순으로 번호 매기기
+        createdAt: item.create_dt || new Date().toISOString(),
+      }));
+      setSavedShorts(dbShorts);
+    } catch (error) {
+      console.error("숏츠 목록 로드 실패:", error);
+      // 에러 발생 시 빈 배열로 설정
+      setSavedShorts([]);
+    }
+  };
+
+  // 비디오를 base64로 변환하는 함수
+  const convertVideoToBase64 = async (videoUrl: string): Promise<string> => {
+    try {
+      const response = await fetch(videoUrl);
+      const blob = await response.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64String = reader.result as string;
+          resolve(base64String);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      throw new Error("비디오를 변환하는데 실패했습니다.");
+    }
+  };
+
+  // 보관함에 저장 핸들러
+  const handleSaveToStorage = async () => {
+    if (!selectedResult || !currentProjectId) {
+      toast({
+        title: "저장 실패",
+        description: "프로젝트 정보가 없습니다.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      // 비디오를 base64로 변환
+      const base64Video = await convertVideoToBase64(selectedResult.url);
+      
+      // API 호출
+      const response = await saveShorts({
+        base64_video: base64Video,
+        project_id: parseInt(currentProjectId),
+        prod_type_id: 2,
+      });
+
+      toast({
+        title: "저장 완료",
+        description: response.message || "쇼츠가 보관함에 저장되었습니다.",
+      });
+      
+      // 저장 성공 후 목록 새로고침
+      if (currentProjectId) {
+        await loadShortsFromDb(parseInt(currentProjectId));
+      }
+    } catch (error: any) {
+      console.error("쇼츠 저장 실패:", error);
+      toast({
+        title: "저장 실패",
+        description: error.message || "쇼츠 저장에 실패했습니다.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const currentLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
   if (!currentLoggedIn) {
     return (
@@ -520,6 +614,25 @@ const ShortsChatPage = () => {
                     <div className="p-4 flex items-center justify-between flex-shrink-0">
                       <h2 className="text-lg font-semibold">숏폼 #{selectedResult.index + 1}</h2>
                       <div className="flex items-center gap-2">
+                        <Button
+                          variant="default"
+                          size="sm"
+                          onClick={handleSaveToStorage}
+                          disabled={isSaving}
+                          className="bg-primary hover:bg-primary/90"
+                        >
+                          {isSaving ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              저장 중...
+                            </>
+                          ) : (
+                            <>
+                              <Save className="h-4 w-4 mr-2" />
+                              보관함에 저장
+                            </>
+                          )}
+                        </Button>
                         {savedShorts.some(
                           item => item.url === selectedResult.url && item.type === selectedResult.type
                         ) && (

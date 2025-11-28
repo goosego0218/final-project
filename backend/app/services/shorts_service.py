@@ -59,7 +59,7 @@ def save_shorts_to_storage_and_db(
 def get_shorts_list(
     db: Session,
     project_id: int,
-    prod_type_id: int = 1,  # 쇼츠 타입
+    prod_type_id: int = 2,  # 쇼츠 타입
 ) -> list[GenerationProd]:
     """
     프로젝트의 쇼츠 목록 조회

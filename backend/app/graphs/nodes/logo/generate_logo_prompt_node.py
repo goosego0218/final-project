@@ -45,7 +45,9 @@ def make_generate_logo_prompt_node(llm: "BaseChatModel"):
             "[LATEST USER REQUEST]\n"
             f"{last_user_text}\n\n"
             "Using the system instructions, create a single Gemini image generation prompt "
-            "for a professional brand logo."
+            "for a professional brand logo.\n\n"
+            "**IMPORTANT: The prompt must specify that only ONE single logo design should be generated. "
+            "Do not create multiple logo variations, versions, or alternatives in one image.**"
         )
         
         messages = [

@@ -62,20 +62,45 @@ def get_user_projects_endpoint(
 ):
     """
     현재 로그인한 사용자의 프로젝트 목록 조회.
-    - 로고/숏폼 개수는 현재 0으로 반환 (나중에 generation_prod 조인하여 추가 가능)
+    - 로고/숏폼 개수는 generation_prod에서 조회
     """
+    from app.models.project import GenerationProd
+    from sqlalchemy import func
+    
     projects = get_user_projects(db, current_user.id)
     
-    # ProjectListItem으로 변환 (로고/숏폼 개수는 추후 추가)
+    # ProjectListItem으로 변환 (로고/숏폼 개수 조회)
     result = []
     for project in projects:
+        # 로고 개수 조회 (type_id=1)
+        logo_count = (
+            db.query(func.count(GenerationProd.prod_id))
+            .filter(
+                GenerationProd.grp_id == project.grp_id,
+                GenerationProd.type_id == 1,  # 로고 타입 ID
+                GenerationProd.del_yn == 'N'
+            )
+            .scalar() or 0
+        )
+        
+        # 숏폼 개수 조회 (type_id=2)
+        shortform_count = (
+            db.query(func.count(GenerationProd.prod_id))
+            .filter(
+                GenerationProd.grp_id == project.grp_id,
+                GenerationProd.type_id == 2,  # 숏폼 타입 ID
+                GenerationProd.del_yn == 'N'
+            )
+            .scalar() or 0
+        )
+        
         result.append(ProjectListItem(
             grp_id=project.grp_id,
             grp_nm=project.grp_nm,
             grp_desc=project.grp_desc,
             creator_id=project.creator_id,
-            logo_count=0,  # TODO: generation_prod에서 조회
-            shortform_count=0,  # TODO: generation_prod에서 조회
+            logo_count=logo_count,
+            shortform_count=shortform_count,
         ))
     
     return result
