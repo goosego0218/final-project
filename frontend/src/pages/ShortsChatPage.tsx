@@ -387,7 +387,7 @@ const ShortsChatPage = () => {
       
       toast({
         title: "숏폼이 저장되었습니다",
-        description: "보관함에 저장되었고, 파일이 다운로드됩니다.",
+        description: "보관함에 저장되었습니다.",
       });
       return updated;
     });
@@ -845,20 +845,7 @@ const ShortsChatPage = () => {
                       className="absolute bottom-1 right-1 h-8 w-8 hover:bg-transparent"
                       disabled={(!inputValue.trim() && attachedImages.length === 0) || isLoadingShortsIntro || isLoadingShortsChat}
                     >
-                      {isLoadingShortsChat ? (
-                        <RefreshCw className="h-4 w-4 animate-spin text-primary" />
-                      ) : (
-                        <Send className="h-4 w-4 text-primary" />
-                      )}
-                    </Button>
-                    <Button 
-                      onClick={handleSendMessage} 
-                      size="icon"
-                      variant="ghost"
-                      className="absolute bottom-1 right-1 h-8 w-8 hover:bg-transparent"
-                      disabled={(!inputValue.trim() && attachedImages.length === 0) || isLoadingShortsChat}
-                    >
-                      {isLoadingShortsChat ? (
+                      {(isLoadingShortsIntro || isLoadingShortsChat) ? (
                         <RefreshCw className="h-4 w-4 animate-spin text-primary" />
                       ) : (
                         <Send className="h-4 w-4 text-primary" />
