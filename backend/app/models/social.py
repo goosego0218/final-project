@@ -91,5 +91,5 @@ class SocialConnection(Base):
     # UserInfo와의 관계
     user: Mapped["UserInfo"] = relationship(
         back_populates="social_connections",
-        lazy="joined",
+        lazy="select",
     )

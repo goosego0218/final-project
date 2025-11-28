@@ -121,7 +121,7 @@ class UserInfo(Base):
     # 권한 관계 (N:1)
     role: Mapped["Role"] = relationship(
         back_populates="users",
-        lazy="joined",
+        lazy="select",
     )
 
     # 이 유저가 생성한 프로젝트 그룹들 (1:N)
@@ -230,9 +230,9 @@ class RoleMenu(Base):
     # 각각 role_mst, menu 쪽과 N:1
     role: Mapped[Role] = relationship(
         back_populates="role_menus",
-        lazy="joined",
+        lazy="select",
     )
     menu: Mapped[Menu] = relationship(
         back_populates="role_menus",
-        lazy="joined",
+        lazy="select",
     )
