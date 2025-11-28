@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Heart, MessageCircle, Share2, Sparkles } from "lucide-react";
+import { Heart, MessageCircle, Share2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -14,7 +14,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import Footer from "@/components/Footer";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import CreateFromStyleModal from "@/components/CreateFromStyleModal";
 import { AuthModals } from "@/components/AuthModals";
 
 interface Logo {
@@ -79,13 +78,11 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [selectedLogo, setSelectedLogo] = useState<Logo | null>(null); // 디테일 모달용
-  const [selectedLogoForCreate, setSelectedLogoForCreate] = useState<Logo | null>(null); // 새 작품 만들기용
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState<Array<{ author: string; authorAvatar?: string; content: string; time: string }>>([]);
   const { toast } = useToast();
-  const [isCreateNewModalOpen, setIsCreateNewModalOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
 
@@ -364,19 +361,6 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
     });
   };
 
-  const handleCreateNew = () => {
-    if (!selectedLogo) return;
-    // 선택된 로고를 별도 state에 저장
-    setSelectedLogoForCreate(selectedLogo);
-    // 아이템 상세 모달 닫기
-    setSelectedLogo(null);
-    setIsLiked(false);
-    setLikesCount(0);
-    setComments([]);
-    setCommentText("");
-    // 모달 열기
-    setIsCreateNewModalOpen(true);
-  };
 
   return (
     <div className="w-full bg-background">
@@ -511,7 +495,7 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
               </div>
 
               {/* Action Buttons - Middle */}
-              <div className="p-3 border-t-[1px] border-border space-y-2">
+              <div className="p-3 border-t-[1px] border-border">
                 <div className="flex items-center gap-3">
                   <Button 
                     variant="ghost" 
@@ -541,10 +525,6 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
                     <Share2 className="h-4 w-4" />
                   </Button>
                 </div>
-                <Button onClick={handleCreateNew} className="w-full h-9 bg-[#7C22C8] hover:bg-[#6B1DB5] text-white text-sm">
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  이 스타일로 새로운 작품 만들기
-                </Button>
               </div>
 
               {/* Comment Input - Bottom */}
@@ -578,25 +558,6 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
           </div>
         </DialogContent>
       </Dialog>
-
-      {/* 새로운 작품 만들기 모달 */}
-      {selectedLogoForCreate && (
-        <CreateFromStyleModal
-          open={isCreateNewModalOpen}
-          onOpenChange={(open) => {
-            setIsCreateNewModalOpen(open);
-            // 모달이 완전히 닫힐 때만 selectedLogoForCreate를 null로 설정
-            // CreateFromStyleModal 내부에서 프로젝트 선택 모달이 열려있을 때는
-            // onOpenChange(false)를 호출하지 않으므로 안전하게 null로 설정 가능
-            if (!open) {
-              setSelectedLogoForCreate(null);
-            }
-          }}
-          baseAssetType="logo"
-          baseAssetId={selectedLogoForCreate.id}
-          baseAssetImageUrl={selectedLogoForCreate.imageSrc}
-        />
-      )}
 
       <AuthModals
         isLoginOpen={isLoginOpen}
