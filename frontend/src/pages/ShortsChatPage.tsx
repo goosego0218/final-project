@@ -578,7 +578,7 @@ const ShortsChatPage = () => {
                               className="bg-background/90 hover:bg-background"
                             >
                               <Star className="h-4 w-4 mr-2" />
-                              로컬로 저장
+                              다운로드
                             </Button>
                             <Button 
                               size="sm" 
@@ -704,55 +704,47 @@ const ShortsChatPage = () => {
                                     <>
                                       {textContent && <p className="whitespace-pre-wrap mb-3">{textContent}</p>}
                                       <div className="mt-2 bg-black/5 rounded-lg p-2">
-                                        <video 
-                                          src={videoUrl} 
-                                          className="w-48 h-auto rounded-md mx-auto"
-                                          controls
-                                          autoPlay
-                                          loop
-                                          muted
-                                          playsInline
-                                          style={{ aspectRatio: '9/16' }}
-                                        />
-                                        <div className="flex gap-2 mt-2 justify-center">
-                                          <Button 
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={() => {
-                                              // 왼쪽 패널에서 재생
-                                              setSelectedResult({
-                                                type: "short",
-                                                url: videoUrl,
-                                                index: savedShorts.length,
-                                              });
-                                              setHasResultPanel(false);
+                                        {/* 썸네일 영상 (자동재생 없음) */}
+                                        <div 
+                                          className="relative w-48 mx-auto cursor-pointer hover:opacity-80 transition-opacity"
+                                          onClick={() => {
+                                            // 클릭 시 왼쪽 패널에서 재생
+                                            setSelectedResult({
+                                              type: "short",
+                                              url: videoUrl,
+                                              index: savedShorts.length,
+                                            });
+                                            setHasResultPanel(false);
+                                          }}
+                                        >
+                                          <video 
+                                            src={videoUrl} 
+                                            className="w-full h-auto rounded-md"
+                                            muted
+                                            playsInline
+                                            style={{ aspectRatio: '9/16' }}
+                                            onMouseEnter={(e) => e.currentTarget.play()}
+                                            onMouseLeave={(e) => {
+                                              e.currentTarget.pause();
+                                              e.currentTarget.currentTime = 0;
                                             }}
-                                          >
-                                            <Video className="h-4 w-4 mr-1" />
-                                            재생
-                                          </Button>
-                                          <Button 
-                                            size="sm" 
-                                            onClick={() => {
-                                              // 보관함에만 저장 (다운로드 안 함)
-                                              handleSave(videoUrl, "short", Date.now());
-                                            }}
-                                          >
-                                            <Star className="h-4 w-4 mr-1" />
-                                            저장
-                                          </Button>
-                                          <Button size="sm" variant="outline">
-                                            <Upload className="h-4 w-4 mr-1" />
-                                            업로드
-                                          </Button>
+                                          />
+                                          {/* 재생 아이콘 오버레이 */}
+                                          <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-md pointer-events-none">
+                                            <div className="bg-white/90 rounded-full p-3">
+                                              <Video className="h-6 w-6 text-primary" />
+                                            </div>
+                                          </div>
                                         </div>
+                                        <p className="text-center text-sm text-muted-foreground mt-2 mb-2">
+                                        </p>
                                       </div>
                                     </>
                                   );
                                 }
                                 
                                 // VIDEO_URL이 없으면 기존 텍스트 렌더링
-                                return <p className="whitespace-pre-wrap">{message.content}</p>;
+                                return <p className="whitespace-pre-wrap break-words">{message.content}</p>;
                               })()}
                             </Card>
                           </div>

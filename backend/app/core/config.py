@@ -52,20 +52,27 @@ class Settings(BaseSettings):
     frontend_url: str = "http://localhost:8080"  # 프론트엔드 기본 URL
     
     # Google GenAI (로고 생성용 - Gemini 이미지 생성)
-    google_genai_model: str = "gemini-2.0-flash-exp"
+    google_genai_api_key: str = ""  
+    google_genai_model: str = ""
 
     # Google Cloud / Vertex AI (Veo 3.1)
-    google_genai_api_key: str = ""  
     google_cloud_project: str = ""
     google_cloud_location: str = ""
     veo_model: str = ""
     veo_duration_seconds: int = 8
     veo_aspect_ratio: str = ""
     veo_resolution: str = ""
+
+    # File Server
+    file_server_url: str = "https://kr.object.ncloudstorage.com/aissemble"
     
-    # Kanana Safeguard (가드레일)
-    safeguard_enabled: bool = False  # 기본값 False - 필요시 .env에서 True로 설정
-    
+    # NCP Object Storage  
+    ncp_access_key: str = ""
+    ncp_secret_key: str = ""
+    ncp_region: str = ""
+    ncp_endpoint: str = ""
+    ncp_bucket_name: str = ""
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

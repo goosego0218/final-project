@@ -11,7 +11,7 @@ from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import MemorySaver
 
 from app.agents.state import AppState
-from app.llm.client import get_chat_model, get_gemini_image_client
+from app.llm.client import get_chat_model, get_gemini_image_client  
 
 # 노드 함수들 import
 from app.graphs.nodes.logo.generate_logo_prompt_node import make_generate_logo_prompt_node
@@ -28,11 +28,11 @@ def build_logo_graph():
     """
     
     llm = get_chat_model()
-    gemini_image_client = get_gemini_image_client()
+    gemini_client = get_gemini_image_client()
     
     # 노드 생성
     generate_logo_prompt = make_generate_logo_prompt_node(llm)
-    generate_logo = make_generate_logo_node(gemini_image_client)
+    generate_logo = make_generate_logo_node(gemini_client)
     
     # 그래프 생성
     graph = StateGraph(AppState)

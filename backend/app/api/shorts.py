@@ -24,6 +24,8 @@ from app.models.auth import UserInfo
 
 from app.agents.state import AppState 
 from app.agents.shorts_agent import build_shorts_graph
+from app.services.shorts_service import save_shorts_to_storage_and_db
+from app.schemas.shorts import SaveShortsRequest, SaveShortsResponse
 
 from uuid import uuid4
 
@@ -218,3 +220,44 @@ def resume_shorts(
         project_id=req.project_id,
         shorts_session_id=req.shorts_session_id,
     )
+
+@router.post("/save", response_model=SaveShortsResponse, summary="쇼츠 저장")
+def save_shorts(
+    req: SaveShortsRequest,
+    db: Session = Depends(get_orm_session),
+    current_user: UserInfo = Depends(get_current_user),
+):
+    """
+    생성된 쇼츠를 NCP Object Storage에 업로드하고 DB에 저장
+    """
+    if not req.project_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="project_id는 필수입니다."
+        )
+    
+    try:
+        prod = save_shorts_to_storage_and_db(
+            db=db,
+            base64_video=req.base64_video,
+            project_id=req.project_id,
+            prod_type_id=req.prod_type_id or 1,
+            user_id=current_user.id,
+        )
+        
+        from app.utils.file_utils import get_file_url
+        file_url = get_file_url(prod.file_path)
+        
+        return SaveShortsResponse(
+            success=True,
+            message="쇼츠가 성공적으로 저장되었습니다.",
+            prod_id=prod.prod_id,
+            file_path=prod.file_path,
+            file_url=file_url,
+        )
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"쇼츠 저장 실패: {str(e)}"
+        )
