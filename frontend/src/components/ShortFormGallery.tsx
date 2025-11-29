@@ -240,11 +240,6 @@ const ShortFormGallery = ({ searchQuery = "", initialSelectedProdId }: ShortForm
                         </div>
                       </div>
                     )}
-
-                    {/* Duration badge */}
-                    <div className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm rounded-lg px-2.5 py-1 shadow-md z-10">
-                      <span className="text-xs font-medium text-foreground">0:15</span>
-                    </div>
                   </div>
 
                   {/* Info section */}
