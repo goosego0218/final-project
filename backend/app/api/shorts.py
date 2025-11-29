@@ -36,7 +36,15 @@ router = APIRouter(
     tags=["shorts"],
 )
 
-shorts_graph = build_shorts_graph()
+# 그래프를 지연 로딩 (필요할 때만 빌드)
+_shorts_graph = None
+
+def get_shorts_graph():
+    """그래프를 지연 로딩 (필요할 때만 빌드)"""
+    global _shorts_graph
+    if _shorts_graph is None:
+        _shorts_graph = build_shorts_graph()
+    return _shorts_graph
 
 @router.post("/chat", response_model=ShortsChatResponse, summary="숏폼 챗봇")
 def chat_shorts(
@@ -74,7 +82,7 @@ def chat_shorts(
         "meta": {},
     }
 
-    new_state = shorts_graph.invoke(
+    new_state = get_shorts_graph().invoke(
         state,
         config={"configurable": {
             "thread_id": f"user-{current_user.id}-project-{req.project_id}-shorts-{shorts_session_id}"
@@ -192,7 +200,7 @@ def resume_shorts(
     resume_value = req.answer  # Y / N 
     
     print("[resume] Command(resume)으로 그래프 재개")
-    result_state = shorts_graph.invoke(
+    result_state = get_shorts_graph().invoke(
         Command(resume=resume_value),
         config=config,
     )
