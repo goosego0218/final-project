@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Heart, MessageCircle, Share2 } from "lucide-react";
+import { Heart, MessageCircle } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -9,12 +9,9 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import Footer from "@/components/Footer";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { AuthModals } from "@/components/AuthModals";
+import LogoDetailModal from "@/components/LogoDetailModal";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getLogoGallery,
@@ -29,18 +26,15 @@ import {
 
 interface LogoGalleryProps {
   searchQuery?: string;
+  initialSelectedProdId?: number;
 }
 
-const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
+const LogoGallery = ({ searchQuery = "", initialSelectedProdId }: LogoGalleryProps) => {
   const [sortBy, setSortBy] = useState<SortOption>("latest");
   const [page, setPage] = useState(1);
   const [allLogos, setAllLogos] = useState<GalleryItem[]>([]); // 누적된 모든 로고 데이터
   const [selectedLogo, setSelectedLogo] = useState<GalleryItem | null>(null);
-  const [isLiked, setIsLiked] = useState(false);
-  const [commentText, setCommentText] = useState("");
   const { toast } = useToast();
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [isSignUpOpen, setIsSignUpOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const ITEMS_PER_PAGE = 12;
@@ -103,111 +97,58 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
   // 페이지네이션: 한 번에 12개씩 가져오기
   const { data: galleryData, isLoading, refetch: refetchGallery } = useQuery({
     queryKey: ['logoGallery', sortBy, searchQuery, userId, page],
-    queryFn: () => getLogoGallery(sortBy, (page - 1) * ITEMS_PER_PAGE, ITEMS_PER_PAGE, searchQuery || undefined),
-    staleTime: 0, // 캐시를 최신이 아닌 것으로 간주 (하지만 자동 refetch는 하지 않음)
-    refetchOnMount: false, // 마운트 시 자동 refetch 방지 (한 번만 호출)
-    refetchOnWindowFocus: false, // 창 포커스 시 자동 refetch 방지
+    queryFn: () =>
+      getLogoGallery(
+        sortBy,
+        (page - 1) * ITEMS_PER_PAGE,
+        ITEMS_PER_PAGE,
+        searchQuery || undefined
+      ),
+    // 갤러리 화면이 마운트될 때마다 항상 DB에서 최신 데이터를 가져오기
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 
   // 선택된 로고의 댓글 조회
-  const { data: commentsData, refetch: refetchComments } = useQuery({
-    queryKey: ['logoComments', selectedLogo?.prod_id],
-    queryFn: () => getComments(selectedLogo!.prod_id),
-    enabled: !!selectedLogo,
-  });
+  // (상세 모달에서 댓글/좋아요를 처리하므로, 여기서는 리스트/선택만 관리)
 
-  // 선택된 로고의 좋아요 상태 조회
-  const { data: likeStatus, refetch: refetchLikeStatus } = useQuery({
-    queryKey: ['logoLikeStatus', selectedLogo?.prod_id],
-    queryFn: () => getLikeStatus(selectedLogo!.prod_id),
-    enabled: !!selectedLogo,
-  });
-
-  // 좋아요 토글 mutation
-  const toggleLikeMutation = useMutation({
-    mutationFn: (prodId: number) => toggleLike(prodId),
-    onSuccess: async (data) => {
-      setIsLiked(data.is_liked);
-      // 현재 페이지의 갤러리 데이터 갱신
-      await refetchGallery();
-      // 선택된 로고의 좋아요 수 업데이트
-      if (selectedLogo) {
-        // 선택된 로고가 현재 페이지에 있으면 업데이트
-        const updatedLogo = galleryData?.items.find(
-          (item) => item.prod_id === selectedLogo.prod_id
-        );
-        if (updatedLogo) {
-          setSelectedLogo({ ...updatedLogo, like_count: data.like_count || updatedLogo.like_count });
-        }
-        refetchLikeStatus();
-      }
-      toast({
-        description: data.is_liked ? "좋아요를 눌렀습니다" : "좋아요를 취소했습니다",
-      });
-    },
-    onError: (error: any) => {
-      if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
-        setIsLoginOpen(true);
-      } else {
-        toast({
-          description: "좋아요 처리에 실패했습니다",
-          variant: "destructive",
-        });
-      }
-    },
-  });
-
-  // 댓글 작성 mutation
-  const createCommentMutation = useMutation({
-    mutationFn: (content: string) => createComment({ prod_id: selectedLogo!.prod_id, content }),
-    onSuccess: () => {
-      setCommentText("");
-      refetchComments();
-      // 갤러리 데이터 갱신
-      queryClient.invalidateQueries({ queryKey: ['logoGallery'] });
-      toast({
-        description: "댓글이 등록되었습니다",
-      });
-    },
-    onError: (error: any) => {
-      if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
-        setIsLoginOpen(true);
-      } else {
-        toast({
-          description: "댓글 작성에 실패했습니다",
-          variant: "destructive",
-        });
-      }
-    },
-  });
-
-  // 선택된 로고 변경 시 좋아요 상태 업데이트
+  // 새로운 페이지 데이터가 로드되면 누적 (같은 prod_id는 항상 최신 데이터로 교체)
   useEffect(() => {
-    if (likeStatus) {
-      setIsLiked(likeStatus.is_liked);
-    }
-  }, [likeStatus]);
+    if (!galleryData?.items) return;
 
-  // 새로운 페이지 데이터가 로드되면 누적
-  useEffect(() => {
-    if (galleryData?.items) {
+    setAllLogos((prev) => {
+      // 첫 페이지이거나 정렬/검색 조건이 바뀐 경우에는 전부 교체
       if (page === 1) {
-        // 첫 페이지는 교체
-        setAllLogos(galleryData.items);
-      } else {
-        // 이후 페이지는 누적 (중복 제거)
-        setAllLogos((prev) => {
-          const existingIds = new Set(prev.map((logo) => logo.prod_id));
-          const newItems = galleryData.items.filter((item) => !existingIds.has(item.prod_id));
-          return [...prev, ...newItems];
-        });
+        return galleryData.items;
       }
-    }
+
+      // 이후 페이지에서는 기존 데이터에 병합하되,
+      // 같은 prod_id가 있으면 서버에서 가져온 최신 데이터로 교체
+      const byId = new Map<number, GalleryItem>();
+      prev.forEach((logo) => {
+        byId.set(logo.prod_id, logo);
+      });
+      galleryData.items.forEach((logo) => {
+        byId.set(logo.prod_id, logo);
+      });
+      return Array.from(byId.values());
+    });
   }, [galleryData, page]);
 
   // 표시할 로고 목록 (누적된 모든 데이터)
   const displayedLogos = allLogos;
   const hasMore = galleryData ? (page * ITEMS_PER_PAGE) < galleryData.total_count : false;
+
+  // 초기 진입 시 특정 prod_id가 쿼리 파라미터로 넘어온 경우, 해당 로고를 자동으로 선택
+  useEffect(() => {
+    if (!initialSelectedProdId || selectedLogo) return;
+    const target = allLogos.find((logo) => logo.prod_id === initialSelectedProdId);
+    if (target) {
+      setSelectedLogo(target);
+    }
+  }, [initialSelectedProdId, allLogos, selectedLogo]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -240,27 +181,6 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
   const handleLoadMore = () => {
     setPage((prev) => prev + 1);
     // 페이지가 변경되면 useQuery가 자동으로 다음 페이지 데이터를 가져옴
-  };
-
-  const handleLike = () => {
-    if (!selectedLogo) return;
-    toggleLikeMutation.mutate(selectedLogo.prod_id);
-  };
-
-  const handleComment = () => {
-    if (commentText.trim() && selectedLogo) {
-      createCommentMutation.mutate(commentText.trim());
-    }
-  };
-
-  const handleShare = () => {
-    const url = selectedLogo
-      ? `${window.location.origin}/logo-gallery?logo=${selectedLogo.prod_id}`
-      : window.location.href;
-    navigator.clipboard.writeText(url);
-    toast({
-      description: "링크가 복사되었습니다",
-    });
   };
 
   const handleSortChange = (value: SortOption) => {
@@ -365,152 +285,11 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
         )}
       </div>
 
-      {/* Logo Detail Modal */}
-      <Dialog
+      {/* Logo Detail Modal - 공통 컴포넌트 사용 */}
+      <LogoDetailModal
         open={!!selectedLogo}
-        onOpenChange={(open) => {
-          if (!open) {
-            setSelectedLogo(null);
-            setIsLiked(false);
-            setCommentText("");
-          }
-        }}
-      >
-        <DialogContent className="max-w-[800px] w-[90vw] overflow-hidden p-0 gap-0">
-          {selectedLogo && (
-            <div className="flex md:flex-row flex-col">
-              {/* Left: Logo Image */}
-              <div className="bg-background flex items-center justify-center p-0 border-r border-border aspect-square w-full md:w-[400px] md:flex-shrink-0 rounded-l-lg overflow-hidden">
-                <img
-                  src={selectedLogo.file_url}
-                  alt={`로고 ${selectedLogo.prod_id}`}
-                  className="w-full h-full object-contain"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = "/placeholder.svg";
-                  }}
-                />
-              </div>
-
-              {/* Right: Comments and Actions */}
-              <div className="flex flex-col bg-background w-full md:w-[400px] md:flex-shrink-0 aspect-square md:aspect-auto md:h-[400px] rounded-r-lg">
-                {/* Comments Section - Top */}
-                <div className="flex-1 min-h-0 overflow-y-auto p-6">
-                  <div className="space-y-4">
-                    {!commentsData || commentsData.comments.length === 0 ? (
-                      <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-                        아직 댓글이 없습니다. 첫 댓글을 남겨보세요!
-                      </div>
-                    ) : (
-                      commentsData.comments.map((comment: Comment) => (
-                        <div key={comment.comment_id} className="flex gap-3">
-                          <Avatar className="h-8 w-8 flex-shrink-0">
-                            <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                              {comment.user_nickname.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-semibold text-sm text-foreground">
-                                {comment.user_nickname}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {formatCommentDate(comment.create_dt)}
-                              </span>
-                            </div>
-                            <p className="text-sm text-foreground break-words">{comment.content}</p>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-
-                {/* Action Buttons - Middle */}
-                <div className="p-3 border-t-[1px] border-border">
-                  <div className="flex items-center gap-3">
-                    <Button
-                      variant="ghost"
-                      onClick={handleLike}
-                      disabled={toggleLikeMutation.isPending}
-                      className="h-8 px-3 gap-2 hover:bg-[#7C22C8]/10 hover:text-[#7C22C8]"
-                    >
-                      <Heart
-                        className={`h-4 w-4 ${isLiked ? "fill-destructive text-destructive" : ""}`}
-                      />
-                      <span className="text-sm font-semibold text-foreground">
-                        {selectedLogo.like_count.toLocaleString()}
-                      </span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="h-8 px-3 gap-2 hover:bg-[#7C22C8]/10 hover:text-[#7C22C8]"
-                    >
-                      <MessageCircle className="h-4 w-4" />
-                      <span className="text-sm font-semibold text-foreground">
-                        {selectedLogo.comment_count.toLocaleString()}
-                      </span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={handleShare}
-                      className="h-8 w-8 hover:bg-[#7C22C8]/10 hover:text-[#7C22C8]"
-                    >
-                      <Share2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Comment Input - Bottom */}
-                <div className="p-3 border-t-[1px] border-border">
-                  <div className="flex gap-2">
-                    <Textarea
-                      placeholder="댓글을 입력하세요..."
-                      value={commentText}
-                      onChange={(e) => setCommentText(e.target.value)}
-                      className="h-[40px] min-h-[40px] max-h-[40px] resize-none flex-1 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#7C22C8] focus-visible:border-2"
-                      rows={1}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                          e.preventDefault();
-                          if (commentText.trim()) {
-                            handleComment();
-                          }
-                        }
-                      }}
-                    />
-                    <Button
-                      onClick={handleComment}
-                      disabled={!commentText.trim() || createCommentMutation.isPending}
-                      className="h-[40px] px-6 bg-[#7C22C8] hover:bg-[#6B1DB5] text-white disabled:opacity-50"
-                    >
-                      {createCommentMutation.isPending ? "등록 중..." : "등록"}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      <AuthModals
-        isLoginOpen={isLoginOpen}
-        isSignUpOpen={isSignUpOpen}
-        onLoginClose={() => setIsLoginOpen(false)}
-        onSignUpClose={() => setIsSignUpOpen(false)}
-        onSwitchToSignUp={() => {
-          setIsLoginOpen(false);
-          setIsSignUpOpen(true);
-        }}
-        onSwitchToLogin={() => {
-          setIsSignUpOpen(false);
-          setIsLoginOpen(true);
-        }}
-        onLoginSuccess={(rememberMe) => {
-          setIsLoginOpen(false);
-          setIsSignUpOpen(false);
-        }}
+        logo={selectedLogo}
+        onClose={() => setSelectedLogo(null)}
       />
 
       <Footer />

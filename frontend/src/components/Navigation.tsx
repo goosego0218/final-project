@@ -150,7 +150,7 @@ const Navigation = () => {
     setIsLoginOpen(true);
   };
 
-  const handleLoginSuccess = (rememberMe: boolean, isSignUp?: boolean) => {
+  const handleLoginSuccess = async (rememberMe: boolean, isSignUp?: boolean) => {
     setIsLoggedIn(true);
     if (rememberMe) {
       localStorage.setItem('isLoggedIn', 'true');
@@ -162,8 +162,9 @@ const Navigation = () => {
     setIsLoginOpen(false);
     setIsSignUpOpen(false);
     
-    // 메뉴 쿼리 무효화 및 다시 가져오기 (한 번만 호출)
-    queryClient.invalidateQueries({ queryKey: ['menus'] });
+    // 메뉴 쿼리 무효화 및 즉시 다시 가져오기
+    await queryClient.invalidateQueries({ queryKey: ['menus'] });
+    await queryClient.refetchQueries({ queryKey: ['menus'] });
     
     // 회원가입이 아닌 경우에만 로그인 토스트 표시
     if (!isSignUp) {

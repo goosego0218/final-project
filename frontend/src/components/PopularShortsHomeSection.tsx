@@ -1,23 +1,24 @@
 import { Heart, MessageCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useQuery } from "@tanstack/react-query";
 import { getShortsGallery, GalleryItem } from "@/lib/api";
+import ShortFormDetailModal from "./ShortFormDetailModal";
 
 const PopularShortsHomeSection = () => {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const scrollIntervalRef = useRef<number | null>(null);
   const [selectedShort, setSelectedShort] = useState<GalleryItem | null>(null);
 
-  // 좋아요순 상위 12개 숏폼을 DB에서 조회 (한 번만 호출)
+  // 좋아요순 상위 12개 숏폼을 DB에서 조회
   const { data, isLoading } = useQuery({
     queryKey: ["homePopularShorts"],
     queryFn: () => getShortsGallery("likes", 0, 12),
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
+    // Home 화면 진입 시마다 DB에서 최신 데이터 한 번 가져오기
+    staleTime: 0,
+    gcTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
-    refetchOnMount: false,
+    refetchOnMount: true,
   });
 
   const shorts: GalleryItem[] = data?.items ?? [];
@@ -123,7 +124,7 @@ const PopularShortsHomeSection = () => {
                     )}
 
                     {/* 호버 시 좋아요/댓글 정보 */}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items=center justify-center">
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
                       <div className="flex items-center gap-6 text-white">
                         <span className="flex items-center gap-2">
                           <Heart
@@ -147,85 +148,12 @@ const PopularShortsHomeSection = () => {
         </div>
       </section>
 
-      {/* 간단한 상세 모달 (이미지 & 카운트만 표시) */}
-      <Dialog
-        open={!!shorts.length && !!selectedShort}
-        onOpenChange={(open) => {
-          if (!open) {
-            setSelectedShort(null);
-          }
-        }}
-      >
-        <DialogContent className="max-w-[800px] w-[90vw] overflow-hidden p-0 gap-0">
-          {selectedShort && (
-            <div className="flex md:flex-row flex-col">
-              {/* Left: Thumbnail / Video */}
-              <div className="bg-background flex items-center justify-center p-0 border-r border-border aspect-[9/16] w-full md:w-[300px] md:flex-shrink-0 rounded-l-lg overflow-hidden relative">
-                {(() => {
-                  const url = selectedShort.file_url;
-                  const isVideo =
-                    url &&
-                    !url.endsWith(".svg") &&
-                    !url.endsWith(".jpg") &&
-                    !url.endsWith(".png") &&
-                    !url.startsWith("data:image");
-                  if (isVideo) {
-                    return (
-                      <video
-                        src={url}
-                        className="w-full h-full object-cover"
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        controls
-                      />
-                    );
-                  }
-                  return (
-                    <img
-                      src={url}
-                      alt={`숏폼 ${selectedShort.prod_id}`}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = "/placeholder.svg";
-                      }}
-                    />
-                  );
-                })()}
-              </div>
-
-              {/* Right: Info */}
-              <div className="flex flex-col bg-background w-full md:w-[500px] md:flex-shrink-0 aspect-[9/16] md:aspect-auto md:h-[533px] rounded-r-lg">
-                <div className="flex-1 min-h-0 p-6 flex flex-col justify-center gap-4">
-                  <div className="flex items-center gap-4 text-muted-foreground">
-                    <span className="flex items-center gap-2">
-                      <Heart
-                        className={`w-5 h-5 ${
-                          selectedShort.is_liked ? "fill-red-500 text-red-500" : ""
-                        }`}
-                      />
-                      <span className="text-lg font-semibold text-foreground">
-                        {selectedShort.like_count.toLocaleString()}
-                      </span>
-                    </span>
-                    <span className="flex items-center gap-2">
-                      <MessageCircle className="w-5 h-5" />
-                      <span className="text-lg font-semibold text-foreground">
-                        {selectedShort.comment_count.toLocaleString()}
-                      </span>
-                    </span>
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    메인 화면에서 인기 숏폼을 미리보기로 제공합니다. 자세한 소통과
-                    좋아요/댓글 관리는 숏폼 갤러리에서 진행할 수 있습니다.
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* 공통 숏폼 상세 모달 재사용 */}
+      <ShortFormDetailModal
+        open={!!selectedShort}
+        short={selectedShort}
+        onClose={() => setSelectedShort(null)}
+      />
     </>
   );
 };
