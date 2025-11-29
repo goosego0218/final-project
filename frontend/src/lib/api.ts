@@ -438,6 +438,7 @@ export interface ShortsListItem {
   file_path: string;
   file_url: string;
   create_dt: string | null;
+  pub_yn: string | null;
 }
 
 // 쇼츠 목록 조회 API 호출
@@ -468,6 +469,7 @@ export interface LogoListItem {
   file_path: string;
   file_url: string;
   create_dt: string | null;
+  pub_yn: string | null;
 }
 
 // 로고 저장 API 호출
@@ -494,6 +496,50 @@ export interface DeleteLogoResponse {
 export async function deleteLogo(prodId: number): Promise<DeleteLogoResponse> {
   return apiRequest<DeleteLogoResponse>(`/logo/${prodId}`, {
     method: 'DELETE',
+  });
+}
+
+// 로고 공개 여부 업데이트
+export interface UpdateLogoPubYnRequest {
+  pub_yn: 'Y' | 'N';
+}
+
+export interface UpdateLogoPubYnResponse {
+  success: boolean;
+  message: string;
+  prod_id: number;
+  pub_yn: string;
+}
+
+export async function updateLogoPubYn(
+  prodId: number,
+  pubYn: 'Y' | 'N'
+): Promise<UpdateLogoPubYnResponse> {
+  return apiRequest<UpdateLogoPubYnResponse>(`/logo/${prodId}/pub-yn`, {
+    method: 'PATCH',
+    body: JSON.stringify({ pub_yn: pubYn }),
+  });
+}
+
+// 쇼츠 공개 여부 업데이트
+export interface UpdateShortsPubYnRequest {
+  pub_yn: 'Y' | 'N';
+}
+
+export interface UpdateShortsPubYnResponse {
+  success: boolean;
+  message: string;
+  prod_id: number;
+  pub_yn: string;
+}
+
+export async function updateShortsPubYn(
+  prodId: number,
+  pubYn: 'Y' | 'N'
+): Promise<UpdateShortsPubYnResponse> {
+  return apiRequest<UpdateShortsPubYnResponse>(`/shorts/${prodId}/pub-yn`, {
+    method: 'PATCH',
+    body: JSON.stringify({ pub_yn: pubYn }),
   });
 }
 
