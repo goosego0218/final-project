@@ -79,11 +79,9 @@ def get_genai_client():
 def get_gemini_image_client():
     """
     로고 이미지 생성용 Gemini 클라이언트
-    Vertex AI + API Key 방식
     """
     from google import genai
     
     return genai.Client(
-        vertexai=True,
         api_key=settings.google_genai_api_key,
     )

@@ -47,7 +47,6 @@ def make_generate_logo_node(genai_client: "Client"):
                 image_config=types.ImageConfig(
                     aspect_ratio="1:1",
                     image_size="1K",
-                    output_mime_type="image/png",
                 ),
             )
             
