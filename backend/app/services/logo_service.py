@@ -117,3 +117,4 @@ def delete_logo(
     db.commit()
     
     return True
+

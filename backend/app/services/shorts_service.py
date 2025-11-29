@@ -75,3 +75,4 @@ def get_shorts_list(
         .order_by(GenerationProd.create_dt.desc())
         .all()
     )
+
