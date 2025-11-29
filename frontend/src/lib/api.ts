@@ -365,7 +365,8 @@ export async function disconnectYouTube(): Promise<{ message: string }> {
 export interface YouTubeUploadRequest {
   video_url: string;
   title: string;
-  description?: string;
+  project_id: number;  // 프로젝트 ID (브랜드 프로필 가져오기 위해)
+  description?: string;  // 사용 안 함 (백엔드에서 자동 생성)
   tags?: string[];
   privacy?: 'public' | 'private' | 'unlisted';
 }
@@ -381,6 +382,28 @@ export interface YouTubeUploadResponse {
 // YouTube에 비디오 업로드
 export async function uploadToYouTube(data: YouTubeUploadRequest): Promise<YouTubeUploadResponse> {
   return apiRequest<YouTubeUploadResponse>('/social/youtube/upload', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+// Instagram 업로드 관련 인터페이스
+export interface InstagramUploadRequest {
+  video_url: string;
+  caption: string;
+  project_id: number;
+  share_to_feed?: boolean;
+}
+
+export interface InstagramUploadResponse {
+  success: boolean;
+  media_id: string;
+  message: string;
+}
+
+// Instagram에 릴스 업로드
+export async function uploadToInstagram(data: InstagramUploadRequest): Promise<InstagramUploadResponse> {
+  return apiRequest<InstagramUploadResponse>('/social/instagram/upload', {
     method: 'POST',
     body: JSON.stringify(data),
   });
