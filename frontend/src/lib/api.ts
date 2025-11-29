@@ -473,3 +473,132 @@ export async function deleteLogo(prodId: number): Promise<DeleteLogoResponse> {
     method: 'DELETE',
   });
 }
+
+// 갤러리 관련 인터페이스
+export type SortOption = "latest" | "oldest" | "likes" | "comments";
+
+export interface GalleryItem {
+  prod_id: number;
+  file_url: string;
+  like_count: number;
+  comment_count: number;
+  create_dt: string;
+  brand_name?: string | null;
+  tags?: string[] | null;
+}
+
+export interface GalleryListResponse {
+  items: GalleryItem[];
+  total_count: number;
+  skip: number;
+  limit: number;
+}
+
+// 로고 갤러리 조회
+export async function getLogoGallery(
+  sortBy: SortOption = "latest",
+  skip: number = 0,
+  limit: number = 100,
+  searchQuery?: string
+): Promise<GalleryListResponse> {
+  const params = new URLSearchParams({
+    sort_by: sortBy,
+    skip: skip.toString(),
+    limit: limit.toString(),
+  });
+  if (searchQuery) {
+    params.append("search_query", searchQuery);
+  }
+  return apiRequest<GalleryListResponse>(`/gallery/logos?${params.toString()}`, {
+    method: 'GET',
+  });
+}
+
+// 쇼츠 갤러리 조회
+export async function getShortsGallery(
+  sortBy: SortOption = "latest",
+  skip: number = 0,
+  limit: number = 100,
+  searchQuery?: string
+): Promise<GalleryListResponse> {
+  const params = new URLSearchParams({
+    sort_by: sortBy,
+    skip: skip.toString(),
+    limit: limit.toString(),
+  });
+  if (searchQuery) {
+    params.append("search_query", searchQuery);
+  }
+  return apiRequest<GalleryListResponse>(`/gallery/shorts?${params.toString()}`, {
+    method: 'GET',
+  });
+}
+
+// 댓글 관련 인터페이스
+export interface Comment {
+  comment_id: number;
+  prod_id: number;
+  user_id: number;
+  user_nickname: string;
+  content: string;
+  create_dt: string;
+  update_dt: string;
+}
+
+export interface CommentListResponse {
+  comments: Comment[];
+  total_count: number;
+}
+
+export interface CreateCommentRequest {
+  prod_id: number;
+  content: string;
+}
+
+// 댓글 목록 조회
+export async function getComments(prodId: number): Promise<CommentListResponse> {
+  return apiRequest<CommentListResponse>(`/comments?prod_id=${prodId}`, {
+    method: 'GET',
+  });
+}
+
+// 댓글 작성
+export async function createComment(data: CreateCommentRequest): Promise<Comment> {
+  return apiRequest<Comment>('/comments', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+// 댓글 삭제
+export async function deleteComment(commentId: number): Promise<void> {
+  return apiRequest<void>(`/comments/${commentId}`, {
+    method: 'DELETE',
+  });
+}
+
+// 좋아요 관련 인터페이스
+export interface LikeToggleResponse {
+  is_liked: boolean;
+  like_count: number;
+}
+
+export interface LikeStatusResponse {
+  prod_id: number;
+  is_liked: boolean;
+  like_count: number;
+}
+
+// 좋아요 토글
+export async function toggleLike(prodId: number): Promise<LikeToggleResponse> {
+  return apiRequest<LikeToggleResponse>(`/likes/toggle/${prodId}`, {
+    method: 'POST',
+  });
+}
+
+// 좋아요 상태 조회
+export async function getLikeStatus(prodId: number): Promise<LikeStatusResponse> {
+  return apiRequest<LikeStatusResponse>(`/likes/status/${prodId}`, {
+    method: 'GET',
+  });
+}

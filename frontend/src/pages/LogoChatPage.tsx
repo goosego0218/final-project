@@ -13,7 +13,6 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/componen
 import { projectStorage, type Message, type SavedItem } from "@/lib/projectStorage";
 import StudioTopBar from "@/components/StudioTopBar";
 import { getLogoIntro, sendLogoChat, getProjectDetail } from "@/lib/api";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import ThemeToggle from "@/components/ThemeToggle";
 import { saveLogo, getLogoList, deleteLogo } from "@/lib/api";
 import { Save } from "lucide-react";
@@ -40,8 +39,6 @@ const LogoChatPage = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [attachedImages, setAttachedImages] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<SavedItem | null>(null);
   
   // 저장된 로고 추적
   const [savedLogos, setSavedLogos] = useState<SavedItem[]>([]);
@@ -435,52 +432,6 @@ const LogoChatPage = () => {
     setHasResultPanel(false);
   };
 
-  const handleDelete = () => {
-    if (!itemToDelete || !currentProjectId) return;
-
-    const project = projectStorage.getProject(currentProjectId);
-    if (!project) return;
-
-    const updatedSavedItems = (project.savedItems || []).filter(
-      item => item.id !== itemToDelete.id
-    );
-    project.savedItems = updatedSavedItems;
-    projectStorage.saveProject(project);
-
-    setSavedLogos(prev => prev.filter(item => item.id !== itemToDelete.id));
-
-    if (selectedResult && selectedResult.url === itemToDelete.url) {
-      setSelectedResult(null);
-      setHasResultPanel(false);
-    }
-
-    toast({
-      title: "로고가 삭제되었습니다",
-      description: "저장된 항목에서 제거되었습니다.",
-    });
-
-    setIsDeleteDialogOpen(false);
-    setItemToDelete(null);
-  };
-
-  const handleDeleteClick = () => {
-    if (!selectedResult || !currentProjectId) return;
-
-    const foundItem = savedLogos.find(
-      item => item.url === selectedResult.url && item.type === selectedResult.type
-    );
-
-    if (foundItem) {
-      setItemToDelete(foundItem);
-      setIsDeleteDialogOpen(true);
-    } else {
-      toast({
-        title: "저장된 항목이 아닙니다",
-        description: "저장된 항목만 삭제할 수 있습니다.",
-        variant: "destructive",
-      });
-    }
-  };
 
   // DB에서 로고 목록 불러오기
   const loadLogosFromDb = async (projectId: number) => {
@@ -724,18 +675,6 @@ const LogoChatPage = () => {
                     <div className="p-4 flex items-center justify-between flex-shrink-0">
                       <h2 className="text-lg font-semibold">로고 #{selectedResult.index + 1}</h2>
                       <div className="flex items-center gap-2">
-                        {savedLogos.some(
-                          item => item.url === selectedResult.url && item.type === selectedResult.type
-                        ) && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={handleDeleteClick}
-                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        )}
                         <Button
                           variant="ghost"
                           size="sm"
@@ -898,69 +837,90 @@ const LogoChatPage = () => {
                           </div>
                         )}
                         {message.content && message.content.trim() && (
-                          <div className={`flex items-end gap-2 ${message.role === "user" ? "justify-end" : "justify-start"}`}>
-                            <Card
-                              className={`max-w-[80%] p-4 ${
-                                message.role === "user"
-                                  ? "text-white border-0"
-                                  : "bg-muted"
-                              }`}
-                              style={message.role === "user" ? { backgroundColor: '#7C22C8' } : undefined}
-                            >
-                              {message.role === "user" && message.images && message.images.length > 0 && (
-                                <div className="mb-3 space-y-2">
-                                  {message.images.map((img, imgIdx) => (
-                                    <div key={imgIdx} className="relative">
-                                      <img
-                                        src={img}
-                                        alt={`첨부 이미지 ${imgIdx + 1}`}
-                                        className="max-w-full max-h-48 rounded-md object-cover"
-                                      />
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                              {(() => {
-                                const logoUrlMatch = message.content.match(/\[LOGO_URL\](.*?)\[\/LOGO_URL\]/);
-                                
-                                if (logoUrlMatch && message.role === "assistant") {
-                                  const logoUrl = logoUrlMatch[1];
-                                  const textContent = message.content
-                                    .replace(/\[LOGO_URL\].*?\[\/LOGO_URL\]/g, '')
-                                    .trim();
-                                  
-                                  return (
-                                    <>
-                                      {textContent && <p className="whitespace-pre-wrap break-words mb-2">{textContent}</p>}
-                                      <div className="mt-1 bg-black/5 rounded-lg p-2">
-                                        <div 
-                                          className="relative w-48 mx-auto cursor-pointer hover:opacity-80 transition-opacity"
-                                          onClick={() => {
-                                            // 클릭 시 왼쪽 패널에서 보기
-                                            setSelectedResult({
-                                              type: "logo",
-                                              url: logoUrl,
-                                              index: savedLogos.length,
-                                            });
-                                            setHasResultPanel(false);
-                                          }}
-                                        >
-                                          <img 
-                                            src={logoUrl} 
-                                            alt="Generated Logo"
-                                            className="w-full h-auto rounded-md object-contain"
-                                          />
-                                        </div>
-                                        <p className="text-center text-sm text-muted-foreground mt-2 mb-2">
-                                        </p>
+                          <div className={`flex flex-col gap-2 ${message.role === "user" ? "items-end" : "items-start"}`}>
+                            <div className={`flex items-end gap-2 w-full ${message.role === "user" ? "justify-end" : "justify-start"}`}>
+                              <Card
+                                className={`max-w-[80%] p-4 ${
+                                  message.role === "user"
+                                    ? "text-white border-0"
+                                    : "bg-muted"
+                                }`}
+                                style={message.role === "user" ? { backgroundColor: '#7C22C8' } : undefined}
+                              >
+                                {message.role === "user" && message.images && message.images.length > 0 && (
+                                  <div className="mb-3 space-y-2">
+                                    {message.images.map((img, imgIdx) => (
+                                      <div key={imgIdx} className="relative">
+                                        <img
+                                          src={img}
+                                          alt={`첨부 이미지 ${imgIdx + 1}`}
+                                          className="max-w-full max-h-48 rounded-md object-cover"
+                                        />
                                       </div>
-                                    </>
-                                  );
-                                }
-                                
-                                return <p className="whitespace-pre-wrap break-words">{message.content}</p>;
-                              })()}                              
-                            </Card>
+                                    ))}
+                                  </div>
+                                )}
+                                {(() => {
+                                  const logoUrlMatch = message.content.match(/\[LOGO_URL\](.*?)\[\/LOGO_URL\]/);
+                                  
+                                  if (logoUrlMatch && message.role === "assistant") {
+                                    const logoUrl = logoUrlMatch[1];
+                                    const textContent = message.content
+                                      .replace(/\[LOGO_URL\].*?\[\/LOGO_URL\]/g, '')
+                                      .trim();
+                                    
+                                    return (
+                                      <>
+                                        {textContent && <p className="whitespace-pre-wrap break-words mb-2">{textContent}</p>}
+                                        <div className="mt-1 bg-black/5 rounded-lg p-2">
+                                          <div 
+                                            className="relative w-48 mx-auto cursor-pointer hover:opacity-80 transition-opacity"
+                                            onClick={() => {
+                                              // 클릭 시 왼쪽 패널에서 보기
+                                              setSelectedResult({
+                                                type: "logo",
+                                                url: logoUrl,
+                                                index: savedLogos.length,
+                                              });
+                                              setHasResultPanel(false);
+                                            }}
+                                          >
+                                            <img 
+                                              src={logoUrl} 
+                                              alt="Generated Logo"
+                                              className="w-full h-auto rounded-md object-contain"
+                                            />
+                                          </div>
+                                          <p className="text-center text-sm text-muted-foreground mt-2 mb-2">
+                                          </p>
+                                        </div>
+                                      </>
+                                    );
+                                  }
+                                  
+                                  return <p className="whitespace-pre-wrap break-words">{message.content}</p>;
+                                })()}                              
+                              </Card>
+                            </div>
+                            {/* 로고가 생성된 경우에만 "내 프로젝트로 이동" 버튼 표시 */}
+                            {(() => {
+                              const logoUrlMatch = message.content.match(/\[LOGO_URL\](.*?)\[\/LOGO_URL\]/);
+                              if (logoUrlMatch && message.role === "assistant" && currentProjectId) {
+                                return (
+                                  <Button
+                                    size="sm"
+                                    onClick={() => {
+                                      navigate(`/project?project=${currentProjectId}`);
+                                    }}
+                                    className="text-sm text-white"
+                                    style={{ backgroundColor: '#7C22C8' }}
+                                  >
+                                    내 프로젝트로 이동
+                                  </Button>
+                                );
+                              }
+                              return null;
+                            })()}
                           </div>
                         )}
                       </div>
@@ -1065,24 +1025,6 @@ const LogoChatPage = () => {
         </ResizablePanelGroup>
       </div>
 
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>삭제하시겠습니까?</DialogTitle>
-            <DialogDescription>
-              로고를 삭제하면 저장된 항목에서 제거됩니다.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)} className="hover:bg-transparent hover:border-border hover:text-foreground">
-              취소
-            </Button>
-            <Button variant="destructive" onClick={handleDelete}>
-              삭제
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
