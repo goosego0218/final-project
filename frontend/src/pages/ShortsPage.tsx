@@ -8,8 +8,19 @@ import { Search } from "lucide-react";
 
 const ShortsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeSearchQuery, setActiveSearchQuery] = useState("");
   const [searchParams] = useSearchParams();
   const initialShortId = searchParams.get("short");
+
+  const handleSearch = () => {
+    setActiveSearchQuery(searchQuery);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
 
   return (
     <div className="min-h-screen">
@@ -32,9 +43,14 @@ const ShortsPage = () => {
                   placeholder="찾고 싶은 숏폼 스타일을 검색하세요 (예: 축제, 음식 등)"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyPress={handleKeyPress}
                   className="h-12 text-base pr-24"
                 />
-                <Button size="sm" className="absolute right-1.5 top-1.5 h-9">
+                <Button 
+                  size="sm" 
+                  onClick={handleSearch}
+                  className="absolute right-1.5 top-1.5 h-9"
+                >
                   <Search className="h-4 w-4 mr-1" />
                   검색
                 </Button>
@@ -43,7 +59,7 @@ const ShortsPage = () => {
           </div>
         </div>
         <ShortFormGallery
-          searchQuery={searchQuery}
+          searchQuery={activeSearchQuery}
           initialSelectedProdId={initialShortId ? Number(initialShortId) : undefined}
         />
       </div>
