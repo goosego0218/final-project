@@ -44,7 +44,6 @@ def save_shorts_to_storage_and_db(
         view_cnt=0,
         ref_cnt=0,
         like_cnt=0,
-        pub_yn='Y',
         create_user=user_id,
         update_user=user_id,
         del_yn='N'
@@ -76,3 +75,4 @@ def get_shorts_list(
         .order_by(GenerationProd.create_dt.desc())
         .all()
     )
+

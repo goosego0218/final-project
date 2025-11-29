@@ -24,6 +24,7 @@ from app.api.shorts import router as shorts_router
 from app.api.social import router as social_router
 from app.api.comment import router as comment_router
 from app.api.like import router as like_router
+from app.api.gallery import router as gallery_router
 
 from app.db.session import oracle_db
 
@@ -130,6 +131,7 @@ def create_app() -> FastAPI:
     app.include_router(social_router)
     app.include_router(comment_router)
     app.include_router(like_router)
+    app.include_router(gallery_router)
     return app
 
 

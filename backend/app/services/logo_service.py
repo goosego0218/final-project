@@ -44,7 +44,6 @@ def save_logo_to_storage_and_db(
         view_cnt=0,
         ref_cnt=0,
         like_cnt=0,
-        pub_yn='Y',
         create_user=user_id,
         update_user=user_id,
         del_yn='N'
@@ -118,3 +117,4 @@ def delete_logo(
     db.commit()
     
     return True
+
