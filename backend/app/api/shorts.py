@@ -25,7 +25,7 @@ from app.models.auth import UserInfo
 
 from app.agents.state import AppState 
 from app.agents.shorts_agent import build_shorts_graph
-from app.services.shorts_service import save_shorts_to_storage_and_db, get_shorts_list, update_shorts_pub_yn
+from app.services.shorts_service import save_shorts_to_storage_and_db, get_shorts_list, delete_shorts, update_shorts_pub_yn
 from app.schemas.shorts import SaveShortsRequest, SaveShortsResponse, ShortsListItemResponse, UpdateShortsPubYnRequest, UpdateShortsPubYnResponse
 from app.utils.file_utils import get_file_url
 
@@ -317,6 +317,42 @@ def get_shorts_list_endpoint(
         ))
     
     return result
+
+
+@router.delete("/{prod_id}", summary="쇼츠 삭제")
+def delete_shorts_endpoint(
+    prod_id: int,
+    db: Session = Depends(get_orm_session),
+    current_user: UserInfo = Depends(get_current_user),
+):
+    """
+    쇼츠 삭제 (소프트 삭제)
+    
+    - prod_id: 삭제할 쇼츠의 생성물 ID (path parameter)
+    - 본인이 생성한 쇼츠만 삭제 가능
+    """
+    try:
+        delete_shorts(
+            db=db,
+            prod_id=prod_id,
+            user_id=current_user.id,
+        )
+        
+        return {
+            "success": True,
+            "message": "쇼츠가 삭제되었습니다."
+        }
+        
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"쇼츠 삭제 실패: {str(e)}"
+        )
 
 
 @router.patch("/{prod_id}/pub-yn", response_model=UpdateShortsPubYnResponse, summary="쇼츠 공개 여부 업데이트")
