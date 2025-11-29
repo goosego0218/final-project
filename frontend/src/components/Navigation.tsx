@@ -38,10 +38,10 @@ const Navigation = () => {
   const { data: menus = [], isLoading: isMenusLoading } = useQuery({
     queryKey: ['menus'], // queryKey 고정 (isLoggedIn 제거하여 중복 호출 방지)
     queryFn: getMenus,
-    staleTime: 5 * 60 * 1000, // 5분간 캐시 유지
+    staleTime: 5 * 60 * 1000, // 5분간 캐시 유지 (중복 호출 방지)
     gcTime: 10 * 60 * 1000, // 10분간 메모리 유지
     refetchOnWindowFocus: false, // 탭 전환 시 자동 refetch 방지
-    refetchOnMount: false, // 마운트 시 refetch 방지
+    refetchOnMount: false, // 마운트 시 refetch 방지 (로그인 상태 변경 시에만 수동으로 갱신)
   });
 
   // localStorage에서 사용자 정보 가져오기
@@ -85,6 +85,7 @@ const Navigation = () => {
     isLoggedInRef.current = isLoggedIn;
     // 로그인 상태가 변경되면 프로필도 업데이트
     setUserProfile(getUserProfile(true));
+    // 메뉴 갱신은 handleLoginSuccess/handleLogout에서만 처리 (중복 호출 방지)
   }, [isLoggedIn]);
 
   // localStorage 변경 감지
@@ -96,6 +97,7 @@ const Navigation = () => {
       setIsLoggedIn(newLoggedIn);
       // 로그인 상태에 따라 프로필 업데이트
       setUserProfile(getUserProfile(true));
+      // 메뉴 갱신은 handleLoginSuccess/handleLogout에서만 처리 (중복 호출 방지)
     };
     
     const handleProfileUpdate = () => {
@@ -103,17 +105,17 @@ const Navigation = () => {
       setUserProfile(getUserProfile(true));
     };
     
-    const handleLogout = () => {
+    const handleLogoutEvent = () => {
       setIsLoggedIn(false);
       setUserProfile({ nickname: "사용자", id: "user123", avatar: null });
-      queryClient.invalidateQueries({ queryKey: ['menus'] });
+      // 메뉴 갱신은 handleLogout 함수에서만 처리 (중복 호출 방지)
     };
     
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('profileUpdated', handleProfileUpdate);
-    window.addEventListener('logout', handleLogout);
+    window.addEventListener('logout', handleLogoutEvent);
     
-    // 같은 탭에서의 변경도 감지하기 위해 interval 사용 (5초로 변경하여 깜빡임 최소화)
+    // 같은 탭에서의 변경도 감지하기 위해 interval 사용 (1초로 변경하여 빠른 반응)
     const interval = setInterval(() => {
       const hasLoginFlag = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
       const hasToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
@@ -121,15 +123,16 @@ const Navigation = () => {
       // 상태가 실제로 변경된 경우에만 업데이트
       if (currentLoggedIn !== isLoggedInRef.current) {
         setIsLoggedIn(currentLoggedIn);
+        // 메뉴 갱신은 handleLoginSuccess/handleLogout에서만 처리 (중복 호출 방지)
       }
       // 로그인 상태에 따라 프로필 정보 업데이트
       setUserProfile(getUserProfile(true));
-    }, 5000);
+    }, 1000);
     
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('profileUpdated', handleProfileUpdate);
-      window.removeEventListener('logout', handleLogout);
+      window.removeEventListener('logout', handleLogoutEvent);
       clearInterval(interval);
     };
   }, [queryClient]);
@@ -162,9 +165,8 @@ const Navigation = () => {
     setIsLoginOpen(false);
     setIsSignUpOpen(false);
     
-    // 메뉴 쿼리 무효화 및 즉시 다시 가져오기
-    await queryClient.invalidateQueries({ queryKey: ['menus'] });
-    await queryClient.refetchQueries({ queryKey: ['menus'] });
+    // 메뉴 쿼리 무효화 (refetch는 자동으로 처리됨)
+    queryClient.invalidateQueries({ queryKey: ['menus'] });
     
     // 회원가입이 아닌 경우에만 로그인 토스트 표시
     if (!isSignUp) {

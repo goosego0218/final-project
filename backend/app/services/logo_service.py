@@ -51,8 +51,7 @@ def save_logo_to_storage_and_db(
     
     db.add(prod)
     db.commit()
-    # refresh 제거: commit 후 이미 prod에 prod_id 등이 설정되어 있음
-    # 불필요한 relationship 로딩 방지
+    db.refresh(prod)
     
     return prod
 

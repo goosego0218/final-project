@@ -16,6 +16,16 @@ import { getLogoIntro, sendLogoChat, getProjectDetail } from "@/lib/api";
 import ThemeToggle from "@/components/ThemeToggle";
 import { saveLogo, getLogoList, deleteLogo } from "@/lib/api";
 import { Save } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface SelectedResult {
   type: "logo";
@@ -65,6 +75,7 @@ const LogoChatPage = () => {
   const [logoSessionId, setLogoSessionId] = useState<string | null>(null);
   const [isLoadingLogoChat, setIsLoadingLogoChat] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const introCalledRef = useRef(false); // 중복 호출 방지용 ref
 
   // localStorage에서 사용자 정보 가져오기
@@ -498,44 +509,14 @@ const LogoChatPage = () => {
         prod_type_id: 1,
       });
 
-      // 저장 성공 시 즉시 savedLogos에 추가하여 버튼이 즉시 업데이트되도록 함
-      // response.file_url과 selectedResult.url이 다를 수 있으므로 둘 다 저장
-      const newSavedItem: SavedItem = {
-        id: `db_${response.prod_id}`,
-        url: response.file_url || selectedResult.url, // API 응답의 file_url 우선, 없으면 원본 URL
-        type: "logo",
-        index: savedLogos.length,
-        title: `로고 ${savedLogos.length + 1}`,
-        createdAt: new Date().toISOString(),
-      };
-      
-      // savedLogos에 즉시 추가 (이렇게 하면 isLogoSaved가 즉시 true가 됨)
-      setSavedLogos(prev => {
-        // 중복 체크 (file_url 또는 원본 URL로 비교)
-        if (prev.some(item => item.url === response.file_url || item.url === selectedResult.url)) {
-          return prev;
-        }
-        return [...prev, newSavedItem];
-      });
-      
-      // selectedResult.url도 업데이트 (저장된 파일 URL로)
-      if (response.file_url && response.file_url !== selectedResult.url) {
-        setSelectedResult({
-          ...selectedResult,
-          url: response.file_url,
-        });
-      }
-
       toast({
         title: "저장 완료",
         description: response.message || "로고가 보관함에 저장되었습니다.",
       });
       
-      // 백그라운드에서 목록 새로고침 (UI는 이미 업데이트됨)
+      // 저장 성공 후 목록 새로고침
       if (currentProjectId) {
-        loadLogosFromDb(parseInt(currentProjectId)).catch(error => {
-          console.error("로고 목록 새로고침 실패:", error);
-        });
+        await loadLogosFromDb(parseInt(currentProjectId));
       }
     } catch (error: any) {
       console.error("로고 저장 실패:", error);
@@ -594,6 +575,10 @@ const LogoChatPage = () => {
       if (currentProjectId) {
         await loadLogosFromDb(parseInt(currentProjectId));
       }
+      
+      // 미리보기에서 이미지 제거
+      setSelectedResult(null);
+      setHasResultPanel(false);
     } catch (error: any) {
       console.error("로고 삭제 실패:", error);
       toast({
@@ -603,6 +588,7 @@ const LogoChatPage = () => {
       });
     } finally {
       setIsSaving(false);
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -725,7 +711,7 @@ const LogoChatPage = () => {
                               onClick={(e) => {
                                 e.stopPropagation();
                                 if (isLogoSaved) {
-                                  handleDeleteFromStorage();
+                                  setShowDeleteConfirm(true);
                                 } else {
                                   handleSaveToStorage();
                                 }
@@ -1025,6 +1011,26 @@ const LogoChatPage = () => {
         </ResizablePanelGroup>
       </div>
 
+      {/* 삭제 확인 다이얼로그 */}
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>로고 삭제 확인</AlertDialogTitle>
+            <AlertDialogDescription>
+              정말로 이 로고를 프로젝트에서 삭제하시겠습니까?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteFromStorage}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              삭제
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

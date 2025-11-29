@@ -36,7 +36,7 @@ def save_shorts_to_storage_and_db(
         project_id=project_id
     )
     
-    # 2. ORM으로 DB에 저장
+    # 2. ORM으로 DB에 저장 (항상 새 레코드 생성)
     prod = GenerationProd(
         type_id=prod_type_id,
         grp_id=project_id,
