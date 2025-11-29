@@ -308,13 +308,13 @@ def get_shorts_list_endpoint(
     result = []
     for prod in shorts_list:
         file_url = get_file_url(prod.file_path)
-            result.append(ShortsListItemResponse(
-                prod_id=prod.prod_id,
-                file_path=prod.file_path,
-                file_url=file_url,
-                create_dt=prod.create_dt.isoformat() if prod.create_dt else None,
-                pub_yn=prod.pub_yn,
-            ))
+        result.append(ShortsListItemResponse(
+            prod_id=prod.prod_id,
+            file_path=prod.file_path,
+            file_url=file_url,
+            create_dt=prod.create_dt.isoformat() if prod.create_dt else None,
+            pub_yn=prod.pub_yn,
+        ))
     
     return result
 
