@@ -264,10 +264,8 @@ def upload_video_to_youtube(
                         hashtag = f"#{keyword.replace(' ', '')}"
                         hashtags.append(hashtag)
             
-            # 기본 해시태그 추가
-            hashtags.extend(["#Shorts", "#YouTubeShorts", "#ShortsVideo"])
             
-            return " ".join(hashtags)
+            return " ".join(hashtags) if hashtags else ""
         
         generated_description = generate_description_from_keywords(brand_profile)
         
