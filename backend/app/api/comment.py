@@ -38,16 +38,16 @@ def get_comments(
     - prod_id: 생성물 번호 (숏폼 또는 로고)
     """
     try:
-        comments = get_comments_by_prod_id(db, prod_id)
+        comments_with_users = get_comments_by_prod_id(db, prod_id)
         
         # CommentResponse로 변환
         comment_responses = []
-        for comment in comments:
+        for comment, user in comments_with_users:
             comment_responses.append(CommentResponse(
                 comment_id=comment.comment_id,
                 prod_id=comment.prod_id,
                 user_id=comment.user_id,
-                user_nickname=comment.user.nickname,  # UserInfo relationship
+                user_nickname=user.nickname,  # join으로 가져온 UserInfo
                 content=comment.content,
                 create_dt=comment.create_dt,
                 update_dt=comment.update_dt,
@@ -82,17 +82,31 @@ def create_comment_endpoint(
             content=request.content,
         )
         
-        # UserInfo relationship 로드
-        db.refresh(comment)
+        # UserInfo와 join하여 nickname 가져오기
+        from app.models.project import Comment
+        result = (
+            db.query(Comment, UserInfo)
+            .join(UserInfo, Comment.user_id == UserInfo.id)
+            .filter(Comment.comment_id == comment.comment_id)
+            .first()
+        )
+        
+        if not result:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="댓글 생성 후 조회에 실패했습니다.",
+            )
+        
+        comment_with_user, user = result
         
         return CommentResponse(
-            comment_id=comment.comment_id,
-            prod_id=comment.prod_id,
-            user_id=comment.user_id,
-            user_nickname=comment.user.nickname,
-            content=comment.content,
-            create_dt=comment.create_dt,
-            update_dt=comment.update_dt,
+            comment_id=comment_with_user.comment_id,
+            prod_id=comment_with_user.prod_id,
+            user_id=comment_with_user.user_id,
+            user_nickname=user.nickname,
+            content=comment_with_user.content,
+            create_dt=comment_with_user.create_dt,
+            update_dt=comment_with_user.update_dt,
         )
     except ValueError as e:
         raise HTTPException(
