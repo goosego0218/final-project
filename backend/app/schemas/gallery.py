@@ -15,6 +15,7 @@ class GalleryItemResponse(BaseModel):
     like_count: int
     comment_count: int
     create_dt: datetime
+    is_liked: Optional[bool] = False  # 현재 사용자가 좋아요를 눌렀는지 여부 (로그인 시에만)
     # 추가 정보 (필요시)
     brand_name: Optional[str] = None
     tags: Optional[list[str]] = None

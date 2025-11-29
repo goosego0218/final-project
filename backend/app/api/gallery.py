@@ -18,6 +18,7 @@ from app.services.gallery_service import (
     get_public_shorts_count,
 )
 from app.services.comment_service import get_comment_count_by_prod_id
+from app.services.like_service import check_user_liked
 from app.utils.file_utils import get_file_url
 
 router = APIRouter(
@@ -60,12 +61,18 @@ def get_logo_gallery(
         # 댓글 수 조회
         comment_count = get_comment_count_by_prod_id(db, logo.prod_id)
         
+        # 좋아요 상태 확인 (로그인한 경우에만)
+        is_liked = False
+        if current_user:
+            is_liked = check_user_liked(db, logo.prod_id, current_user.id)
+        
         items.append(GalleryItemResponse(
             prod_id=logo.prod_id,
             file_url=get_file_url(logo.file_path),
             like_count=logo.like_cnt,
             comment_count=comment_count,
             create_dt=logo.create_dt,
+            is_liked=is_liked,
         ))
     
     return GalleryListResponse(
@@ -108,12 +115,18 @@ def get_shorts_gallery(
         # 댓글 수 조회
         comment_count = get_comment_count_by_prod_id(db, short.prod_id)
         
+        # 좋아요 상태 확인 (로그인한 경우에만)
+        is_liked = False
+        if current_user:
+            is_liked = check_user_liked(db, short.prod_id, current_user.id)
+        
         items.append(GalleryItemResponse(
             prod_id=short.prod_id,
             file_url=get_file_url(short.file_path),
             like_count=short.like_cnt,
             comment_count=comment_count,
             create_dt=short.create_dt,
+            is_liked=is_liked,
         ))
     
     return GalleryListResponse(

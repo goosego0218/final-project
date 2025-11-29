@@ -186,6 +186,10 @@ const Navigation = () => {
     // 메뉴 쿼리 무효화 및 다시 가져오기
     queryClient.invalidateQueries({ queryKey: ['menus'] });
     
+    // 갤러리 쿼리 무효화 (좋아요 상태가 사용자별로 다르므로)
+    queryClient.invalidateQueries({ queryKey: ['logoGallery'] });
+    queryClient.invalidateQueries({ queryKey: ['shortsGallery'] });
+    
     // 프로필 업데이트 이벤트 발생
     window.dispatchEvent(new Event('profileUpdated'));
     

@@ -33,6 +33,7 @@ interface ShortFormGalleryProps {
 const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
   const [sortBy, setSortBy] = useState<SortOption>("latest");
   const [page, setPage] = useState(1);
+  const [allShorts, setAllShorts] = useState<GalleryItem[]>([]); // 누적된 모든 쇼츠 데이터
   const [selectedShort, setSelectedShort] = useState<GalleryItem | null>(null);
   const [isLiked, setIsLiked] = useState(false);
   const [commentText, setCommentText] = useState("");
@@ -43,11 +44,68 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
 
   const ITEMS_PER_PAGE = 12;
 
-  // 갤러리 데이터 조회
+  // 사용자 ID 추출 (쿼리 키에 포함하여 사용자별 캐시 분리)
+  const getUserId = () => {
+    try {
+      const profile = localStorage.getItem('userProfile');
+      if (profile) {
+        const parsed = JSON.parse(profile);
+        return parsed.id || null;
+      }
+    } catch (e) {
+      // ignore
+    }
+    return null;
+  };
+
+  const [userId, setUserId] = useState(getUserId());
+
+  // 로그인 상태 변경 감지 및 사용자 ID 업데이트
+  useEffect(() => {
+    let isMounted = true;
+    
+    const checkUserChange = () => {
+      if (!isMounted) return;
+      
+      const hasLoginFlag = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+      const hasToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+      const currentLoggedIn = hasLoginFlag && !!hasToken;
+      
+      const newUserId = currentLoggedIn ? getUserId() : null;
+      
+      if (newUserId !== userId) {
+        setUserId(newUserId);
+        setPage(1); // 페이지 초기화
+        setAllShorts([]); // 누적 데이터 초기화
+        // 사용자가 변경되면 갤러리 쿼리 캐시 완전히 제거 (refetch는 useQuery가 자동으로 처리)
+        queryClient.removeQueries({ queryKey: ['shortsGallery'] });
+      }
+    };
+
+    // 초기 확인 (한 번만)
+    checkUserChange();
+
+    // storage 이벤트 리스너 (다른 탭에서 로그인/로그아웃 시)
+    window.addEventListener('storage', checkUserChange);
+    
+    // 같은 탭에서의 변경도 감지하기 위해 interval 사용 (하지만 너무 자주 체크하지 않도록)
+    const interval = setInterval(checkUserChange, 2000);
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener('storage', checkUserChange);
+      clearInterval(interval);
+    };
+  }, [userId, queryClient]);
+
+  // 갤러리 데이터 조회 (사용자 ID를 쿼리 키에 포함하여 사용자별 캐시 분리)
+  // 페이지네이션: 한 번에 12개씩 가져오기
   const { data: galleryData, isLoading, refetch: refetchGallery } = useQuery({
-    queryKey: ['shortsGallery', sortBy, searchQuery],
-    queryFn: () => getShortsGallery(sortBy, 0, 1000, searchQuery || undefined),
-    staleTime: 30 * 1000, // 30초
+    queryKey: ['shortsGallery', sortBy, searchQuery, userId, page],
+    queryFn: () => getShortsGallery(sortBy, (page - 1) * ITEMS_PER_PAGE, ITEMS_PER_PAGE, searchQuery || undefined),
+    staleTime: 0, // 캐시를 최신이 아닌 것으로 간주 (하지만 자동 refetch는 하지 않음)
+    refetchOnMount: false, // 마운트 시 자동 refetch 방지 (한 번만 호출)
+    refetchOnWindowFocus: false, // 창 포커스 시 자동 refetch 방지
   });
 
   // 선택된 쇼츠의 댓글 조회
@@ -69,18 +127,17 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
     mutationFn: (prodId: number) => toggleLike(prodId),
     onSuccess: async (data) => {
       setIsLiked(data.is_liked);
-      // 갤러리 데이터 갱신
-      const { data: updatedGalleryData } = await refetchGallery();
+      // 현재 페이지의 갤러리 데이터 갱신
+      await refetchGallery();
       // 선택된 쇼츠의 좋아요 수 업데이트
-      if (selectedShort && updatedGalleryData) {
-        const updatedShort = updatedGalleryData.items.find(
+      if (selectedShort) {
+        // 선택된 쇼츠가 현재 페이지에 있으면 업데이트
+        const updatedShort = galleryData?.items.find(
           (item) => item.prod_id === selectedShort.prod_id
         );
         if (updatedShort) {
-          setSelectedShort(updatedShort);
+          setSelectedShort({ ...updatedShort, like_count: data.like_count || updatedShort.like_count });
         }
-      }
-      if (selectedShort) {
         refetchLikeStatus();
       }
       toast({
@@ -130,9 +187,26 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
     }
   }, [likeStatus]);
 
-  // 페이지네이션된 쇼츠 목록
-  const displayedShorts = galleryData?.items.slice(0, page * ITEMS_PER_PAGE) || [];
-  const hasMore = galleryData ? displayedShorts.length < galleryData.items.length : false;
+  // 새로운 페이지 데이터가 로드되면 누적
+  useEffect(() => {
+    if (galleryData?.items) {
+      if (page === 1) {
+        // 첫 페이지는 교체
+        setAllShorts(galleryData.items);
+      } else {
+        // 이후 페이지는 누적 (중복 제거)
+        setAllShorts((prev) => {
+          const existingIds = new Set(prev.map((short) => short.prod_id));
+          const newItems = galleryData.items.filter((item) => !existingIds.has(item.prod_id));
+          return [...prev, ...newItems];
+        });
+      }
+    }
+  }, [galleryData, page]);
+
+  // 표시할 쇼츠 목록 (누적된 모든 데이터)
+  const displayedShorts = allShorts;
+  const hasMore = galleryData ? (page * ITEMS_PER_PAGE) < galleryData.total_count : false;
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -164,6 +238,7 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
 
   const handleLoadMore = () => {
     setPage((prev) => prev + 1);
+    // 페이지가 변경되면 useQuery가 자동으로 다음 페이지 데이터를 가져옴
   };
 
   const handleLike = () => {
@@ -190,6 +265,7 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
   const handleSortChange = (value: SortOption) => {
     setSortBy(value);
     setPage(1);
+    setAllShorts([]); // 정렬 변경 시 누적 데이터 초기화
   };
 
   const isVideoUrl = (url: string) => {
@@ -283,12 +359,12 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
 
                   {/* Info section */}
                   <div className="p-4 bg-card">
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-1">
-                          <Heart className="w-4 h-4" />
-                          <span>{shortForm.like_count.toLocaleString()}</span>
-                        </div>
+                      <div className="flex items-center justify-between text-sm text-muted-foreground">
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-1">
+                            <Heart className={`w-4 h-4 ${shortForm.is_liked ? "fill-destructive text-destructive" : ""}`} />
+                            <span>{shortForm.like_count.toLocaleString()}</span>
+                          </div>
                         <div className="flex items-center gap-1">
                           <MessageCircle className="w-4 h-4" />
                           <span>{shortForm.comment_count}</span>

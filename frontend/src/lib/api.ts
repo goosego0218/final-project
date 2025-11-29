@@ -547,6 +547,7 @@ export async function updateShortsPubYn(
 export type SortOption = "latest" | "oldest" | "likes" | "comments";
 
 export interface GalleryItem {
+  is_liked?: boolean;  // 현재 사용자가 좋아요를 눌렀는지 여부
   prod_id: number;
   file_url: string;
   like_count: number;

@@ -34,6 +34,7 @@ interface LogoGalleryProps {
 const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
   const [sortBy, setSortBy] = useState<SortOption>("latest");
   const [page, setPage] = useState(1);
+  const [allLogos, setAllLogos] = useState<GalleryItem[]>([]); // 누적된 모든 로고 데이터
   const [selectedLogo, setSelectedLogo] = useState<GalleryItem | null>(null);
   const [isLiked, setIsLiked] = useState(false);
   const [commentText, setCommentText] = useState("");
@@ -44,11 +45,68 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
 
   const ITEMS_PER_PAGE = 12;
 
-  // 갤러리 데이터 조회
+  // 사용자 ID 추출 (쿼리 키에 포함하여 사용자별 캐시 분리)
+  const getUserId = () => {
+    try {
+      const profile = localStorage.getItem('userProfile');
+      if (profile) {
+        const parsed = JSON.parse(profile);
+        return parsed.id || null;
+      }
+    } catch (e) {
+      // ignore
+    }
+    return null;
+  };
+
+  const [userId, setUserId] = useState(getUserId());
+
+  // 로그인 상태 변경 감지 및 사용자 ID 업데이트
+  useEffect(() => {
+    let isMounted = true;
+    
+    const checkUserChange = () => {
+      if (!isMounted) return;
+      
+      const hasLoginFlag = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+      const hasToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+      const currentLoggedIn = hasLoginFlag && !!hasToken;
+      
+      const newUserId = currentLoggedIn ? getUserId() : null;
+      
+      if (newUserId !== userId) {
+        setUserId(newUserId);
+        setPage(1); // 페이지 초기화
+        setAllLogos([]); // 누적 데이터 초기화
+        // 사용자가 변경되면 갤러리 쿼리 캐시 완전히 제거 (refetch는 useQuery가 자동으로 처리)
+        queryClient.removeQueries({ queryKey: ['logoGallery'] });
+      }
+    };
+
+    // 초기 확인 (한 번만)
+    checkUserChange();
+
+    // storage 이벤트 리스너 (다른 탭에서 로그인/로그아웃 시)
+    window.addEventListener('storage', checkUserChange);
+    
+    // 같은 탭에서의 변경도 감지하기 위해 interval 사용 (하지만 너무 자주 체크하지 않도록)
+    const interval = setInterval(checkUserChange, 2000);
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener('storage', checkUserChange);
+      clearInterval(interval);
+    };
+  }, [userId, queryClient]);
+
+  // 갤러리 데이터 조회 (사용자 ID를 쿼리 키에 포함하여 사용자별 캐시 분리)
+  // 페이지네이션: 한 번에 12개씩 가져오기
   const { data: galleryData, isLoading, refetch: refetchGallery } = useQuery({
-    queryKey: ['logoGallery', sortBy, searchQuery],
-    queryFn: () => getLogoGallery(sortBy, 0, 1000, searchQuery || undefined),
-    staleTime: 30 * 1000, // 30초
+    queryKey: ['logoGallery', sortBy, searchQuery, userId, page],
+    queryFn: () => getLogoGallery(sortBy, (page - 1) * ITEMS_PER_PAGE, ITEMS_PER_PAGE, searchQuery || undefined),
+    staleTime: 0, // 캐시를 최신이 아닌 것으로 간주 (하지만 자동 refetch는 하지 않음)
+    refetchOnMount: false, // 마운트 시 자동 refetch 방지 (한 번만 호출)
+    refetchOnWindowFocus: false, // 창 포커스 시 자동 refetch 방지
   });
 
   // 선택된 로고의 댓글 조회
@@ -70,18 +128,17 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
     mutationFn: (prodId: number) => toggleLike(prodId),
     onSuccess: async (data) => {
       setIsLiked(data.is_liked);
-      // 갤러리 데이터 갱신
-      const { data: updatedGalleryData } = await refetchGallery();
+      // 현재 페이지의 갤러리 데이터 갱신
+      await refetchGallery();
       // 선택된 로고의 좋아요 수 업데이트
-      if (selectedLogo && updatedGalleryData) {
-        const updatedLogo = updatedGalleryData.items.find(
+      if (selectedLogo) {
+        // 선택된 로고가 현재 페이지에 있으면 업데이트
+        const updatedLogo = galleryData?.items.find(
           (item) => item.prod_id === selectedLogo.prod_id
         );
         if (updatedLogo) {
-          setSelectedLogo(updatedLogo);
+          setSelectedLogo({ ...updatedLogo, like_count: data.like_count || updatedLogo.like_count });
         }
-      }
-      if (selectedLogo) {
         refetchLikeStatus();
       }
       toast({
@@ -131,9 +188,26 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
     }
   }, [likeStatus]);
 
-  // 페이지네이션된 로고 목록
-  const displayedLogos = galleryData?.items.slice(0, page * ITEMS_PER_PAGE) || [];
-  const hasMore = galleryData ? displayedLogos.length < galleryData.items.length : false;
+  // 새로운 페이지 데이터가 로드되면 누적
+  useEffect(() => {
+    if (galleryData?.items) {
+      if (page === 1) {
+        // 첫 페이지는 교체
+        setAllLogos(galleryData.items);
+      } else {
+        // 이후 페이지는 누적 (중복 제거)
+        setAllLogos((prev) => {
+          const existingIds = new Set(prev.map((logo) => logo.prod_id));
+          const newItems = galleryData.items.filter((item) => !existingIds.has(item.prod_id));
+          return [...prev, ...newItems];
+        });
+      }
+    }
+  }, [galleryData, page]);
+
+  // 표시할 로고 목록 (누적된 모든 데이터)
+  const displayedLogos = allLogos;
+  const hasMore = galleryData ? (page * ITEMS_PER_PAGE) < galleryData.total_count : false;
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -165,6 +239,7 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
 
   const handleLoadMore = () => {
     setPage((prev) => prev + 1);
+    // 페이지가 변경되면 useQuery가 자동으로 다음 페이지 데이터를 가져옴
   };
 
   const handleLike = () => {
@@ -191,6 +266,7 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
   const handleSortChange = (value: SortOption) => {
     setSortBy(value);
     setPage(1);
+    setAllLogos([]); // 정렬 변경 시 누적 데이터 초기화
   };
 
   if (isLoading) {
@@ -258,7 +334,7 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
                       <div className="flex items-center justify-between text-sm text-muted-foreground">
                         <div className="flex items-center gap-4">
                           <span className="flex items-center gap-1">
-                            <Heart className="w-4 h-4" />
+                            <Heart className={`w-4 h-4 ${logo.is_liked ? "fill-destructive text-destructive" : ""}`} />
                             {logo.like_count.toLocaleString()}
                           </span>
                           <span className="flex items-center gap-1">
