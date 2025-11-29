@@ -537,6 +537,32 @@ export async function updateLogoPubYn(
   });
 }
 
+// 로고 다운로드 (백엔드 프록시 사용)
+export async function downloadLogo(prodId: number, filename: string): Promise<void> {
+  const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+  
+  const response = await fetch(`${API_BASE_URL}/logo/${prodId}/download`, {
+    method: 'GET',
+    headers: {
+      ...(token && { Authorization: `Bearer ${token}` }),
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`다운로드 실패: ${response.statusText}`);
+  }
+
+  const blob = await response.blob();
+  const blobUrl = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = blobUrl;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(blobUrl);
+}
+
 // 쇼츠 공개 여부 업데이트
 export interface UpdateShortsPubYnRequest {
   pub_yn: 'Y' | 'N';
