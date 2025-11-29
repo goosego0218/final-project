@@ -2,6 +2,7 @@
 # 작성일: 2025-11-28
 # 수정내역
 # - 2025-11-28: 초기 작성 (ORM 패턴 적용)
+# - 2025-12-XX: 전략 1 적용 - relationship 제거
 
 from sqlalchemy.orm import Session
 from app.models.project import GenerationProd
@@ -51,7 +52,8 @@ def save_logo_to_storage_and_db(
     
     db.add(prod)
     db.commit()
-    db.refresh(prod)
+    # refresh 제거: commit 후 이미 prod에 prod_id 등이 설정되어 있음
+    # 불필요한 relationship 로딩 방지
     
     return prod
 
@@ -95,10 +97,14 @@ def delete_logo(
     Raises:
         ValueError: 로고를 찾을 수 없거나 권한이 없는 경우
     """
-    prod = db.query(GenerationProd).filter(
-        GenerationProd.prod_id == prod_id,
-        GenerationProd.del_yn == 'N'
-    ).first()
+    prod = (
+        db.query(GenerationProd)
+        .filter(
+            GenerationProd.prod_id == prod_id,
+            GenerationProd.del_yn == 'N'
+        )
+        .first()
+    )
     
     if not prod:
         raise ValueError("로고를 찾을 수 없습니다.")

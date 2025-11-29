@@ -3,7 +3,8 @@
 # 작성일: 2025-11-24
 # 수정내역
 # - 2025-11-24: 초기 작성
-# - 2025-12-XX: 토큰 암호화/복호화 추가
+# - 2025-11-29: 토큰 암호화/복호화 추가
+# - 2025-12-XX: 전략 1 적용 - relationship 제거
 
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta, timezone
@@ -28,6 +29,7 @@ def get_social_connection(
     특정 사용자의 특정 플랫폼 연동 정보 조회.
     - del_yn = 'N'인 것만 조회
     - 토큰은 복호화되어 반환됨
+    성능 최적화: 불필요한 relationship 로딩 방지
     """
     connection = (
         db.query(SocialConnection)
@@ -92,7 +94,7 @@ def create_or_update_social_connection(
             existing.email = email
         existing.del_yn = "N"  # 재연동 시 활성화
         db.commit()
-        db.refresh(existing)
+        # refresh 제거: 불필요한 relationship 로딩 방지
         
         # 반환 시 복호화된 토큰으로 교체
         existing.access_token = access_token
@@ -112,7 +114,8 @@ def create_or_update_social_connection(
         )
         db.add(connection)
         db.commit()
-        db.refresh(connection)
+        # refresh 제거: commit 후 이미 connection에 id 등이 설정되어 있음
+        # 불필요한 relationship 로딩 방지
         
         # 반환 시 복호화된 토큰으로 교체
         connection.access_token = access_token

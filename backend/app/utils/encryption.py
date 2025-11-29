@@ -1,9 +1,9 @@
 # 토큰 암호화/복호화 유틸리티 (AES-256-GCM)
 # 작성자: 황민준
-# 작성일: 2025-12-XX
+# 작성일: 2025-11-29
 # 수정내역
-# - 2025-12-XX: 초기 작성
-# - 2025-12-XX: Fernet에서 AES-256-GCM으로 변경
+# - 2025-11-29: 초기 작성
+# - 2025-11-29: Fernet에서 AES-256-GCM으로 변경
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives import hashes

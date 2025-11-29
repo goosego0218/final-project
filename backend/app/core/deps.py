@@ -3,13 +3,13 @@
 # 작성일: 2025-11-17
 # 수정내역
 # - 2025-11-17: 초기 작성
-# - 2025-12-XX: 성능 최적화 - 불필요한 relationship 로딩 방지
+# - 2025-12-XX: 전략 1 적용 - relationship 제거
 
 from typing import Optional
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import APIKeyHeader
-from sqlalchemy.orm import Session, noload
+from sqlalchemy.orm import Session
 
 from app.core.security import decode_access_token
 from app.db.orm import get_orm_session
@@ -59,16 +59,8 @@ def get_optional_user(
     if user_id is None:
         return None
 
-    # 성능 최적화: 불필요한 relationship 로딩 방지
     user = (
         db.query(UserInfo)
-        .options(
-            noload(UserInfo.project_groups),
-            noload(UserInfo.created_products),
-            noload(UserInfo.updated_products),
-            noload(UserInfo.social_connections),
-            noload(UserInfo.comments),
-        )
         .filter(UserInfo.id == int(user_id))
         .first()
     )
@@ -100,16 +92,8 @@ def get_current_user(
             detail="유효하지 않은 토큰입니다.",
         )
 
-    # 성능 최적화: 불필요한 relationship 로딩 방지
     user = (
         db.query(UserInfo)
-        .options(
-            noload(UserInfo.project_groups),
-            noload(UserInfo.created_products),
-            noload(UserInfo.updated_products),
-            noload(UserInfo.social_connections),
-            noload(UserInfo.comments),
-        )
         .filter(UserInfo.id == int(user_id))
         .first()
     )

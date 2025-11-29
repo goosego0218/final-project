@@ -11,7 +11,7 @@ from sqlalchemy import (
     ForeignKey,
     text,
 )
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.orm import Base
 from app.models.auth import UserInfo
@@ -72,9 +72,10 @@ class ProdGroup(Base):
         comment="생성일",
     )
 
-    update_dt: Mapped[datetime | None] = mapped_column(
+    update_dt: Mapped[datetime] = mapped_column(
         DateTime,
-        nullable=True,
+        server_default=func.sysdate(),
+        nullable=False,
         comment="수정일",
     )
 
@@ -83,19 +84,6 @@ class ProdGroup(Base):
         nullable=False,
         server_default=text("'N'"),
         comment="삭제여부",
-    )
-
-    # 여기서 UserInfo 쪽 project_groups 와 연결
-    creator: Mapped["UserInfo"] = relationship(
-        foreign_keys=[creator_id],
-        back_populates="project_groups",
-        lazy="select",
-    )
-
-    brand_info = relationship(
-        "BrandInfo",
-        back_populates="group",
-        uselist=False,
     )
 
 
@@ -206,9 +194,10 @@ class GenerationProd(Base):
         comment="수정자",
     )
 
-    update_dt: Mapped[datetime | None] = mapped_column(
+    update_dt: Mapped[datetime] = mapped_column(
         DateTime,
-        nullable=True,
+        server_default=func.sysdate(),
+        nullable=False,
         comment="수정일",
     )
 
@@ -217,34 +206,6 @@ class GenerationProd(Base):
         nullable=False,
         server_default=text("'N'"),
         comment="삭제여부",
-    )
-
-    # 관계 설정
-    type: Mapped["ProdType"] = relationship(
-        lazy="select",
-    )
-
-    group: Mapped["ProdGroup"] = relationship(
-        lazy="select",
-    )
-
-    creator: Mapped["UserInfo"] = relationship(
-        foreign_keys=[create_user],
-        lazy="select",
-        overlaps="created_products",
-    )
-
-    updater: Mapped["UserInfo | None"] = relationship(
-        foreign_keys=[update_user],
-        lazy="select",
-        overlaps="updated_products",
-    )
-    
-    # 댓글 관계 (1:N)
-    comments: Mapped[list["Comment"]] = relationship(
-        back_populates="product",
-        lazy="selectin",
-        cascade="all, delete-orphan",
     )
 
 
@@ -301,15 +262,35 @@ class Comment(Base):
         server_default=text("'N'"),
         comment="삭제여부",
     )
-    
-    # 관계 설정
-    product: Mapped["GenerationProd"] = relationship(
-        back_populates="comments",
-        lazy="select",
-    )
 
-    user: Mapped["UserInfo"] = relationship(
-        foreign_keys=[user_id],
-        lazy="select",
-        overlaps="comments",
+
+class GenerationLike(Base):
+    """
+    유저별 생성물 좋아요 테이블 (generation_like)
+    - 복합 PK: (prod_id, user_id)
+    - 트리거로 generation_prod.like_cnt 자동 업데이트
+    """
+    __tablename__ = "generation_like"
+    
+    prod_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("generation_prod.prod_id"),
+        primary_key=True,
+        nullable=False,
+        comment="생성물 번호",
+    )
+    
+    user_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("user_info.id"),
+        primary_key=True,
+        nullable=False,
+        comment="유저 번호",
+    )
+    
+    create_dt: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.sysdate(),
+        nullable=False,
+        comment="좋아요 일시",
     )
