@@ -8,12 +8,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Send, ChevronLeft, RefreshCw, Star, Plus, X, FolderOpen, Folder, Trash2, Video, Loader2, Upload, Save } from "lucide-react";
+import { Send, ChevronLeft, RefreshCw, Star, Plus, X, FolderOpen, Folder, Trash2, Video, Loader2, Upload, Save, Instagram, Youtube } from "lucide-react";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { projectStorage, type Message, type SavedItem } from "@/lib/projectStorage";
 import StudioTopBar from "@/components/StudioTopBar";
-import { getShortsIntro, sendShortsChat, getProjectDetail, getShortsList, saveShorts, deleteShorts } from "@/lib/api";
+import { getShortsIntro, sendShortsChat, getProjectDetail, getShortsList, saveShorts, deleteShorts, uploadToYouTube, uploadToInstagram } from "@/lib/api";
 import ThemeToggle from "@/components/ThemeToggle";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { CardContent } from "@/components/ui/card";
 
 interface SelectedResult {
   type: "short";
@@ -49,6 +52,13 @@ const ShortsChatPage = () => {
   const [isLoadingShortsChat, setIsLoadingShortsChat] = useState(false);
   const introCalledRef = useRef(false); // 중복 호출 방지용 ref
   const [isSaving, setIsSaving] = useState(false);
+  
+  // SNS 업로드 관련 state
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+  const [selectedShortFormForUpload, setSelectedShortFormForUpload] = useState<SelectedResult | null>(null);
+  const [selectedPlatforms, setSelectedPlatforms] = useState<Set<string>>(new Set());
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadTitle, setUploadTitle] = useState("");
 
   // localStorage에서 사용자 정보 가져오기
   const getUserProfile = () => {
@@ -431,42 +441,22 @@ const ShortsChatPage = () => {
         prod_type_id: 2,
       });
 
-      // 저장 성공 시 즉시 savedShorts에 추가하여 버튼이 즉시 업데이트되도록 함
-      const newSavedItem: SavedItem = {
-        id: `db_${response.prod_id}`,
-        url: response.file_url || selectedResult.url,
-        type: "short",
-        index: savedShorts.length,
-        title: `숏폼 ${savedShorts.length + 1}`,
-        createdAt: new Date().toISOString(),
-      };
-      
-      // savedShorts에 즉시 추가
-      setSavedShorts(prev => {
-        if (prev.some(item => item.url === response.file_url || item.url === selectedResult.url)) {
-          return prev;
-        }
-        return [...prev, newSavedItem];
-      });
-      
-      // selectedResult.url도 업데이트 (저장된 파일 URL로)
-      if (response.file_url && response.file_url !== selectedResult.url) {
-        setSelectedResult({
-          ...selectedResult,
-          url: response.file_url,
-        });
-      }
-
       toast({
         title: "저장 완료",
         description: response.message || "쇼츠가 프로젝트에 저장되었습니다.",
       });
       
-      // 백그라운드에서 목록 새로고침 (UI는 이미 업데이트됨)
+      // 저장 성공 후 목록 새로고침 (await로 완료 대기하여 정확한 상태 유지)
       if (currentProjectId) {
-        loadShortsFromDb(parseInt(currentProjectId)).catch(error => {
-          console.error("쇼츠 목록 새로고침 실패:", error);
-        });
+        await loadShortsFromDb(parseInt(currentProjectId));
+        
+        // selectedResult.url도 업데이트 (저장된 파일 URL로)
+        if (response.file_url && response.file_url !== selectedResult.url) {
+          setSelectedResult({
+            ...selectedResult,
+            url: response.file_url,
+          });
+        }
       }
     } catch (error: any) {
       console.error("쇼츠 저장 실패:", error);
@@ -521,7 +511,7 @@ const ShortsChatPage = () => {
         description: "쇼츠가 프로젝트에서 삭제되었습니다.",
       });
       
-      // 삭제 성공 후 목록 새로고침
+      // 삭제 성공 후 목록 새로고침 (await로 완료 대기)
       if (currentProjectId) {
         await loadShortsFromDb(parseInt(currentProjectId));
       }
@@ -541,6 +531,139 @@ const ShortsChatPage = () => {
   const isShortSaved = selectedResult ? savedShorts.some(
     item => item.url === selectedResult.url && item.type === selectedResult.type
   ) : false;
+
+  // SNS 연동 여부 확인
+  const checkSocialMediaConnection = () => {
+    const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+    if (profile && (profile.instagram || profile.youtube)) {
+      return {
+        instagram: profile.instagram?.connected || false,
+        youtube: profile.youtube?.connected || false,
+      };
+    }
+    return { instagram: false, youtube: false };
+  };
+
+  // 플랫폼 선택 토글
+  const handlePlatformToggle = (platform: string) => {
+    const connections = checkSocialMediaConnection();
+    const isConnected = platform === "instagram" ? connections.instagram : connections.youtube;
+    
+    if (!isConnected) {
+      toast({
+        title: "소셜 미디어 연동 필요",
+        description: `${platform === "instagram" ? "Instagram" : "YouTube"} 계정을 먼저 연동해주세요.`,
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setSelectedPlatforms(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(platform)) {
+        newSet.delete(platform);
+      } else {
+        newSet.add(platform);
+      }
+      return newSet;
+    });
+  };
+
+  // 업로드 버튼 클릭 핸들러
+  const handleUploadClick = () => {
+    if (!selectedResult) return;
+    
+    const connections = checkSocialMediaConnection();
+    const hasConnection = connections.instagram || connections.youtube;
+
+    if (hasConnection) {
+      setSelectedShortFormForUpload(selectedResult);
+      setIsUploadDialogOpen(true);
+      setSelectedPlatforms(new Set());
+      setUploadTitle(`숏폼 ${selectedResult.index + 1}`);
+    } else {
+      toast({
+        title: "소셜 미디어 연동 필요",
+        description: "숏폼을 업로드하려면 먼저 소셜 미디어 계정을 연동해주세요.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // 업로드 실행
+  const handleConfirmUpload = async () => {
+    if (selectedShortFormForUpload && selectedPlatforms.size > 0 && currentProjectId) {
+      if (isUploading) {
+        return;
+      }
+      
+      setIsUploading(true);
+      const platforms = Array.from(selectedPlatforms);
+      
+      // 각 플랫폼별 업로드 결과 추적
+      const uploadResults: { platform: string; success: boolean; error?: string }[] = [];
+      
+      // 각 플랫폼을 개별적으로 처리
+      for (const platform of platforms) {
+        try {
+          if (platform === 'youtube') {
+            await uploadToYouTube({
+              video_url: selectedShortFormForUpload.url,
+              title: uploadTitle || `숏폼 ${selectedShortFormForUpload.index + 1}`,
+              project_id: Number(currentProjectId),
+              tags: [],
+              privacy: 'public'
+            });
+            uploadResults.push({ platform: 'youtube', success: true });
+          } else if (platform === 'instagram') {
+            await uploadToInstagram({
+              video_url: selectedShortFormForUpload.url,
+              caption: uploadTitle || `숏폼 ${selectedShortFormForUpload.index + 1}`,
+              project_id: Number(currentProjectId),
+              share_to_feed: true
+            });
+            uploadResults.push({ platform: 'instagram', success: true });
+          }
+        } catch (error: any) {
+          console.error(`${platform} 업로드 실패:`, error);
+          uploadResults.push({ 
+            platform, 
+            success: false, 
+            error: error.message || `${platform} 업로드 중 오류가 발생했습니다.` 
+          });
+        }
+      }
+      
+      // 결과 메시지 표시
+      const successPlatforms = uploadResults.filter(r => r.success).map(r => r.platform === "instagram" ? "Instagram" : "YouTube");
+      const failedPlatforms = uploadResults.filter(r => !r.success).map(r => r.platform === "instagram" ? "Instagram" : "YouTube");
+      
+      if (successPlatforms.length > 0 && failedPlatforms.length === 0) {
+        toast({
+          title: "업로드 완료",
+          description: `숏폼이 ${successPlatforms.join(", ")}에 성공적으로 업로드되었습니다.`,
+        });
+        setIsUploadDialogOpen(false);
+        setSelectedShortFormForUpload(null);
+        setSelectedPlatforms(new Set());
+        setUploadTitle("");
+      } else if (successPlatforms.length > 0 && failedPlatforms.length > 0) {
+        toast({
+          title: "부분 업로드 완료",
+          description: `${successPlatforms.join(", ")} 업로드 성공, ${failedPlatforms.join(", ")} 업로드 실패`,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "업로드 실패",
+          description: `플랫폼 업로드에 실패했습니다. ${failedPlatforms.join(", ")}`,
+          variant: "destructive",
+        });
+      }
+      
+      setIsUploading(false);
+    }
+  };
 
   const currentLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
   if (!currentLoggedIn) {
@@ -637,6 +760,19 @@ const ShortsChatPage = () => {
                               variant="secondary"
                               onClick={(e) => {
                                 e.stopPropagation();
+                                handleUploadClick();
+                              }}
+                              disabled={isUploading}
+                              className="bg-background/90 hover:bg-background"
+                            >
+                              <Upload className="h-4 w-4 mr-2" />
+                              업로드
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="secondary"
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 if (isShortSaved) {
                                   handleDeleteFromProject();
                                 } else {
@@ -666,14 +802,6 @@ const ShortsChatPage = () => {
                                   )}
                                 </>
                               )}
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="secondary"
-                              className="bg-background/90 hover:bg-background"
-                            >
-                              <Upload className="h-4 w-4 mr-2" />
-                              업로드
                             </Button>
                           </div>
                         </div>
@@ -941,6 +1069,176 @@ const ShortsChatPage = () => {
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
+
+      {/* 숏폼 업로드 다이얼로그 */}
+      <Dialog open={isUploadDialogOpen} onOpenChange={(open) => {
+        setIsUploadDialogOpen(open);
+        if (!open) {
+          setSelectedShortFormForUpload(null);
+          setSelectedPlatforms(new Set());
+          setUploadTitle("");
+        } else if (selectedShortFormForUpload) {
+          setUploadTitle(`숏폼 ${selectedShortFormForUpload.index + 1}`);
+        }
+      }}>
+        <DialogContent className="max-w-[500px]">
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold mb-4">숏폼 업로드</h3>
+              {selectedShortFormForUpload && (
+                <div className="space-y-2">
+                  <div className="aspect-[9/16] w-full max-w-[200px] mx-auto rounded-lg overflow-hidden bg-muted">
+                    <video
+                      src={selectedShortFormForUpload.url}
+                      className="w-full h-full object-cover"
+                      muted
+                      loop
+                      playsInline
+                      autoPlay
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* 제목 입력 필드 */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                제목 (필수)
+              </label>
+              <Input
+                value={uploadTitle}
+                onChange={(e) => setUploadTitle(e.target.value)}
+                placeholder="숏폼 제목을 입력하세요"
+                disabled={isUploading}
+                required
+              />
+            </div>
+            
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground text-center">업로드할 플랫폼을 선택해주세요</p>
+              {selectedShortFormForUpload && (() => {
+                const connections = checkSocialMediaConnection();
+                
+                return (
+                  <div className="flex justify-center gap-4">
+                    {/* Instagram 카드 */}
+                    <div className="flex flex-col items-center gap-1">
+                      <Card 
+                        className={`relative cursor-pointer transition-all hover:opacity-80 ${
+                          !connections.instagram
+                            ? "opacity-50 cursor-not-allowed" 
+                            : selectedPlatforms.has("instagram")
+                            ? "ring-2 ring-primary"
+                            : ""
+                        }`}
+                        onClick={() => {
+                          if (!connections.instagram) return;
+                          handlePlatformToggle("instagram");
+                        }}
+                      >
+                        <CardContent className="p-6 flex flex-col items-center gap-4 min-w-[140px]">
+                          <div className="absolute top-3 left-3">
+                            <div className={`h-4 w-4 rounded-full border-2 ${
+                              selectedPlatforms.has("instagram")
+                                ? "bg-primary border-primary"
+                                : "border-muted-foreground/50"
+                            }`}>
+                              {selectedPlatforms.has("instagram") && (
+                                <div className="h-full w-full rounded-full bg-primary flex items-center justify-center">
+                                  <div className="h-2 w-2 rounded-full bg-background" />
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <img
+                            src="/icon/instagram-logo.png"
+                            alt="Instagram"
+                            className="h-12 w-12 object-contain"
+                          />
+                          <span className="text-sm font-medium lowercase">instagram</span>
+                        </CardContent>
+                      </Card>
+                    </div>
+                    
+                    {/* YouTube 카드 */}
+                    <div className="flex flex-col items-center gap-1">
+                      <Card 
+                        className={`relative cursor-pointer transition-all hover:opacity-80 ${
+                          !connections.youtube
+                            ? "opacity-50 cursor-not-allowed" 
+                            : selectedPlatforms.has("youtube")
+                            ? "ring-2 ring-primary"
+                            : ""
+                        }`}
+                        onClick={() => {
+                          if (!connections.youtube) return;
+                          handlePlatformToggle("youtube");
+                        }}
+                      >
+                        <CardContent className="p-6 flex flex-col items-center gap-4 min-w-[140px]">
+                          <div className="absolute top-3 left-3">
+                            <div className={`h-4 w-4 rounded-full border-2 ${
+                              selectedPlatforms.has("youtube")
+                                ? "bg-primary border-primary"
+                                : "border-muted-foreground/50"
+                            }`}>
+                              {selectedPlatforms.has("youtube") && (
+                                <div className="h-full w-full rounded-full bg-primary flex items-center justify-center">
+                                  <div className="h-2 w-2 rounded-full bg-background" />
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <img
+                            src="/icon/youtube-logo.png"
+                            alt="YouTube"
+                            className="h-12 w-12 object-contain"
+                          />
+                          <span className="text-sm font-medium lowercase">youtube</span>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+            
+            {selectedPlatforms.size > 0 && (
+              <div className="flex justify-end gap-2 pt-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    if (isUploading) return;
+                    setIsUploadDialogOpen(false);
+                    setSelectedShortFormForUpload(null);
+                    setSelectedPlatforms(new Set());
+                    setUploadTitle("");
+                  }}
+                  disabled={isUploading}
+                  className="hover:bg-transparent hover:text-foreground"
+                >
+                  취소
+                </Button>
+                <Button
+                  onClick={handleConfirmUpload}
+                  disabled={isUploading || !uploadTitle.trim()}
+                >
+                  {isUploading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      업로드 중...
+                    </>
+                  ) : (
+                    "업로드 하기"
+                  )}
+                </Button>
+              </div>
+            )}
+            
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

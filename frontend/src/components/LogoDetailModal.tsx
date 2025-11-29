@@ -343,9 +343,7 @@ const LogoDetailModal = ({ open, logo, onClose }: LogoDetailModalProps) => {
         onLoginSuccess={async () => {
           setIsLoginOpen(false);
           setIsSignUpOpen(false);
-          // 메뉴도 업데이트 (Navigation 컴포넌트와 같은 queryClient 사용)
-          await queryClient.invalidateQueries({ queryKey: ['menus'] });
-          await queryClient.refetchQueries({ queryKey: ['menus'] });
+          // 메뉴는 Navigation 컴포넌트에서 자동으로 갱신되므로 여기서는 처리하지 않음
           if (prodId) {
             queryClient.invalidateQueries({ queryKey: ["logoLikeStatus", prodId] });
           }

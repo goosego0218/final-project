@@ -35,14 +35,15 @@ const ProjectsPage = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // DB에서 프로젝트 목록 가져오기
+  // DB에서 프로젝트 목록 가져오기 - 항상 최신 데이터 가져오기
   const { data: projects = [], isLoading: isProjectsLoading } = useQuery({
     queryKey: ['userProjects'],
     queryFn: getProjects,
     enabled: isLoggedIn, // 로그인 상태일 때만 조회
-    staleTime: 5 * 60 * 1000, // 5분간 캐시 유지
+    staleTime: 0, // 항상 최신 데이터 가져오기 (캐시 사용 안 함)
+    gcTime: 5 * 60 * 1000, // 5분간 메모리 유지
     refetchOnWindowFocus: false, // 윈도우 포커스 시 자동 refetch 비활성화
-    refetchOnMount: false, // 마운트 시 자동 refetch 비활성화
+    refetchOnMount: true, // 마운트 시 항상 최신 데이터 가져오기
   });
 
   useEffect(() => {
