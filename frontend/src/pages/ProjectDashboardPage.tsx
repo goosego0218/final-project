@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { getProjectDetail, deleteProject, ProjectDetail, ProjectListItem, getShortsList, getLogoList, uploadToYouTube } from "@/lib/api";
+import { getProjectDetail, deleteProject, ProjectDetail, ProjectListItem, getShortsList, getLogoList, uploadToYouTube, uploadToInstagram } from "@/lib/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { 
@@ -27,6 +27,7 @@ import {
 import { Trash2, Image, Video, Calendar, X, Upload, Instagram, Youtube, Download } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { addWatermarkToImage, addWatermarkToVideo } from "@/utils/watermark";
 
@@ -65,6 +66,8 @@ const ProjectDashboardPage = () => {
   const [selectedShortFormForUpload, setSelectedShortFormForUpload] = useState<ShortFormItem | null>(null);
   const [selectedPlatforms, setSelectedPlatforms] = useState<Set<string>>(new Set());
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadTitle, setUploadTitle] = useState(""); // 제목 입력 상태
 
   const projectId = searchParams.get('project');
   
@@ -719,50 +722,91 @@ const ProjectDashboardPage = () => {
   // 업로드 실행
   const handleConfirmUpload = async () => {
     if (selectedShortFormForUpload && selectedPlatforms.size > 0) {
-      const platforms = Array.from(selectedPlatforms);
-      const platformNames = platforms.map(p => p === "instagram" ? "Instagram" : "YouTube").join(", ");
-      
-      try {
-        // YouTube 업로드
-        if (platforms.includes('youtube')) {
-          await uploadToYouTube({
-            video_url: selectedShortFormForUpload.url,
-            title: selectedShortFormForUpload.title || "숏폼",
-            description: "",
-            tags: [],
-            privacy: 'public'
-          });
-        }
-        
-        // Instagram 업로드는 추후 구현
-        if (platforms.includes('instagram')) {
-          // TODO: Instagram 업로드 구현
-        }
-        
-        // 업로드 상태 저장 (savedItems의 ID 사용, URL도 함께 전달)
-        const savedItemId = getShortFormSavedItemId(selectedShortFormForUpload.id, selectedShortFormForUpload.url);
-        platforms.forEach(platform => {
-          saveShortFormUploadStatus(savedItemId, platform as "instagram" | "youtube", true);
-        });
-        
-        toast({
-          title: "업로드 완료",
-          description: `숏폼이 ${platformNames}에 성공적으로 업로드되었습니다.`,
-          status: "success",
-        });
-      } catch (error: any) {
-        console.error('업로드 실패:', error);
-        toast({
-          title: "업로드 실패",
-          description: error.message || "업로드 중 오류가 발생했습니다.",
-          status: "error",
-        });
-        return; // 에러 시 상태 저장하지 않음
+      // 이미 업로드 중이면 중복 실행 방지
+      if (isUploading) {
+        return;
       }
       
-      setIsUploadDialogOpen(false);
-      setSelectedShortFormForUpload(null);
-      setSelectedPlatforms(new Set());
+      setIsUploading(true); // 업로드 시작
+      const platforms = Array.from(selectedPlatforms);
+      
+      // 각 플랫폼별 업로드 결과 추적
+      const uploadResults: { platform: string; success: boolean; error?: string }[] = [];
+      
+      // 각 플랫폼을 개별적으로 처리
+      for (const platform of platforms) {
+        try {
+          if (platform === 'youtube') {
+            await uploadToYouTube({
+              video_url: selectedShortFormForUpload.url,
+              title: uploadTitle || selectedShortFormForUpload.title || "숏폼", // 사용자 입력 제목 사용
+              project_id: Number(projectId), // 프로젝트 ID 전달 (백엔드에서 브랜드 프로필 가져옴)
+              tags: [],
+              privacy: 'public'
+            });
+            uploadResults.push({ platform: 'youtube', success: true });
+          } else if (platform === 'instagram') {
+            await uploadToInstagram({
+              video_url: selectedShortFormForUpload.url,
+              caption: uploadTitle || selectedShortFormForUpload.title || "숏폼",
+              project_id: Number(projectId),
+              share_to_feed: true
+            });
+            uploadResults.push({ platform: 'instagram', success: true });
+          }
+        } catch (error: any) {
+          console.error(`${platform} 업로드 실패:`, error);
+          uploadResults.push({ 
+            platform, 
+            success: false, 
+            error: error.message || `${platform} 업로드 중 오류가 발생했습니다.` 
+          });
+          // 개별 플랫폼 실패해도 다른 플랫폼은 계속 진행
+        }
+      }
+      
+      // 성공한 플랫폼만 상태 저장
+      const savedItemId = getShortFormSavedItemId(selectedShortFormForUpload.id, selectedShortFormForUpload.url);
+      uploadResults.forEach(result => {
+        if (result.success) {
+          saveShortFormUploadStatus(savedItemId, result.platform as "instagram" | "youtube", true);
+        }
+      });
+      
+      // 결과 메시지 표시
+      const successPlatforms = uploadResults.filter(r => r.success).map(r => r.platform === "instagram" ? "Instagram" : "YouTube");
+      const failedPlatforms = uploadResults.filter(r => !r.success).map(r => r.platform === "instagram" ? "Instagram" : "YouTube");
+      
+      if (successPlatforms.length > 0 && failedPlatforms.length === 0) {
+        // 모두 성공
+        toast({
+          title: "업로드 완료",
+          description: `숏폼이 ${successPlatforms.join(", ")}에 성공적으로 업로드되었습니다.`,
+          status: "success",
+        });
+        setIsUploadDialogOpen(false);
+        setSelectedShortFormForUpload(null);
+        setSelectedPlatforms(new Set());
+        setUploadTitle(""); // 제목 초기화
+      } else if (successPlatforms.length > 0 && failedPlatforms.length > 0) {
+        // 부분 성공
+        toast({
+          title: "부분 업로드 완료",
+          description: `${successPlatforms.join(", ")} 업로드 성공, ${failedPlatforms.join(", ")} 업로드 실패`,
+          status: "warning",
+        });
+        // 다이얼로그는 유지 (실패한 플랫폼 재시도 가능)
+      } else {
+        // 모두 실패
+        toast({
+          title: "업로드 실패",
+          description: `플랫폼 업로드에 실패했습니다. ${failedPlatforms.join(", ")}`,
+          status: "error",
+        });
+        // 다이얼로그는 유지 (재시도 가능)
+      }
+      
+      setIsUploading(false);
     }
   };
 
@@ -1124,6 +1168,10 @@ const ProjectDashboardPage = () => {
         if (!open) {
           setSelectedShortFormForUpload(null);
           setSelectedPlatforms(new Set());
+          setUploadTitle(""); // 다이얼로그 닫을 때 초기화
+        } else if (selectedShortFormForUpload) {
+          // 다이얼로그 열 때 기본 제목 설정
+          setUploadTitle(selectedShortFormForUpload.title || "");
         }
       }}>
         <DialogContent className="max-w-[500px]">
@@ -1144,6 +1192,20 @@ const ProjectDashboardPage = () => {
                   </div>
                 </div>
               )}
+            </div>
+            
+            {/* 제목 입력 필드 */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                제목 (필수)
+              </label>
+              <Input
+                value={uploadTitle}
+                onChange={(e) => setUploadTitle(e.target.value)}
+                placeholder="숏폼 제목을 입력하세요"
+                disabled={isUploading}
+                required
+              />
             </div>
             
             <div className="space-y-4">
@@ -1248,18 +1310,29 @@ const ProjectDashboardPage = () => {
                 <Button
                   variant="outline"
                   onClick={() => {
+                    if (isUploading) return; // 업로드 중에는 취소 불가
                     setIsUploadDialogOpen(false);
                     setSelectedShortFormForUpload(null);
                     setSelectedPlatforms(new Set());
+                    setUploadTitle(""); // 제목 초기화
                   }}
+                  disabled={isUploading} // 업로드 중 비활성화
                   className="hover:bg-transparent hover:text-foreground"
                 >
                   취소
                 </Button>
                 <Button
                   onClick={handleConfirmUpload}
+                  disabled={isUploading || !uploadTitle.trim()} // 업로드 중이거나 제목이 없으면 비활성화
                 >
-                  업로드 하기
+                  {isUploading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      업로드 중...
+                    </>
+                  ) : (
+                    "업로드 하기"
+                  )}
                 </Button>
               </div>
             )}

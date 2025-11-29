@@ -28,7 +28,15 @@ router = APIRouter(
     tags=["logo"],
 )
 
-logo_graph = build_logo_graph()
+# 그래프를 지연 로딩 (필요할 때만 빌드)
+_logo_graph = None
+
+def get_logo_graph():
+    """그래프를 지연 로딩 (필요할 때만 빌드)"""
+    global _logo_graph
+    if _logo_graph is None:
+        _logo_graph = build_logo_graph()
+    return _logo_graph
 
 @router.post("/intro", response_model=LogoChatResponse, summary="로고 진입 시 브랜드 정보 요약")
 def get_logo_intro(
@@ -129,7 +137,7 @@ def chat_logo(
         "meta": {},
     }
 
-    new_state = logo_graph.invoke(
+    new_state = get_logo_graph().invoke(
         state,
         config={"configurable": {
             "thread_id": f"user-{current_user.id}-project-{req.project_id}-logo-{logo_session_id}"
