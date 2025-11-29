@@ -301,7 +301,7 @@ const ProjectsPage = () => {
                         생성 중...
                       </>
                     ) : (
-                      "생성하기"
+                      "다음으로"
                     )}
                   </Button>
                 </DialogFooter>
