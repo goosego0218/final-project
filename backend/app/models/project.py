@@ -169,7 +169,7 @@ class GenerationProd(Base):
     pub_yn: Mapped[str] = mapped_column(
         String(1),
         nullable=False,
-        server_default=text("'Y'"),
+        server_default=text("'N'"),
         comment="공개여부",
     )
 

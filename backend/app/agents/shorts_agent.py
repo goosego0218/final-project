@@ -32,7 +32,7 @@ def build_shorts_graph():
 
     llm = get_chat_model()
     fast_llm = get_fast_chat_model()
-    genai_client = get_genai_client()
+    genai_client = get_genai_client()  # None일 수 있음 (API 키 없을 때)
 
     # 프롬프트 생성용 : gpt-5
     # 이미지 생성 구글키도필요
@@ -45,7 +45,7 @@ def build_shorts_graph():
     # check_logo = make_check_logo_node(llm)
     # fetch_logo = make_fetch_logo_node(llm)
     generate_prompt_no_logo = make_generate_prompt_no_logo_node(llm)
-    generate_shorts = make_generate_shorts_node(genai_client)  
+    generate_shorts = make_generate_shorts_node(genai_client)  # None일 수 있음 (노드에서 처리)  
 
     # 그래프 생성
     graph = StateGraph(AppState)

@@ -25,3 +25,15 @@ class LogoListItemResponse(BaseModel):
     file_path: str
     file_url: str
     create_dt: str | None = None
+    pub_yn: str | None = None  # 공개 여부 추가
+
+
+class UpdateLogoPubYnRequest(BaseModel):
+    pub_yn: str  # 'Y' 또는 'N'
+
+
+class UpdateLogoPubYnResponse(BaseModel):
+    success: bool
+    message: str
+    prod_id: int
+    pub_yn: str

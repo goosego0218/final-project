@@ -51,38 +51,37 @@ def get_embeddings():
 def get_genai_client():
     """
     Google GenAI 클라이언트 (Veo 3.1 영상 생성용)
-    Vertex AI + 서비스 계정 인증
+    API Key 방식 사용 (서비스 계정 파일 불필요)
     """
     from google import genai
+    import logging
     
-    # 서비스 계정 JSON 파일 경로
-    credentials_path = os.path.join("credentials", "google-service-account.json")
+    logger = logging.getLogger(__name__)
     
-    if not os.path.exists(credentials_path):
-        raise FileNotFoundError(
-            f"서비스 계정 JSON 파일이 없습니다: {credentials_path}\n"
-            "Google Cloud Console에서 서비스 계정 키를 다운로드하여 해당 경로에 저장하세요."
+    # API 키가 없으면 None 반환 (에러 대신)
+    if not settings.google_genai_api_key:
+        logger.warning(
+            "Google GenAI API 키가 설정되지 않았습니다.\n"
+            "숏폼 생성 기능을 사용하려면 google_genai_api_key를 설정하세요."
         )
+        return None
     
-    # 환경변수로 인증 정보 설정
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = credentials_path
-    
-    # Vertex AI 모드로 클라이언트 생성
-    return genai.Client(
-        vertexai=True,
-        project=settings.google_cloud_project,
-        location=settings.google_cloud_location
-    )
+    # API Key 방식으로 클라이언트 생성
+    try:
+        return genai.Client(
+            api_key=settings.google_genai_api_key,
+        )
+    except Exception as e:
+        logger.error(f"GenAI 클라이언트 생성 실패: {e}")
+        return None
 
 @lru_cache
 def get_gemini_image_client():
     """
     로고 이미지 생성용 Gemini 클라이언트
-    Vertex AI + API Key 방식
     """
     from google import genai
     
     return genai.Client(
-        vertexai=True,
         api_key=settings.google_genai_api_key,
     )
