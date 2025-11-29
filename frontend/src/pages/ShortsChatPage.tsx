@@ -17,6 +17,16 @@ import ThemeToggle from "@/components/ThemeToggle";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { CardContent } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface SelectedResult {
   type: "short";
@@ -52,6 +62,7 @@ const ShortsChatPage = () => {
   const [isLoadingShortsChat, setIsLoadingShortsChat] = useState(false);
   const introCalledRef = useRef(false); // 중복 호출 방지용 ref
   const [isSaving, setIsSaving] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
   // SNS 업로드 관련 state
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
@@ -446,17 +457,17 @@ const ShortsChatPage = () => {
         description: response.message || "쇼츠가 프로젝트에 저장되었습니다.",
       });
       
-      // 저장 성공 후 목록 새로고침 (await로 완료 대기하여 정확한 상태 유지)
+      // selectedResult.url을 저장된 파일 URL로 업데이트 (버튼이 "프로젝트에서 삭제"로 바뀌도록)
+      if (response.file_url && selectedResult) {
+        setSelectedResult({
+          ...selectedResult,
+          url: response.file_url,
+        });
+      }
+      
+      // 저장 성공 후 목록 새로고침
       if (currentProjectId) {
         await loadShortsFromDb(parseInt(currentProjectId));
-        
-        // selectedResult.url도 업데이트 (저장된 파일 URL로)
-        if (response.file_url && response.file_url !== selectedResult.url) {
-          setSelectedResult({
-            ...selectedResult,
-            url: response.file_url,
-          });
-        }
       }
     } catch (error: any) {
       console.error("쇼츠 저장 실패:", error);
@@ -511,10 +522,14 @@ const ShortsChatPage = () => {
         description: "쇼츠가 프로젝트에서 삭제되었습니다.",
       });
       
-      // 삭제 성공 후 목록 새로고침 (await로 완료 대기)
+      // 삭제 성공 후 목록 새로고침
       if (currentProjectId) {
         await loadShortsFromDb(parseInt(currentProjectId));
       }
+      
+      // 미리보기에서 비디오 제거
+      setSelectedResult(null);
+      setHasResultPanel(false);
     } catch (error: any) {
       console.error("쇼츠 삭제 실패:", error);
       toast({
@@ -524,6 +539,7 @@ const ShortsChatPage = () => {
       });
     } finally {
       setIsSaving(false);
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -774,7 +790,7 @@ const ShortsChatPage = () => {
                               onClick={(e) => {
                                 e.stopPropagation();
                                 if (isShortSaved) {
-                                  handleDeleteFromProject();
+                                  setShowDeleteConfirm(true);
                                 } else {
                                   handleSaveToProject();
                                 }
@@ -887,85 +903,106 @@ const ShortsChatPage = () => {
                           </div>
                         )}
                         {message.content && message.content.trim() && (
-                          <div className={`flex items-end gap-2 ${message.role === "user" ? "justify-end" : "justify-start"}`}>
-                            <Card
-                              className={`max-w-[80%] p-4 ${
-                                message.role === "user"
-                                  ? "text-white border-0"
-                                  : "bg-muted"
-                              }`}
-                              style={message.role === "user" ? { backgroundColor: '#FF8A3D' } : undefined}
-                            >
-                              {message.role === "user" && message.images && message.images.length > 0 && (
-                                <div className="mb-3 space-y-2">
-                                  {message.images.map((img, imgIdx) => (
-                                    <div key={imgIdx} className="relative">
-                                      <img
-                                        src={img}
-                                        alt={`첨부 이미지 ${imgIdx + 1}`}
-                                        className="max-w-full max-h-48 rounded-md object-cover"
-                                      />
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                              
-                              {(() => {
-                                const videoUrlMatch = message.content.match(/\[VIDEO_URL\](.*?)\[\/VIDEO_URL\]/);
+                          <div className={`flex flex-col gap-2 ${message.role === "user" ? "items-end" : "items-start"}`}>
+                            <div className={`flex items-end gap-2 w-full ${message.role === "user" ? "justify-end" : "justify-start"}`}>
+                              <Card
+                                className={`max-w-[80%] p-4 ${
+                                  message.role === "user"
+                                    ? "text-white border-0"
+                                    : "bg-muted"
+                                }`}
+                                style={message.role === "user" ? { backgroundColor: '#FF8A3D' } : undefined}
+                              >
+                                {message.role === "user" && message.images && message.images.length > 0 && (
+                                  <div className="mb-3 space-y-2">
+                                    {message.images.map((img, imgIdx) => (
+                                      <div key={imgIdx} className="relative">
+                                        <img
+                                          src={img}
+                                          alt={`첨부 이미지 ${imgIdx + 1}`}
+                                          className="max-w-full max-h-48 rounded-md object-cover"
+                                        />
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
                                 
-                                if (videoUrlMatch && message.role === "assistant") {
-                                  const videoUrl = videoUrlMatch[1];
-                                  const textContent = message.content
-                                    .replace(/\[VIDEO_URL\].*?\[\/VIDEO_URL\]/, '')
-                                    .trim();
+                                {(() => {
+                                  const videoUrlMatch = message.content.match(/\[VIDEO_URL\](.*?)\[\/VIDEO_URL\]/);
                                   
-                                  return (
-                                    <>
-                                      {textContent && <p className="whitespace-pre-wrap mb-3">{textContent}</p>}
-                                      <div className="mt-2 bg-black/5 rounded-lg p-2">
-                                        {/* 썸네일 영상 (자동재생 없음) */}
-                                        <div 
-                                          className="relative w-48 mx-auto cursor-pointer hover:opacity-80 transition-opacity"
-                                          onClick={() => {
-                                            // 클릭 시 왼쪽 패널에서 재생
-                                            setSelectedResult({
-                                              type: "short",
-                                              url: videoUrl,
-                                              index: savedShorts.length,
-                                            });
-                                            setHasResultPanel(false);
-                                          }}
-                                        >
-                                          <video 
-                                            src={videoUrl} 
-                                            className="w-full h-auto rounded-md"
-                                            muted
-                                            playsInline
-                                            style={{ aspectRatio: '9/16' }}
-                                            onMouseEnter={(e) => e.currentTarget.play()}
-                                            onMouseLeave={(e) => {
-                                              e.currentTarget.pause();
-                                              e.currentTarget.currentTime = 0;
+                                  if (videoUrlMatch && message.role === "assistant") {
+                                    const videoUrl = videoUrlMatch[1];
+                                    const textContent = message.content
+                                      .replace(/\[VIDEO_URL\].*?\[\/VIDEO_URL\]/, '')
+                                      .trim();
+                                    
+                                    return (
+                                      <>
+                                        {textContent && <p className="whitespace-pre-wrap mb-3">{textContent}</p>}
+                                        <div className="mt-2 bg-black/5 rounded-lg p-2">
+                                          {/* 썸네일 영상 (자동재생 없음) */}
+                                          <div 
+                                            className="relative w-48 mx-auto cursor-pointer hover:opacity-80 transition-opacity"
+                                            onClick={() => {
+                                              // 클릭 시 왼쪽 패널에서 재생
+                                              setSelectedResult({
+                                                type: "short",
+                                                url: videoUrl,
+                                                index: savedShorts.length,
+                                              });
+                                              setHasResultPanel(false);
                                             }}
-                                          />
-                                          {/* 재생 아이콘 오버레이 */}
-                                          <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-md pointer-events-none">
-                                            <div className="bg-white/90 rounded-full p-3">
-                                              <Video className="h-6 w-6 text-primary" />
+                                          >
+                                            <video 
+                                              src={videoUrl} 
+                                              className="w-full h-auto rounded-md"
+                                              muted
+                                              playsInline
+                                              style={{ aspectRatio: '9/16' }}
+                                              onMouseEnter={(e) => e.currentTarget.play()}
+                                              onMouseLeave={(e) => {
+                                                e.currentTarget.pause();
+                                                e.currentTarget.currentTime = 0;
+                                              }}
+                                            />
+                                            {/* 재생 아이콘 오버레이 */}
+                                            <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-md pointer-events-none">
+                                              <div className="bg-white/90 rounded-full p-3">
+                                                <Video className="h-6 w-6 text-primary" />
+                                              </div>
                                             </div>
                                           </div>
+                                          <p className="text-center text-sm text-muted-foreground mt-2 mb-2">
+                                          </p>
                                         </div>
-                                        <p className="text-center text-sm text-muted-foreground mt-2 mb-2">
-                                        </p>
-                                      </div>
-                                    </>
-                                  );
-                                }
-                                
-                                // VIDEO_URL이 없으면 기존 텍스트 렌더링
-                                return <p className="whitespace-pre-wrap break-words">{message.content}</p>;
-                              })()}
-                            </Card>
+                                      </>
+                                    );
+                                  }
+                                  
+                                  // VIDEO_URL이 없으면 기존 텍스트 렌더링
+                                  return <p className="whitespace-pre-wrap break-words">{message.content}</p>;
+                                })()}
+                              </Card>
+                            </div>
+                            {/* 숏폼이 생성된 경우에만 "내 프로젝트로 이동" 버튼 표시 */}
+                            {(() => {
+                              const videoUrlMatch = message.content.match(/\[VIDEO_URL\](.*?)\[\/VIDEO_URL\]/);
+                              if (videoUrlMatch && message.role === "assistant" && currentProjectId) {
+                                return (
+                                  <Button
+                                    size="sm"
+                                    onClick={() => {
+                                      navigate(`/project?project=${currentProjectId}`);
+                                    }}
+                                    className="text-sm text-white"
+                                    style={{ backgroundColor: '#FF8B3D' }}
+                                  >
+                                    내 프로젝트로 이동
+                                  </Button>
+                                );
+                              }
+                              return null;
+                            })()}
                           </div>
                         )}
                       </div>
@@ -1239,6 +1276,27 @@ const ShortsChatPage = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* 삭제 확인 다이얼로그 */}
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>숏폼 삭제 확인</AlertDialogTitle>
+            <AlertDialogDescription>
+              정말로 이 숏폼을 프로젝트에서 삭제하시겠습니까?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteFromProject}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              삭제
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
