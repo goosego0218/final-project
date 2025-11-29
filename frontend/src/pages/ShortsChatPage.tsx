@@ -8,15 +8,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Send, ChevronLeft, RefreshCw, Star, Plus, X, FolderOpen, Trash2, Video, Loader2, Upload } from "lucide-react";
+import { Send, ChevronLeft, RefreshCw, Star, Plus, X, FolderOpen, Folder, Trash2, Video, Loader2, Upload, Save } from "lucide-react";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { projectStorage, type Message, type SavedItem } from "@/lib/projectStorage";
 import StudioTopBar from "@/components/StudioTopBar";
-import { getShortsIntro, sendShortsChat, getProjectDetail, getShortsList } from "@/lib/api";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { getShortsIntro, sendShortsChat, getProjectDetail, getShortsList, saveShorts, deleteShorts } from "@/lib/api";
 import ThemeToggle from "@/components/ThemeToggle";
-import { saveShorts } from "@/lib/api";
-import { Save } from "lucide-react";
 
 interface SelectedResult {
   type: "short";
@@ -40,12 +37,10 @@ const ShortsChatPage = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [attachedImages, setAttachedImages] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<SavedItem | null>(null);
   
   // 저장된 숏폼 추적
   const [savedShorts, setSavedShorts] = useState<SavedItem[]>([]);
-  const [activeStorageTab, setActiveStorageTab] = useState<"shorts" | null>(null);
+  const [activeStorageTab, setActiveStorageTab] = useState<"shorts" | null>("shorts"); // 디폴트가 펼쳐진 상태
   
   const [isChatLoaded, setIsChatLoaded] = useState(false);
   const [isLoadingShortsIntro, setIsLoadingShortsIntro] = useState(false);
@@ -353,54 +348,6 @@ const ShortsChatPage = () => {
     }
   };
 
-  const handleSave = (url: string, type: "short", index: number) => {
-    if (!currentProjectId) return;
-    
-    const item: SavedItem = {
-      id: `${type}_${Date.now()}_${index}`,
-      url,
-      type,
-      index,
-      title: `숏폼 ${savedShorts.length + 1}`,
-      createdAt: new Date().toISOString(),
-    };
-
-    const project = projectStorage.getProject(currentProjectId);
-    if (project) {
-      const existingInProject = project.savedItems?.some(saved => saved.url === url && saved.type === "short");
-      if (existingInProject) {
-        toast({
-          title: "이미 저장된 숏폼입니다",
-          description: "이 숏폼은 이미 저장되어 있습니다.",
-        });
-        return;
-      }
-    }
-    
-    setSavedShorts(prev => {
-      if (prev.some(saved => saved.url === url)) {
-        toast({
-          title: "이미 저장된 숏폼입니다",
-          description: "이 숏폼은 이미 저장되어 있습니다.",
-        });
-        return prev;
-      }
-      
-      const updated = [...prev, item];
-      
-      if (project) {
-        const allSavedItems = [...(project.savedItems || []), item];
-        project.savedItems = allSavedItems;
-        projectStorage.saveProject(project);
-      }
-      
-      toast({
-        title: "숏폼이 저장되었습니다",
-        description: "보관함에 저장되었습니다.",
-      });
-      return updated;
-    });
-  };
 
   const handleToggleStorageTab = (tab: "shorts") => {
     if (activeStorageTab === tab) {
@@ -419,52 +366,6 @@ const ShortsChatPage = () => {
     setHasResultPanel(false);
   };
 
-  const handleDelete = () => {
-    if (!itemToDelete || !currentProjectId) return;
-
-    const project = projectStorage.getProject(currentProjectId);
-    if (!project) return;
-
-    const updatedSavedItems = (project.savedItems || []).filter(
-      item => item.id !== itemToDelete.id
-    );
-    project.savedItems = updatedSavedItems;
-    projectStorage.saveProject(project);
-
-    setSavedShorts(prev => prev.filter(item => item.id !== itemToDelete.id));
-
-    if (selectedResult && selectedResult.url === itemToDelete.url) {
-      setSelectedResult(null);
-      setHasResultPanel(false);
-    }
-
-    toast({
-      title: "숏폼이 삭제되었습니다",
-      description: "저장된 항목에서 제거되었습니다.",
-    });
-
-    setIsDeleteDialogOpen(false);
-    setItemToDelete(null);
-  };
-
-  const handleDeleteClick = () => {
-    if (!selectedResult || !currentProjectId) return;
-
-    const foundItem = savedShorts.find(
-      item => item.url === selectedResult.url && item.type === selectedResult.type
-    );
-
-    if (foundItem) {
-      setItemToDelete(foundItem);
-      setIsDeleteDialogOpen(true);
-    } else {
-      toast({
-        title: "저장된 항목이 아닙니다",
-        description: "저장된 항목만 삭제할 수 있습니다.",
-        variant: "destructive",
-      });
-    }
-  };
 
   // DB에서 숏츠 목록 불러오기
   const loadShortsFromDb = async (projectId: number) => {
@@ -507,8 +408,8 @@ const ShortsChatPage = () => {
     }
   };
 
-  // 보관함에 저장 핸들러
-  const handleSaveToStorage = async () => {
+  // 프로젝트에 저장 핸들러
+  const handleSaveToProject = async () => {
     if (!selectedResult || !currentProjectId) {
       toast({
         title: "저장 실패",
@@ -530,14 +431,42 @@ const ShortsChatPage = () => {
         prod_type_id: 2,
       });
 
-      toast({
-        title: "저장 완료",
-        description: response.message || "쇼츠가 보관함에 저장되었습니다.",
+      // 저장 성공 시 즉시 savedShorts에 추가하여 버튼이 즉시 업데이트되도록 함
+      const newSavedItem: SavedItem = {
+        id: `db_${response.prod_id}`,
+        url: response.file_url || selectedResult.url,
+        type: "short",
+        index: savedShorts.length,
+        title: `숏폼 ${savedShorts.length + 1}`,
+        createdAt: new Date().toISOString(),
+      };
+      
+      // savedShorts에 즉시 추가
+      setSavedShorts(prev => {
+        if (prev.some(item => item.url === response.file_url || item.url === selectedResult.url)) {
+          return prev;
+        }
+        return [...prev, newSavedItem];
       });
       
-      // 저장 성공 후 목록 새로고침
+      // selectedResult.url도 업데이트 (저장된 파일 URL로)
+      if (response.file_url && response.file_url !== selectedResult.url) {
+        setSelectedResult({
+          ...selectedResult,
+          url: response.file_url,
+        });
+      }
+
+      toast({
+        title: "저장 완료",
+        description: response.message || "쇼츠가 프로젝트에 저장되었습니다.",
+      });
+      
+      // 백그라운드에서 목록 새로고침 (UI는 이미 업데이트됨)
       if (currentProjectId) {
-        await loadShortsFromDb(parseInt(currentProjectId));
+        loadShortsFromDb(parseInt(currentProjectId)).catch(error => {
+          console.error("쇼츠 목록 새로고침 실패:", error);
+        });
       }
     } catch (error: any) {
       console.error("쇼츠 저장 실패:", error);
@@ -550,6 +479,68 @@ const ShortsChatPage = () => {
       setIsSaving(false);
     }
   };
+
+  // 프로젝트에서 삭제 핸들러
+  const handleDeleteFromProject = async () => {
+    if (!selectedResult || !currentProjectId) {
+      return;
+    }
+
+    // savedShorts에서 현재 선택된 쇼츠 찾기
+    const savedShort = savedShorts.find(
+      item => item.url === selectedResult.url && item.type === selectedResult.type
+    );
+
+    if (!savedShort) {
+      toast({
+        title: "삭제 실패",
+        description: "저장된 쇼츠를 찾을 수 없습니다.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // prod_id 추출 (id가 "db_123" 형식이므로 숫자 부분만 추출)
+    const prodId = parseInt(savedShort.id.replace('db_', ''));
+
+    if (isNaN(prodId)) {
+      toast({
+        title: "삭제 실패",
+        description: "유효하지 않은 쇼츠 ID입니다.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await deleteShorts(prodId);
+
+      toast({
+        title: "삭제 완료",
+        description: "쇼츠가 프로젝트에서 삭제되었습니다.",
+      });
+      
+      // 삭제 성공 후 목록 새로고침
+      if (currentProjectId) {
+        await loadShortsFromDb(parseInt(currentProjectId));
+      }
+    } catch (error: any) {
+      console.error("쇼츠 삭제 실패:", error);
+      toast({
+        title: "삭제 실패",
+        description: error.message || "쇼츠 삭제에 실패했습니다.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // 현재 선택된 쇼츠가 저장되어 있는지 확인
+  const isShortSaved = selectedResult ? savedShorts.some(
+    item => item.url === selectedResult.url && item.type === selectedResult.type
+  ) : false;
 
   const currentLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
   if (!currentLoggedIn) {
@@ -616,37 +607,6 @@ const ShortsChatPage = () => {
                       <h2 className="text-lg font-semibold">숏폼 #{selectedResult.index + 1}</h2>
                       <div className="flex items-center gap-2">
                         <Button
-                          variant="default"
-                          size="sm"
-                          onClick={handleSaveToStorage}
-                          disabled={isSaving}
-                          className="bg-primary hover:bg-primary/90"
-                        >
-                          {isSaving ? (
-                            <>
-                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                              저장 중...
-                            </>
-                          ) : (
-                            <>
-                              <Save className="h-4 w-4 mr-2" />
-                              보관함에 저장
-                            </>
-                          )}
-                        </Button>
-                        {savedShorts.some(
-                          item => item.url === selectedResult.url && item.type === selectedResult.type
-                        ) && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={handleDeleteClick}
-                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        )}
-                        <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => {
@@ -672,27 +632,40 @@ const ShortsChatPage = () => {
                         />
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg pointer-events-none">
                           <div className="flex flex-col gap-2 justify-center items-center pointer-events-auto">
-                          <Button 
+                            <Button 
                               size="sm" 
                               variant="secondary"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                
-                                // 로컬에 다운로드
-                                const link = document.createElement('a');
-                                link.href = selectedResult.url;
-                                link.download = `shorts_${Date.now()}.mp4`;
-                                link.click();
-                                
-                                toast({
-                                  title: "다운로드 시작",
-                                  description: "쇼츠 영상을 로컬에 저장합니다.",
-                                });
+                                if (isShortSaved) {
+                                  handleDeleteFromProject();
+                                } else {
+                                  handleSaveToProject();
+                                }
                               }}
+                              disabled={isSaving}
                               className="bg-background/90 hover:bg-background"
                             >
-                              <Star className="h-4 w-4 mr-2" />
-                              다운로드
+                              {isSaving ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  {isShortSaved ? "삭제 중..." : "저장 중..."}
+                                </>
+                              ) : (
+                                <>
+                                  {isShortSaved ? (
+                                    <>
+                                      <Trash2 className="h-4 w-4 mr-2" />
+                                      프로젝트에서 삭제
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Save className="h-4 w-4 mr-2" />
+                                      프로젝트에 저장
+                                    </>
+                                  )}
+                                </>
+                              )}
                             </Button>
                             <Button 
                               size="sm" 
@@ -754,7 +727,11 @@ const ShortsChatPage = () => {
                     onClick={() => handleToggleStorageTab("shorts")}
                     className={activeStorageTab === "shorts" ? "bg-primary hover:bg-primary/90 text-primary-foreground" : ""}
                   >
-                    <FolderOpen className="h-4 w-4 mr-2" />
+                    {activeStorageTab === "shorts" ? (
+                      <FolderOpen className="h-4 w-4 mr-2" />
+                    ) : (
+                      <Folder className="h-4 w-4 mr-2" />
+                    )}
                     숏폼 보관함
                   </Button>
                 </div>
@@ -964,25 +941,6 @@ const ShortsChatPage = () => {
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
-
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>삭제하시겠습니까?</DialogTitle>
-            <DialogDescription>
-              숏폼을 삭제하면 저장된 항목에서 제거됩니다.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)} className="hover:bg-transparent hover:border-border hover:text-foreground">
-              취소
-            </Button>
-            <Button variant="destructive" onClick={handleDelete}>
-              삭제
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

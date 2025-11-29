@@ -452,6 +452,18 @@ export async function getShortsList(projectId: number): Promise<ShortsListItem[]
   });
 }
 
+// 쇼츠 삭제 API 호출
+export interface DeleteShortsResponse {
+  success: boolean;
+  message: string;
+}
+
+export async function deleteShorts(prodId: number): Promise<DeleteShortsResponse> {
+  return apiRequest<DeleteShortsResponse>(`/shorts/${prodId}`, {
+    method: 'DELETE',
+  });
+}
+
 // 로고 저장 관련 인터페이스
 export interface SaveLogoRequest {
   base64_image: string;

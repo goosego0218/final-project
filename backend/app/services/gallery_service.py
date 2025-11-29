@@ -2,12 +2,14 @@
 # 작성일: 2025-12-XX
 # 수정내역
 # - 2025-12-XX: 초기 작성 - 공개된 생성물 조회 및 정렬 기능
+# - 2025-12-XX: brand_info 기반 검색 기능 추가
 
 from sqlalchemy.orm import Session
 from typing import Literal, Optional
-from sqlalchemy import desc, asc, func
+from sqlalchemy import desc, asc, func, or_
 
 from app.models.project import GenerationProd, Comment
+from app.models.brand import BrandInfo
 from app.models.auth import UserInfo
 from app.utils.file_utils import get_file_url
 
@@ -43,6 +45,25 @@ def get_public_logos(
             GenerationProd.del_yn == 'N'  # 삭제되지 않은 것만
         )
     )
+    
+    # 검색어가 있으면 brand_info의 6개 컬럼에서 검색
+    # (brand_name, category, tone_mood, core_keywords, slogan, preferred_colors)
+    if search_query and search_query.strip():
+        search_term = f"%{search_query.strip()}%"
+        query = (
+            query
+            .join(BrandInfo, GenerationProd.grp_id == BrandInfo.grp_id)
+            .filter(
+                or_(
+                    BrandInfo.brand_name.like(search_term),
+                    BrandInfo.category.like(search_term),
+                    BrandInfo.tone_mood.like(search_term),
+                    BrandInfo.core_keywords.like(search_term),
+                    BrandInfo.slogan.like(search_term),
+                    BrandInfo.preferred_colors.like(search_term),
+                )
+            )
+        )
     
     # 정렬 적용
     if sort_by == "latest":
@@ -104,6 +125,25 @@ def get_public_shorts(
         )
     )
     
+    # 검색어가 있으면 brand_info의 6개 컬럼에서 검색
+    # (brand_name, category, tone_mood, core_keywords, slogan, preferred_colors)
+    if search_query and search_query.strip():
+        search_term = f"%{search_query.strip()}%"
+        query = (
+            query
+            .join(BrandInfo, GenerationProd.grp_id == BrandInfo.grp_id)
+            .filter(
+                or_(
+                    BrandInfo.brand_name.like(search_term),
+                    BrandInfo.category.like(search_term),
+                    BrandInfo.tone_mood.like(search_term),
+                    BrandInfo.core_keywords.like(search_term),
+                    BrandInfo.slogan.like(search_term),
+                    BrandInfo.preferred_colors.like(search_term),
+                )
+            )
+        )
+    
     # 정렬 적용
     if sort_by == "latest":
         query = query.order_by(desc(GenerationProd.create_dt))
@@ -158,6 +198,25 @@ def get_public_logos_count(
         )
     )
     
+    # 검색어가 있으면 brand_info의 6개 컬럼에서 검색
+    # (brand_name, category, tone_mood, core_keywords, slogan, preferred_colors)
+    if search_query and search_query.strip():
+        search_term = f"%{search_query.strip()}%"
+        query = (
+            query
+            .join(BrandInfo, GenerationProd.grp_id == BrandInfo.grp_id)
+            .filter(
+                or_(
+                    BrandInfo.brand_name.like(search_term),
+                    BrandInfo.category.like(search_term),
+                    BrandInfo.tone_mood.like(search_term),
+                    BrandInfo.core_keywords.like(search_term),
+                    BrandInfo.slogan.like(search_term),
+                    BrandInfo.preferred_colors.like(search_term),
+                )
+            )
+        )
+    
     return query.count()
 
 
@@ -183,6 +242,25 @@ def get_public_shorts_count(
             GenerationProd.del_yn == 'N'
         )
     )
+    
+    # 검색어가 있으면 brand_info의 6개 컬럼에서 검색
+    # (brand_name, category, tone_mood, core_keywords, slogan, preferred_colors)
+    if search_query and search_query.strip():
+        search_term = f"%{search_query.strip()}%"
+        query = (
+            query
+            .join(BrandInfo, GenerationProd.grp_id == BrandInfo.grp_id)
+            .filter(
+                or_(
+                    BrandInfo.brand_name.like(search_term),
+                    BrandInfo.category.like(search_term),
+                    BrandInfo.tone_mood.like(search_term),
+                    BrandInfo.core_keywords.like(search_term),
+                    BrandInfo.slogan.like(search_term),
+                    BrandInfo.preferred_colors.like(search_term),
+                )
+            )
+        )
     
     return query.count()
 

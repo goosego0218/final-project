@@ -77,6 +77,48 @@ def get_shorts_list(
     )
 
 
+def delete_shorts(
+    db: Session,
+    prod_id: int,
+    user_id: int,
+) -> bool:
+    """
+    쇼츠 삭제 (소프트 삭제)
+    
+    Args:
+        db: SQLAlchemy Session
+        prod_id: 생성물 ID
+        user_id: 사용자 ID (권한 확인용)
+        
+    Returns:
+        bool: 삭제 성공 여부
+        
+    Raises:
+        ValueError: 쇼츠를 찾을 수 없거나 권한이 없는 경우
+    """
+    prod = (
+        db.query(GenerationProd)
+        .filter(
+            GenerationProd.prod_id == prod_id,
+            GenerationProd.del_yn == 'N'
+        )
+        .first()
+    )
+    
+    if not prod:
+        raise ValueError("쇼츠를 찾을 수 없습니다.")
+    
+    # 본인이 생성한 쇼츠인지 확인
+    if prod.create_user != user_id:
+        raise ValueError("삭제 권한이 없습니다.")
+    
+    # 소프트 삭제
+    prod.del_yn = 'Y'
+    db.commit()
+    
+    return True
+
+
 def update_shorts_pub_yn(
     db: Session,
     prod_id: int,
