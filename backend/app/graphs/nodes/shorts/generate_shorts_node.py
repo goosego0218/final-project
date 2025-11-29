@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from app.agents.state import AppState
     from google.genai import Client
 
-def make_generate_shorts_node(genai_client: "Client"):
+def make_generate_shorts_node(genai_client: "Client | None"):
     """
     생성된 프롬프트로 Veo 3.1 쇼츠 영상 생성 노드 팩토리
     """
@@ -34,6 +34,13 @@ def make_generate_shorts_node(genai_client: "Client"):
         
         if not prompt:
             error_msg = AIMessage(content="프롬프트가 생성되지 않았습니다.")
+            return Command(update={"messages": [error_msg]}, goto=END)
+        
+        # GenAI 클라이언트 확인
+        if genai_client is None:
+            error_msg = AIMessage(
+                content="영상 생성 기능을 사용할 수 없습니다. Google GenAI API 키를 설정해주세요."
+            )
             return Command(update={"messages": [error_msg]}, goto=END)
         
         # 비디오 생성 설정

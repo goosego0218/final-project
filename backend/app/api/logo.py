@@ -13,8 +13,8 @@ from app.schemas.chat import LogoChatRequest, LogoChatResponse
 from app.db.orm import get_orm_session
 from app.core.deps import get_current_user
 from app.models.auth import UserInfo
-from app.schemas.logo import SaveLogoRequest, SaveLogoResponse, LogoListItemResponse
-from app.services.logo_service import save_logo_to_storage_and_db, get_logo_list, delete_logo
+from app.schemas.logo import SaveLogoRequest, SaveLogoResponse, LogoListItemResponse, UpdateLogoPubYnRequest, UpdateLogoPubYnResponse
+from app.services.logo_service import save_logo_to_storage_and_db, get_logo_list, delete_logo, update_logo_pub_yn
 from app.utils.file_utils import get_file_url
 from langchain_core.messages import HumanMessage
 from app.agents.state import AppState 
@@ -28,7 +28,15 @@ router = APIRouter(
     tags=["logo"],
 )
 
-logo_graph = build_logo_graph()
+# 그래프를 지연 로딩 (필요할 때만 빌드)
+_logo_graph = None
+
+def get_logo_graph():
+    """그래프를 지연 로딩 (필요할 때만 빌드)"""
+    global _logo_graph
+    if _logo_graph is None:
+        _logo_graph = build_logo_graph()
+    return _logo_graph
 
 @router.post("/intro", response_model=LogoChatResponse, summary="로고 진입 시 브랜드 정보 요약")
 def get_logo_intro(
@@ -129,7 +137,7 @@ def chat_logo(
         "meta": {},
     }
 
-    new_state = logo_graph.invoke(
+    new_state = get_logo_graph().invoke(
         state,
         config={"configurable": {
             "thread_id": f"user-{current_user.id}-project-{req.project_id}-logo-{logo_session_id}"
@@ -228,6 +236,7 @@ def get_logo_list_endpoint(
             file_path=prod.file_path,
             file_url=file_url,
             create_dt=prod.create_dt.isoformat() if prod.create_dt else None,
+            pub_yn=prod.pub_yn,
         ))
     
     return result
@@ -265,4 +274,45 @@ def delete_logo_endpoint(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"로고 삭제 실패: {str(e)}"
+        )
+
+
+@router.patch("/{prod_id}/pub-yn", response_model=UpdateLogoPubYnResponse, summary="로고 공개 여부 업데이트")
+def update_logo_pub_yn_endpoint(
+    prod_id: int,
+    req: UpdateLogoPubYnRequest,
+    db: Session = Depends(get_orm_session),
+    current_user: UserInfo = Depends(get_current_user),
+):
+    """
+    로고 공개 여부 업데이트 (PUB_YN)
+    
+    - prod_id: 업데이트할 로고의 생성물 ID (path parameter)
+    - pub_yn: 공개 여부 ('Y' 또는 'N') (body)
+    - 본인이 생성한 로고만 수정 가능
+    """
+    try:
+        updated_prod = update_logo_pub_yn(
+            db=db,
+            prod_id=prod_id,
+            pub_yn=req.pub_yn,
+            user_id=current_user.id,
+        )
+        
+        return UpdateLogoPubYnResponse(
+            success=True,
+            message="공개 여부가 업데이트되었습니다.",
+            prod_id=updated_prod.prod_id,
+            pub_yn=updated_prod.pub_yn,
+        )
+        
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"공개 여부 업데이트 실패: {str(e)}"
         )    

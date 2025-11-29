@@ -45,7 +45,16 @@ const Navigation = () => {
   });
 
   // localStorage에서 사용자 정보 가져오기
-  const getUserProfile = () => {
+  const getUserProfile = (checkLogin: boolean = true) => {
+    // 로그인 상태 확인이 필요하고, 로그인되지 않았으면 기본값 반환
+    if (checkLogin) {
+      const hasLoginFlag = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
+      const hasToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+      if (!hasLoginFlag || !hasToken) {
+        return { nickname: "사용자", id: "user123", avatar: null };
+      }
+    }
+    
     const stored = localStorage.getItem('userProfile');
     if (stored) {
       const profile = JSON.parse(stored);
@@ -66,14 +75,16 @@ const Navigation = () => {
     return { nickname: "사용자", id: "user123", avatar: null };
   };
 
-  const [userProfile, setUserProfile] = useState(getUserProfile());
+  const [userProfile, setUserProfile] = useState(() => getUserProfile(true));
   
   // interval 내부에서 최신 상태를 참조하기 위한 ref
   const isLoggedInRef = useRef(isLoggedIn);
   
-  // isLoggedIn이 변경될 때마다 ref 업데이트
+  // isLoggedIn이 변경될 때마다 ref 업데이트 및 프로필 동기화
   useEffect(() => {
     isLoggedInRef.current = isLoggedIn;
+    // 로그인 상태가 변경되면 프로필도 업데이트
+    setUserProfile(getUserProfile(true));
   }, [isLoggedIn]);
 
   // localStorage 변경 감지
@@ -83,11 +94,13 @@ const Navigation = () => {
       const hasToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
       const newLoggedIn = hasLoginFlag && !!hasToken;
       setIsLoggedIn(newLoggedIn);
-      setUserProfile(getUserProfile());
+      // 로그인 상태에 따라 프로필 업데이트
+      setUserProfile(getUserProfile(true));
     };
     
     const handleProfileUpdate = () => {
-      setUserProfile(getUserProfile());
+      // 로그인 상태 확인 후 프로필 업데이트
+      setUserProfile(getUserProfile(true));
     };
     
     const handleLogout = () => {
@@ -109,8 +122,8 @@ const Navigation = () => {
       if (currentLoggedIn !== isLoggedInRef.current) {
         setIsLoggedIn(currentLoggedIn);
       }
-      // 프로필 정보는 항상 최신 상태로 유지
-      setUserProfile(getUserProfile());
+      // 로그인 상태에 따라 프로필 정보 업데이트
+      setUserProfile(getUserProfile(true));
     }, 5000);
     
     return () => {
@@ -172,6 +185,10 @@ const Navigation = () => {
     
     // 메뉴 쿼리 무효화 및 다시 가져오기
     queryClient.invalidateQueries({ queryKey: ['menus'] });
+    
+    // 갤러리 쿼리 무효화 (좋아요 상태가 사용자별로 다르므로)
+    queryClient.invalidateQueries({ queryKey: ['logoGallery'] });
+    queryClient.invalidateQueries({ queryKey: ['shortsGallery'] });
     
     // 프로필 업데이트 이벤트 발생
     window.dispatchEvent(new Event('profileUpdated'));

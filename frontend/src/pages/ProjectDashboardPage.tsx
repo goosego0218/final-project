@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { getProjectDetail, deleteProject, ProjectDetail, ProjectListItem, getShortsList, getLogoList, uploadToYouTube } from "@/lib/api";
+import { getProjectDetail, deleteProject, ProjectDetail, ProjectListItem, getShortsList, getLogoList, uploadToYouTube, uploadToInstagram, updateLogoPubYn, updateShortsPubYn } from "@/lib/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { 
@@ -27,6 +27,7 @@ import {
 import { Trash2, Image, Video, Calendar, X, Upload, Instagram, Youtube, Download } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { addWatermarkToImage, addWatermarkToVideo } from "@/utils/watermark";
 
@@ -65,6 +66,8 @@ const ProjectDashboardPage = () => {
   const [selectedShortFormForUpload, setSelectedShortFormForUpload] = useState<ShortFormItem | null>(null);
   const [selectedPlatforms, setSelectedPlatforms] = useState<Set<string>>(new Set());
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadTitle, setUploadTitle] = useState(""); // 제목 입력 상태
 
   const projectId = searchParams.get('project');
   
@@ -150,7 +153,7 @@ const ProjectDashboardPage = () => {
             url: item.file_url,
             createdAt: item.create_dt || new Date().toISOString(),
             title: `로고 ${logoList.length - index}`, // 역순으로 번호 매기기
-            isPublic: false, // 기본값 (나중에 DB에서 가져올 수 있음)
+            isPublic: item.pub_yn === 'Y', // DB에서 가져온 pub_yn 값 사용
           }));
           setLogos(dbLogos);
         } catch (error) {
@@ -170,7 +173,7 @@ const ProjectDashboardPage = () => {
             url: item.file_url,
             createdAt: item.create_dt || new Date().toISOString(),
             title: `숏폼 ${shortsList.length - index}`, // 역순으로 번호 매기기
-            isPublic: false, // 기본값 (나중에 DB에서 가져올 수 있음)
+            isPublic: item.pub_yn === 'Y', // DB에서 가져온 pub_yn 값 사용
           }));
           setShortForms(dbShortForms);
         } catch (error) {
@@ -258,9 +261,20 @@ const ProjectDashboardPage = () => {
     });
   };
 
-  const handleTogglePublic = (logoId: string) => {
+  const handleTogglePublic = async (logoId: string) => {
     const logo = logos.find(l => l.id === logoId);
     if (!logo) return;
+    
+    // prod_id 추출 (id가 "db_123" 형식이므로)
+    const prodId = parseInt(logoId.replace('db_', ''));
+    if (isNaN(prodId)) {
+      toast({
+        title: "오류",
+        description: "유효하지 않은 로고 ID입니다.",
+        status: "error",
+      });
+      return;
+    }
     
     // 비공개에서 공개로 바꾸는 경우 확인 다이얼로그 표시
     if (!logo.isPublic) {
@@ -270,42 +284,30 @@ const ProjectDashboardPage = () => {
     }
     
     // 공개에서 비공개로 바꾸는 경우 바로 처리
-    setLogos(prevLogos => {
-      const updatedLogos = prevLogos.map(l => 
-        l.id === logoId ? { ...l, isPublic: false } : l
-      );
+    try {
+      await updateLogoPubYn(prodId, 'N');
       
-      // 공개된 로고를 localStorage에 저장
-      const publicLogos = updatedLogos.filter(l => l.isPublic);
-      const publicLogosData = publicLogos.map(l => ({
-        id: l.id,
-        url: l.url,
-        brandName: l.title || "로고",
-        likes: 0,
-        comments: 0,
-        createdAt: new Date(l.createdAt),
-        tags: [],
-        projectId: projectId || "",
-      }));
+      setLogos(prevLogos => {
+        return prevLogos.map(l => 
+          l.id === logoId ? { ...l, isPublic: false } : l
+        );
+      });
       
-      // 기존 공개 로고 가져오기
-      const existingPublicLogos = JSON.parse(localStorage.getItem('public_logos') || '[]');
-      // 현재 프로젝트의 로고 제거 후 새로 추가
-      const filteredLogos = existingPublicLogos.filter((l: any) => l.projectId !== projectId);
-      const updatedPublicLogos = [...filteredLogos, ...publicLogosData];
-      localStorage.setItem('public_logos', JSON.stringify(updatedPublicLogos));
+      // 갤러리 데이터 갱신
+      queryClient.invalidateQueries({ queryKey: ['logoGallery'] });
       
-      // 커스텀 이벤트 발생시켜 갤러리에 알림
-      window.dispatchEvent(new CustomEvent('publicLogosUpdated'));
-      
-      return updatedLogos;
-    });
-    
-    toast({
-      title: "비공개로 변경되었습니다",
-      description: "갤러리에서 제거되었습니다.",
-      status: "success",
-    });
+      toast({
+        title: "비공개로 변경되었습니다",
+        description: "갤러리에서 제거되었습니다.",
+        status: "success",
+      });
+    } catch (error) {
+      toast({
+        title: "업데이트 실패",
+        description: error instanceof Error ? error.message : "공개 여부 업데이트에 실패했습니다.",
+        status: "error",
+      });
+    }
   };
   
   const handleConfirmShare = async () => {
@@ -315,68 +317,35 @@ const ProjectDashboardPage = () => {
       const logo = logos.find(l => l.id === pendingToggleItem.id);
       if (!logo) return;
       
+      // prod_id 추출
+      const prodId = parseInt(pendingToggleItem.id.replace('db_', ''));
+      if (isNaN(prodId)) {
+        toast({
+          title: "오류",
+          description: "유효하지 않은 로고 ID입니다.",
+          status: "error",
+        });
+        return;
+      }
+      
       try {
-        // 워터마크 추가
-        const watermarkedUrl = await addWatermarkToImage(logo.url);
+        // DB에 PUB_YN 업데이트
+        await updateLogoPubYn(prodId, 'Y');
         
+        // UI 업데이트
         setLogos(prevLogos => {
-          const updatedLogos = prevLogos.map(l => 
+          return prevLogos.map(l => 
             l.id === pendingToggleItem.id 
               ? { ...l, isPublic: true }
               : l
           );
-          
-          // 공개된 로고를 localStorage에 저장 (모든 로고에 워터마크 추가)
-          const publicLogos = updatedLogos.filter(l => l.isPublic);
-          
-          // 모든 공개된 로고에 워터마크 추가 (비동기 처리)
-          Promise.all(publicLogos.map(async (l) => {
-            // 현재 게시하는 로고는 이미 워터마크가 추가된 URL 사용
-            if (l.id === pendingToggleItem.id) {
-            return {
-              id: l.id,
-                url: watermarkedUrl,
-              brandName: l.title || "로고",
-              likes: 0,
-              comments: 0,
-              createdAt: new Date(l.createdAt),
-              tags: [],
-              projectId: projectId || "",
-            };
-            }
-            // 이미 공개된 다른 로고들도 워터마크 추가
-            const watermarkedUrlForOther = await addWatermarkToImage(l.url);
-            return {
-              id: l.id,
-              url: watermarkedUrlForOther,
-              brandName: l.title || "로고",
-              likes: 0,
-              comments: 0,
-              createdAt: new Date(l.createdAt),
-              tags: [],
-              projectId: projectId || "",
-            };
-          })).then((publicLogosData) => {
-          // 기존 공개 로고 가져오기
-          const existingPublicLogos = JSON.parse(localStorage.getItem('public_logos') || '[]');
-          // 현재 프로젝트의 로고 제거 후 새로 추가
-          const filteredLogos = existingPublicLogos.filter((l: any) => l.projectId !== projectId);
-          const updatedPublicLogos = [...filteredLogos, ...publicLogosData];
-          localStorage.setItem('public_logos', JSON.stringify(updatedPublicLogos));
-          
-          // 커스텀 이벤트 발생시켜 갤러리에 알림
-          window.dispatchEvent(new CustomEvent('publicLogosUpdated'));
-          }).catch((error) => {
-            console.error('워터마크 추가 실패:', error);
-            toast({
-              title: "오류",
-              description: "워터마크 추가 중 오류가 발생했습니다.",
-              status: "error",
-            });
-          });
-          
-          return updatedLogos;
         });
+        
+        // 갤러리 데이터 갱신
+        queryClient.invalidateQueries({ queryKey: ['logoGallery'] });
+        
+        setIsShareDialogOpen(false);
+        setPendingToggleItem(null);
         
         toast({
           title: "게시되었습니다",
@@ -384,85 +353,47 @@ const ProjectDashboardPage = () => {
           status: "success",
         });
       } catch (error) {
-        console.error('워터마크 추가 실패:', error);
+        console.error('공개 여부 업데이트 실패:', error);
         toast({
           title: "오류",
-          description: "워터마크 추가 중 오류가 발생했습니다.",
+          description: error instanceof Error ? error.message : "공개 여부 업데이트에 실패했습니다.",
           status: "error",
         });
-        return;
       }
     } else {
       // 숏폼 게시
       const shortForm = shortForms.find(sf => sf.id === pendingToggleItem.id);
       if (!shortForm) return;
       
+      // prod_id 추출
+      const prodId = parseInt(pendingToggleItem.id.replace('db_', ''));
+      if (isNaN(prodId)) {
+        toast({
+          title: "오류",
+          description: "유효하지 않은 숏폼 ID입니다.",
+          status: "error",
+        });
+        return;
+      }
+      
       try {
-        // 워터마크 추가 (썸네일)
-        const watermarkedThumbnail = await addWatermarkToVideo(shortForm.url);
+        // DB에 PUB_YN 업데이트
+        await updateShortsPubYn(prodId, 'Y');
         
+        // UI 업데이트
         setShortForms(prevShortForms => {
-          const updatedShortForms = prevShortForms.map(sf => 
+          return prevShortForms.map(sf => 
             sf.id === pendingToggleItem.id 
               ? { ...sf, isPublic: true }
               : sf
           );
-          
-          // 공개된 숏폼을 localStorage에 저장
-          const publicShortForms = updatedShortForms.filter(sf => sf.isPublic);
-          
-          // 모든 공개된 숏폼에 워터마크 추가 (비동기 처리)
-          Promise.all(publicShortForms.map(async (sf) => {
-            // 현재 게시하는 숏폼은 이미 워터마크가 추가된 썸네일 사용
-            if (sf.id === pendingToggleItem.id) {
-              return {
-                id: sf.id,
-                thumbnailUrl: watermarkedThumbnail.thumbnailUrl, // 워터마크가 추가된 썸네일
-                videoUrl: sf.url, // 원본 비디오 URL
-                title: sf.title || "숏폼",
-                likes: 0,
-                comments: 0,
-                duration: "0:15",
-                createdAt: new Date(sf.createdAt),
-                tags: [],
-                projectId: projectId || "",
-              };
-            }
-            // 이미 공개된 다른 숏폼들도 워터마크 추가
-            const watermarkedThumbnailForOther = await addWatermarkToVideo(sf.url);
-            return {
-              id: sf.id,
-              thumbnailUrl: watermarkedThumbnailForOther.thumbnailUrl, // 워터마크가 추가된 썸네일
-              videoUrl: sf.url, // 원본 비디오 URL
-              title: sf.title || "숏폼",
-              likes: 0,
-              comments: 0,
-              duration: "0:15",
-              createdAt: new Date(sf.createdAt),
-              tags: [],
-              projectId: projectId || "",
-            };
-          })).then((publicShortFormsData) => {
-            // 기존 공개 숏폼 가져오기
-            const existingPublicShortForms = JSON.parse(localStorage.getItem('public_shortforms') || '[]');
-            // 현재 프로젝트의 숏폼 제거 후 새로 추가
-            const filteredShortForms = existingPublicShortForms.filter((sf: any) => sf.projectId !== projectId);
-            const updatedPublicShortForms = [...filteredShortForms, ...publicShortFormsData];
-            localStorage.setItem('public_shortforms', JSON.stringify(updatedPublicShortForms));
-            
-            // 커스텀 이벤트 발생시켜 갤러리에 알림
-            window.dispatchEvent(new CustomEvent('publicShortFormsUpdated'));
-          }).catch((error) => {
-            console.error('워터마크 추가 실패:', error);
-            toast({
-              title: "오류",
-              description: "워터마크 추가 중 오류가 발생했습니다.",
-              status: "error",
-            });
-          });
-          
-          return updatedShortForms;
         });
+        
+        // 갤러리 데이터 갱신
+        queryClient.invalidateQueries({ queryKey: ['shortsGallery'] });
+        
+        setIsShareDialogOpen(false);
+        setPendingToggleItem(null);
         
         toast({
           title: "게시되었습니다",
@@ -470,13 +401,12 @@ const ProjectDashboardPage = () => {
           status: "success",
         });
       } catch (error) {
-        console.error('워터마크 추가 실패:', error);
+        console.error('공개 여부 업데이트 실패:', error);
         toast({
           title: "오류",
-          description: "워터마크 추가 중 오류가 발생했습니다.",
+          description: error instanceof Error ? error.message : "공개 여부 업데이트에 실패했습니다.",
           status: "error",
         });
-        return;
       }
     }
     
@@ -484,9 +414,20 @@ const ProjectDashboardPage = () => {
     setPendingToggleItem(null);
   };
 
-  const handleToggleShortFormPublic = (shortFormId: string) => {
+  const handleToggleShortFormPublic = async (shortFormId: string) => {
     const shortForm = shortForms.find(sf => sf.id === shortFormId);
     if (!shortForm) return;
+    
+    // prod_id 추출
+    const prodId = parseInt(shortFormId.replace('db_', ''));
+    if (isNaN(prodId)) {
+      toast({
+        title: "오류",
+        description: "유효하지 않은 숏폼 ID입니다.",
+        status: "error",
+      });
+      return;
+    }
     
     // 비공개에서 공개로 바꾸는 경우 확인 다이얼로그 표시
     if (!shortForm.isPublic) {
@@ -496,43 +437,30 @@ const ProjectDashboardPage = () => {
     }
     
     // 공개에서 비공개로 바꾸는 경우 바로 처리
-    setShortForms(prevShortForms => {
-      const updatedShortForms = prevShortForms.map(sf => 
-        sf.id === shortFormId ? { ...sf, isPublic: false } : sf
-      );
+    try {
+      await updateShortsPubYn(prodId, 'N');
       
-      // 공개된 숏폼을 localStorage에 저장
-      const publicShortForms = updatedShortForms.filter(sf => sf.isPublic);
-      const publicShortFormsData = publicShortForms.map(sf => ({
-        id: sf.id,
-        thumbnailUrl: sf.url,
-        title: sf.title || "숏폼",
-        likes: 0,
-        comments: 0,
-        duration: "0:15",
-        createdAt: new Date(sf.createdAt),
-        tags: [],
-        projectId: projectId || "",
-      }));
+      setShortForms(prevShortForms => {
+        return prevShortForms.map(sf => 
+          sf.id === shortFormId ? { ...sf, isPublic: false } : sf
+        );
+      });
       
-      // 기존 공개 숏폼 가져오기
-      const existingPublicShortForms = JSON.parse(localStorage.getItem('public_shortforms') || '[]');
-      // 현재 프로젝트의 숏폼 제거 후 새로 추가
-      const filteredShortForms = existingPublicShortForms.filter((sf: any) => sf.projectId !== projectId);
-      const updatedPublicShortForms = [...filteredShortForms, ...publicShortFormsData];
-      localStorage.setItem('public_shortforms', JSON.stringify(updatedPublicShortForms));
+      // 갤러리 데이터 갱신
+      queryClient.invalidateQueries({ queryKey: ['shortsGallery'] });
       
-      // 커스텀 이벤트 발생시켜 갤러리에 알림
-      window.dispatchEvent(new CustomEvent('publicShortFormsUpdated'));
-      
-      return updatedShortForms;
-    });
-    
-    toast({
-      title: "비공개로 변경되었습니다",
-      description: "갤러리에서 제거되었습니다.",
-      status: "success",
-    });
+      toast({
+        title: "비공개로 변경되었습니다",
+        description: "갤러리에서 제거되었습니다.",
+        status: "success",
+      });
+    } catch (error) {
+      toast({
+        title: "업데이트 실패",
+        description: error instanceof Error ? error.message : "공개 여부 업데이트에 실패했습니다.",
+        status: "error",
+      });
+    }
   };
 
   // 로고/숏폼 삭제 핸들러
@@ -719,50 +647,91 @@ const ProjectDashboardPage = () => {
   // 업로드 실행
   const handleConfirmUpload = async () => {
     if (selectedShortFormForUpload && selectedPlatforms.size > 0) {
-      const platforms = Array.from(selectedPlatforms);
-      const platformNames = platforms.map(p => p === "instagram" ? "Instagram" : "YouTube").join(", ");
-      
-      try {
-        // YouTube 업로드
-        if (platforms.includes('youtube')) {
-          await uploadToYouTube({
-            video_url: selectedShortFormForUpload.url,
-            title: selectedShortFormForUpload.title || "숏폼",
-            description: "",
-            tags: [],
-            privacy: 'public'
-          });
-        }
-        
-        // Instagram 업로드는 추후 구현
-        if (platforms.includes('instagram')) {
-          // TODO: Instagram 업로드 구현
-        }
-        
-        // 업로드 상태 저장 (savedItems의 ID 사용, URL도 함께 전달)
-        const savedItemId = getShortFormSavedItemId(selectedShortFormForUpload.id, selectedShortFormForUpload.url);
-        platforms.forEach(platform => {
-          saveShortFormUploadStatus(savedItemId, platform as "instagram" | "youtube", true);
-        });
-        
-        toast({
-          title: "업로드 완료",
-          description: `숏폼이 ${platformNames}에 성공적으로 업로드되었습니다.`,
-          status: "success",
-        });
-      } catch (error: any) {
-        console.error('업로드 실패:', error);
-        toast({
-          title: "업로드 실패",
-          description: error.message || "업로드 중 오류가 발생했습니다.",
-          status: "error",
-        });
-        return; // 에러 시 상태 저장하지 않음
+      // 이미 업로드 중이면 중복 실행 방지
+      if (isUploading) {
+        return;
       }
       
-      setIsUploadDialogOpen(false);
-      setSelectedShortFormForUpload(null);
-      setSelectedPlatforms(new Set());
+      setIsUploading(true); // 업로드 시작
+      const platforms = Array.from(selectedPlatforms);
+      
+      // 각 플랫폼별 업로드 결과 추적
+      const uploadResults: { platform: string; success: boolean; error?: string }[] = [];
+      
+      // 각 플랫폼을 개별적으로 처리
+      for (const platform of platforms) {
+        try {
+          if (platform === 'youtube') {
+            await uploadToYouTube({
+              video_url: selectedShortFormForUpload.url,
+              title: uploadTitle || selectedShortFormForUpload.title || "숏폼", // 사용자 입력 제목 사용
+              project_id: Number(projectId), // 프로젝트 ID 전달 (백엔드에서 브랜드 프로필 가져옴)
+              tags: [],
+              privacy: 'public'
+            });
+            uploadResults.push({ platform: 'youtube', success: true });
+          } else if (platform === 'instagram') {
+            await uploadToInstagram({
+              video_url: selectedShortFormForUpload.url,
+              caption: uploadTitle || selectedShortFormForUpload.title || "숏폼",
+              project_id: Number(projectId),
+              share_to_feed: true
+            });
+            uploadResults.push({ platform: 'instagram', success: true });
+          }
+        } catch (error: any) {
+          console.error(`${platform} 업로드 실패:`, error);
+          uploadResults.push({ 
+            platform, 
+            success: false, 
+            error: error.message || `${platform} 업로드 중 오류가 발생했습니다.` 
+          });
+          // 개별 플랫폼 실패해도 다른 플랫폼은 계속 진행
+        }
+      }
+      
+      // 성공한 플랫폼만 상태 저장
+      const savedItemId = getShortFormSavedItemId(selectedShortFormForUpload.id, selectedShortFormForUpload.url);
+      uploadResults.forEach(result => {
+        if (result.success) {
+          saveShortFormUploadStatus(savedItemId, result.platform as "instagram" | "youtube", true);
+        }
+      });
+      
+      // 결과 메시지 표시
+      const successPlatforms = uploadResults.filter(r => r.success).map(r => r.platform === "instagram" ? "Instagram" : "YouTube");
+      const failedPlatforms = uploadResults.filter(r => !r.success).map(r => r.platform === "instagram" ? "Instagram" : "YouTube");
+      
+      if (successPlatforms.length > 0 && failedPlatforms.length === 0) {
+        // 모두 성공
+        toast({
+          title: "업로드 완료",
+          description: `숏폼이 ${successPlatforms.join(", ")}에 성공적으로 업로드되었습니다.`,
+          status: "success",
+        });
+        setIsUploadDialogOpen(false);
+        setSelectedShortFormForUpload(null);
+        setSelectedPlatforms(new Set());
+        setUploadTitle(""); // 제목 초기화
+      } else if (successPlatforms.length > 0 && failedPlatforms.length > 0) {
+        // 부분 성공
+        toast({
+          title: "부분 업로드 완료",
+          description: `${successPlatforms.join(", ")} 업로드 성공, ${failedPlatforms.join(", ")} 업로드 실패`,
+          status: "warning",
+        });
+        // 다이얼로그는 유지 (실패한 플랫폼 재시도 가능)
+      } else {
+        // 모두 실패
+        toast({
+          title: "업로드 실패",
+          description: `플랫폼 업로드에 실패했습니다. ${failedPlatforms.join(", ")}`,
+          status: "error",
+        });
+        // 다이얼로그는 유지 (재시도 가능)
+      }
+      
+      setIsUploading(false);
     }
   };
 
@@ -1124,6 +1093,10 @@ const ProjectDashboardPage = () => {
         if (!open) {
           setSelectedShortFormForUpload(null);
           setSelectedPlatforms(new Set());
+          setUploadTitle(""); // 다이얼로그 닫을 때 초기화
+        } else if (selectedShortFormForUpload) {
+          // 다이얼로그 열 때 기본 제목 설정
+          setUploadTitle(selectedShortFormForUpload.title || "");
         }
       }}>
         <DialogContent className="max-w-[500px]">
@@ -1144,6 +1117,20 @@ const ProjectDashboardPage = () => {
                   </div>
                 </div>
               )}
+            </div>
+            
+            {/* 제목 입력 필드 */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                제목 (필수)
+              </label>
+              <Input
+                value={uploadTitle}
+                onChange={(e) => setUploadTitle(e.target.value)}
+                placeholder="숏폼 제목을 입력하세요"
+                disabled={isUploading}
+                required
+              />
             </div>
             
             <div className="space-y-4">
@@ -1248,18 +1235,29 @@ const ProjectDashboardPage = () => {
                 <Button
                   variant="outline"
                   onClick={() => {
+                    if (isUploading) return; // 업로드 중에는 취소 불가
                     setIsUploadDialogOpen(false);
                     setSelectedShortFormForUpload(null);
                     setSelectedPlatforms(new Set());
+                    setUploadTitle(""); // 제목 초기화
                   }}
+                  disabled={isUploading} // 업로드 중 비활성화
                   className="hover:bg-transparent hover:text-foreground"
                 >
                   취소
                 </Button>
                 <Button
                   onClick={handleConfirmUpload}
+                  disabled={isUploading || !uploadTitle.trim()} // 업로드 중이거나 제목이 없으면 비활성화
                 >
-                  업로드 하기
+                  {isUploading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      업로드 중...
+                    </>
+                  ) : (
+                    "업로드 하기"
+                  )}
                 </Button>
               </div>
             )}

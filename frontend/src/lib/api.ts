@@ -365,7 +365,8 @@ export async function disconnectYouTube(): Promise<{ message: string }> {
 export interface YouTubeUploadRequest {
   video_url: string;
   title: string;
-  description?: string;
+  project_id: number;  // 프로젝트 ID (브랜드 프로필 가져오기 위해)
+  description?: string;  // 사용 안 함 (백엔드에서 자동 생성)
   tags?: string[];
   privacy?: 'public' | 'private' | 'unlisted';
 }
@@ -381,6 +382,28 @@ export interface YouTubeUploadResponse {
 // YouTube에 비디오 업로드
 export async function uploadToYouTube(data: YouTubeUploadRequest): Promise<YouTubeUploadResponse> {
   return apiRequest<YouTubeUploadResponse>('/social/youtube/upload', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+// Instagram 업로드 관련 인터페이스
+export interface InstagramUploadRequest {
+  video_url: string;
+  caption: string;
+  project_id: number;
+  share_to_feed?: boolean;
+}
+
+export interface InstagramUploadResponse {
+  success: boolean;
+  media_id: string;
+  message: string;
+}
+
+// Instagram에 릴스 업로드
+export async function uploadToInstagram(data: InstagramUploadRequest): Promise<InstagramUploadResponse> {
+  return apiRequest<InstagramUploadResponse>('/social/instagram/upload', {
     method: 'POST',
     body: JSON.stringify(data),
   });
@@ -415,6 +438,7 @@ export interface ShortsListItem {
   file_path: string;
   file_url: string;
   create_dt: string | null;
+  pub_yn: string | null;
 }
 
 // 쇼츠 목록 조회 API 호출
@@ -445,6 +469,7 @@ export interface LogoListItem {
   file_path: string;
   file_url: string;
   create_dt: string | null;
+  pub_yn: string | null;
 }
 
 // 로고 저장 API 호출
@@ -471,5 +496,179 @@ export interface DeleteLogoResponse {
 export async function deleteLogo(prodId: number): Promise<DeleteLogoResponse> {
   return apiRequest<DeleteLogoResponse>(`/logo/${prodId}`, {
     method: 'DELETE',
+  });
+}
+
+// 로고 공개 여부 업데이트
+export interface UpdateLogoPubYnRequest {
+  pub_yn: 'Y' | 'N';
+}
+
+export interface UpdateLogoPubYnResponse {
+  success: boolean;
+  message: string;
+  prod_id: number;
+  pub_yn: string;
+}
+
+export async function updateLogoPubYn(
+  prodId: number,
+  pubYn: 'Y' | 'N'
+): Promise<UpdateLogoPubYnResponse> {
+  return apiRequest<UpdateLogoPubYnResponse>(`/logo/${prodId}/pub-yn`, {
+    method: 'PATCH',
+    body: JSON.stringify({ pub_yn: pubYn }),
+  });
+}
+
+// 쇼츠 공개 여부 업데이트
+export interface UpdateShortsPubYnRequest {
+  pub_yn: 'Y' | 'N';
+}
+
+export interface UpdateShortsPubYnResponse {
+  success: boolean;
+  message: string;
+  prod_id: number;
+  pub_yn: string;
+}
+
+export async function updateShortsPubYn(
+  prodId: number,
+  pubYn: 'Y' | 'N'
+): Promise<UpdateShortsPubYnResponse> {
+  return apiRequest<UpdateShortsPubYnResponse>(`/shorts/${prodId}/pub-yn`, {
+    method: 'PATCH',
+    body: JSON.stringify({ pub_yn: pubYn }),
+  });
+}
+
+// 갤러리 관련 인터페이스
+export type SortOption = "latest" | "oldest" | "likes" | "comments";
+
+export interface GalleryItem {
+  is_liked?: boolean;  // 현재 사용자가 좋아요를 눌렀는지 여부
+  prod_id: number;
+  file_url: string;
+  like_count: number;
+  comment_count: number;
+  create_dt: string;
+  brand_name?: string | null;
+  tags?: string[] | null;
+}
+
+export interface GalleryListResponse {
+  items: GalleryItem[];
+  total_count: number;
+  skip: number;
+  limit: number;
+}
+
+// 로고 갤러리 조회
+export async function getLogoGallery(
+  sortBy: SortOption = "latest",
+  skip: number = 0,
+  limit: number = 100,
+  searchQuery?: string
+): Promise<GalleryListResponse> {
+  const params = new URLSearchParams({
+    sort_by: sortBy,
+    skip: skip.toString(),
+    limit: limit.toString(),
+  });
+  if (searchQuery) {
+    params.append("search_query", searchQuery);
+  }
+  return apiRequest<GalleryListResponse>(`/gallery/logos?${params.toString()}`, {
+    method: 'GET',
+  });
+}
+
+// 쇼츠 갤러리 조회
+export async function getShortsGallery(
+  sortBy: SortOption = "latest",
+  skip: number = 0,
+  limit: number = 100,
+  searchQuery?: string
+): Promise<GalleryListResponse> {
+  const params = new URLSearchParams({
+    sort_by: sortBy,
+    skip: skip.toString(),
+    limit: limit.toString(),
+  });
+  if (searchQuery) {
+    params.append("search_query", searchQuery);
+  }
+  return apiRequest<GalleryListResponse>(`/gallery/shorts?${params.toString()}`, {
+    method: 'GET',
+  });
+}
+
+// 댓글 관련 인터페이스
+export interface Comment {
+  comment_id: number;
+  prod_id: number;
+  user_id: number;
+  user_nickname: string;
+  content: string;
+  create_dt: string;
+  update_dt: string;
+}
+
+export interface CommentListResponse {
+  comments: Comment[];
+  total_count: number;
+}
+
+export interface CreateCommentRequest {
+  prod_id: number;
+  content: string;
+}
+
+// 댓글 목록 조회
+export async function getComments(prodId: number): Promise<CommentListResponse> {
+  return apiRequest<CommentListResponse>(`/comments?prod_id=${prodId}`, {
+    method: 'GET',
+  });
+}
+
+// 댓글 작성
+export async function createComment(data: CreateCommentRequest): Promise<Comment> {
+  return apiRequest<Comment>('/comments', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+// 댓글 삭제
+export async function deleteComment(commentId: number): Promise<void> {
+  return apiRequest<void>(`/comments/${commentId}`, {
+    method: 'DELETE',
+  });
+}
+
+// 좋아요 관련 인터페이스
+export interface LikeToggleResponse {
+  is_liked: boolean;
+  like_count: number;
+}
+
+export interface LikeStatusResponse {
+  prod_id: number;
+  is_liked: boolean;
+  like_count: number;
+}
+
+// 좋아요 토글
+export async function toggleLike(prodId: number): Promise<LikeToggleResponse> {
+  return apiRequest<LikeToggleResponse>(`/likes/toggle/${prodId}`, {
+    method: 'POST',
+  });
+}
+
+// 좋아요 상태 조회
+export async function getLikeStatus(prodId: number): Promise<LikeStatusResponse> {
+  return apiRequest<LikeStatusResponse>(`/likes/status/${prodId}`, {
+    method: 'GET',
   });
 }
