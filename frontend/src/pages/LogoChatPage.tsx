@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Send, ChevronLeft, RefreshCw, Star, Plus, X, FolderOpen, Folder, Trash2, Image, Loader2, Download } from "lucide-react";
+import { Send, ChevronLeft, RefreshCw, Star, Plus, X, FolderOpen, Folder, Trash2, Image, Loader2, Download, Info } from "lucide-react";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { projectStorage, type Message, type SavedItem } from "@/lib/projectStorage";
 import StudioTopBar from "@/components/StudioTopBar";
@@ -16,6 +16,7 @@ import { getLogoIntro, sendLogoChat, getProjectDetail } from "@/lib/api";
 import ThemeToggle from "@/components/ThemeToggle";
 import { saveLogo, getLogoList, deleteLogo } from "@/lib/api";
 import { Save } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -791,7 +792,7 @@ const LogoChatPage = () => {
                   </div>
                 )}
                 
-                <div className="flex justify-center gap-2 pb-6">
+                <div className="flex justify-center items-center gap-2 pb-6">
                   <Button
                     variant={activeStorageTab === "logos" ? "default" : "outline"}
                     size="sm"
@@ -806,6 +807,24 @@ const LogoChatPage = () => {
                     )}
                     로고 보관함
                   </Button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:bg-transparent hover:text-muted-foreground"
+                        >
+                          <Info className="h-5 w-5" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-xs">
+                        <p className="text-xs">
+                          본 서비스에서 생성된 콘텐츠는 AI에 의해 자동 생성되며, 저작권, 상표권 등 법적 책임은 사용자에게 있습니다. MAKERY는 생성된 콘텐츠와 관련된 법적 분쟁에 대해 책임을 지지 않습니다.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
               </div>
             </div>
