@@ -1,24 +1,24 @@
 import { Heart, MessageCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { getLogoGallery, GalleryItem } from "@/lib/api";
+import LogoDetailModal from "@/components/LogoDetailModal";
 
 const PopularLogosHomeSection = () => {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const scrollIntervalRef = useRef<number | null>(null);
-
   const [selectedLogo, setSelectedLogo] = useState<GalleryItem | null>(null);
 
-  // 좋아요순 상위 12개 로고를 DB에서 조회 (한 번만 호출)
+  // 좋아요순 상위 12개 로고를 DB에서 조회
   const { data, isLoading } = useQuery({
     queryKey: ["homePopularLogos"],
     queryFn: () => getLogoGallery("likes", 0, 12),
-    staleTime: 5 * 60 * 1000, // 5분 동안 캐시 유지
-    gcTime: 10 * 60 * 1000,
+    // Home 화면 진입 시마다 DB에서 최신 데이터 한 번 가져오기
+    staleTime: 0,
+    gcTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
-    refetchOnMount: false,
+    refetchOnMount: true,
   });
 
   const logos: GalleryItem[] = data?.items ?? [];
@@ -156,57 +156,12 @@ const PopularLogosHomeSection = () => {
         </div>
       </section>
 
-      {/* 간단한 상세 모달 (이미지 & 카운트만 표시) */}
-      <Dialog
+      {/* 갤러리와 동일한 공통 상세 모달 사용 */}
+      <LogoDetailModal
         open={!!selectedLogo}
-        onOpenChange={(open) => {
-          if (!open) {
-            setSelectedLogo(null);
-          }
-        }}
-      >
-        <DialogContent className="max-w-[800px] w-[90vw] overflow-hidden p-0 gap-0">
-          {selectedLogo && (
-            <div className="flex md:flex-row flex-col">
-              {/* Left: Logo Image */}
-              <div className="bg-background flex items-center justify-center p-0 border-r border-border aspect-square w-full md:w-[400px] md:flex-shrink-0 rounded-l-lg overflow-hidden">
-                <img
-                  src={selectedLogo.file_url}
-                  alt={`로고 ${selectedLogo.prod_id}`}
-                  className="w-full h-full object-contain"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = "/placeholder.svg";
-                  }}
-                />
-              </div>
-
-              {/* Right: Info */}
-              <div className="flex flex-col bg-background w-full md:w-[400px] md:flex-shrink-0 aspect-square md:aspect-auto md:h-[400px] rounded-r-lg">
-                <div className="flex-1 min-h-0 p-6 flex flex-col justify-center gap-4">
-                  <div className="flex items-center gap-4 text-muted-foreground">
-                    <span className="flex items-center gap-2">
-                      <Heart className="w-5 h-5" />
-                      <span className="text-lg font-semibold text-foreground">
-                        {selectedLogo.like_count.toLocaleString()}
-                      </span>
-                    </span>
-                    <span className="flex items-center gap-2">
-                      <MessageCircle className="w-5 h-5" />
-                      <span className="text-lg font-semibold text-foreground">
-                        {selectedLogo.comment_count.toLocaleString()}
-                      </span>
-                    </span>
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    메인 화면에서 인기 로고를 미리보기로 제공합니다. 자세한 소통과
-                    좋아요/댓글 관리는 로고 갤러리에서 진행할 수 있습니다.
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+        logo={selectedLogo}
+        onClose={() => setSelectedLogo(null)}
+      />
     </>
   );
 };

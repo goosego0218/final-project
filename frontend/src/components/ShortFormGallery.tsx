@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Heart, MessageCircle, Play, Share2 } from "lucide-react";
+import { Heart, MessageCircle, Play } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -8,38 +8,25 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
 import Footer from "@/components/Footer";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { AuthModals } from "@/components/AuthModals";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getShortsGallery,
-  getComments,
-  createComment,
-  toggleLike,
-  getLikeStatus,
   SortOption,
   GalleryItem,
-  Comment,
 } from "@/lib/api";
+import ShortFormDetailModal from "./ShortFormDetailModal";
 
 interface ShortFormGalleryProps {
   searchQuery?: string;
+  initialSelectedProdId?: number;
 }
 
-const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
+const ShortFormGallery = ({ searchQuery = "", initialSelectedProdId }: ShortFormGalleryProps) => {
   const [sortBy, setSortBy] = useState<SortOption>("latest");
   const [page, setPage] = useState(1);
   const [allShorts, setAllShorts] = useState<GalleryItem[]>([]); // 누적된 모든 쇼츠 데이터
   const [selectedShort, setSelectedShort] = useState<GalleryItem | null>(null);
-  const [isLiked, setIsLiked] = useState(false);
-  const [commentText, setCommentText] = useState("");
-  const { toast } = useToast();
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [isSignUpOpen, setIsSignUpOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const ITEMS_PER_PAGE = 12;
@@ -102,90 +89,20 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
   // 페이지네이션: 한 번에 12개씩 가져오기
   const { data: galleryData, isLoading, refetch: refetchGallery } = useQuery({
     queryKey: ['shortsGallery', sortBy, searchQuery, userId, page],
-    queryFn: () => getShortsGallery(sortBy, (page - 1) * ITEMS_PER_PAGE, ITEMS_PER_PAGE, searchQuery || undefined),
-    staleTime: 0, // 캐시를 최신이 아닌 것으로 간주 (하지만 자동 refetch는 하지 않음)
-    refetchOnMount: false, // 마운트 시 자동 refetch 방지 (한 번만 호출)
-    refetchOnWindowFocus: false, // 창 포커스 시 자동 refetch 방지
+    queryFn: () =>
+      getShortsGallery(
+        sortBy,
+        (page - 1) * ITEMS_PER_PAGE,
+        ITEMS_PER_PAGE,
+        searchQuery || undefined
+      ),
+    // 쇼츠 갤러리 화면이 마운트될 때마다 항상 DB에서 최신 데이터를 가져오기
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 
-  // 선택된 쇼츠의 댓글 조회
-  const { data: commentsData, refetch: refetchComments } = useQuery({
-    queryKey: ['shortsComments', selectedShort?.prod_id],
-    queryFn: () => getComments(selectedShort!.prod_id),
-    enabled: !!selectedShort,
-  });
-
-  // 선택된 쇼츠의 좋아요 상태 조회
-  const { data: likeStatus, refetch: refetchLikeStatus } = useQuery({
-    queryKey: ['shortsLikeStatus', selectedShort?.prod_id],
-    queryFn: () => getLikeStatus(selectedShort!.prod_id),
-    enabled: !!selectedShort,
-  });
-
-  // 좋아요 토글 mutation
-  const toggleLikeMutation = useMutation({
-    mutationFn: (prodId: number) => toggleLike(prodId),
-    onSuccess: async (data) => {
-      setIsLiked(data.is_liked);
-      // 현재 페이지의 갤러리 데이터 갱신
-      await refetchGallery();
-      // 선택된 쇼츠의 좋아요 수 업데이트
-      if (selectedShort) {
-        // 선택된 쇼츠가 현재 페이지에 있으면 업데이트
-        const updatedShort = galleryData?.items.find(
-          (item) => item.prod_id === selectedShort.prod_id
-        );
-        if (updatedShort) {
-          setSelectedShort({ ...updatedShort, like_count: data.like_count || updatedShort.like_count });
-        }
-        refetchLikeStatus();
-      }
-      toast({
-        description: data.is_liked ? "좋아요를 눌렀습니다" : "좋아요를 취소했습니다",
-      });
-    },
-    onError: (error: any) => {
-      if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
-        setIsLoginOpen(true);
-      } else {
-        toast({
-          description: "좋아요 처리에 실패했습니다",
-          variant: "destructive",
-        });
-      }
-    },
-  });
-
-  // 댓글 작성 mutation
-  const createCommentMutation = useMutation({
-    mutationFn: (content: string) => createComment({ prod_id: selectedShort!.prod_id, content }),
-    onSuccess: () => {
-      setCommentText("");
-      refetchComments();
-      // 갤러리 데이터 갱신
-      queryClient.invalidateQueries({ queryKey: ['shortsGallery'] });
-      toast({
-        description: "댓글이 등록되었습니다",
-      });
-    },
-    onError: (error: any) => {
-      if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
-        setIsLoginOpen(true);
-      } else {
-        toast({
-          description: "댓글 작성에 실패했습니다",
-          variant: "destructive",
-        });
-      }
-    },
-  });
-
-  // 선택된 쇼츠 변경 시 좋아요 상태 업데이트
-  useEffect(() => {
-    if (likeStatus) {
-      setIsLiked(likeStatus.is_liked);
-    }
-  }, [likeStatus]);
 
   // 새로운 페이지 데이터가 로드되면 누적
   useEffect(() => {
@@ -208,6 +125,15 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
   const displayedShorts = allShorts;
   const hasMore = galleryData ? (page * ITEMS_PER_PAGE) < galleryData.total_count : false;
 
+  // 초기 진입 시 특정 prod_id가 쿼리 파라미터로 넘어온 경우, 해당 숏폼을 자동으로 선택
+  useEffect(() => {
+    if (!initialSelectedProdId || selectedShort) return;
+    const target = allShorts.find((short) => short.prod_id === initialSelectedProdId);
+    if (target) {
+      setSelectedShort(target);
+    }
+  }, [initialSelectedProdId, allShorts, selectedShort]);
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -221,45 +147,9 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
     return `${Math.floor(days / 30)}개월 전`;
   };
 
-  const formatCommentDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const minutes = Math.floor(diff / (1000 * 60));
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
-    if (minutes < 1) return "방금 전";
-    if (minutes < 60) return `${minutes}분 전`;
-    if (hours < 24) return `${hours}시간 전`;
-    if (days < 7) return `${days}일 전`;
-    return formatDate(dateString);
-  };
-
   const handleLoadMore = () => {
     setPage((prev) => prev + 1);
     // 페이지가 변경되면 useQuery가 자동으로 다음 페이지 데이터를 가져옴
-  };
-
-  const handleLike = () => {
-    if (!selectedShort) return;
-    toggleLikeMutation.mutate(selectedShort.prod_id);
-  };
-
-  const handleComment = () => {
-    if (commentText.trim() && selectedShort) {
-      createCommentMutation.mutate(commentText.trim());
-    }
-  };
-
-  const handleShare = () => {
-    const url = selectedShort
-      ? `${window.location.origin}/shortform-gallery?short=${selectedShort.prod_id}`
-      : window.location.href;
-    navigator.clipboard.writeText(url);
-    toast({
-      description: "링크가 복사되었습니다",
-    });
   };
 
   const handleSortChange = (value: SortOption) => {
@@ -388,164 +278,11 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
         )}
       </div>
 
-      {/* Short Form Detail Modal */}
-      <Dialog
+      {/* Short Form Detail Modal - 갤러리/메인 공통 컴포넌트 사용 */}
+      <ShortFormDetailModal
         open={!!selectedShort}
-        onOpenChange={(open) => {
-          if (!open) {
-            setSelectedShort(null);
-            setIsLiked(false);
-            setCommentText("");
-          }
-        }}
-      >
-        <DialogContent className="max-w-[800px] w-[90vw] overflow-hidden p-0 gap-0">
-          {selectedShort && (
-            <div className="flex md:flex-row flex-col">
-              {/* Left: Short Form Video (9:16 ratio) */}
-              <div className="bg-background flex items-center justify-center p-0 border-r border-border aspect-[9/16] w-full md:w-[300px] md:flex-shrink-0 rounded-l-lg overflow-hidden relative">
-                {isVideoUrl(selectedShort.file_url) ? (
-                  <video
-                    src={selectedShort.file_url}
-                    className="w-full h-full object-cover"
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    controls
-                  />
-                ) : (
-                  <img
-                    src={selectedShort.file_url}
-                    alt={`쇼츠 ${selectedShort.prod_id}`}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = "/placeholder.svg";
-                    }}
-                  />
-                )}
-              </div>
-
-              {/* Right: Comments and Actions */}
-              <div className="flex flex-col bg-background w-full md:w-[500px] md:flex-shrink-0 aspect-[9/16] md:aspect-auto md:h-[533px] rounded-r-lg">
-                {/* Comments Section - Top */}
-                <div className="flex-1 min-h-0 overflow-y-auto p-6">
-                  <div className="space-y-4">
-                    {!commentsData || commentsData.comments.length === 0 ? (
-                      <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-                        아직 댓글이 없습니다. 첫 댓글을 남겨보세요!
-                      </div>
-                    ) : (
-                      commentsData.comments.map((comment: Comment) => (
-                        <div key={comment.comment_id} className="flex gap-3">
-                          <Avatar className="h-8 w-8 flex-shrink-0">
-                            <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                              {comment.user_nickname.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-semibold text-sm text-foreground">
-                                {comment.user_nickname}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {formatCommentDate(comment.create_dt)}
-                              </span>
-                            </div>
-                            <p className="text-sm text-foreground break-words">{comment.content}</p>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-
-                {/* Action Buttons - Middle */}
-                <div className="p-3 border-t-[1px] border-border space-y-2">
-                  <div className="flex items-center gap-3">
-                    <Button
-                      variant="ghost"
-                      onClick={handleLike}
-                      disabled={toggleLikeMutation.isPending}
-                      className="h-8 px-3 gap-2 hover:bg-primary/10 hover:text-primary"
-                    >
-                      <Heart
-                        className={`h-4 w-4 ${isLiked ? "fill-destructive text-destructive" : ""}`}
-                      />
-                      <span className="text-sm font-semibold text-foreground">
-                        {selectedShort.like_count.toLocaleString()}
-                      </span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="h-8 px-3 gap-2 hover:bg-primary/10 hover:text-primary"
-                    >
-                      <MessageCircle className="h-4 w-4" />
-                      <span className="text-sm font-semibold text-foreground">
-                        {selectedShort.comment_count.toLocaleString()}
-                      </span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={handleShare}
-                      className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
-                    >
-                      <Share2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Comment Input - Bottom */}
-                <div className="p-3 border-t-[1px] border-border">
-                  <div className="flex gap-2">
-                    <Textarea
-                      placeholder="댓글을 입력하세요..."
-                      value={commentText}
-                      onChange={(e) => setCommentText(e.target.value)}
-                      className="h-[40px] min-h-[40px] max-h-[40px] resize-none flex-1 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-primary focus-visible:border-2"
-                      rows={1}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                          e.preventDefault();
-                          if (commentText.trim()) {
-                            handleComment();
-                          }
-                        }
-                      }}
-                    />
-                    <Button
-                      onClick={handleComment}
-                      disabled={!commentText.trim() || createCommentMutation.isPending}
-                      className="h-[40px] px-6 bg-primary hover:bg-primary/90 text-white disabled:opacity-50"
-                    >
-                      {createCommentMutation.isPending ? "등록 중..." : "등록"}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      <AuthModals
-        isLoginOpen={isLoginOpen}
-        isSignUpOpen={isSignUpOpen}
-        onLoginClose={() => setIsLoginOpen(false)}
-        onSignUpClose={() => setIsSignUpOpen(false)}
-        onSwitchToSignUp={() => {
-          setIsLoginOpen(false);
-          setIsSignUpOpen(true);
-        }}
-        onSwitchToLogin={() => {
-          setIsSignUpOpen(false);
-          setIsLoginOpen(true);
-        }}
-        onLoginSuccess={(rememberMe) => {
-          setIsLoginOpen(false);
-          setIsSignUpOpen(false);
-        }}
+        short={selectedShort}
+        onClose={() => setSelectedShort(null)}
       />
 
       <Footer />

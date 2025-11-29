@@ -86,7 +86,11 @@ async function apiRequest<T>(endpoint: string, options?: RequestInit): Promise<T
       }
     }
     
-    throw new Error(errorMessage);
+    // status 정보를 포함한 에러 객체 생성
+    const error = new Error(errorMessage) as any;
+    error.status = response.status;
+    error.response = { status: response.status };
+    throw error;
   }
 
   // 204 No Content 응답은 본문이 없으므로 JSON 파싱을 건너뜀

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import ShortFormGallery from "@/components/ShortFormGallery";
 import { Input } from "@/components/ui/input";
@@ -7,6 +8,8 @@ import { Search } from "lucide-react";
 
 const ShortsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchParams] = useSearchParams();
+  const initialShortId = searchParams.get("short");
 
   return (
     <div className="min-h-screen">
@@ -39,7 +42,10 @@ const ShortsPage = () => {
             </div>
           </div>
         </div>
-        <ShortFormGallery searchQuery={searchQuery} />
+        <ShortFormGallery
+          searchQuery={searchQuery}
+          initialSelectedProdId={initialShortId ? Number(initialShortId) : undefined}
+        />
       </div>
     </div>
   );

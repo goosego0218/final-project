@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import LogoGallery from "@/components/LogoGallery";
 import { Input } from "@/components/ui/input";
@@ -7,6 +8,8 @@ import { Search } from "lucide-react";
 
 const LogosPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchParams] = useSearchParams();
+  const initialLogoId = searchParams.get("logo");
 
   return (
     <div className="min-h-screen">
@@ -39,7 +42,10 @@ const LogosPage = () => {
             </div>
           </div>
         </div>
-        <LogoGallery searchQuery={searchQuery} />
+        <LogoGallery
+          searchQuery={searchQuery}
+          initialSelectedProdId={initialLogoId ? Number(initialLogoId) : undefined}
+        />
       </div>
     </div>
   );
