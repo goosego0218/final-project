@@ -36,7 +36,7 @@ def save_shorts_to_storage_and_db(
         project_id=project_id
     )
     
-    # 2. ORM으로 DB에 저장
+    # 2. ORM으로 DB에 저장 (항상 새 레코드 생성)
     prod = GenerationProd(
         type_id=prod_type_id,
         grp_id=project_id,
@@ -51,7 +51,8 @@ def save_shorts_to_storage_and_db(
     
     db.add(prod)
     db.commit()
-    db.refresh(prod)
+    # refresh 제거: commit 후 이미 prod에 prod_id 등이 설정되어 있음
+    # 불필요한 relationship 로딩 방지
     
     return prod
 

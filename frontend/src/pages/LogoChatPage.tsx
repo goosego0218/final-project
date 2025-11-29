@@ -514,14 +514,6 @@ const LogoChatPage = () => {
         description: response.message || "로고가 보관함에 저장되었습니다.",
       });
       
-      // selectedResult.url을 저장된 파일 URL로 업데이트 (버튼이 "프로젝트에서 삭제"로 바뀌도록)
-      if (response.file_url && selectedResult) {
-        setSelectedResult({
-          ...selectedResult,
-          url: response.file_url,
-        });
-      }
-      
       // 저장 성공 후 목록 새로고침
       if (currentProjectId) {
         await loadLogosFromDb(parseInt(currentProjectId));

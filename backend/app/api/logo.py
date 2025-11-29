@@ -4,25 +4,18 @@
 # 수정내역
 # - 2025-11-20: 초기 작성
 # - 2025-11-24: intro 엔드포인트 추가
-# - 2025-12-XX: 다운로드 프록시 엔드포인트 추가
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.responses import StreamingResponse
 from typing import List
 from sqlalchemy.orm import Session
-import boto3
-from botocore.client import Config
-from io import BytesIO
 
 from app.schemas.chat import LogoChatRequest, LogoChatResponse
 from app.db.orm import get_orm_session
 from app.core.deps import get_current_user
-from app.core.config import settings
 from app.models.auth import UserInfo
-from app.models.project import GenerationProd
 from app.schemas.logo import SaveLogoRequest, SaveLogoResponse, LogoListItemResponse, UpdateLogoPubYnRequest, UpdateLogoPubYnResponse
 from app.services.logo_service import save_logo_to_storage_and_db, get_logo_list, delete_logo, update_logo_pub_yn
-from app.utils.file_utils import get_file_url, get_file_path_from_url
+from app.utils.file_utils import get_file_url
 from langchain_core.messages import HumanMessage
 from app.agents.state import AppState 
 from app.agents.logo_agent import build_logo_graph
@@ -322,103 +315,4 @@ def update_logo_pub_yn_endpoint(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"공개 여부 업데이트 실패: {str(e)}"
-        )
-
-
-@router.get("/{prod_id}/download", summary="로고 다운로드")
-def download_logo(
-    prod_id: int,
-    db: Session = Depends(get_orm_session),
-    current_user: UserInfo = Depends(get_current_user),
-):
-    """
-    로고 파일 다운로드 (CORS 우회를 위한 프록시)
-    - NCP Object Storage에서 파일을 가져와서 프론트엔드로 전달
-    """
-    try:
-        # DB에서 로고 정보 조회
-        prod = (
-            db.query(GenerationProd)
-            .filter(
-                GenerationProd.prod_id == prod_id,
-                GenerationProd.type_id == 1,  # 로고 타입
-                GenerationProd.del_yn == 'N'
-            )
-            .first()
-        )
-        
-        if not prod:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="로고를 찾을 수 없습니다."
-            )
-        
-        # 권한 확인 (본인이 생성한 로고만 다운로드 가능)
-        if prod.create_user != current_user.id:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="다운로드 권한이 없습니다."
-            )
-        
-        # 파일 경로 가져오기
-        file_path = prod.file_path
-        if not file_path:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="파일 경로를 찾을 수 없습니다."
-            )
-        
-        # URL에서 상대 경로 추출 (이미 상대 경로면 그대로 사용)
-        relative_path = get_file_path_from_url(file_path) or file_path
-        
-        # NCP Object Storage에서 파일 다운로드
-        try:
-            s3_client = boto3.client(
-                's3',
-                aws_access_key_id=settings.ncp_access_key,
-                aws_secret_access_key=settings.ncp_secret_key,
-                endpoint_url=settings.ncp_endpoint,
-                region_name=settings.ncp_region,
-                config=Config(signature_version='s3v4')
-            )
-            
-            # S3 키 생성 (앞의 "/" 제거)
-            s3_key = relative_path.lstrip("/")
-            
-            # 파일 다운로드
-            response = s3_client.get_object(
-                Bucket=settings.ncp_bucket_name,
-                Key=s3_key
-            )
-            
-            # 파일 내용을 BytesIO로 변환
-            file_content = response['Body'].read()
-            file_stream = BytesIO(file_content)
-            
-            # 파일명 추출
-            filename = s3_key.split("/")[-1] if "/" in s3_key else s3_key
-            if not filename.endswith(".png"):
-                filename = f"{filename}.png"
-            
-            # StreamingResponse로 반환
-            return StreamingResponse(
-                iter([file_content]),
-                media_type="image/png",
-                headers={
-                    "Content-Disposition": f'attachment; filename="{filename}"'
-                }
-            )
-            
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"파일 다운로드 실패: {str(e)}"
-            )
-            
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"다운로드 처리 중 오류가 발생했습니다: {str(e)}"
         )    

@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { getProjectDetail, deleteProject, ProjectDetail, ProjectListItem, getShortsList, getLogoList, uploadToYouTube, uploadToInstagram, updateLogoPubYn, updateShortsPubYn, downloadLogo, deleteLogo, deleteShorts } from "@/lib/api";
+import { getProjectDetail, deleteProject, ProjectDetail, ProjectListItem, getShortsList, getLogoList, uploadToYouTube, uploadToInstagram, updateLogoPubYn, updateShortsPubYn } from "@/lib/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { 
@@ -37,7 +37,6 @@ interface LogoItem {
   createdAt: string;
   title?: string;
   isPublic?: boolean;
-  prodId?: number; // DB prod_id 추가
 }
 
 interface ShortFormItem {
@@ -155,7 +154,6 @@ const ProjectDashboardPage = () => {
             createdAt: item.create_dt || new Date().toISOString(),
             title: `로고 ${logoList.length - index}`, // 역순으로 번호 매기기
             isPublic: item.pub_yn === 'Y', // DB에서 가져온 pub_yn 값 사용
-            prodId: item.prod_id, // prod_id 추가
           }));
           setLogos(dbLogos);
         } catch (error) {
@@ -465,100 +463,79 @@ const ProjectDashboardPage = () => {
     }
   };
 
-  // 로고/숏폼 삭제 핸들러 (DB에서 실제 삭제)
-  const handleDeleteItem = async () => {
-    if (!itemToDelete || !projectId) return;
+  // 로고/숏폼 삭제 핸들러
+  const handleDeleteItem = () => {
+    if (!itemToDelete) return;
 
-    try {
-      // prod_id 추출 (id가 "db_123" 형식이므로)
-      const prodId = parseInt(itemToDelete.id.replace('db_', ''));
-      if (isNaN(prodId)) {
-        toast({
-          title: "삭제 실패",
-          description: "유효하지 않은 항목 ID입니다.",
-          variant: "destructive",
-        });
-        setIsDeleteItemDialogOpen(false);
-        setItemToDelete(null);
-        return;
-      }
-
-      // DB에서 삭제 API 호출
-      if (itemToDelete.type === "logo") {
-        await deleteLogo(prodId);
-      } else {
-        await deleteShorts(prodId);
-      }
-
-      // 삭제 성공 후 목록 새로고침 (DB에서 다시 가져오기)
-      if (itemToDelete.type === "logo") {
-        const logoList = await getLogoList(Number(projectId));
-        const dbLogos: LogoItem[] = logoList.map((item, index) => ({
-          id: `db_${item.prod_id}`,
-          url: item.file_url,
-          createdAt: item.create_dt || new Date().toISOString(),
-          title: `로고 ${logoList.length - index}`,
-          isPublic: item.pub_yn === 'Y',
-          prodId: item.prod_id,
-        }));
-        setLogos(dbLogos);
-      } else {
-        const shortsList = await getShortsList(Number(projectId));
-        const dbShortForms: ShortFormItem[] = shortsList.map((item, index) => ({
-          id: `db_${item.prod_id}`,
-          url: item.file_url,
-          createdAt: item.create_dt || new Date().toISOString(),
-          title: `숏폼 ${shortsList.length - index}`,
-          isPublic: item.pub_yn === 'Y',
-        }));
-        setShortForms(dbShortForms);
-      }
-
-      // 갤러리 데이터도 무효화 (삭제된 항목이 갤러리에 있을 수 있음)
-      queryClient.invalidateQueries({ queryKey: ['logoGallery'] });
-      queryClient.invalidateQueries({ queryKey: ['shortsGallery'] });
-      queryClient.invalidateQueries({ queryKey: ['homePopularLogos'] });
-      queryClient.invalidateQueries({ queryKey: ['homePopularShorts'] });
-
-      toast({
-        title: itemToDelete.type === "logo" ? "로고가 삭제되었습니다" : "숏폼이 삭제되었습니다",
-      });
-
-      setIsDeleteItemDialogOpen(false);
-      setItemToDelete(null);
-    } catch (error: any) {
-      console.error("삭제 오류:", error);
-      toast({
-        title: "삭제 실패",
-        description: error.message || "항목 삭제 중 오류가 발생했습니다.",
-        variant: "destructive",
-      });
+    // TODO: DB에서 로고/숏폼 삭제 API 호출 (generation_prod 테이블)
+    // 현재는 상태에서만 제거
+    if (itemToDelete.type === "logo") {
+      setLogos(prev => prev.filter(logo => logo.id !== itemToDelete.id));
+    } else {
+      setShortForms(prev => prev.filter(short => short.id !== itemToDelete.id));
     }
+
+    // 공개 상태도 제거 (localStorage) - 삭제할 항목의 id와 일치하는 것 제거
+    if (itemToDelete.type === "logo") {
+      const publicLogos = JSON.parse(localStorage.getItem('public_logos') || '[]');
+      const updatedPublicLogos = publicLogos.filter((l: any) => l.id !== itemToDelete.id);
+      localStorage.setItem('public_logos', JSON.stringify(updatedPublicLogos));
+    } else {
+      const publicShortForms = JSON.parse(localStorage.getItem('public_shortforms') || '[]');
+      const updatedPublicShortForms = publicShortForms.filter((sf: any) => sf.id !== itemToDelete.id);
+      localStorage.setItem('public_shortforms', JSON.stringify(updatedPublicShortForms));
+    }
+
+    toast({
+      title: itemToDelete.type === "logo" ? "로고가 삭제되었습니다" : "숏폼이 삭제되었습니다",
+      description: "저장된 항목에서 제거되었습니다.",
+      status: "success",
+    });
+
+    setIsDeleteItemDialogOpen(false);
+    setItemToDelete(null);
   };
 
-  // 다운로드 버튼 클릭 핸들러 (백엔드 프록시 사용)
-  const handleDownload = async (logo: LogoItem) => {
-    if (!logo.prodId) {
-      toast({
-        title: "다운로드 실패",
-        description: "로고 정보를 찾을 수 없습니다.",
-        variant: "destructive",
-      });
-      return;
-    }
-
+  // 삭제 버튼 클릭 핸들러
+  const handleDownload = (url: string, title: string) => {
     try {
-      await downloadLogo(logo.prodId, `${logo.title || "로고"}.png`);
-      toast({
-        title: "다운로드 완료",
-        description: `${logo.title || "로고"}이(가) 다운로드되었습니다.`,
-      });
-    } catch (error: any) {
+      // 이미지를 fetch하여 Blob으로 변환
+      fetch(url)
+        .then(response => response.blob())
+        .then(blob => {
+          // Blob URL 생성
+          const blobUrl = window.URL.createObjectURL(blob);
+          // 임시 링크 요소 생성
+          const link = document.createElement('a');
+          link.href = blobUrl;
+          link.download = `${title}.png`;
+          // 링크 클릭하여 다운로드 시작
+          document.body.appendChild(link);
+          link.click();
+          // 정리
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(blobUrl);
+          
+          toast({
+            title: "다운로드 완료",
+            description: `${title}이(가) 다운로드되었습니다.`,
+            status: "success",
+          });
+        })
+        .catch((error) => {
+          console.error("다운로드 오류:", error);
+          toast({
+            title: "다운로드 실패",
+            description: "이미지 다운로드 중 오류가 발생했습니다.",
+            status: "error",
+          });
+        });
+    } catch (error) {
       console.error("다운로드 오류:", error);
       toast({
         title: "다운로드 실패",
-        description: error.message || "이미지 다운로드 중 오류가 발생했습니다.",
-        variant: "destructive",
+        description: "이미지 다운로드 중 오류가 발생했습니다.",
+        status: "error",
       });
     }
   };
@@ -873,7 +850,7 @@ const ProjectDashboardPage = () => {
                             size="sm"
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleDownload(logo);
+                              handleDownload(logo.url, logo.title || "로고");
                             }}
                             className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 dark:bg-background/90 hover:bg-black/70 dark:hover:bg-background text-white dark:text-foreground"
                           >
