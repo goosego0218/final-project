@@ -45,7 +45,7 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
   const ITEMS_PER_PAGE = 12;
 
   // 갤러리 데이터 조회
-  const { data: galleryData, isLoading } = useQuery({
+  const { data: galleryData, isLoading, refetch: refetchGallery } = useQuery({
     queryKey: ['logoGallery', sortBy, searchQuery],
     queryFn: () => getLogoGallery(sortBy, 0, 1000, searchQuery || undefined),
     staleTime: 30 * 1000, // 30초
@@ -68,10 +68,19 @@ const LogoGallery = ({ searchQuery = "" }: LogoGalleryProps) => {
   // 좋아요 토글 mutation
   const toggleLikeMutation = useMutation({
     mutationFn: (prodId: number) => toggleLike(prodId),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       setIsLiked(data.is_liked);
       // 갤러리 데이터 갱신
-      queryClient.invalidateQueries({ queryKey: ['logoGallery'] });
+      const { data: updatedGalleryData } = await refetchGallery();
+      // 선택된 로고의 좋아요 수 업데이트
+      if (selectedLogo && updatedGalleryData) {
+        const updatedLogo = updatedGalleryData.items.find(
+          (item) => item.prod_id === selectedLogo.prod_id
+        );
+        if (updatedLogo) {
+          setSelectedLogo(updatedLogo);
+        }
+      }
       if (selectedLogo) {
         refetchLikeStatus();
       }

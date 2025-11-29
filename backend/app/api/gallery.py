@@ -32,7 +32,7 @@ SortOption = Literal["latest", "oldest", "likes", "comments"]
 def get_logo_gallery(
     sort_by: SortOption = Query("latest", description="정렬 옵션: latest, oldest, likes, comments"),
     skip: int = Query(0, ge=0, description="건너뛸 개수"),
-    limit: int = Query(100, ge=1, le=100, description="가져올 개수"),
+    limit: int = Query(100, ge=1, le=1000, description="가져올 개수"),
     search_query: Optional[str] = Query(None, description="검색어 (향후 구현)"),
     db: Session = Depends(get_orm_session),
     current_user: Optional[UserInfo] = Depends(get_optional_user),
@@ -80,7 +80,7 @@ def get_logo_gallery(
 def get_shorts_gallery(
     sort_by: SortOption = Query("latest", description="정렬 옵션: latest, oldest, likes, comments"),
     skip: int = Query(0, ge=0, description="건너뛸 개수"),
-    limit: int = Query(100, ge=1, le=100, description="가져올 개수"),
+    limit: int = Query(100, ge=1, le=1000, description="가져올 개수"),
     search_query: Optional[str] = Query(None, description="검색어 (향후 구현)"),
     db: Session = Depends(get_orm_session),
     current_user: Optional[UserInfo] = Depends(get_optional_user),

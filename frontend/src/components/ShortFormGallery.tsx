@@ -44,7 +44,7 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
   const ITEMS_PER_PAGE = 12;
 
   // 갤러리 데이터 조회
-  const { data: galleryData, isLoading } = useQuery({
+  const { data: galleryData, isLoading, refetch: refetchGallery } = useQuery({
     queryKey: ['shortsGallery', sortBy, searchQuery],
     queryFn: () => getShortsGallery(sortBy, 0, 1000, searchQuery || undefined),
     staleTime: 30 * 1000, // 30초
@@ -67,10 +67,19 @@ const ShortFormGallery = ({ searchQuery = "" }: ShortFormGalleryProps) => {
   // 좋아요 토글 mutation
   const toggleLikeMutation = useMutation({
     mutationFn: (prodId: number) => toggleLike(prodId),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       setIsLiked(data.is_liked);
       // 갤러리 데이터 갱신
-      queryClient.invalidateQueries({ queryKey: ['shortsGallery'] });
+      const { data: updatedGalleryData } = await refetchGallery();
+      // 선택된 쇼츠의 좋아요 수 업데이트
+      if (selectedShort && updatedGalleryData) {
+        const updatedShort = updatedGalleryData.items.find(
+          (item) => item.prod_id === selectedShort.prod_id
+        );
+        if (updatedShort) {
+          setSelectedShort(updatedShort);
+        }
+      }
       if (selectedShort) {
         refetchLikeStatus();
       }
