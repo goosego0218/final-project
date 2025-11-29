@@ -25,8 +25,8 @@ from app.models.auth import UserInfo
 
 from app.agents.state import AppState 
 from app.agents.shorts_agent import build_shorts_graph
-from app.services.shorts_service import save_shorts_to_storage_and_db, get_shorts_list
-from app.schemas.shorts import SaveShortsRequest, SaveShortsResponse, ShortsListItemResponse
+from app.services.shorts_service import save_shorts_to_storage_and_db, get_shorts_list, update_shorts_pub_yn
+from app.schemas.shorts import SaveShortsRequest, SaveShortsResponse, ShortsListItemResponse, UpdateShortsPubYnRequest, UpdateShortsPubYnResponse
 from app.utils.file_utils import get_file_url
 
 from uuid import uuid4
@@ -313,6 +313,48 @@ def get_shorts_list_endpoint(
             file_path=prod.file_path,
             file_url=file_url,
             create_dt=prod.create_dt.isoformat() if prod.create_dt else None,
+            pub_yn=prod.pub_yn,
         ))
     
     return result
+
+
+@router.patch("/{prod_id}/pub-yn", response_model=UpdateShortsPubYnResponse, summary="쇼츠 공개 여부 업데이트")
+def update_shorts_pub_yn_endpoint(
+    prod_id: int,
+    req: UpdateShortsPubYnRequest,
+    db: Session = Depends(get_orm_session),
+    current_user: UserInfo = Depends(get_current_user),
+):
+    """
+    쇼츠 공개 여부 업데이트 (PUB_YN)
+    
+    - prod_id: 업데이트할 쇼츠의 생성물 ID (path parameter)
+    - pub_yn: 공개 여부 ('Y' 또는 'N') (body)
+    - 본인이 생성한 쇼츠만 수정 가능
+    """
+    try:
+        updated_prod = update_shorts_pub_yn(
+            db=db,
+            prod_id=prod_id,
+            pub_yn=req.pub_yn,
+            user_id=current_user.id,
+        )
+        
+        return UpdateShortsPubYnResponse(
+            success=True,
+            message="공개 여부가 업데이트되었습니다.",
+            prod_id=updated_prod.prod_id,
+            pub_yn=updated_prod.pub_yn,
+        )
+        
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"공개 여부 업데이트 실패: {str(e)}"
+        )

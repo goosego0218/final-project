@@ -76,3 +76,51 @@ def get_shorts_list(
         .all()
     )
 
+
+def update_shorts_pub_yn(
+    db: Session,
+    prod_id: int,
+    pub_yn: str,
+    user_id: int,
+) -> GenerationProd:
+    """
+    쇼츠 공개 여부 업데이트 (PUB_YN)
+    
+    Args:
+        db: SQLAlchemy Session
+        prod_id: 생성물 ID
+        pub_yn: 공개 여부 ('Y' 또는 'N')
+        user_id: 사용자 ID (권한 확인용)
+        
+    Returns:
+        GenerationProd: 업데이트된 엔티티
+        
+    Raises:
+        ValueError: 쇼츠를 찾을 수 없거나 권한이 없는 경우, 또는 pub_yn 값이 잘못된 경우
+    """
+    if pub_yn not in ('Y', 'N'):
+        raise ValueError("pub_yn은 'Y' 또는 'N'이어야 합니다.")
+    
+    prod = (
+        db.query(GenerationProd)
+        .filter(
+            GenerationProd.prod_id == prod_id,
+            GenerationProd.del_yn == 'N'
+        )
+        .first()
+    )
+    
+    if not prod:
+        raise ValueError("쇼츠를 찾을 수 없습니다.")
+    
+    # 본인이 생성한 쇼츠인지 확인
+    if prod.create_user != user_id:
+        raise ValueError("수정 권한이 없습니다.")
+    
+    # 공개 여부 업데이트
+    prod.pub_yn = pub_yn
+    db.commit()
+    db.refresh(prod)
+    
+    return prod
+
