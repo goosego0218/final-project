@@ -1,0 +1,88 @@
+{
+  "source_image": "page5_18.jpg",
+  "text_elements": {
+    "primary_text": "ASIA OFFROAD",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "bold, blocky",
+    "typography_notes": "Highly readable with strong presence",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Mountain range with a sun",
+    "category": "abstract",
+    "meanings": [
+      "adventure",
+      "nature",
+      "exploration"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#F4A300",
+        "common_name": "orange",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#3AAFA9",
+        "common_name": "teal",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "bold"
+  ],
+  "tone_descriptors": [
+    "adventurous",
+    "dynamic"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol",
+    "spacing_notes": "Adequate spacing around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "adventure",
+      "offroad",
+      "Asia"
+    ],
+    "values": [
+      "exploration",
+      "freedom"
+    ],
+    "audience_hint": "outdoor enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "outdoor"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends in outdoor and adventure branding"
+  },
+  "analysis_timestamp": "2025-11-10T06:23:15.905671Z"
+}

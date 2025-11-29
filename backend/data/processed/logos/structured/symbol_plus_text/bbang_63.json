@@ -1,0 +1,87 @@
+{
+  "source_image": "bbang_63.jpg",
+  "text_elements": {
+    "primary_text": "빵금이",
+    "secondary_text": "salt bread",
+    "language": "Korean",
+    "font_style": "rounded, playful",
+    "typography_notes": "Legible with a friendly appearance",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Cartoon squirrel holding a piece of bread",
+    "category": "animal",
+    "meanings": [
+      "playfulness",
+      "food",
+      "friendliness"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#4A2C2A",
+        "common_name": "brown",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with white background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "playful",
+    "cute",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "approachable",
+    "fun"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "4:5",
+    "balance_notes": "Well-balanced with central focus",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "bread",
+      "fun",
+      "friendly"
+    ],
+    "values": [
+      "approachability",
+      "joy",
+      "quality"
+    ],
+    "audience_hint": "families, children",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "cute"
+    ],
+    "score": 0.85,
+    "notes": "Aligns with current trends in playful and minimal design"
+  },
+  "analysis_timestamp": "2025-11-10T07:12:30.866722Z"
+}

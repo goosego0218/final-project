@@ -1,0 +1,94 @@
+{
+  "source_image": "page4_35.jpg",
+  "text_elements": {
+    "primary_text": "삼형제 드림몰",
+    "secondary_text": null,
+    "language": "Korean",
+    "font_style": "Sans-serif, modern",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Abstract landscape with crescent moon and stars",
+    "category": "abstract",
+    "meanings": [
+      "night",
+      "community",
+      "dream"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#00BFA5",
+        "common_name": "Teal",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#8BC34A",
+        "common_name": "Light Green",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "calm"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "4:5",
+    "balance_notes": "Well-balanced with equal emphasis on text and symbol",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "dream",
+      "community",
+      "night"
+    ],
+    "values": [
+      "togetherness",
+      "aspiration"
+    ],
+    "audience_hint": "general public",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "color",
+      "description": "Limited color palette",
+      "severity": "low"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Introduce a secondary accent color",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "modern"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current minimalistic design trends"
+  },
+  "analysis_timestamp": "2025-11-10T06:17:13.614663Z"
+}

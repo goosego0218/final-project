@@ -1,0 +1,110 @@
+{
+  "source_image": "kape_18.jpg",
+  "text_elements": {
+    "primary_text": "PICO",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "Bold sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Mountain with a sun and sky",
+    "category": "emblem",
+    "meanings": [
+      "nature",
+      "adventure",
+      "outdoors"
+    ],
+    "confidence": 0.95
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "outline"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FF4500",
+        "common_name": "orange",
+        "usage": "accent"
+      },
+      {
+        "hex": "#008000",
+        "common_name": "green",
+        "usage": "background"
+      },
+      {
+        "hex": "#87CEEB",
+        "common_name": "sky blue",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "adventurous",
+    "natural"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central focus",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.85
+  },
+  "brand_message": {
+    "keywords": [
+      "mountain",
+      "exploration",
+      "nature"
+    ],
+    "values": [
+      "adventure",
+      "sustainability"
+    ],
+    "audience_hint": "outdoor enthusiasts",
+    "confidence": 0.9
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "color",
+      "description": "Potential color clash with orange accent",
+      "severity": "low"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider a more harmonious accent color",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "nature-inspired"
+    ],
+    "score": 0.85,
+    "notes": "Aligns with current trends in outdoor and adventure branding"
+  },
+  "analysis_timestamp": "2025-11-10T07:20:46.627895Z"
+}

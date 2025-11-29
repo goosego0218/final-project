@@ -1,0 +1,95 @@
+{
+  "source_image": "beikeori_128.jpg",
+  "text_elements": {
+    "primary_text": "Bakery 5'ven",
+    "secondary_text": "touch your emotion",
+    "language": "Latin",
+    "font_style": "modern sans-serif",
+    "typography_notes": "Readable with a stylish touch",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized oven with a cup inside",
+    "category": "abstract",
+    "meanings": [
+      "baking",
+      "warmth",
+      "comfort"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#3A3A3A",
+        "common_name": "dark gray",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "inviting"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with equal weight on text and symbol",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "bakery",
+      "emotion",
+      "comfort"
+    ],
+    "values": [
+      "warmth",
+      "quality"
+    ],
+    "audience_hint": "general public, bakery enthusiasts",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [
+    {
+      "type": "contrast",
+      "description": "Potential low contrast in certain lighting",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "contrast",
+      "suggestion": "Enhance contrast for better visibility",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current minimalistic design trends"
+  },
+  "analysis_timestamp": "2025-11-10T06:52:50.533566Z"
+}

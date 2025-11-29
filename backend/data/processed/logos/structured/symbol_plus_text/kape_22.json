@@ -1,0 +1,97 @@
+{
+  "source_image": "kape_22.jpg",
+  "text_elements": {
+    "primary_text": "cafeinlinger",
+    "secondary_text": "CAFE & MINI CAKE",
+    "language": "Latin and Korean",
+    "font_style": "cursive and serif",
+    "typography_notes": "The cursive font is elegant but may be slightly challenging to read at smaller sizes.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Illustration of a cafe storefront",
+    "category": "emblem",
+    "meanings": [
+      "coziness",
+      "inviting atmosphere"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#F5E9E9",
+        "common_name": "light pink",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal",
+    "elegant"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "inviting",
+    "chic"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment.",
+    "spacing_notes": "Adequate white space around elements.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "cafe",
+      "linger",
+      "cozy"
+    ],
+    "values": [
+      "comfort",
+      "quality",
+      "relaxation"
+    ],
+    "audience_hint": "cafe-goers, young adults",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Cursive text may be hard to read at smaller sizes.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Consider a slightly bolder font for the cursive text.",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current trends in minimalistic and elegant design."
+  },
+  "analysis_timestamp": "2025-11-10T07:21:35.816327Z"
+}

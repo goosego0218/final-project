@@ -1,0 +1,94 @@
+{
+  "source_image": "021_teugbyeolhan_yeohaeng.jpg",
+  "text_elements": {
+    "primary_text": "특별한 여행",
+    "secondary_text": null,
+    "language": "Korean",
+    "font_style": "brush script",
+    "typography_notes": "The brush script style gives a traditional and artistic feel, but may affect readability for non-native speakers.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Red stamp-like symbol with characters",
+    "category": "emblem",
+    "meanings": [
+      "authenticity",
+      "tradition"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FF0000",
+        "common_name": "red",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between black text and white background, red accent adds emphasis.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "traditional",
+    "artistic"
+  ],
+  "tone_descriptors": [
+    "authentic",
+    "cultural"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Centered layout with balanced text and symbol placement.",
+    "spacing_notes": "Adequate white space around elements enhances readability.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "travel",
+      "unique",
+      "experience"
+    ],
+    "values": [
+      "authenticity",
+      "cultural richness"
+    ],
+    "audience_hint": "Korean-speaking travelers",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Brush script may be hard to read for non-native speakers.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Consider a more legible font for broader audience appeal.",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "traditional",
+      "cultural"
+    ],
+    "score": 0.7,
+    "notes": "Aligns with trends emphasizing cultural authenticity and traditional aesthetics."
+  },
+  "analysis_timestamp": "2025-11-10T04:55:46.266433Z"
+}

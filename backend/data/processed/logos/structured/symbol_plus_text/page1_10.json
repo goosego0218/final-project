@@ -1,0 +1,93 @@
+{
+  "source_image": "page1_10.jpg",
+  "text_elements": {
+    "primary_text": "조선 뭉티기",
+    "secondary_text": "뭉티기, 육회, 연어 전문점",
+    "language": "Korean",
+    "font_style": "traditional calligraphy",
+    "typography_notes": "Legible with a traditional aesthetic",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Red abstract emblem with Korean characters",
+    "category": "emblem",
+    "meanings": [
+      "tradition",
+      "authenticity"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#B22222",
+        "common_name": "firebrick",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "text"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "traditional",
+    "cultural"
+  ],
+  "tone_descriptors": [
+    "authentic",
+    "heritage"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "3:4",
+    "balance_notes": "Centered and balanced",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "tradition",
+      "Korean cuisine"
+    ],
+    "values": [
+      "authenticity",
+      "heritage"
+    ],
+    "audience_hint": "Korean cuisine enthusiasts",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Abstract symbol may be unclear to non-Korean speakers",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "symbol clarity",
+      "suggestion": "Consider adding a descriptive tagline in English",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "cultural",
+      "heritage"
+    ],
+    "score": 0.7,
+    "notes": "Aligns with trends valuing cultural authenticity"
+  },
+  "analysis_timestamp": "2025-11-10T05:40:24.693023Z"
+}

@@ -1,0 +1,95 @@
+{
+  "source_image": "page1_23.jpg",
+  "text_elements": {
+    "primary_text": "신촌추어탕",
+    "secondary_text": "추어탕전문점",
+    "language": "Korean",
+    "font_style": "traditional brush style",
+    "typography_notes": "Legible with a traditional aesthetic",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Circular emblem with stylized Korean characters and fish motif",
+    "category": "emblem",
+    "meanings": [
+      "tradition",
+      "authenticity",
+      "cuisine"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#2E8B57",
+        "common_name": "sea green",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "text"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "traditional",
+    "cultural"
+  ],
+  "tone_descriptors": [
+    "authentic",
+    "cultural"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central focus",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "tradition",
+      "authenticity",
+      "Korean cuisine"
+    ],
+    "values": [
+      "heritage",
+      "quality"
+    ],
+    "audience_hint": "cultural enthusiasts, food lovers",
+    "confidence": 0.9
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Secondary text may be small in some contexts",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Increase size of secondary text for clarity",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "traditional",
+      "cultural"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with trends in cultural and traditional branding"
+  },
+  "analysis_timestamp": "2025-11-10T05:43:24.152503Z"
+}

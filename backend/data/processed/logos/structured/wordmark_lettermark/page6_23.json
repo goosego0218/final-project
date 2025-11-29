@@ -1,0 +1,87 @@
+{
+  "source_image": "page6_23.jpg",
+  "text_elements": {
+    "primary_text": "Double",
+    "secondary_text": "순살 떡볶이",
+    "language": "Latin and Hangul",
+    "font_style": "bold sans-serif",
+    "typography_notes": "The text is clear and legible with a playful style.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Leaf above the letter 'b'",
+    "category": "abstract",
+    "meanings": [
+      "nature",
+      "freshness"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#4CAF50",
+        "common_name": "green",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#E53935",
+        "common_name": "red",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "playful"
+  ],
+  "tone_descriptors": [
+    "fresh",
+    "friendly"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with equal emphasis on both text elements.",
+    "spacing_notes": "Adequate spacing between elements.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "fresh",
+      "natural",
+      "Korean"
+    ],
+    "values": [
+      "health",
+      "taste"
+    ],
+    "audience_hint": "young, health-conscious consumers",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth.",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "eco-friendly"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with trends focusing on health and sustainability."
+  },
+  "analysis_timestamp": "2025-11-10T06:34:02.816967Z"
+}

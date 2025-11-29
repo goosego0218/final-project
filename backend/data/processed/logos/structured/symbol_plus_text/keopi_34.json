@@ -1,0 +1,82 @@
+{
+  "source_image": "keopi_34.jpg",
+  "text_elements": {
+    "primary_text": "ZET PRESSO",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "Bold sans-serif",
+    "typography_notes": "Clear and readable",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Running platypus with motion lines",
+    "category": "animal",
+    "meanings": [
+      "speed",
+      "playfulness"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "High contrast with white background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "dynamic"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "speed",
+      "fun",
+      "coffee"
+    ],
+    "values": [
+      "efficiency",
+      "enjoyment"
+    ],
+    "audience_hint": "young, dynamic consumers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Introduce a secondary color for added depth",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "playful"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends of simplicity and playfulness"
+  },
+  "analysis_timestamp": "2025-11-10T07:46:39.266102Z"
+}

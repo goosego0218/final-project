@@ -1,0 +1,88 @@
+{
+  "source_image": "bbang_71.jpg",
+  "text_elements": {
+    "primary_text": "POST",
+    "secondary_text": "소망우체통빵",
+    "language": "Korean and English",
+    "font_style": "Bold sans-serif",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized envelope with wings",
+    "category": "abstract",
+    "meanings": [
+      "communication",
+      "speed",
+      "delivery"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#C45A5A",
+        "common_name": "red",
+        "usage": "background"
+      },
+      {
+        "hex": "#3A6B6B",
+        "common_name": "teal",
+        "usage": "background"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "efficient"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with equal spacing",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "post",
+      "delivery",
+      "hope"
+    ],
+    "values": [
+      "speed",
+      "reliability"
+    ],
+    "audience_hint": "general public",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary accent color for depth",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.85,
+    "notes": "Aligns with current trends in simplicity and clarity"
+  },
+  "analysis_timestamp": "2025-11-10T07:14:05.173261Z"
+}

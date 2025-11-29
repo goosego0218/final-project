@@ -1,0 +1,89 @@
+{
+  "source_image": "page2_28.jpg",
+  "text_elements": {
+    "primary_text": "MOMENT",
+    "secondary_text": "moment coffee",
+    "language": "Latin",
+    "font_style": "bold, geometric",
+    "typography_notes": "The primary text is bold and stylized, while the secondary text is more traditional and readable.",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "A stylized coffee bean within the letter 'O' of 'MOMENT'.",
+    "category": "abstract",
+    "meanings": [
+      "coffee",
+      "energy",
+      "focus"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#1A3A6E",
+        "common_name": "navy blue",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "energetic",
+    "professional"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment.",
+    "spacing_notes": "Adequate spacing between elements.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "coffee",
+      "moment",
+      "energy"
+    ],
+    "values": [
+      "quality",
+      "focus"
+    ],
+    "audience_hint": "coffee enthusiasts, professionals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "The stylized 'MOMENT' may be slightly hard to read at smaller sizes.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Simplify the primary text for better readability at smaller sizes.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current trends in minimalistic and bold logo designs."
+  },
+  "analysis_timestamp": "2025-11-10T05:55:01.813334Z"
+}

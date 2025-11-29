@@ -1,0 +1,98 @@
+{
+  "source_image": "kape_85.jpg",
+  "text_elements": {
+    "primary_text": "모두롱",
+    "secondary_text": "모두의 마카롱, 모두롱",
+    "language": "Korean",
+    "font_style": "rounded sans-serif",
+    "typography_notes": "Clear and legible with playful curves",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Three stylized macarons with faces",
+    "category": "abstract",
+    "meanings": [
+      "playfulness",
+      "food",
+      "friendliness"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#D9B48F",
+        "common_name": "beige",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#4A2E1A",
+        "common_name": "brown",
+        "usage": "text"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#F5C6A5",
+        "common_name": "peach",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.8
+  },
+  "style_tags": [
+    "playful",
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "approachable",
+    "fun"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "macarons",
+      "fun",
+      "community"
+    ],
+    "values": [
+      "inclusivity",
+      "joy",
+      "sharing"
+    ],
+    "audience_hint": "young adults and families",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a contrasting color for emphasis",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "playful"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current playful and minimal design trends"
+  },
+  "analysis_timestamp": "2025-11-10T07:29:11.014403Z"
+}

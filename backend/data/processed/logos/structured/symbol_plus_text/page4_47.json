@@ -1,0 +1,102 @@
+{
+  "source_image": "page4_47.jpg",
+  "text_elements": {
+    "primary_text": "몽심당",
+    "secondary_text": "MONG SIM DANG",
+    "language": "Korean",
+    "font_style": "modern serif",
+    "typography_notes": "Readable with clear distinction between characters",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Hexagonal emblem with abstract elements",
+    "category": "emblem",
+    "meanings": [
+      "tradition",
+      "modernity"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#D4AF37",
+        "common_name": "gold",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      },
+      {
+        "hex": "#C0C0C0",
+        "common_name": "silver",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between gold and white",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal",
+    "elegant"
+  ],
+  "tone_descriptors": [
+    "luxury",
+    "traditional",
+    "refined"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "tradition",
+      "quality",
+      "luxury"
+    ],
+    "values": [
+      "heritage",
+      "excellence"
+    ],
+    "audience_hint": "premium consumers",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Small text may be hard to read at smaller sizes",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Increase font size for better readability",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "luxury"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current trends in luxury branding"
+  },
+  "analysis_timestamp": "2025-11-10T06:19:40.261508Z"
+}

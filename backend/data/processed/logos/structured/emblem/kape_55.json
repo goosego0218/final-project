@@ -1,0 +1,76 @@
+{
+  "source_image": "kape_55.jpg",
+  "text_elements": {
+    "primary_text": "모모 키친",
+    "secondary_text": "MOMOKITCHEN",
+    "language": "Korean",
+    "font_style": "sans-serif, rounded",
+    "typography_notes": "Clear and legible",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Two bear faces with kitchen utensils",
+    "category": "emblem",
+    "meanings": [
+      "friendly",
+      "culinary"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#D4AF37",
+        "common_name": "gold",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast with background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "inviting"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "2:3",
+    "balance_notes": "Well-balanced with centered elements",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "kitchen",
+      "friendly",
+      "bears"
+    ],
+    "values": [
+      "hospitality",
+      "warmth"
+    ],
+    "audience_hint": "families, casual diners",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "friendly"
+    ],
+    "score": 0.85,
+    "notes": "Aligns with current trends of simplicity and friendliness"
+  },
+  "analysis_timestamp": "2025-11-10T07:24:45.711703Z"
+}

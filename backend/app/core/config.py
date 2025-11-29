@@ -1,12 +1,8 @@
-# 코어 설정 관리
-# 작성자: 황민준
-# 작성일: 2025-10-28
-# 수정내역
-# - 2025-10-28: 초기 작성
-
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+
 class Settings(BaseSettings):
+    # App
     app_env: str = "local"
     app_name: str = "brand-ai-backend"
     app_version: str = "0.0.1"
@@ -17,11 +13,18 @@ class Settings(BaseSettings):
     fast_openai_model: str = "gpt-4o-mini"
     openai_embedding_model: str = "text-embedding-3-small"
     openai_temperature: float = 0.0
-    
-    langsmith_tracing: bool
-    langsmith_endpoint: str
-    langsmith_api_key: str
-    langsmith_project: str
+
+    # LangSmith
+    langsmith_tracing: bool = False
+    langsmith_endpoint: str = ""
+    langsmith_api_key: str = ""
+    langsmith_project: str = ""
+
+    # Google GenAI
+    google_genai_project: str = ""
+    google_genai_location: str = ""
+    google_genai_model: str = "gemini-3-pro-image-preview"
+    google_genai_api_key: str = ""
 
     # Oracle
     oracle_user: str = ""
@@ -30,7 +33,7 @@ class Settings(BaseSettings):
     oracle_schema: str = ""
 
     # JWT
-    jwt_secret_key: str = "" 
+    jwt_secret_key: str = ""
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
     
@@ -38,11 +41,11 @@ class Settings(BaseSettings):
     encryption_key: str = ""  # Base64 인코딩된 32바이트(256-bit) 키 (선택적, 없으면 jwt_secret_key 기반으로 생성)
 
     # Trend / RAG / Search
-    tavily_api_key: str = ""        
+    tavily_api_key: str = ""
     jina_api_key: str = ""
-    jina_model: str = ""  
-    vector_store_dir: str = "vector_store/chroma_db"  # 상대 경로 (프로젝트 루트 기준)
-    vector_store_collection: str = "RAG_md"            # 기본 컬렉션 이름
+    jina_model: str = ""
+    vector_store_dir: str = "vector_store/chroma_db"
+    vector_store_collection: str = "RAG_md"
 
     # File Server
     file_server_url: str = "https://kr.object.ncloudstorage.com/aissemble"  # 파일 서버 기본 URL
@@ -86,9 +89,8 @@ class Settings(BaseSettings):
     safeguard_server_url: str = ""  # GPU 서버 URL (예: "http://gpu-server:8001")
 
     model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        extra="forbid",
+        env_file=".env", env_file_encoding="utf-8", extra="ignore"
     )
+
 
 settings = Settings()

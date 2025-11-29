@@ -1,0 +1,86 @@
+{
+  "source_image": "bbang_116.jpg",
+  "text_elements": {
+    "primary_text": "열린제빵소",
+    "secondary_text": "Open bakery",
+    "language": "Korean",
+    "font_style": "Sans-serif for Korean, script for English",
+    "typography_notes": "Readable with a friendly and approachable style",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Thumbs up with leaves and a smiling face",
+    "category": "abstract",
+    "meanings": [
+      "approval",
+      "nature",
+      "happiness"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#A67C52",
+        "common_name": "brown",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast against the white background",
+    "confidence": 0.8
+  },
+  "style_tags": [
+    "modern",
+    "friendly",
+    "organic"
+  ],
+  "tone_descriptors": [
+    "approachable",
+    "natural",
+    "positive"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "3:4",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space for clarity",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "bakery",
+      "open",
+      "friendly"
+    ],
+    "values": [
+      "community",
+      "nature",
+      "positivity"
+    ],
+    "audience_hint": "general public, families",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Introduce a secondary color for depth",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "organic"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with trends favoring simplicity and nature-inspired designs"
+  },
+  "analysis_timestamp": "2025-11-10T07:05:54.108013Z"
+}

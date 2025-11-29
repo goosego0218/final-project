@@ -1,0 +1,89 @@
+{
+  "source_image": "008_jejusanyangmogjang.jpg",
+  "text_elements": {
+    "primary_text": "제주산양목장",
+    "secondary_text": "Jeju Mountain Goat Green Land",
+    "language": "Korean",
+    "font_style": "bold sans-serif",
+    "typography_notes": "The text is clear and legible with a bold style that stands out.",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "A silhouette of a goat with sun rays behind it.",
+    "category": "emblem",
+    "meanings": [
+      "nature",
+      "agriculture",
+      "livestock"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#00693E",
+        "common_name": "dark green",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "The dark green provides good contrast against a white background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "traditional",
+    "agricultural"
+  ],
+  "tone_descriptors": [
+    "natural",
+    "trustworthy"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "3:4",
+    "balance_notes": "The logo is well-balanced with the text and symbol centered.",
+    "spacing_notes": "Adequate white space around the elements enhances readability.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "nature",
+      "goat",
+      "Jeju"
+    ],
+    "values": [
+      "sustainability",
+      "local produce"
+    ],
+    "audience_hint": "consumers interested in natural and local products",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "color",
+      "description": "Limited color palette may not stand out in all contexts.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Introduce a secondary color for more vibrancy.",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "retro",
+      "organic"
+    ],
+    "score": 0.8,
+    "notes": "The logo aligns with trends favoring natural and organic themes."
+  },
+  "analysis_timestamp": "2025-11-10T04:27:52.282245Z"
+}

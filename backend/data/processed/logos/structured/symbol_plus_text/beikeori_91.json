@@ -1,0 +1,89 @@
+{
+  "source_image": "beikeori_91.jpg",
+  "text_elements": {
+    "primary_text": "해오름당",
+    "secondary_text": null,
+    "language": "Korean",
+    "font_style": "handwritten",
+    "typography_notes": "The text is clear and legible with a casual, friendly style.",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "A stylized sun with rays and two dots resembling eyes.",
+    "category": "abstract",
+    "meanings": [
+      "sunrise",
+      "new beginnings",
+      "optimism"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "High contrast between black and white ensures visibility.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "minimal",
+    "playful"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "approachable"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "The design is well-balanced with equal emphasis on text and symbol.",
+    "spacing_notes": "Adequate spacing around elements enhances readability.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "sunrise",
+      "beginning",
+      "optimism"
+    ],
+    "values": [
+      "positivity",
+      "growth"
+    ],
+    "audience_hint": "general public",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for more depth.",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "playful"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with current trends favoring simplicity and friendliness."
+  },
+  "analysis_timestamp": "2025-11-10T07:02:08.409756Z"
+}

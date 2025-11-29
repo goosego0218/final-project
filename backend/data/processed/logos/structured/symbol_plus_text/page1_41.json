@@ -1,0 +1,87 @@
+{
+  "source_image": "page1_41.jpg",
+  "text_elements": {
+    "primary_text": "우공탄 생갈비",
+    "secondary_text": "한우 전문점, 울산 본점",
+    "language": "Korean",
+    "font_style": "traditional serif",
+    "typography_notes": "Clear and legible with a traditional aesthetic",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Abstract emblem with stylized elements",
+    "category": "abstract",
+    "meanings": [
+      "tradition",
+      "heritage"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#D94F3D",
+        "common_name": "red",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "text"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between red and black elements",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "traditional",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "authentic",
+    "cultural"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "3:4",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "tradition",
+      "quality",
+      "authenticity"
+    ],
+    "values": [
+      "heritage",
+      "excellence"
+    ],
+    "audience_hint": "cultural enthusiasts, food lovers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "traditional",
+      "minimal"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with trends favoring authenticity and minimalism"
+  },
+  "analysis_timestamp": "2025-11-10T05:47:42.527330Z"
+}

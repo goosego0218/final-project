@@ -1,0 +1,95 @@
+{
+  "source_image": "022_badajum.jpg",
+  "text_elements": {
+    "primary_text": "바다흠",
+    "secondary_text": "바다",
+    "language": "Korean",
+    "font_style": "brush script",
+    "typography_notes": "The text is stylized with a brush effect, enhancing cultural authenticity.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Red seal with stylized fish",
+    "category": "emblem",
+    "meanings": [
+      "traditional",
+      "seal",
+      "authenticity"
+    ],
+    "confidence": 0.85
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FF0000",
+        "common_name": "red",
+        "usage": "accent"
+      }
+    ],
+    "contrast_notes": "Good contrast between black and red elements.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "traditional",
+    "cultural"
+  ],
+  "tone_descriptors": [
+    "authentic",
+    "cultural"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with central text and right-aligned emblem.",
+    "spacing_notes": "Adequate spacing around elements for clarity.",
+    "confidence": 0.85
+  },
+  "brand_message": {
+    "keywords": [
+      "authenticity",
+      "tradition",
+      "culture"
+    ],
+    "values": [
+      "heritage",
+      "quality"
+    ],
+    "audience_hint": "culturally interested consumers",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Brush script may reduce legibility at small sizes.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Consider a slightly bolder font for smaller applications.",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "traditional",
+      "cultural"
+    ],
+    "score": 0.8,
+    "notes": "Aligns well with trends emphasizing cultural authenticity."
+  },
+  "analysis_timestamp": "2025-11-10T04:56:55.723603Z"
+}

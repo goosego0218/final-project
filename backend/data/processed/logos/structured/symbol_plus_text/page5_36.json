@@ -1,0 +1,88 @@
+{
+  "source_image": "page5_36.jpg",
+  "text_elements": {
+    "primary_text": "Miniby_yun",
+    "secondary_text": "미니바이윤",
+    "language": "Latin and Korean",
+    "font_style": "serif with playful elements",
+    "typography_notes": "Readable with decorative elements",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "hanger integrated with text",
+    "category": "abstract",
+    "meanings": [
+      "fashion",
+      "clothing"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#D3D3D3",
+        "common_name": "light gray",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Subtle contrast with background",
+    "confidence": 0.85
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "elegant",
+    "friendly"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "fashion",
+      "style",
+      "elegance"
+    ],
+    "values": [
+      "quality",
+      "modernity"
+    ],
+    "audience_hint": "fashion-conscious individuals",
+    "confidence": 0.9
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [
+    {
+      "type": "contrast",
+      "description": "Low contrast with background",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "contrast",
+      "suggestion": "Increase text color contrast",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "minimal",
+      "modern"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current minimalistic design trends"
+  },
+  "analysis_timestamp": "2025-11-10T06:26:51.309879Z"
+}

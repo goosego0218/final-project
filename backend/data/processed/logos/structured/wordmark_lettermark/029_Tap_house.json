@@ -1,0 +1,88 @@
+{
+  "source_image": "029_Tap_house.jpg",
+  "text_elements": {
+    "primary_text": "Taphouse",
+    "secondary_text": "Pub & Eatery",
+    "language": "Latin",
+    "font_style": "script",
+    "typography_notes": "The script font is decorative but remains legible.",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Fork and knife integrated into the lettering",
+    "category": "emblem",
+    "meanings": [
+      "dining",
+      "hospitality"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#C8102E",
+        "common_name": "red",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "The red color stands out well against a white background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "rustic",
+    "vintage"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "casual"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "4:3",
+    "balance_notes": "The logo is well-balanced with text and symbol integration.",
+    "spacing_notes": "Adequate spacing between elements ensures readability.",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "dining",
+      "community",
+      "casual"
+    ],
+    "values": [
+      "hospitality",
+      "comfort"
+    ],
+    "audience_hint": "casual diners",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Script font may be hard to read at small sizes.",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "legibility",
+      "suggestion": "Consider a simpler font for smaller applications.",
+      "priority": "high"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "vintage",
+      "handcrafted"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends favoring handcrafted and vintage aesthetics."
+  },
+  "analysis_timestamp": "2025-11-10T05:08:21.618391Z"
+}

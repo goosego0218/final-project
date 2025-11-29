@@ -1,0 +1,96 @@
+{
+  "source_image": "keopi_44.jpg",
+  "text_elements": {
+    "primary_text": "COFFEE BRO",
+    "secondary_text": "ENJOY YOUR COFFEE TRAVEL WITH",
+    "language": "Latin",
+    "font_style": "Bold serif",
+    "typography_notes": "Readable with a vintage feel",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Two faces with mountains, trees, and an airplane",
+    "category": "emblem",
+    "meanings": [
+      "travel",
+      "adventure",
+      "friendship"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#4A5D23",
+        "common_name": "dark green",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#F5F0D7",
+        "common_name": "beige",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "vintage",
+    "adventure"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "adventurous"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "4:5",
+    "balance_notes": "Centered composition with balanced elements",
+    "spacing_notes": "Adequate spacing around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "coffee",
+      "travel",
+      "friendship"
+    ],
+    "values": [
+      "adventure",
+      "community"
+    ],
+    "audience_hint": "young travelers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "symbol",
+      "description": "Complexity in emblem details",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "simplicity",
+      "suggestion": "Simplify emblem details for clarity",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "retro",
+      "adventure"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current retro and travel trends"
+  },
+  "analysis_timestamp": "2025-11-10T07:48:07.913199Z"
+}

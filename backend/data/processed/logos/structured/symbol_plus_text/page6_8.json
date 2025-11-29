@@ -1,0 +1,86 @@
+{
+  "source_image": "page6_8.jpg",
+  "text_elements": {
+    "primary_text": "PaRaPaRa",
+    "secondary_text": "파라파라컴퍼니",
+    "language": "Latin and Hangul",
+    "font_style": "modern sans-serif",
+    "typography_notes": "Readable with distinct capitalization",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Circular emblem with stylized letters P and R",
+    "category": "lettermark",
+    "meanings": [
+      "unity",
+      "balance"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#00A8A8",
+        "common_name": "teal",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#FBB03B",
+        "common_name": "orange",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between teal and orange",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "friendly",
+    "dynamic"
+  ],
+  "layout": {
+    "orientation": "vertical",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with equal weight on symbol and text",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "innovation",
+      "creativity"
+    ],
+    "values": [
+      "modernity",
+      "approachability"
+    ],
+    "audience_hint": "young professionals",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary color for depth",
+      "priority": "low"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimalist"
+    ],
+    "score": 0.85,
+    "notes": "Aligns well with current minimalist design trends"
+  },
+  "analysis_timestamp": "2025-11-10T06:41:10.261207Z"
+}

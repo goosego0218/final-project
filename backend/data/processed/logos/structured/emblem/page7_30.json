@@ -1,0 +1,88 @@
+{
+  "source_image": "page7_30.jpg",
+  "text_elements": {
+    "primary_text": "SULFURBEEF",
+    "secondary_text": "설퍼비프",
+    "language": "Latin and Korean",
+    "font_style": "Bold sans-serif",
+    "typography_notes": "Text is clear and legible",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Stylized cow head with stars",
+    "category": "emblem",
+    "meanings": [
+      "strength",
+      "quality"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#8B0000",
+        "common_name": "dark red",
+        "usage": "foreground"
+      },
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "background"
+      }
+    ],
+    "secondary": [],
+    "contrast_notes": "Good contrast between text and background",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "bold"
+  ],
+  "tone_descriptors": [
+    "strong",
+    "premium"
+  ],
+  "layout": {
+    "orientation": "square",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Well-balanced with central alignment",
+    "spacing_notes": "Adequate white space around elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "beef",
+      "premium",
+      "quality"
+    ],
+    "values": [
+      "strength",
+      "tradition"
+    ],
+    "audience_hint": "meat consumers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "medium",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary accent color",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "bold"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with current trends of bold and simple designs"
+  },
+  "analysis_timestamp": "2025-11-10T06:47:39.291150Z"
+}

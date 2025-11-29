@@ -1,0 +1,95 @@
+{
+  "source_image": "beikeori_133.jpg",
+  "text_elements": {
+    "primary_text": "PANE DOLCHE",
+    "secondary_text": "Since 2019\nEvery Fresh",
+    "language": "Latin",
+    "font_style": "Bold serif with script accents",
+    "typography_notes": "Readable with decorative elements",
+    "confidence": 0.95
+  },
+  "symbol": {
+    "description": "Bread loaf icon with rolling pins",
+    "category": "emblem",
+    "meanings": [
+      "bakery",
+      "freshness"
+    ],
+    "confidence": 0.9
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "foreground"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#000000",
+        "common_name": "black",
+        "usage": "background"
+      }
+    ],
+    "contrast_notes": "High contrast for readability",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "vintage",
+    "classic"
+  ],
+  "tone_descriptors": [
+    "traditional",
+    "authentic"
+  ],
+  "layout": {
+    "orientation": "square",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Centered with symmetrical elements",
+    "spacing_notes": "Adequate spacing between elements",
+    "confidence": 0.9
+  },
+  "brand_message": {
+    "keywords": [
+      "fresh",
+      "bakery",
+      "artisan"
+    ],
+    "values": [
+      "quality",
+      "tradition"
+    ],
+    "audience_hint": "bakery customers",
+    "confidence": 0.85
+  },
+  "detected_channels": [
+    "digital",
+    "print",
+    "packaging"
+  ],
+  "complexity_rating": "medium",
+  "issues": [
+    {
+      "type": "legibility",
+      "description": "Script font may be hard to read at small sizes",
+      "severity": "medium"
+    }
+  ],
+  "improvement_cues": [
+    {
+      "focus": "typography",
+      "suggestion": "Consider simplifying script font",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "retro",
+      "classic"
+    ],
+    "score": 0.8,
+    "notes": "Aligns with vintage and traditional design trends"
+  },
+  "analysis_timestamp": "2025-11-10T06:53:30.400231Z"
+}

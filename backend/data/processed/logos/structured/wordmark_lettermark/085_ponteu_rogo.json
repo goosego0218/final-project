@@ -1,0 +1,87 @@
+{
+  "source_image": "085_ponteu_rogo.jpg",
+  "text_elements": {
+    "primary_text": "AVIO",
+    "secondary_text": null,
+    "language": "Latin",
+    "font_style": "italic, sans-serif",
+    "typography_notes": "The text is stylized with a slant, enhancing a sense of motion.",
+    "confidence": 0.9
+  },
+  "symbol": {
+    "description": "Stylized text with a dot over the 'I'.",
+    "category": "lettermark",
+    "meanings": [
+      "speed",
+      "modernity"
+    ],
+    "confidence": 0.8
+  },
+  "color_palette": {
+    "primary": [
+      {
+        "hex": "#00A9B7",
+        "common_name": "teal",
+        "usage": "background"
+      }
+    ],
+    "secondary": [
+      {
+        "hex": "#FFFFFF",
+        "common_name": "white",
+        "usage": "foreground"
+      }
+    ],
+    "contrast_notes": "Good contrast between text and background.",
+    "confidence": 0.9
+  },
+  "style_tags": [
+    "modern",
+    "minimal"
+  ],
+  "tone_descriptors": [
+    "dynamic",
+    "innovative"
+  ],
+  "layout": {
+    "orientation": "horizontal",
+    "aspect_ratio_estimate": "1:1",
+    "balance_notes": "Centrally aligned text provides balance.",
+    "spacing_notes": "Adequate white space around the text.",
+    "confidence": 0.8
+  },
+  "brand_message": {
+    "keywords": [
+      "technology",
+      "innovation"
+    ],
+    "values": [
+      "speed",
+      "efficiency"
+    ],
+    "audience_hint": "tech-savvy individuals",
+    "confidence": 0.8
+  },
+  "detected_channels": [
+    "digital",
+    "print"
+  ],
+  "complexity_rating": "low",
+  "issues": [],
+  "improvement_cues": [
+    {
+      "focus": "color",
+      "suggestion": "Consider adding a secondary accent color for depth.",
+      "priority": "medium"
+    }
+  ],
+  "trend_alignment": {
+    "tags": [
+      "modern",
+      "minimal"
+    ],
+    "score": 0.9,
+    "notes": "Aligns well with current trends in simplicity and modern design."
+  },
+  "analysis_timestamp": "2025-11-10T05:38:26.189316Z"
+}
