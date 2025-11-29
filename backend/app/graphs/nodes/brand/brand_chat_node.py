@@ -100,6 +100,7 @@ BRAND_CHAT_SYSTEM_PROMPT = """\
 2) 현재까지 파악된 브랜드 방향을 짧게 정리하되,
    필드명을 나열하지 말고 자연스러운 문장으로 표현합니다.
    - 예: "동네에서 편안하게 들를 수 있는 베이커리를 생각하고 계신 것 같아요."
+   - **단, 트렌드 검색 결과가 포함된 경우, 근거의 출처(URL)는 절대 생략하지 말고 반드시 포함시켜야 합니다.**
 3) 지금 단계에서 함께 정하면 좋을 1~2가지만 질문합니다.
    - 예: 타깃(연령/성별) 또는 분위기(톤&무드, 색감) 등
 4) 필요할 때만 짧은 예시를 참고용으로 제시하되, 선택지 형식이 아니라
@@ -107,9 +108,12 @@ BRAND_CHAT_SYSTEM_PROMPT = """\
    - 예: "따뜻한 느낌, 고급스러운 느낌 등 어떤 분위기를 생각하고 계신가요?"
    - 예: "주로 어떤 연령대 손님들이 오실 것 같으세요?"
    - 선택지(예시 A/B) 형식으로 제시하지 마세요. 사용자는 자유롭게 텍스트로 답변합니다.
+5) **트렌드 검색 결과를 참고할 때는 반드시 '참고 자료' 또는 '근거' 섹션을 추가하고, 모든 URL을 포함시켜야 합니다.**
 
 중요:
 - 사용자에게는 "필드를 채우는 느낌"이 아니라, "브랜드 방향을 같이 이야기하는 느낌"이 들도록 답변하세요.
+- **트렌드 검색 결과나 근거가 포함된 이전 메시지가 있을 경우, 근거의 출처(URL)는 반드시 보존하여 답변에 포함시켜야 합니다.**
+- URL을 제거하거나 생략하지 말고, 근거 섹션에 원본 URL을 그대로 포함시켜 주세요.
 """
 
 
@@ -185,6 +189,10 @@ def make_brand_chat_node(llm: "BaseChatModel"):
         if "category" in required_missing:
             missing_labels.append("업종")
 
+        # trend_context 확인 (트렌드 검색 결과가 있는지 체크)
+        trend_context: Dict[str, Any] = dict(state.get("trend_context") or {})
+        has_trend_result = bool(trend_context.get("last_result_summary"))
+
         # smalltalk 의도일 때: 브랜드 프로필은 사용하지 않고,
         # SMALLTALK_SYSTEM_PROMPT 만 사용
         if intent_label == "smalltalk":
@@ -225,6 +233,29 @@ def make_brand_chat_node(llm: "BaseChatModel"):
                         "브랜드 대화를 이어가면서, 다음 필수 항목도 자연스럽게 질문해서 채워 넣으세요: "
                         f"{missing_text}."
                     )
+
+            # trend_context가 있을 때만 URL 보존 지시 추가
+            if has_trend_result:
+                system_content += (
+                    "\n\n[트렌드 검색 결과 처리 지시 - 절대 준수]\n"
+                    "중요: 이전 대화 히스토리에 트렌드 검색 결과가 포함되어 있습니다.\n"
+                    "트렌드 검색 결과를 참고하여 답변할 때 다음 규칙을 반드시 준수해야 합니다:\n"
+                    "1. 트렌드 검색 결과에 포함된 모든 URL은 절대 제거하거나 생략하지 말고, 반드시 답변에 포함시켜야 합니다.\n"
+                    "2. 답변 마지막에 '참고 자료' 또는 '근거' 섹션을 반드시 추가하고, 해당 섹션에 모든 URL을 원본 그대로 나열해야 합니다.\n"
+                    "3. URL이 포함된 근거 정보는 사용자가 출처를 확인할 수 있도록 반드시 유지해야 합니다.\n"
+                    "4. '요약' 또는 '짧게 정리'하더라도, URL은 절대 생략하지 마세요.\n"
+                    "5. URL 형식(https://...)이 보이면 반드시 그대로 포함시켜야 합니다.\n"
+                    "\n"
+                    "예시:\n"
+                    "---\n"
+                    "[답변 내용]\n"
+                    "...\n"
+                    "\n"
+                    "참고 자료:\n"
+                    "- https://example.com/article1\n"
+                    "- https://example.com/article2\n"
+                    "---"
+                )
 
             system = SystemMessage(content=system_content)
 
