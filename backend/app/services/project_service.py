@@ -2,6 +2,7 @@
 # 작성일: 2025-11-18
 # 수정내역
 # - 2025-11-18: 초기 작성
+# - 2025-12-XX: 전략 1 적용 - relationship 제거, 명시적 join 사용
 
 from sqlalchemy.orm import Session
 
@@ -27,7 +28,8 @@ def create_project_group(
     )
     db.add(obj)
     db.commit()
-    db.refresh(obj)
+    # refresh 제거: commit 후 이미 obj에 grp_id 등이 설정되어 있음
+    # 불필요한 relationship 로딩 방지
     return obj
 
 def load_project_group_entity(
@@ -100,7 +102,7 @@ def delete_project_group(
     # del_yn을 'Y'로 변경
     project.del_yn = "Y"
     db.commit()
-    db.refresh(project)
+    # refresh 제거: 불필요한 relationship 로딩 방지
     
     return project
 
@@ -237,8 +239,8 @@ def persist_brand_project(
 
     db.add(info)
     db.commit()
-    db.refresh(group)
-
+    # refresh 제거: 불필요한 relationship 로딩 방지
+    
     return group
 
 
@@ -271,6 +273,6 @@ def update_project_group(
         project.grp_desc = grp_desc
     
     db.commit()
-    db.refresh(project)
+    # refresh 제거: 불필요한 relationship 로딩 방지
     
     return project

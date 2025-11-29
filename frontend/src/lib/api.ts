@@ -484,3 +484,15 @@ export async function getLogoList(projectId: number): Promise<LogoListItem[]> {
     method: 'GET',
   });
 }
+
+// 로고 삭제 API 호출
+export interface DeleteLogoResponse {
+  success: boolean;
+  message: string;
+}
+
+export async function deleteLogo(prodId: number): Promise<DeleteLogoResponse> {
+  return apiRequest<DeleteLogoResponse>(`/logo/${prodId}`, {
+    method: 'DELETE',
+  });
+}

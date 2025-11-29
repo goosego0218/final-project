@@ -2,9 +2,10 @@
 # 작성일: 2025-11-28
 # 수정내역
 # - 2025-11-28: 초기 작성
+# - 2025-12-XX: 전략 1 적용 - relationship 제거, 명시적 join 사용
 
 from sqlalchemy.orm import Session
-from typing import Optional
+from typing import Optional, Tuple
 from datetime import datetime
 
 from app.models.project import Comment, GenerationProd
@@ -54,8 +55,10 @@ def create_comment(
     )
     
     db.add(comment)
-    db.commit()
+    db.flush()  # flush로 DB에 반영 (트리거 실행)
+    # 트리거로 comment_id가 생성되므로 refresh 필요
     db.refresh(comment)
+    db.commit()
     
     return comment
 
@@ -65,9 +68,10 @@ def get_comments_by_prod_id(
     prod_id: int,
     skip: int = 0,
     limit: int = 100,
-) -> list[Comment]:
+) -> list[Tuple[Comment, UserInfo]]:
     """
     생성물의 댓글 목록 조회 (최신순)
+    - UserInfo와 join하여 nickname 포함
     
     Args:
         db: SQLAlchemy Session
@@ -76,10 +80,11 @@ def get_comments_by_prod_id(
         limit: 최대 개수
         
     Returns:
-        list[Comment]: 댓글 목록
+        list[Tuple[Comment, UserInfo]]: (댓글, 유저정보) 튜플 리스트
     """
     return (
-        db.query(Comment)
+        db.query(Comment, UserInfo)
+        .join(UserInfo, Comment.user_id == UserInfo.id)
         .filter(
             Comment.prod_id == prod_id,
             Comment.del_yn == 'N',

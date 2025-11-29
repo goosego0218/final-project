@@ -3,6 +3,7 @@
 # 작성일: 2025-11-17
 # 수정내역
 # - 2025-11-17: 초기 작성
+# - 2025-12-XX: 전략 1 적용 - relationship 제거
 
 from typing import Optional
 
@@ -58,26 +59,11 @@ def get_optional_user(
     if user_id is None:
         return None
 
-    user = db.get(UserInfo, int(user_id))
-    return user
-
-TEST_LOGIN_ID = "test"
-
-def _get_test_user(db: Session) -> UserInfo:
-    """
-    개발용 헬퍼: user_info에서 login_id='test' 계정을 찾아서 반환.
-    없으면 500 에러.
-    """
     user = (
         db.query(UserInfo)
-        .filter(UserInfo.login_id == TEST_LOGIN_ID)
+        .filter(UserInfo.id == int(user_id))
         .first()
     )
-    if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="테스트 계정 'test'가 존재하지 않습니다. 먼저 user_info에 test 계정을 생성하세요.",
-        )
     return user
 
 def get_current_user(
@@ -106,7 +92,11 @@ def get_current_user(
             detail="유효하지 않은 토큰입니다.",
         )
 
-    user = db.get(UserInfo, int(user_id))
+    user = (
+        db.query(UserInfo)
+        .filter(UserInfo.id == int(user_id))
+        .first()
+    )
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

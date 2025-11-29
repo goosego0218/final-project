@@ -15,7 +15,7 @@ from sqlalchemy import (
     ForeignKey,
     func,
 )
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.orm import Base
 
@@ -46,19 +46,6 @@ class Role(Base):
         nullable=False,
         default="N",
         comment="삭제여부",
-    )
-
-    # user_info와 1:N
-    users: Mapped[list["UserInfo"]] = relationship(
-        back_populates="role",
-        lazy="selectin",
-    )
-
-    # role_menu와 1:N (권한별 메뉴 매핑)
-    role_menus: Mapped[list["RoleMenu"]] = relationship(
-        back_populates="role",
-        cascade="all, delete-orphan",
-        lazy="selectin",
     )
 
 
@@ -118,49 +105,6 @@ class UserInfo(Base):
         comment="권한ID",
     )
 
-    # 권한 관계 (N:1)
-    role: Mapped["Role"] = relationship(
-        back_populates="users",
-        lazy="select",
-    )
-
-    # 이 유저가 생성한 프로젝트 그룹들 (1:N)
-    project_groups: Mapped[list["ProdGroup"]] = relationship(
-        "ProdGroup",
-        foreign_keys="[ProdGroup.creator_id]",
-        back_populates="creator",
-        lazy="selectin",
-    )
-
-    # 이 유저가 생성한 생성물들 (1:N)
-    created_products: Mapped[list["GenerationProd"]] = relationship(
-        "GenerationProd",
-        foreign_keys="[GenerationProd.create_user]",
-        lazy="selectin",
-    )
-
-    # 이 유저가 수정한 생성물들 (1:N)
-    updated_products: Mapped[list["GenerationProd"]] = relationship(
-        "GenerationProd",
-        foreign_keys="[GenerationProd.update_user]",
-        lazy="selectin",
-    )
-
-    social_connections: Mapped[list["SocialConnection"]] = relationship(
-        "SocialConnection",
-        back_populates="user",
-        lazy="selectin",
-        cascade="all, delete-orphan",
-    )
-    
-    # 이 유저가 작성한 댓글들 (1:N)
-    comments: Mapped[list["Comment"]] = relationship(
-        "Comment",
-        foreign_keys="[Comment.user_id]",
-        lazy="selectin",
-        cascade="all, delete-orphan",
-    )
-
 class Menu(Base):
     """
     메뉴 테이블 (menu)
@@ -199,13 +143,6 @@ class Menu(Base):
         comment="삭제여부",
     )
 
-    # role_menu와 1:N (이 메뉴를 쓰는 권한들)
-    role_menus: Mapped[list["RoleMenu"]] = relationship(
-        back_populates="menu",
-        cascade="all, delete-orphan",
-        lazy="selectin",
-    )
-
 
 class RoleMenu(Base):
     """
@@ -225,14 +162,4 @@ class RoleMenu(Base):
         ForeignKey("menu.menu_id"),
         primary_key=True,
         comment="메뉴ID",
-    )
-
-    # 각각 role_mst, menu 쪽과 N:1
-    role: Mapped[Role] = relationship(
-        back_populates="role_menus",
-        lazy="select",
-    )
-    menu: Mapped[Menu] = relationship(
-        back_populates="role_menus",
-        lazy="select",
     )

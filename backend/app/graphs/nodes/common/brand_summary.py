@@ -26,7 +26,7 @@ def summarize_brand_profile_with_llm(
     - 프론트에서 시스템 메시지 스타일로 표시 가능
     """
     from langchain_core.messages import SystemMessage, HumanMessage
-    from app.llm.client import get_chat_model
+    from app.llm.client import get_fast_chat_model
     
     # 브랜드 프로필을 텍스트로 포맷팅
     # 브랜드명과 업종은 무조건 있음
@@ -60,7 +60,7 @@ def summarize_brand_profile_with_llm(
     profile_text = "\n".join(profile_lines)
     
     # LLM을 사용해 요약 생성
-    llm = get_chat_model()
+    llm = get_fast_chat_model()
     
     # 공통 부분: 브랜드 정보 구조화 및 소개
     common_prompt = """

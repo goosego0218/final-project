@@ -10,7 +10,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import String, Integer, ForeignKey, DateTime, text
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.orm import Base
 
@@ -86,10 +86,4 @@ class SocialConnection(Base):
         nullable=False,
         server_default=text("'N'"),
         comment="삭제여부",
-    )
-
-    # UserInfo와의 관계
-    user: Mapped["UserInfo"] = relationship(
-        back_populates="social_connections",
-        lazy="select",
     )

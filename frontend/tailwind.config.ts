@@ -57,6 +57,9 @@ export default {
           DEFAULT: "hsl(var(--studio-chat-panel))",
         },
       },
+      fontFamily: {
+        'handwriting': ['Kaushan Script', 'cursive'],
+      },
       fontSize: {
         'hero': ['4.5rem', { lineHeight: '1.1', letterSpacing: '-0.02em', fontWeight: '700' }],
         'section-title': ['3rem', { lineHeight: '1.2', letterSpacing: '-0.01em', fontWeight: '600' }],

@@ -45,7 +45,8 @@ def create_user(db: Session, user_in: UserCreate) -> UserInfo:
     # 4) DB 반영
     db.add(user)
     db.commit()
-    db.refresh(user)
+    # refresh 제거: commit 후 이미 user 객체에 id 등이 설정되어 있음
+    # 불필요한 relationship 로딩 방지
 
     return user
 

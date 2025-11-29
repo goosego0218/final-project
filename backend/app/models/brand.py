@@ -1,5 +1,4 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
-from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from app.db.orm import Base
@@ -36,10 +35,4 @@ class BrandInfo(Base):
         server_default=func.sysdate(),
         onupdate=func.sysdate(),
         nullable=False,
-    )
-
-    group = relationship(
-        "ProdGroup",
-        back_populates="brand_info",
-        uselist=False,
     )
