@@ -110,10 +110,10 @@ INSERT INTO menu (menu_nm, up_menu_id, menu_path, del_yn, menu_order)
 VALUES ('내 프로젝트',    NULL, '/projects',        'N', 4);
 
 INSERT INTO menu (menu_nm, up_menu_id, menu_path, del_yn, menu_order)
-VALUES ('플랜 관리',      NULL, '/plans',           'N', 5);
+VALUES ('숏폼 리포트',    NULL, '/shortsReport',    'N', 5);
 
 INSERT INTO menu (menu_nm, up_menu_id, menu_path, del_yn, menu_order)
-VALUES ('숏폼 리포트',    NULL, '/shortsReport',    'N', 6);
+VALUES ('플랜 관리',      NULL, '/plans',           'N', 6);
 
 ------------------------------------------------------------------------------------------------------------------------
 -- role_menu 테이블
@@ -461,3 +461,154 @@ COMMENT ON COLUMN comments.update_dt  IS '수정일';
 COMMENT ON COLUMN comments.del_yn     IS '삭제여부';
 
 ------------------------------------------------------------------------------------------------------------------------
+
+-- oauth_identity 테이블 (구글 로그인)
+CREATE TABLE oauth_identity (
+    oauth_id         NUMBER        NOT NULL,          -- PK
+    user_id          NUMBER        NOT NULL,          -- FK → user_info.id
+    provider         VARCHAR2(50)  NOT NULL,          -- 'google'
+    provider_user_id VARCHAR2(255) NOT NULL,          -- Google sub (고유 ID)
+    email            VARCHAR2(255) NULL,              -- 구글 이메일
+    create_dt        DATE DEFAULT SYSDATE NOT NULL,   -- 생성일
+    update_dt        DATE DEFAULT SYSDATE NOT NULL,   -- 수정일
+    del_yn           CHAR(1) DEFAULT 'N' NOT NULL,    -- 삭제여부
+    CONSTRAINT pk_oauth_identity PRIMARY KEY (oauth_id),
+    CONSTRAINT fk_oauth_identity_user
+        FOREIGN KEY (user_id) REFERENCES user_info(id)
+);
+
+CREATE SEQUENCE seq_oauth_identity
+    START WITH 1
+    INCREMENT BY 1
+    NOCACHE
+    NOCYCLE;
+
+CREATE OR REPLACE TRIGGER trg_oauth_identity_bi
+BEFORE INSERT ON oauth_identity
+FOR EACH ROW
+BEGIN
+    IF :NEW.oauth_id IS NULL THEN
+        :NEW.oauth_id := seq_oauth_identity.NEXTVAL;
+    END IF;
+END;
+
+CREATE OR REPLACE TRIGGER trg_oauth_identity_bu
+BEFORE UPDATE ON oauth_identity
+FOR EACH ROW
+BEGIN
+    :NEW.update_dt := SYSDATE;
+END;
+
+COMMENT ON TABLE oauth_identity IS 'OAuth 인증 정보 테이블 (구글 로그인)';
+
+COMMENT ON COLUMN oauth_identity.oauth_id         IS 'OAuth 인증 ID';
+COMMENT ON COLUMN oauth_identity.user_id          IS '유저번호';
+COMMENT ON COLUMN oauth_identity.provider         IS '제공자 (google)';
+COMMENT ON COLUMN oauth_identity.provider_user_id IS '제공자 사용자 ID (Google sub)';
+COMMENT ON COLUMN oauth_identity.email            IS '구글 이메일';
+COMMENT ON COLUMN oauth_identity.create_dt        IS '생성일';
+COMMENT ON COLUMN oauth_identity.update_dt        IS '수정일';
+COMMENT ON COLUMN oauth_identity.del_yn           IS '삭제여부';
+
+-- UNIQUE 제약조건: 같은 구글 계정 중복 방지
+ALTER TABLE oauth_identity
+    ADD CONSTRAINT uk_oauth_prov_user
+        UNIQUE (provider, provider_user_id);
+
+------------------------------------------------------------------------------------------------------------------------
+
+-- social_post 테이블 (유튜브, 인스타 업로드)
+CREATE TABLE social_post (
+    post_id            NUMBER          NOT NULL,                 -- PK
+    prod_id            NUMBER          NOT NULL,                 -- 생성물 → generation_prod.prod_id
+    conn_id            NUMBER          NOT NULL,                 -- 연동 계정 → social_connection.conn_id
+    platform           VARCHAR2(50)    NOT NULL,                 -- 'youtube', 'instagram'
+    platform_post_id   VARCHAR2(255)   NULL,                     -- YouTube videoId, 인스타 mediaId
+    platform_url       VARCHAR2(1000)  NULL,                     -- 실제 URL
+    status             VARCHAR2(20)    DEFAULT 'PENDING' NOT NULL,  -- PENDING / SUCCESS / FAIL / DELETED 등
+    error_code         VARCHAR2(100)   NULL,                     -- 실패 시 코드
+    error_message      VARCHAR2(1000)  NULL,                     -- 실패 시 메시지
+    requested_at       DATE            DEFAULT SYSDATE NOT NULL, -- 업로드 요청 시각
+    posted_at          DATE            NULL,                     -- 실제 업로드 완료 시각
+    last_checked_at    DATE            NULL,                     -- 마지막 로그/통계 조회 시각
+    del_yn             CHAR(1)         DEFAULT 'N' NOT NULL,     -- 삭제여부
+    CONSTRAINT pk_social_post PRIMARY KEY (post_id),
+    CONSTRAINT fk_social_post_prod
+        FOREIGN KEY (prod_id) REFERENCES generation_prod(prod_id),
+    CONSTRAINT fk_social_post_conn
+        FOREIGN KEY (conn_id) REFERENCES social_connection(conn_id),
+    CONSTRAINT ck_social_post_status
+        CHECK (status IN ('PENDING', 'SUCCESS', 'FAIL', 'DELETED'))
+);
+
+CREATE SEQUENCE seq_social_post
+    START WITH 1
+    INCREMENT BY 1
+    NOCACHE
+    NOCYCLE;
+
+CREATE OR REPLACE TRIGGER trg_social_post_bi
+BEFORE INSERT ON social_post
+FOR EACH ROW
+BEGIN
+    IF :NEW.post_id IS NULL THEN
+        :NEW.post_id := seq_social_post.NEXTVAL;
+    END IF;
+END;
+
+COMMENT ON TABLE social_post IS '소셜 미디어 게시물 테이블';
+
+COMMENT ON COLUMN social_post.post_id            IS '게시물 ID';
+COMMENT ON COLUMN social_post.prod_id            IS '생성물 번호';
+COMMENT ON COLUMN social_post.conn_id            IS '연동 계정 ID';
+COMMENT ON COLUMN social_post.platform           IS '플랫폼 (youtube, instagram)';
+COMMENT ON COLUMN social_post.platform_post_id   IS '플랫폼 게시물 ID (YouTube videoId, Instagram mediaId)';
+COMMENT ON COLUMN social_post.platform_url       IS '플랫폼 게시물 URL';
+COMMENT ON COLUMN social_post.status             IS '업로드 상태 (PENDING/SUCCESS/FAIL/DELETED)';
+COMMENT ON COLUMN social_post.error_code         IS '실패 시 에러 코드';
+COMMENT ON COLUMN social_post.error_message      IS '실패 시 에러 메시지';
+COMMENT ON COLUMN social_post.requested_at       IS '업로드 요청 시각';
+COMMENT ON COLUMN social_post.posted_at          IS '실제 업로드 완료 시각';
+COMMENT ON COLUMN social_post.last_checked_at    IS '마지막 로그/통계 조회 시각';
+COMMENT ON COLUMN social_post.del_yn             IS '삭제여부';
+
+------------------------------------------------------------------------------------------------------------------------
+
+-- social_post_metric 테이블 (업로드된 쇼츠영상 로그 수집)
+CREATE TABLE social_post_metric (
+    metric_id      NUMBER        NOT NULL,                -- PK
+    post_id        NUMBER        NOT NULL,                -- FK → social_post.post_id
+    captured_at    DATE          DEFAULT SYSDATE NOT NULL,-- 수집 시각
+    view_cnt       NUMBER        DEFAULT 0 NOT NULL,      -- 조회수
+    like_cnt       NUMBER        DEFAULT 0 NOT NULL,      -- 좋아요수
+    comment_cnt    NUMBER        DEFAULT 0 NOT NULL,      -- 댓글수
+    share_cnt      NUMBER        NULL,          -- 공유수 (플랫폼별로 다르므로 NULL 허용)
+    CONSTRAINT pk_social_post_metric PRIMARY KEY (metric_id),
+    CONSTRAINT fk_social_post_metric_post
+        FOREIGN KEY (post_id) REFERENCES social_post(post_id)
+);
+
+CREATE SEQUENCE seq_social_post_metric
+    START WITH 1
+    INCREMENT BY 1
+    NOCACHE
+    NOCYCLE;
+
+CREATE OR REPLACE TRIGGER trg_social_post_metric_bi
+BEFORE INSERT ON social_post_metric
+FOR EACH ROW
+BEGIN
+    IF :NEW.metric_id IS NULL THEN
+        :NEW.metric_id := seq_social_post_metric.NEXTVAL;
+    END IF;
+END;
+
+COMMENT ON TABLE social_post_metric IS '소셜 미디어 게시물 메트릭 테이블';
+
+COMMENT ON COLUMN social_post_metric.metric_id   IS '메트릭 ID';
+COMMENT ON COLUMN social_post_metric.post_id     IS '게시물 ID';
+COMMENT ON COLUMN social_post_metric.captured_at IS '수집 시각';
+COMMENT ON COLUMN social_post_metric.view_cnt    IS '조회수';
+COMMENT ON COLUMN social_post_metric.like_cnt    IS '좋아요수';
+COMMENT ON COLUMN social_post_metric.comment_cnt IS '댓글수';
+COMMENT ON COLUMN social_post_metric.share_cnt   IS '공유수 (플랫폼별로 다르므로 NULL 허용)';
