@@ -569,7 +569,7 @@ const ShortsChatPage = () => {
     if (!isConnected) {
       toast({
         title: "소셜 미디어 연동 필요",
-        description: `${platform === "instagram" ? "Instagram" : "YouTube"} 계정을 먼저 연동해주세요.`,
+        description: `${platform === "instagram" ? "TikTok" : "YouTube"} 계정을 먼저 연동해주세요.`,
         variant: "destructive",
       });
       return;
@@ -652,8 +652,8 @@ const ShortsChatPage = () => {
       }
       
       // 결과 메시지 표시
-      const successPlatforms = uploadResults.filter(r => r.success).map(r => r.platform === "instagram" ? "Instagram" : "YouTube");
-      const failedPlatforms = uploadResults.filter(r => !r.success).map(r => r.platform === "instagram" ? "Instagram" : "YouTube");
+      const successPlatforms = uploadResults.filter(r => r.success).map(r => r.platform === "instagram" ? "TikTok" : "YouTube");
+      const failedPlatforms = uploadResults.filter(r => !r.success).map(r => r.platform === "instagram" ? "TikTok" : "YouTube");
       
       if (successPlatforms.length > 0 && failedPlatforms.length === 0) {
         toast({
@@ -1178,7 +1178,7 @@ const ShortsChatPage = () => {
                 
                 return (
                   <div className="flex justify-center gap-4">
-                    {/* Instagram 카드 */}
+                    {/* TikTok 카드 */}
                     <div className="flex flex-col items-center gap-1">
                       <Card 
                         className={`relative cursor-pointer transition-all hover:opacity-80 ${
@@ -1208,11 +1208,11 @@ const ShortsChatPage = () => {
                             </div>
                           </div>
                           <img
-                            src="/icon/instagram-logo.png"
-                            alt="Instagram"
+                            src="/icon/tiktok-logo.png"
+                            alt="TikTok"
                             className="h-12 w-12 object-contain"
                           />
-                          <span className="text-sm font-medium lowercase">instagram</span>
+                          <span className="text-sm font-medium lowercase">tiktok</span>
                         </CardContent>
                       </Card>
                     </div>

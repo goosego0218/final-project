@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
-import { Zap, User, FolderOpen, CreditCard, Heart, Instagram, Youtube, BarChart3 } from "lucide-react";
+import { Zap, User, FolderOpen, CreditCard, Heart, Youtube, BarChart3 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getMenus, Menu } from "@/lib/api";
@@ -329,9 +329,9 @@ const Navigation = () => {
                       </div>
                       <div className="flex items-center gap-2">
                         {userProfile?.instagram?.connected ? (
-                          <img src="/icon/instagram-logo.png" alt="Instagram" className="h-5 w-5" />
+                          <img src="/icon/tiktok-logo.png" alt="TikTok" className="h-5 w-5" />
                         ) : (
-                          <Instagram className="h-5 w-5 text-muted-foreground/30" strokeWidth={1.5} />
+                          <img src="/icon/tiktok-logo.png" alt="TikTok" className="h-5 w-5 opacity-30" />
                         )}
                         {userProfile?.youtube?.connected ? (
                           <img src="/icon/youtube-logo.png" alt="YouTube" className="h-5 w-5 object-contain" />

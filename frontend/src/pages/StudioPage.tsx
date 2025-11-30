@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Send, Zap, ChevronLeft, ChevronRight, Download, RefreshCw, Star, Plus, Upload, X, FolderOpen, Instagram, Youtube, Trash2, Info, Check, Image, Video, Loader2 } from "lucide-react";
+import { Send, Zap, ChevronLeft, ChevronRight, Download, RefreshCw, Star, Plus, Upload, X, FolderOpen, Youtube, Trash2, Info, Check, Image, Video, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { projectStorage, type Message, type Project, type SavedItem } from "@/lib/projectStorage";
@@ -1896,7 +1896,7 @@ const StudioPage = () => {
     if (!isConnected) {
       toast({
         title: "소셜 미디어 연동 필요",
-        description: `${platform === "instagram" ? "Instagram" : "YouTube"} 계정을 먼저 연동해주세요.`,
+        description: `${platform === "instagram" ? "TikTok" : "YouTube"} 계정을 먼저 연동해주세요.`,
         status: "warning",
       });
       return;
@@ -1908,7 +1908,7 @@ const StudioPage = () => {
       if (uploadStatus[platform as "instagram" | "youtube"]) {
         toast({
           title: "이미 업로드됨",
-          description: `이 숏폼은 이미 ${platform === "instagram" ? "Instagram" : "YouTube"}에 업로드되었습니다.`,
+          description: `이 숏폼은 이미 ${platform === "instagram" ? "TikTok" : "YouTube"}에 업로드되었습니다.`,
           status: "info",
         });
         return;
@@ -1930,7 +1930,7 @@ const StudioPage = () => {
   const handleConfirmUpload = () => {
     if (pendingUploadUrl && selectedPlatforms.size > 0 && currentProjectId) {
       const platforms = Array.from(selectedPlatforms);
-      const platformNames = platforms.map(p => p === "instagram" ? "Instagram" : "YouTube").join(", ");
+      const platformNames = platforms.map(p => p === "instagram" ? "TikTok" : "YouTube").join(", ");
       
       // 업로드 상태 저장 (localStorage)
       // savedItems에서 해당 URL의 숏폼 ID 찾기
@@ -2791,7 +2791,7 @@ const StudioPage = () => {
                           <div className="flex justify-start mt-2">
                             <div className="max-w-[80%] w-full space-y-3">
                               <div className="flex gap-3 items-start">
-                                {/* Instagram Card */}
+                                {/* TikTok Card */}
                                 <div className="flex flex-col items-center gap-1">
                                 <Card
                                   className={`relative cursor-pointer transition-all border-2 ${
@@ -2819,11 +2819,11 @@ const StudioPage = () => {
                                       )}
                                     </div>
                                       <img
-                                        src="/icon/instagram-logo.png"
-                                        alt="Instagram"
+                                        src="/icon/tiktok-logo.png"
+                                        alt="TikTok"
                                         className="h-8 w-8 object-contain"
                                       />
-                                    <span className="text-sm font-medium">instagram</span>
+                                    <span className="text-sm font-medium">tiktok</span>
                                   </CardContent>
                                 </Card>
                                   {uploadStatus.instagram && (

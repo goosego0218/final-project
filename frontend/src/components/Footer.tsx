@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Instagram, Youtube } from "lucide-react";
+import { Youtube } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -123,12 +123,12 @@ const Footer = () => {
           </p>
           <div className="flex gap-4">
             <a
-              href="https://instagram.com"
+              href="https://tiktok.com"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
-              <Instagram className="h-5 w-5" />
+              <img src="/icon/tiktok-logo.png" alt="TikTok" className="h-5 w-5" />
             </a>
             <a
               href="https://youtube.com"

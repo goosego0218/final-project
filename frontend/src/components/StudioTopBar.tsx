@@ -17,7 +17,6 @@ import {
   Heart,
   MoreVertical,
   User,
-  Instagram,
   Youtube,
   BarChart3,
 } from "lucide-react";
@@ -102,9 +101,9 @@ const StudioTopBar = ({
                 </div>
                 <div className="flex items-center gap-2">
                   {instagramConnected ? (
-                    <img src="/icon/instagram-logo.png" alt="Instagram" className="h-5 w-5" />
+                    <img src="/icon/tiktok-logo.png" alt="TikTok" className="h-5 w-5" />
                   ) : (
-                    <Instagram className="h-5 w-5 text-muted-foreground/30" strokeWidth={1.5} />
+                    <img src="/icon/tiktok-logo.png" alt="TikTok" className="h-5 w-5 opacity-30" />
                   )}
                   {youtubeConnected ? (
                     <img src="/icon/youtube-logo.png" alt="YouTube" className="h-5 w-5 object-contain" />
