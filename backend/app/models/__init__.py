@@ -1,7 +1,7 @@
 from app.models.auth import Role, UserInfo, Menu, RoleMenu
 from app.models.project import ProdGroup
 from app.models.brand import BrandInfo
-from app.models.social import SocialConnection
+from app.models.social import SocialConnection, OAuthIdentity, SocialPost, SocialPostMetric
 
 __all__ = [
     "Role",
@@ -11,4 +11,7 @@ __all__ = [
     "ProdGroup",
     "BrandInfo",
     "SocialConnection",
+    "OAuthIdentity",
+    "SocialPost",
+    "SocialPostMetric",
 ]
