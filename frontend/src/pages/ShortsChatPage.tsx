@@ -12,7 +12,7 @@ import { Send, ChevronLeft, RefreshCw, Star, Plus, X, FolderOpen, Folder, Trash2
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { projectStorage, type Message, type SavedItem } from "@/lib/projectStorage";
 import StudioTopBar from "@/components/StudioTopBar";
-import { getShortsIntro, sendShortsChat, getProjectDetail, getShortsList, saveShorts, deleteShorts, uploadToYouTube, uploadToInstagram } from "@/lib/api";
+import { getShortsIntro, sendShortsChat, getProjectDetail, getShortsList, saveShorts, deleteShorts, uploadToYouTube, uploadToTikTok } from "@/lib/api";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -633,11 +633,10 @@ const ShortsChatPage = () => {
             });
             uploadResults.push({ platform: 'youtube', success: true });
           } else if (platform === 'instagram') {
-            await uploadToInstagram({
+            await uploadToTikTok({
               video_url: selectedShortFormForUpload.url,
               caption: uploadTitle || `숏폼 ${selectedShortFormForUpload.index + 1}`,
               project_id: Number(currentProjectId),
-              share_to_feed: true
             });
             uploadResults.push({ platform: 'instagram', success: true });
           }

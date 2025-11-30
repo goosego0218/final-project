@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { getProjectDetail, deleteProject, ProjectDetail, ProjectListItem, getShortsList, getLogoList, uploadToYouTube, uploadToInstagram, updateLogoPubYn, updateShortsPubYn, downloadLogo, deleteLogo, deleteShorts } from "@/lib/api";
+import { getProjectDetail, deleteProject, ProjectDetail, ProjectListItem, getShortsList, getLogoList, uploadToYouTube, uploadToTikTok, updateLogoPubYn, updateShortsPubYn, downloadLogo, deleteLogo, deleteShorts } from "@/lib/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { 
@@ -694,11 +694,10 @@ const ProjectDashboardPage = () => {
             });
             uploadResults.push({ platform: 'youtube', success: true });
           } else if (platform === 'instagram') {
-            await uploadToInstagram({
+            await uploadToTikTok({
               video_url: selectedShortFormForUpload.url,
               caption: uploadTitle || selectedShortFormForUpload.title || "숏폼",
               project_id: Number(projectId),
-              share_to_feed: true
             });
             uploadResults.push({ platform: 'instagram', success: true });
           }

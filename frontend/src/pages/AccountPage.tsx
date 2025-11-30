@@ -20,7 +20,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { getYouTubeAuthUrl, getYouTubeConnectionStatus, disconnectYouTube } from "@/lib/api";
+import { 
+  getYouTubeAuthUrl, 
+  getYouTubeConnectionStatus, 
+  disconnectYouTube,
+  getTikTokAuthUrl,
+  getTikTokConnectionStatus,
+  disconnectTikTok,
+} from "@/lib/api";
 
 const AccountPage = () => {
   const { toast } = useToast();
@@ -83,11 +90,33 @@ const AccountPage = () => {
     }
   };
 
+  // TikTok 연동 상태 로드 함수
+  const loadTikTokConnectionStatus = async () => {
+    try {
+      const status = await getTikTokConnectionStatus();
+      setInstagramConnected(status.connected);
+      // localStorage 업데이트
+      const profile = getUserProfile();
+      localStorage.setItem('userProfile', JSON.stringify({
+        ...profile,
+        instagram: {
+          connected: status.connected,
+        }
+      }));
+      window.dispatchEvent(new Event('profileUpdated'));
+    } catch (error) {
+      console.error('TikTok 연동 상태 조회 실패:', error);
+    }
+  };
+
   // 컴포넌트 마운트 시 연동 상태 확인
   useEffect(() => {
     const checkConnection = async () => {
       try {
-        await loadYouTubeConnectionStatus();
+        await Promise.all([
+          loadYouTubeConnectionStatus(),
+          loadTikTokConnectionStatus(),
+        ]);
       } catch (error) {
         // 로그인 안 되어 있으면 무시
         console.log('연동 상태 확인 실패 (로그인 필요할 수 있음)');
@@ -98,18 +127,12 @@ const AccountPage = () => {
 
   // URL 파라미터로 연동 완료 확인
   useEffect(() => {
-    const instagramSuccess = searchParams.get('instagram_success');
+    const tiktokConnected = searchParams.get('tiktok_connected');
     const youtubeConnected = searchParams.get('youtube_connected');
     
-    if (instagramSuccess === 'true') {
-      setInstagramConnected(true);
-      // 프로필 저장
-      const profile = getUserProfile();
-      localStorage.setItem('userProfile', JSON.stringify({
-        ...profile,
-        instagram: { connected: true }
-      }));
-      window.dispatchEvent(new Event('profileUpdated'));
+    if (tiktokConnected === 'success') {
+      // 백엔드에서 실제 연동 정보 가져오기
+      loadTikTokConnectionStatus();
       
       toast({
         title: "TikTok 계정이 연동되었어요",
@@ -118,7 +141,21 @@ const AccountPage = () => {
       });
       
       // URL에서 파라미터 제거
-      searchParams.delete('instagram_success');
+      searchParams.delete('tiktok_connected');
+      searchParams.delete('message');
+      setSearchParams(searchParams, { replace: true });
+    } else if (tiktokConnected === 'error') {
+      const message = searchParams.get('message') || '연동에 실패했습니다.';
+      const decodedMessage = decodeURIComponent(message);
+      
+      toast({
+        title: "TikTok 연동 실패",
+        description: decodedMessage,
+        variant: "destructive",
+      });
+      
+      searchParams.delete('tiktok_connected');
+      searchParams.delete('message');
       setSearchParams(searchParams, { replace: true });
     }
     
@@ -215,8 +252,18 @@ const AccountPage = () => {
     });
   };
 
-  const handleInstagramConnect = () => {
-    setIsInstagramModalOpen(true);
+  const handleInstagramConnect = async () => {
+    try {
+      // 백엔드에서 TikTok OAuth URL 받아오기
+      const { auth_url } = await getTikTokAuthUrl();
+      window.location.href = auth_url;
+    } catch (error: any) {
+      toast({
+        title: "TikTok 연동 실패",
+        description: error?.message || "TikTok 연동 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleInstagramConnectConfirm = () => {
@@ -255,21 +302,30 @@ const AccountPage = () => {
     });
   };
 
-  const handleInstagramDisconnect = () => {
-    setInstagramConnected(false);
-    // 즉시 localStorage에 저장
-    const profile = getUserProfile();
-    localStorage.setItem('userProfile', JSON.stringify({
-      ...profile,
-      instagram: { connected: false }
-    }));
-    window.dispatchEvent(new Event('profileUpdated'));
-    
-    toast({
-      title: "TikTok 연동 해제",
-      description: "TikTok 연동이 해제되었습니다.",
-      status: "success",
-    });
+  const handleInstagramDisconnect = async () => {
+    try {
+      await disconnectTikTok();
+  
+      setInstagramConnected(false);
+      const profile = getUserProfile();
+      localStorage.setItem('userProfile', JSON.stringify({
+        ...profile,
+        instagram: { connected: false },
+      }));
+      window.dispatchEvent(new Event('profileUpdated'));
+  
+      toast({
+        title: "TikTok 연동 해제",
+        description: "TikTok 연동이 해제되었습니다.",
+        status: "success",
+      });
+    } catch (error: any) {
+      toast({
+        title: "연동 해제 실패",
+        description: error?.message || "TikTok 연동 해제 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleYoutubeConnect = async () => {

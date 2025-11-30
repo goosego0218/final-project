@@ -337,6 +337,39 @@ export interface YouTubeAuthUrlResponse {
   state: string;
 }
 
+// TikTok 연동 관련 API
+export interface TikTokAuthUrlResponse {
+  auth_url: string;
+  state: string;
+}
+
+// TikTok OAuth 인증 URL 가져오기
+export async function getTikTokAuthUrl(): Promise<TikTokAuthUrlResponse> {
+  return apiRequest<TikTokAuthUrlResponse>('/social/tiktok/auth-url', {
+    method: 'GET',
+  });
+}
+
+// TikTok 연동 상태 조회
+export interface TikTokConnectionStatus {
+  connected: boolean;
+  platform_user_id: string | null;
+  connected_at: string | null;
+}
+
+export async function getTikTokConnectionStatus(): Promise<TikTokConnectionStatus> {
+  return apiRequest<TikTokConnectionStatus>('/social/tiktok/status', {
+    method: 'GET',
+  });
+}
+
+// TikTok 연동 해제
+export async function disconnectTikTok(): Promise<{ platform: string; connected: boolean }> {
+  return apiRequest<{ platform: string; connected: boolean }>('/social/tiktok/disconnect', {
+    method: 'DELETE',
+  });
+}
+
 export interface YouTubeConnectionStatus {
   connected: boolean;
   email: string | null;
@@ -391,23 +424,22 @@ export async function uploadToYouTube(data: YouTubeUploadRequest): Promise<YouTu
   });
 }
 
-// Instagram 업로드 관련 인터페이스
-export interface InstagramUploadRequest {
+// TikTok 업로드 요청/응답 타입
+export interface TikTokUploadRequest {
   video_url: string;
   caption: string;
   project_id: number;
-  share_to_feed?: boolean;
 }
 
-export interface InstagramUploadResponse {
+export interface TikTokUploadResponse {
   success: boolean;
-  media_id: string;
+  publish_id: string | null;
   message: string;
 }
 
-// Instagram에 릴스 업로드
-export async function uploadToInstagram(data: InstagramUploadRequest): Promise<InstagramUploadResponse> {
-  return apiRequest<InstagramUploadResponse>('/social/instagram/upload', {
+// TikTok에 Draft 업로드
+export async function uploadToTikTok(data: TikTokUploadRequest): Promise<TikTokUploadResponse> {
+  return apiRequest<TikTokUploadResponse>('/social/tiktok/upload', {
     method: 'POST',
     body: JSON.stringify(data),
   });

@@ -24,14 +24,13 @@ class YouTubeUploadResponse(BaseModel):
     message: str
 
 
-class InstagramUploadRequest(BaseModel):
-    video_url: str  # NCP Object Storage URL
-    caption: str  # 릴스 캡션
-    project_id: int  # 프로젝트 ID (브랜드 프로필 가져오기 위해)
-    share_to_feed: bool = True  # 릴스+피드에 함께 올리기
+class TikTokUploadRequest(BaseModel):
+    video_url: str      # NCP Object Storage URL
+    caption: str        # 틱톡 캡션
+    project_id: int     # 브랜드 프로필 불러오기 용
 
 
-class InstagramUploadResponse(BaseModel):
+class TikTokUploadResponse(BaseModel):
     success: bool
-    media_id: str
+    publish_id: str | None
     message: str
