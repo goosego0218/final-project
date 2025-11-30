@@ -36,9 +36,11 @@ class Settings(BaseSettings):
     jwt_secret_key: str = ""
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
-    
+
     # Encryption (토큰 암호화용 - AES-256-GCM)
-    encryption_key: str = ""  # Base64 인코딩된 32바이트(256-bit) 키 (선택적, 없으면 jwt_secret_key 기반으로 생성)
+    encryption_key: str = (
+        ""  # Base64 인코딩된 32바이트(256-bit) 키 (선택적, 없으면 jwt_secret_key 기반으로 생성)
+    )
 
     # Trend / RAG / Search
     tavily_api_key: str = ""
@@ -48,23 +50,25 @@ class Settings(BaseSettings):
     vector_store_collection: str = "RAG_md"
 
     # File Server
-    file_server_url: str = "https://kr.object.ncloudstorage.com/aissemble"  # 파일 서버 기본 URL
+    file_server_url: str = (
+        "https://kr.object.ncloudstorage.com/aissemble"  # 파일 서버 기본 URL
+    )
 
     google_client_id: str = ""  # Google Cloud Console에서 발급받은 Client ID
     google_client_secret: str = ""  # Google Cloud Console에서 발급받은 Client Secret
-    google_redirect_uri: str = "http://localhost:8000/social/youtube/callback"  # 개발 환경
-    
+    google_redirect_uri: str = (
+        "http://localhost:8000/social/youtube/callback"  # 개발 환경
+    )
+
     # Facebook/Instagram OAuth 설정
     facebook_app_id: str = ""  # Facebook App ID
     facebook_app_secret: str = ""  # Facebook App Secret
-    facebook_redirect_uri: str = "http://localhost:8000/social/instagram/callback"  # 개발 환경
-    
+    facebook_redirect_uri: str = (
+        "http://localhost:8000/social/instagram/callback"  # 개발 환경
+    )
+
     # 프론트엔드 URL (OAuth 콜백 후 리다이렉트용)
     frontend_url: str = "http://localhost:8080"  # 프론트엔드 기본 URL
-    
-    # Google GenAI (로고 생성용 - Gemini 이미지 생성)
-    google_genai_api_key: str = ""  
-    google_genai_model: str = ""
 
     # Google Cloud / Vertex AI (Veo 3.1)
     google_cloud_project: str = ""
@@ -74,10 +78,7 @@ class Settings(BaseSettings):
     veo_aspect_ratio: str = ""
     veo_resolution: str = ""
 
-    # File Server
-    file_server_url: str = "https://kr.object.ncloudstorage.com/aissemble"
-    
-    # NCP Object Storage  
+    # NCP Object Storage
     ncp_access_key: str = ""
     ncp_secret_key: str = ""
     ncp_region: str = ""
