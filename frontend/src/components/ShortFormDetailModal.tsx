@@ -12,9 +12,18 @@ import {
   Comment,
   getComments,
   createComment,
+  updateComment,
+  deleteComment,
   toggleLike,
   getLikeStatus,
 } from "@/lib/api";
+import { MoreVertical, Edit2, Trash2 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ShortFormDetailModalProps {
   open: boolean;
@@ -36,6 +45,26 @@ const ShortFormDetailModal = ({ open, short, onClose }: ShortFormDetailModalProp
   const [commentText, setCommentText] = useState("");
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
+  const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
+  const [editingCommentText, setEditingCommentText] = useState("");
+
+  // 현재 사용자 ID 가져오기 (JWT 토큰에서)
+  const getCurrentUserId = (): number | null => {
+    try {
+      const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+      if (!token) return null;
+      
+      // JWT 토큰 디코딩 (payload는 두 번째 부분)
+      const parts = token.split('.');
+      if (parts.length !== 3) return null;
+      
+      const payload = JSON.parse(atob(parts[1]));
+      return payload.sub || payload.user_id || payload.id || null;
+    } catch (error) {
+      console.error('Failed to decode token:', error);
+      return null;
+    }
+  };
 
   const prodId = short?.prod_id;
 
@@ -159,6 +188,46 @@ const ShortFormDetailModal = ({ open, short, onClose }: ShortFormDetailModalProp
     },
   });
 
+  // 댓글 수정 mutation
+  const updateCommentMutation = useMutation({
+    mutationFn: ({ commentId, content }: { commentId: number; content: string }) =>
+      updateComment(commentId, { content }),
+    onSuccess: async () => {
+      setEditingCommentId(null);
+      setEditingCommentText("");
+      await refetchComments();
+      toast({ description: "댓글이 수정되었습니다" });
+    },
+    onError: (error: any) => {
+      console.error("[ShortFormDetailModal] 댓글 수정 에러:", error);
+      toast({
+        description: error?.message || "댓글 수정에 실패했습니다",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // 댓글 삭제 mutation
+  const deleteCommentMutation = useMutation({
+    mutationFn: (commentId: number) => deleteComment(commentId),
+    onSuccess: async () => {
+      await refetchComments();
+      // 갤러리 / 메인 인기 섹션도 새로고침 (comment_count 반영)
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["shortsGallery"] }),
+        queryClient.invalidateQueries({ queryKey: ["homePopularShorts"] }),
+      ]);
+      toast({ description: "댓글이 삭제되었습니다" });
+    },
+    onError: (error: any) => {
+      console.error("[ShortFormDetailModal] 댓글 삭제 에러:", error);
+      toast({
+        description: error?.message || "댓글 삭제에 실패했습니다",
+        variant: "destructive",
+      });
+    },
+  });
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -258,26 +327,106 @@ const ShortFormDetailModal = ({ open, short, onClose }: ShortFormDetailModalProp
                         아직 댓글이 없습니다. 첫 댓글을 남겨보세요!
                       </div>
                     ) : (
-                      comments.map((comment) => (
-                        <div key={comment.comment_id} className="flex gap-3">
-                          <Avatar className="h-8 w-8 flex-shrink-0">
-                            <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                              {comment.user_nickname.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-semibold text-sm text-foreground">
-                                {comment.user_nickname}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {formatCommentDate(comment.create_dt)}
-                              </span>
+                      comments.map((comment) => {
+                        const currentUserId = getCurrentUserId();
+                        const isMyComment = currentUserId !== null && comment.user_id === currentUserId;
+                        const isEditing = editingCommentId === comment.comment_id;
+
+                        return (
+                          <div key={comment.comment_id} className="flex gap-3 group">
+                            <Avatar className="h-8 w-8 flex-shrink-0">
+                              <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                                {comment.user_nickname.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-semibold text-sm text-foreground">
+                                  {comment.user_nickname}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  {formatCommentDate(comment.create_dt)}
+                                </span>
+                                {isMyComment && !isEditing && (
+                                  <div className="ml-auto">
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="h-6 w-6 opacity-0 group-hover:opacity-100"
+                                        >
+                                          <MoreVertical className="h-3 w-3" />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      <DropdownMenuItem
+                                        onClick={() => {
+                                          setEditingCommentId(comment.comment_id);
+                                          setEditingCommentText(comment.content);
+                                        }}
+                                      >
+                                        <Edit2 className="h-4 w-4 mr-2" />
+                                        수정
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem
+                                        onClick={() => {
+                                          if (confirm("댓글을 삭제하시겠습니까?")) {
+                                            deleteCommentMutation.mutate(comment.comment_id);
+                                          }
+                                        }}
+                                        className="text-destructive"
+                                      >
+                                        <Trash2 className="h-4 w-4 mr-2" />
+                                        삭제
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                  </div>
+                                )}
+                              </div>
+                              {isEditing ? (
+                                <div className="space-y-2">
+                                  <Textarea
+                                    value={editingCommentText}
+                                    onChange={(e) => setEditingCommentText(e.target.value)}
+                                    className="min-h-[60px] resize-none"
+                                    rows={2}
+                                  />
+                                  <div className="flex gap-2">
+                                    <Button
+                                      size="sm"
+                                      onClick={() => {
+                                        if (editingCommentText.trim()) {
+                                          updateCommentMutation.mutate({
+                                            commentId: comment.comment_id,
+                                            content: editingCommentText.trim(),
+                                          });
+                                        }
+                                      }}
+                                      disabled={!editingCommentText.trim() || updateCommentMutation.isPending}
+                                    >
+                                      저장
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => {
+                                        setEditingCommentId(null);
+                                        setEditingCommentText("");
+                                      }}
+                                    >
+                                      취소
+                                    </Button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <p className="text-sm text-foreground break-words">{comment.content}</p>
+                              )}
                             </div>
-                            <p className="text-sm text-foreground break-words">{comment.content}</p>
                           </div>
-                        </div>
-                      ))
+                        );
+                      })
                     )}
                   </div>
                 </div>

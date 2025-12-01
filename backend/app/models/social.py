@@ -42,7 +42,7 @@ class SocialConnection(Base):
     platform: Mapped[str] = mapped_column(
         String(50),
         nullable=False,
-        comment="플랫폼 (youtube, instagram)",
+        comment="플랫폼 (youtube, tiktok)",
     )
 
     platform_user_id: Mapped[str | None] = mapped_column(
@@ -159,7 +159,7 @@ class OAuthIdentity(Base):
 class SocialPost(Base):
     """
     소셜 미디어 게시물 테이블 (social_post)
-    - 유튜브, 인스타그램 업로드 기록 저장
+    - 유튜브, 틱톡 업로드 기록 저장
     """
     __tablename__ = "social_post"
 
@@ -186,13 +186,13 @@ class SocialPost(Base):
     platform: Mapped[str] = mapped_column(
         String(50),
         nullable=False,
-        comment="플랫폼 (youtube, instagram)",
+        comment="플랫폼 (youtube, tiktok)",
     )
 
     platform_post_id: Mapped[str | None] = mapped_column(
         String(255),
         nullable=True,
-        comment="플랫폼 게시물 ID (YouTube videoId, Instagram mediaId)",
+        comment="플랫폼 게시물 ID (YouTube videoId, TikTok publishId)",
     )
 
     platform_url: Mapped[str | None] = mapped_column(

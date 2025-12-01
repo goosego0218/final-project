@@ -106,7 +106,7 @@ const StudioPage = () => {
         name: profile.nickname || "사용자",
         email: profile.id || "user@example.com",
         avatar: profile.avatar || null,
-        instagram: profile.instagram?.connected || false,
+        tiktok: profile.tiktok?.connected || false,
         youtube: profile.youtube?.connected || false,
         tokensUsed: 132,
         tokensTotal: 200,
@@ -116,7 +116,7 @@ const StudioPage = () => {
       name: "사용자",
       email: "user@example.com",
       avatar: null,
-      instagram: false,
+      tiktok: false,
       youtube: false,
       tokensUsed: 132,
       tokensTotal: 200,
@@ -1640,11 +1640,11 @@ const StudioPage = () => {
     if (stored) {
       const profile = JSON.parse(stored);
       return {
-        instagram: profile.instagram?.connected || false,
+        tiktok: profile.tiktok?.connected || false,
         youtube: profile.youtube?.connected || false
       };
     }
-    return { instagram: false, youtube: false };
+    return { tiktok: false, youtube: false };
   };
 
   // 저장 버튼 클릭 핸들러
@@ -1842,7 +1842,7 @@ const StudioPage = () => {
   // 숏폼 업로드 버튼 클릭 핸들러
   const handleShortFormUpload = (url: string) => {
     const connections = checkSocialMediaConnection();
-    const hasConnection = connections.instagram || connections.youtube;
+    const hasConnection = connections.tiktok || connections.youtube;
 
     if (hasConnection) {
       // 연동된 경우 채팅창에 질문 메시지 추가
@@ -1876,27 +1876,27 @@ const StudioPage = () => {
 
   // 숏폼 업로드 상태 확인 (localStorage에서)
   const getShortFormUploadStatus = (url: string) => {
-    if (!currentProjectId) return { instagram: false, youtube: false };
+    if (!currentProjectId) return { tiktok: false, youtube: false };
     const project = projectStorage.getProject(currentProjectId);
     if (project && project.savedItems) {
       const shortItem = project.savedItems.find(item => item.url === url && item.type === "short");
       if (shortItem) {
         const uploadStatuses = JSON.parse(localStorage.getItem('shortFormUploadStatuses') || '{}');
-        return uploadStatuses[shortItem.id] || { instagram: false, youtube: false };
+        return uploadStatuses[shortItem.id] || { tiktok: false, youtube: false };
       }
     }
-    return { instagram: false, youtube: false };
+    return { tiktok: false, youtube: false };
   };
 
   // 플랫폼 선택 토글
   const handlePlatformToggle = (platform: string) => {
     const connections = checkSocialMediaConnection();
-    const isConnected = platform === "instagram" ? connections.instagram : connections.youtube;
+    const isConnected = platform === "tiktok" ? connections.tiktok : connections.youtube;
     
     if (!isConnected) {
       toast({
         title: "소셜 미디어 연동 필요",
-        description: `${platform === "instagram" ? "TikTok" : "YouTube"} 계정을 먼저 연동해주세요.`,
+        description: `${platform === "tiktok" ? "TikTok" : "YouTube"} 계정을 먼저 연동해주세요.`,
         status: "warning",
       });
       return;
@@ -1905,10 +1905,10 @@ const StudioPage = () => {
     // 이미 업로드된 플랫폼은 취소 불가
     if (pendingUploadUrl) {
       const uploadStatus = getShortFormUploadStatus(pendingUploadUrl);
-      if (uploadStatus[platform as "instagram" | "youtube"]) {
+      if (uploadStatus[platform as "tiktok" | "youtube"]) {
         toast({
           title: "이미 업로드됨",
-          description: `이 숏폼은 이미 ${platform === "instagram" ? "TikTok" : "YouTube"}에 업로드되었습니다.`,
+          description: `이 숏폼은 이미 ${platform === "tiktok" ? "TikTok" : "YouTube"}에 업로드되었습니다.`,
           status: "info",
         });
         return;
@@ -1930,7 +1930,7 @@ const StudioPage = () => {
   const handleConfirmUpload = () => {
     if (pendingUploadUrl && selectedPlatforms.size > 0 && currentProjectId) {
       const platforms = Array.from(selectedPlatforms);
-      const platformNames = platforms.map(p => p === "instagram" ? "TikTok" : "YouTube").join(", ");
+      const platformNames = platforms.map(p => p === "tiktok" ? "TikTok" : "YouTube").join(", ");
       
       // 업로드 상태 저장 (localStorage)
       // savedItems에서 해당 URL의 숏폼 ID 찾기
@@ -1946,10 +1946,10 @@ const StudioPage = () => {
           // 이미 저장된 숏폼인 경우, 업로드 상태만 업데이트
           const uploadStatuses = JSON.parse(localStorage.getItem('shortFormUploadStatuses') || '{}');
           if (!uploadStatuses[shortItem.id]) {
-            uploadStatuses[shortItem.id] = { instagram: false, youtube: false };
+            uploadStatuses[shortItem.id] = { tiktok: false, youtube: false };
           }
           platforms.forEach(platform => {
-            uploadStatuses[shortItem.id][platform as "instagram" | "youtube"] = true;
+            uploadStatuses[shortItem.id][platform as "tiktok" | "youtube"] = true;
           });
           localStorage.setItem('shortFormUploadStatuses', JSON.stringify(uploadStatuses));
         } else {
@@ -1964,9 +1964,9 @@ const StudioPage = () => {
           };
           
           const uploadStatuses = JSON.parse(localStorage.getItem('shortFormUploadStatuses') || '{}');
-          uploadStatuses[newShortItem.id] = { instagram: false, youtube: false };
+          uploadStatuses[newShortItem.id] = { tiktok: false, youtube: false };
           platforms.forEach(platform => {
-            uploadStatuses[newShortItem.id][platform as "instagram" | "youtube"] = true;
+            uploadStatuses[newShortItem.id][platform as "tiktok" | "youtube"] = true;
           });
           localStorage.setItem('shortFormUploadStatuses', JSON.stringify(uploadStatuses));
           
@@ -2063,7 +2063,7 @@ const StudioPage = () => {
         tokensUsed={userProfile.tokensUsed}
         tokensTotal={userProfile.tokensTotal}
         userAvatar={userProfile.avatar}
-        instagramConnected={userProfile.instagram}
+        tiktokConnected={userProfile.tiktok}
         youtubeConnected={userProfile.youtube}
       />
 
@@ -2786,7 +2786,7 @@ const StudioPage = () => {
                        message.content === "업로드 하시겠습니까?" && 
                        uploadQuestionStep === pendingUploadUrl && (() => {
                         const connections = checkSocialMediaConnection();
-                        const uploadStatus = pendingUploadUrl ? getShortFormUploadStatus(pendingUploadUrl) : { instagram: false, youtube: false };
+                        const uploadStatus = pendingUploadUrl ? getShortFormUploadStatus(pendingUploadUrl) : { tiktok: false, youtube: false };
                         return (
                           <div className="flex justify-start mt-2">
                             <div className="max-w-[80%] w-full space-y-3">
@@ -2795,26 +2795,26 @@ const StudioPage = () => {
                                 <div className="flex flex-col items-center gap-1">
                                 <Card
                                   className={`relative cursor-pointer transition-all border-2 ${
-                                    selectedPlatforms.has("instagram")
+                                    selectedPlatforms.has("tiktok")
                                       ? "border-[#FF8A3D] shadow-md"
                                       : "border-border hover:border-primary/50"
                                   } ${
-                                    !connections.instagram || uploadStatus.instagram ? "opacity-50 cursor-not-allowed" : ""
+                                    !connections.tiktok || uploadStatus.tiktok ? "opacity-50 cursor-not-allowed" : ""
                                   }`}
                                   onClick={() => {
-                                    if (connections.instagram && !uploadStatus.instagram) {
-                                      handlePlatformToggle("instagram");
+                                    if (connections.tiktok && !uploadStatus.tiktok) {
+                                      handlePlatformToggle("tiktok");
                                     }
                                   }}
                                 >
                                   <CardContent className="p-4 flex flex-col items-center gap-2 min-w-[120px]">
                                     {/* 선택 표시 (빈 회색에 체크표시, 선택 시 주황색) */}
                                       <div className={`absolute top-2 left-2 h-4 w-4 rounded-full border transition-colors flex items-center justify-center ${
-                                      selectedPlatforms.has("instagram")
+                                      selectedPlatforms.has("tiktok")
                                           ? "bg-[#FF8A3D] border-[#FF8A3D]"
                                           : "bg-transparent dark:bg-neutral-700 border-neutral-400 dark:border-neutral-600"
                                     }`}>
-                                      {selectedPlatforms.has("instagram") && (
+                                      {selectedPlatforms.has("tiktok") && (
                                         <Check className="h-2.5 w-2.5 text-white" />
                                       )}
                                     </div>
@@ -2826,7 +2826,7 @@ const StudioPage = () => {
                                     <span className="text-sm font-medium">tiktok</span>
                                   </CardContent>
                                 </Card>
-                                  {uploadStatus.instagram && (
+                                  {uploadStatus.tiktok && (
                                     <span className="text-xs text-muted-foreground mt-1">(이미 업로드됨)</span>
                                   )}
                                 </div>

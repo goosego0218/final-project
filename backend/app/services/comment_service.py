@@ -96,6 +96,52 @@ def get_comments_by_prod_id(
     )
 
 
+def update_comment(
+    db: Session,
+    comment_id: int,
+    user_id: int,
+    content: str,
+) -> Comment:
+    """
+    댓글 수정
+    
+    Args:
+        db: SQLAlchemy Session
+        comment_id: 댓글 번호
+        user_id: 요청한 유저 번호 (본인만 수정 가능)
+        content: 수정할 댓글 내용
+        
+    Returns:
+        Comment: 수정된 댓글
+        
+    Raises:
+        ValueError: 댓글이 없거나 권한이 없는 경우
+    """
+    comment = (
+        db.query(Comment)
+        .filter(
+            Comment.comment_id == comment_id,
+            Comment.del_yn == 'N',
+        )
+        .first()
+    )
+    
+    if not comment:
+        raise ValueError("댓글을 찾을 수 없습니다.")
+    
+    # 본인만 수정 가능
+    if comment.user_id != user_id:
+        raise ValueError("댓글을 수정할 권한이 없습니다.")
+    
+    # 댓글 내용 수정
+    comment.content = content
+    # update_dt는 트리거로 자동 업데이트됨
+    db.commit()
+    db.refresh(comment)
+    
+    return comment
+
+
 def delete_comment(
     db: Session,
     comment_id: int,

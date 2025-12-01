@@ -714,6 +714,18 @@ export async function createComment(data: CreateCommentRequest): Promise<Comment
   });
 }
 
+// 댓글 수정
+export interface UpdateCommentRequest {
+  content: string;
+}
+
+export async function updateComment(commentId: number, data: UpdateCommentRequest): Promise<Comment> {
+  return apiRequest<Comment>(`/comments/${commentId}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
 // 댓글 삭제
 export async function deleteComment(commentId: number): Promise<void> {
   return apiRequest<void>(`/comments/${commentId}`, {

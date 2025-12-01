@@ -12,11 +12,13 @@ from app.core.deps import get_current_user
 from app.models.auth import UserInfo
 from app.schemas.comment import (
     CommentCreateRequest,
+    CommentUpdateRequest,
     CommentResponse,
     CommentListResponse,
 )
 from app.services.comment_service import (
     create_comment,
+    update_comment,
     get_comments_by_prod_id,
     delete_comment,
     get_comment_count_by_prod_id,
@@ -117,6 +119,63 @@ def create_comment_endpoint(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"댓글 작성 실패: {str(e)}",
+        )
+
+
+@router.put("/{comment_id}", response_model=CommentResponse, summary="댓글 수정")
+def update_comment_endpoint(
+    comment_id: int,
+    request: CommentUpdateRequest,
+    current_user: UserInfo = Depends(get_current_user),
+    db: Session = Depends(get_orm_session),
+):
+    """
+    댓글 수정
+    - 본인 댓글만 수정 가능
+    """
+    try:
+        comment = update_comment(
+            db=db,
+            comment_id=comment_id,
+            user_id=current_user.id,
+            content=request.content,
+        )
+        
+        # UserInfo와 join하여 nickname 가져오기
+        from app.models.project import Comment
+        result = (
+            db.query(Comment, UserInfo)
+            .join(UserInfo, Comment.user_id == UserInfo.id)
+            .filter(Comment.comment_id == comment.comment_id)
+            .first()
+        )
+        
+        if not result:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="댓글 수정 후 조회에 실패했습니다.",
+            )
+        
+        comment_with_user, user = result
+        
+        return CommentResponse(
+            comment_id=comment_with_user.comment_id,
+            prod_id=comment_with_user.prod_id,
+            user_id=comment_with_user.user_id,
+            user_nickname=user.nickname,
+            content=comment_with_user.content,
+            create_dt=comment_with_user.create_dt,
+            update_dt=comment_with_user.update_dt,
+        )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"댓글 수정 실패: {str(e)}",
         )
 
 

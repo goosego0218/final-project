@@ -89,7 +89,7 @@ const ShortsChatPage = () => {
         name: profile.nickname || "사용자",
         email: profile.id || "user@example.com",
         avatar: profile.avatar || null,
-        instagram: profile.instagram?.connected || false,
+        tiktok: profile.tiktok?.connected || false,
         youtube: profile.youtube?.connected || false,
         tokensUsed: 132,
         tokensTotal: 200,
@@ -99,7 +99,7 @@ const ShortsChatPage = () => {
       name: "사용자",
       email: "user@example.com",
       avatar: null,
-      instagram: false,
+      tiktok: false,
       youtube: false,
       tokensUsed: 132,
       tokensTotal: 200,
@@ -552,24 +552,24 @@ const ShortsChatPage = () => {
   // SNS 연동 여부 확인
   const checkSocialMediaConnection = () => {
     const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-    if (profile && (profile.instagram || profile.youtube)) {
+    if (profile && (profile.tiktok || profile.youtube)) {
       return {
-        instagram: profile.instagram?.connected || false,
+        tiktok: profile.tiktok?.connected || false,
         youtube: profile.youtube?.connected || false,
       };
     }
-    return { instagram: false, youtube: false };
+    return { tiktok: false, youtube: false };
   };
 
   // 플랫폼 선택 토글
   const handlePlatformToggle = (platform: string) => {
     const connections = checkSocialMediaConnection();
-    const isConnected = platform === "instagram" ? connections.instagram : connections.youtube;
+    const isConnected = platform === "tiktok" ? connections.tiktok : connections.youtube;
     
     if (!isConnected) {
       toast({
         title: "소셜 미디어 연동 필요",
-        description: `${platform === "instagram" ? "TikTok" : "YouTube"} 계정을 먼저 연동해주세요.`,
+        description: `${platform === "tiktok" ? "TikTok" : "YouTube"} 계정을 먼저 연동해주세요.`,
         variant: "destructive",
       });
       return;
@@ -591,7 +591,7 @@ const ShortsChatPage = () => {
     if (!selectedResult) return;
     
     const connections = checkSocialMediaConnection();
-    const hasConnection = connections.instagram || connections.youtube;
+    const hasConnection = connections.tiktok || connections.youtube;
 
     if (hasConnection) {
       setSelectedShortFormForUpload(selectedResult);
@@ -632,13 +632,13 @@ const ShortsChatPage = () => {
               privacy: 'public'
             });
             uploadResults.push({ platform: 'youtube', success: true });
-          } else if (platform === 'instagram') {
+          } else if (platform === 'tiktok') {
             await uploadToTikTok({
               video_url: selectedShortFormForUpload.url,
               caption: uploadTitle || `숏폼 ${selectedShortFormForUpload.index + 1}`,
               project_id: Number(currentProjectId),
             });
-            uploadResults.push({ platform: 'instagram', success: true });
+            uploadResults.push({ platform: 'tiktok', success: true });
           }
         } catch (error: any) {
           console.error(`${platform} 업로드 실패:`, error);
@@ -651,8 +651,8 @@ const ShortsChatPage = () => {
       }
       
       // 결과 메시지 표시
-      const successPlatforms = uploadResults.filter(r => r.success).map(r => r.platform === "instagram" ? "TikTok" : "YouTube");
-      const failedPlatforms = uploadResults.filter(r => !r.success).map(r => r.platform === "instagram" ? "TikTok" : "YouTube");
+      const successPlatforms = uploadResults.filter(r => r.success).map(r => r.platform === "tiktok" ? "TikTok" : "YouTube");
+      const failedPlatforms = uploadResults.filter(r => !r.success).map(r => r.platform === "tiktok" ? "TikTok" : "YouTube");
       
       if (successPlatforms.length > 0 && failedPlatforms.length === 0) {
         toast({
@@ -728,7 +728,7 @@ const ShortsChatPage = () => {
         tokensUsed={userProfile.tokensUsed}
         tokensTotal={userProfile.tokensTotal}
         userAvatar={userProfile.avatar}
-        instagramConnected={userProfile.instagram}
+        tiktokConnected={userProfile.tiktok}
         youtubeConnected={userProfile.youtube}
         studioType="shorts"
       />
@@ -1181,25 +1181,25 @@ const ShortsChatPage = () => {
                     <div className="flex flex-col items-center gap-1">
                       <Card 
                         className={`relative cursor-pointer transition-all hover:opacity-80 ${
-                          !connections.instagram
+                          !connections.tiktok
                             ? "opacity-50 cursor-not-allowed" 
-                            : selectedPlatforms.has("instagram")
+                            : selectedPlatforms.has("tiktok")
                             ? "ring-2 ring-primary"
                             : ""
                         }`}
                         onClick={() => {
-                          if (!connections.instagram) return;
-                          handlePlatformToggle("instagram");
+                          if (!connections.tiktok) return;
+                          handlePlatformToggle("tiktok");
                         }}
                       >
                         <CardContent className="p-6 flex flex-col items-center gap-4 min-w-[140px]">
                           <div className="absolute top-3 left-3">
                             <div className={`h-4 w-4 rounded-full border-2 ${
-                              selectedPlatforms.has("instagram")
+                              selectedPlatforms.has("tiktok")
                                 ? "bg-primary border-primary"
                                 : "border-muted-foreground/50"
                             }`}>
-                              {selectedPlatforms.has("instagram") && (
+                              {selectedPlatforms.has("tiktok") && (
                                 <div className="h-full w-full rounded-full bg-primary flex items-center justify-center">
                                   <div className="h-2 w-2 rounded-full bg-background" />
                                 </div>

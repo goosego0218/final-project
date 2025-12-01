@@ -13,6 +13,10 @@ class CommentCreateRequest(BaseModel):
     content: str  # 댓글 내용
 
 
+class CommentUpdateRequest(BaseModel):
+    content: str  # 수정할 댓글 내용
+
+
 class CommentResponse(BaseModel):
     comment_id: int
     prod_id: int
