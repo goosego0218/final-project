@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { Camera, Instagram, Youtube, Eye, EyeOff, Loader2, X } from "lucide-react";
+import { Camera, Youtube, Eye, EyeOff, Loader2, X } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -20,7 +20,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { getYouTubeAuthUrl, getYouTubeConnectionStatus, disconnectYouTube } from "@/lib/api";
+import { 
+  getYouTubeAuthUrl, 
+  getYouTubeConnectionStatus, 
+  disconnectYouTube,
+  getTikTokAuthUrl,
+  getTikTokConnectionStatus,
+  disconnectTikTok,
+} from "@/lib/api";
 
 const AccountPage = () => {
   const { toast } = useToast();
@@ -83,11 +90,33 @@ const AccountPage = () => {
     }
   };
 
+  // TikTok 연동 상태 로드 함수
+  const loadTikTokConnectionStatus = async () => {
+    try {
+      const status = await getTikTokConnectionStatus();
+      setInstagramConnected(status.connected);
+      // localStorage 업데이트
+      const profile = getUserProfile();
+      localStorage.setItem('userProfile', JSON.stringify({
+        ...profile,
+        instagram: {
+          connected: status.connected,
+        }
+      }));
+      window.dispatchEvent(new Event('profileUpdated'));
+    } catch (error) {
+      console.error('TikTok 연동 상태 조회 실패:', error);
+    }
+  };
+
   // 컴포넌트 마운트 시 연동 상태 확인
   useEffect(() => {
     const checkConnection = async () => {
       try {
-        await loadYouTubeConnectionStatus();
+        await Promise.all([
+          loadYouTubeConnectionStatus(),
+          loadTikTokConnectionStatus(),
+        ]);
       } catch (error) {
         // 로그인 안 되어 있으면 무시
         console.log('연동 상태 확인 실패 (로그인 필요할 수 있음)');
@@ -98,27 +127,35 @@ const AccountPage = () => {
 
   // URL 파라미터로 연동 완료 확인
   useEffect(() => {
-    const instagramSuccess = searchParams.get('instagram_success');
+    const tiktokConnected = searchParams.get('tiktok_connected');
     const youtubeConnected = searchParams.get('youtube_connected');
     
-    if (instagramSuccess === 'true') {
-      setInstagramConnected(true);
-      // 프로필 저장
-      const profile = getUserProfile();
-      localStorage.setItem('userProfile', JSON.stringify({
-        ...profile,
-        instagram: { connected: true }
-      }));
-      window.dispatchEvent(new Event('profileUpdated'));
+    if (tiktokConnected === 'success') {
+      // 백엔드에서 실제 연동 정보 가져오기
+      loadTikTokConnectionStatus();
       
       toast({
-        title: "Instagram 계정이 연동되었어요",
+        title: "TikTok 계정이 연동되었어요",
         description: "이제 내 숏폼에서 바로 업로드할 수 있어요.",
         status: "success",
       });
       
       // URL에서 파라미터 제거
-      searchParams.delete('instagram_success');
+      searchParams.delete('tiktok_connected');
+      searchParams.delete('message');
+      setSearchParams(searchParams, { replace: true });
+    } else if (tiktokConnected === 'error') {
+      const message = searchParams.get('message') || '연동에 실패했습니다.';
+      const decodedMessage = decodeURIComponent(message);
+      
+      toast({
+        title: "TikTok 연동 실패",
+        description: decodedMessage,
+        variant: "destructive",
+      });
+      
+      searchParams.delete('tiktok_connected');
+      searchParams.delete('message');
       setSearchParams(searchParams, { replace: true });
     }
     
@@ -215,15 +252,25 @@ const AccountPage = () => {
     });
   };
 
-  const handleInstagramConnect = () => {
-    setIsInstagramModalOpen(true);
+  const handleInstagramConnect = async () => {
+    try {
+      // 백엔드에서 TikTok OAuth URL 받아오기
+      const { auth_url } = await getTikTokAuthUrl();
+      window.location.href = auth_url;
+    } catch (error: any) {
+      toast({
+        title: "TikTok 연동 실패",
+        description: error?.message || "TikTok 연동 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleInstagramConnectConfirm = () => {
     if (!instagramAccessToken.trim() || !instagramUserId.trim()) {
       toast({
         title: "입력 오류",
-        description: "ACCESS_TOKEN과 IG_USER_ID를 모두 입력해주세요.",
+        description: "ACCESS_TOKEN과 TIKTOK_USER_ID를 모두 입력해주세요.",
         status: "warning",
       });
       return;
@@ -255,21 +302,30 @@ const AccountPage = () => {
     });
   };
 
-  const handleInstagramDisconnect = () => {
-    setInstagramConnected(false);
-    // 즉시 localStorage에 저장
-    const profile = getUserProfile();
-    localStorage.setItem('userProfile', JSON.stringify({
-      ...profile,
-      instagram: { connected: false }
-    }));
-    window.dispatchEvent(new Event('profileUpdated'));
-    
-    toast({
-      title: "인스타그램 연동 해제",
-      description: "인스타그램 연동이 해제되었습니다.",
-      status: "success",
-    });
+  const handleInstagramDisconnect = async () => {
+    try {
+      await disconnectTikTok();
+  
+      setInstagramConnected(false);
+      const profile = getUserProfile();
+      localStorage.setItem('userProfile', JSON.stringify({
+        ...profile,
+        instagram: { connected: false },
+      }));
+      window.dispatchEvent(new Event('profileUpdated'));
+  
+      toast({
+        title: "TikTok 연동 해제",
+        description: "TikTok 연동이 해제되었습니다.",
+        status: "success",
+      });
+    } catch (error: any) {
+      toast({
+        title: "연동 해제 실패",
+        description: error?.message || "TikTok 연동 해제 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleYoutubeConnect = async () => {
@@ -438,23 +494,25 @@ const AccountPage = () => {
             <Card className="mt-6">
               <CardHeader>
                 <CardTitle>소셜 미디어 연동</CardTitle>
-                <CardDescription>인스타그램과 유튜브 계정을 연동하세요</CardDescription>
+                <CardDescription>틱톡과 유튜브 계정을 연동하세요</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Instagram Connection */}
+                {/* TikTok Connection */}
                 <div className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex items-center gap-3">
                     <div className={`p-2 rounded-full ${
                       instagramConnected 
-                        ? "bg-gradient-to-br from-purple-600 via-pink-600 to-orange-600" 
+                        ? "bg-black" 
                         : "bg-muted-foreground/20"
                     }`}>
-                      <Instagram className={`h-5 w-5 ${
-                        instagramConnected ? "text-white" : "text-muted-foreground"
-                      }`} />
+                      <img 
+                        src="/icon/tiktok-logo.png" 
+                        alt="TikTok" 
+                        className={`h-5 w-5 ${instagramConnected ? "opacity-100" : "opacity-30"}`}
+                      />
                     </div>
                     <div>
-                      <p className="font-medium">Instagram</p>
+                      <p className="font-medium">TikTok</p>
                       <p className="text-sm text-muted-foreground">
                         {instagramConnected ? "연동됨" : "연동되지 않음"}
                       </p>
@@ -522,7 +580,7 @@ const AccountPage = () => {
       
       <Footer />
 
-      {/* Instagram 연동 모달 */}
+      {/* TikTok 연동 모달 */}
       <Dialog open={isInstagramModalOpen} onOpenChange={(open) => {
         setIsInstagramModalOpen(open);
         if (!open) {
@@ -534,9 +592,9 @@ const AccountPage = () => {
       }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Instagram 계정을 연동할까요?</DialogTitle>
+            <DialogTitle>TikTok 계정을 연동할까요?</DialogTitle>
             <DialogDescription>
-              MAKERY에서 만든 숏폼을 Instagram Reels로 바로 업로드할 수 있어요.
+              MAKERY에서 만든 숏폼을 TikTok으로 바로 업로드할 수 있어요.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -567,11 +625,11 @@ const AccountPage = () => {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="userId">IG_USER_ID</Label>
+              <Label htmlFor="userId">TIKTOK_USER_ID</Label>
               <Input
                 id="userId"
                 type="text"
-                placeholder="IG_USER_ID를 입력하세요"
+                placeholder="TIKTOK_USER_ID를 입력하세요"
                 value={instagramUserId}
                 onChange={(e) => setInstagramUserId(e.target.value)}
               />

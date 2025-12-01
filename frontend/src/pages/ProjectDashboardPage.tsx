@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { getProjectDetail, deleteProject, ProjectDetail, ProjectListItem, getShortsList, getLogoList, uploadToYouTube, uploadToInstagram, updateLogoPubYn, updateShortsPubYn, downloadLogo, deleteLogo, deleteShorts } from "@/lib/api";
+import { getProjectDetail, deleteProject, ProjectDetail, ProjectListItem, getShortsList, getLogoList, uploadToYouTube, uploadToTikTok, updateLogoPubYn, updateShortsPubYn, downloadLogo, deleteLogo, deleteShorts } from "@/lib/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { 
@@ -636,7 +636,7 @@ const ProjectDashboardPage = () => {
     if (!isConnected) {
       toast({
         title: "소셜 미디어 연동 필요",
-        description: `${platform === "instagram" ? "Instagram" : "YouTube"} 계정을 먼저 연동해주세요.`,
+        description: `${platform === "instagram" ? "TikTok" : "YouTube"} 계정을 먼저 연동해주세요.`,
         status: "warning",
       });
       return;
@@ -649,7 +649,7 @@ const ProjectDashboardPage = () => {
       if (uploadStatus[platform as "instagram" | "youtube"]) {
         toast({
           title: "이미 업로드됨",
-          description: `이 숏폼은 이미 ${platform === "instagram" ? "Instagram" : "YouTube"}에 업로드되었습니다.`,
+          description: `이 숏폼은 이미 ${platform === "instagram" ? "TikTok" : "YouTube"}에 업로드되었습니다.`,
           status: "info",
         });
         return;
@@ -694,11 +694,10 @@ const ProjectDashboardPage = () => {
             });
             uploadResults.push({ platform: 'youtube', success: true });
           } else if (platform === 'instagram') {
-            await uploadToInstagram({
+            await uploadToTikTok({
               video_url: selectedShortFormForUpload.url,
               caption: uploadTitle || selectedShortFormForUpload.title || "숏폼",
               project_id: Number(projectId),
-              share_to_feed: true
             });
             uploadResults.push({ platform: 'instagram', success: true });
           }
@@ -722,8 +721,8 @@ const ProjectDashboardPage = () => {
       });
       
       // 결과 메시지 표시
-      const successPlatforms = uploadResults.filter(r => r.success).map(r => r.platform === "instagram" ? "Instagram" : "YouTube");
-      const failedPlatforms = uploadResults.filter(r => !r.success).map(r => r.platform === "instagram" ? "Instagram" : "YouTube");
+      const successPlatforms = uploadResults.filter(r => r.success).map(r => r.platform === "instagram" ? "TikTok" : "YouTube");
+      const failedPlatforms = uploadResults.filter(r => !r.success).map(r => r.platform === "instagram" ? "TikTok" : "YouTube");
       
       if (successPlatforms.length > 0 && failedPlatforms.length === 0) {
         // 모두 성공
@@ -1165,7 +1164,7 @@ const ProjectDashboardPage = () => {
                 
                 return (
                   <div className="flex justify-center gap-4">
-                    {/* Instagram 카드 */}
+                    {/* TikTok 카드 */}
                     <div className="flex flex-col items-center gap-1">
                     <Card 
                       className={`relative cursor-pointer transition-all hover:opacity-80 ${
@@ -1195,11 +1194,11 @@ const ProjectDashboardPage = () => {
                           </div>
                         </div>
                         <img
-                          src="/icon/instagram-logo.png"
-                          alt="Instagram"
+                          src="/icon/tiktok-logo.png"
+                          alt="TikTok"
                           className="h-12 w-12 object-contain"
                         />
-                        <span className="text-sm font-medium lowercase">instagram</span>
+                        <span className="text-sm font-medium lowercase">tiktok</span>
                       </CardContent>
                     </Card>
                       {uploadStatus.instagram && (

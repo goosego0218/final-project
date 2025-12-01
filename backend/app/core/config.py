@@ -51,11 +51,13 @@ class Settings(BaseSettings):
     google_client_secret: str = ""  # Google Cloud Console에서 발급받은 Client Secret
     google_redirect_uri: str = "http://localhost:8000/social/youtube/callback"  # 개발 환경
     
-    # Facebook/Instagram OAuth 설정
-    facebook_app_id: str = ""  # Facebook App ID
-    facebook_app_secret: str = ""  # Facebook App Secret
-    facebook_redirect_uri: str = "http://localhost:8000/social/instagram/callback"  # 개발 환경
-    
+    # TikTok OAuth 설정
+    tiktok_client_key: str = ""  # TikTok Developer Client Key
+    tiktok_client_secret: str = ""  # TikTok Developer Client Secret
+    tiktok_redirect_uri: str = ""
+    tiktok_scope: str = ""  # 기본 스코프
+    ngrok_auth_token: str = ""    
+
     # 프론트엔드 URL (OAuth 콜백 후 리다이렉트용)
     frontend_url: str = "http://localhost:8080"  # 프론트엔드 기본 URL
     

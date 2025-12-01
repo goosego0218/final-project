@@ -10,21 +10,20 @@ from sqlalchemy.orm import Session
 from datetime import datetime, timedelta, timezone
 import secrets
 import json
-from urllib.parse import quote
+from urllib.parse import quote, urlencode
 
 from app.schemas.social import (
     YouTubeUploadRequest, 
     YouTubeUploadResponse,
-    InstagramUploadRequest,
-    InstagramUploadResponse,
+    TikTokUploadRequest,
+    TikTokUploadResponse,
 )
 from app.services.social_service import (
     upload_video_to_youtube, 
-    upload_reels_to_instagram,
-    verify_instagram_business_account,
+    upload_video_to_tiktok,
     YOUTUBE_SCOPES,
-    INSTAGRAM_SCOPES,
 )
+
 from app.db.orm import get_orm_session
 from app.core.deps import get_current_user
 from app.models.auth import UserInfo
@@ -371,218 +370,201 @@ def upload_video_to_youtube_endpoint(
         )
 
 
-@router.get("/instagram/auth-url")
-def get_instagram_auth_url(
+@router.get("/tiktok/auth-url")
+def get_tiktok_auth_url(
     current_user: UserInfo = Depends(get_current_user),
 ):
     """
-    Instagram OAuth 인증 URL 생성
-    - Facebook Graph API 사용
+    TikTok OAuth 인증 URL 생성
     """
-    if not settings.facebook_app_id or not settings.facebook_app_secret:
+    if not settings.tiktok_client_key or not settings.tiktok_client_secret or not settings.tiktok_redirect_uri:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Instagram 연동이 설정되지 않았습니다.",
+            detail="TikTok 연동이 설정되지 않았습니다.",
         )
-    
-    # CSRF 방지를 위한 state 생성
+
+    # CSRF 방지를 위한 state 생성 (user_id 포함)
     state = f"{current_user.id}:{secrets.token_urlsafe(32)}"
-    
-    # Facebook OAuth URL 생성
-    auth_url = (
-        f"https://www.facebook.com/v20.0/dialog/oauth?"
-        f"client_id={settings.facebook_app_id}&"
-        f"redirect_uri={quote(settings.facebook_redirect_uri)}&"
-        f"scope={','.join(INSTAGRAM_SCOPES)}&"
-        f"state={state}&"
-        f"response_type=code"
-    )
-    
+
+    params = {
+        "client_key": settings.tiktok_client_key,
+        "response_type": "code",
+        "scope": settings.tiktok_scope,
+        "redirect_uri": settings.tiktok_redirect_uri,
+        "state": state,
+    }
+
+    auth_url = "https://www.tiktok.com/v2/auth/authorize/?" + urlencode(params)
+
     return {
         "auth_url": auth_url,
-        "state": state
+        "state": state,
     }
 
 
-@router.get("/instagram/callback")
-def instagram_oauth_callback(
-    code: str = Query(None, description="Facebook에서 받은 authorization code"),
+@router.get("/tiktok/callback")
+def tiktok_oauth_callback(
+    code: str = Query(None, description="TikTok authorization code"),
     state: str = Query(None, description="CSRF 방지용 state"),
-    error: str = Query(None, description="Facebook OAuth 에러"),
+    scopes: str | None = Query(None, description="부여된 scope 문자열"),
+    error: str | None = Query(None, description="TikTok OAuth 에러"),
+    error_description: str | None = Query(None, description="에러 상세 메시지"),
     db: Session = Depends(get_orm_session),
 ):
     """
-    Instagram OAuth 콜백 처리
+    TikTok OAuth 콜백 처리
     - code를 access_token으로 교환
-    - Instagram Business Account ID 조회
+    - open_id 조회
     - DB에 저장
     - 프론트엔드로 리다이렉트
     """
     import requests
-    
+
     frontend_base_url = settings.frontend_url.rstrip('/')
-    
-    print(f"[DEBUG] Instagram OAuth Callback - code: {code is not None}, state: {state is not None}, error: {error}")
-    
+
+    print(f"[DEBUG] TikTok OAuth Callback - code: {code is not None}, state: {state is not None}, error: {error}")
+
+    # 1) 에러 파라미터 처리
     if error:
-        print(f"[ERROR] Facebook OAuth 에러: {error}")
-        user_message = f"Instagram 연동 중 오류가 발생했습니다. ({error})"
-        frontend_url = f"{frontend_base_url}/account?instagram_connected=error&message=" + quote(user_message)
+        print(f"[ERROR] TikTok OAuth 에러: {error} ({error_description})")
+        user_message = f"TikTok 연동 중 오류가 발생했습니다. ({error})"
+        frontend_url = f"{frontend_base_url}/account?tiktok_connected=error&message=" + quote(user_message)
         return RedirectResponse(url=frontend_url, status_code=302)
-    
+
+    # 2) code/state 필수
     if not code or not state:
-        print(f"[ERROR] code 또는 state가 없습니다.")
+        print("[ERROR] code 또는 state가 없습니다.")
         user_message = "인증 정보를 받을 수 없습니다."
-        frontend_url = f"{frontend_base_url}/account?instagram_connected=error&message=" + quote(user_message)
+        frontend_url = f"{frontend_base_url}/account?tiktok_connected=error&message=" + quote(user_message)
         return RedirectResponse(url=frontend_url, status_code=302)
-    
+
+    # 3) state에서 user_id 파싱
     try:
-        # state에서 user_id 추출
-        try:
-            user_id_str, _ = state.split(":", 1)
-            user_id = int(user_id_str)
-        except (ValueError, IndexError):
-            frontend_url = f"{frontend_base_url}/account?instagram_connected=error&message=" + quote("잘못된 요청입니다.")
-            return RedirectResponse(url=frontend_url)
-        
-        # 사용자 확인
-        user = db.get(UserInfo, user_id)
-        if not user:
-            frontend_url = f"{frontend_base_url}/account?instagram_connected=error&message=" + quote("사용자를 찾을 수 없습니다.")
-            return RedirectResponse(url=frontend_url)
-        
-        # code를 access_token으로 교환
-        token_response = requests.post(
-            "https://graph.facebook.com/v20.0/oauth/access_token",
-            params={
-                "client_id": settings.facebook_app_id,
-                "client_secret": settings.facebook_app_secret,
-                "redirect_uri": settings.facebook_redirect_uri,
-                "code": code,
-            }
-        )
-        
-        if token_response.status_code != 200:
-            print(f"[ERROR] 토큰 교환 실패: {token_response.text}")
-            frontend_url = f"{frontend_base_url}/account?instagram_connected=error&message=" + quote("토큰 교환에 실패했습니다.")
-            return RedirectResponse(url=frontend_url)
-        
-        token_data = token_response.json()
+        user_id_str, _ = state.split(":", 1)
+        user_id = int(user_id_str)
+    except Exception:
+        print(f"[ERROR] 잘못된 state 값: {state}")
+        user_message = "state 값이 올바르지 않습니다."
+        frontend_url = f"{frontend_base_url}/account?tiktok_connected=error&message=" + quote(user_message)
+        return RedirectResponse(url=frontend_url, status_code=302)
+
+    # 4) 사용자 존재 여부 확인
+    user = db.query(UserInfo).filter(UserInfo.id == user_id).first()
+    if not user:
+        print(f"[ERROR] user_id={user_id} 사용자를 찾을 수 없습니다.")
+        user_message = "사용자 정보를 찾을 수 없습니다."
+        frontend_url = f"{frontend_base_url}/account?tiktok_connected=error&message=" + quote(user_message)
+        return RedirectResponse(url=frontend_url, status_code=302)
+
+    # 5) TikTok 토큰 교환
+    if not settings.tiktok_client_key or not settings.tiktok_client_secret or not settings.tiktok_redirect_uri:
+        user_message = "TikTok 연동 설정이 올바르지 않습니다."
+        frontend_url = f"{frontend_base_url}/account?tiktok_connected=error&message=" + quote(user_message)
+        return RedirectResponse(url=frontend_url, status_code=302)
+
+    token_url = "https://open.tiktokapis.com/v2/oauth/token/"
+
+    payload = {
+        "client_key": settings.tiktok_client_key,
+        "client_secret": settings.tiktok_client_secret,
+        "code": code,
+        "grant_type": "authorization_code",
+        "redirect_uri": settings.tiktok_redirect_uri,
+    }
+
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+
+    try:
+        resp = requests.post(token_url, data=payload, headers=headers, timeout=10)
+        token_data = resp.json()
+        print(f"[DEBUG] TikTok token response: {token_data}")
+
+        if "error" in token_data:
+            raise Exception(str(token_data))
+
         access_token = token_data.get("access_token")
-        expires_in = token_data.get("expires_in", 3600)  # 기본 1시간
-        
-        if not access_token:
-            frontend_url = f"{frontend_base_url}/account?instagram_connected=error&message=" + quote("액세스 토큰을 받을 수 없습니다.")
-            return RedirectResponse(url=frontend_url)
-        
-        # Instagram Business Account ID 조회
-        pages_response = requests.get(
-            "https://graph.facebook.com/v20.0/me/accounts",
-            params={
-                "access_token": access_token,
-                "fields": "id,name,instagram_business_account"
-            }
-        )
-        
-        platform_user_id = None
-        email = None
-        
-        if pages_response.status_code == 200:
-            pages_data = pages_response.json()
-            for page in pages_data.get('data', []):
-                ig_account = page.get('instagram_business_account')
-                if ig_account:
-                    platform_user_id = ig_account.get('id')
-                    # Instagram 계정 정보 조회
-                    ig_info_response = requests.get(
-                        f"https://graph.facebook.com/v20.0/{platform_user_id}",
-                        params={
-                            "access_token": access_token,
-                            "fields": "id,username"
-                        }
-                    )
-                    if ig_info_response.status_code == 200:
-                        ig_info = ig_info_response.json()
-                        email = ig_info.get('username', '')
-                    break
-        
-        # 토큰 만료 시간 계산
-        kst = timezone(timedelta(hours=9))
-        token_expires_at = datetime.now(kst) + timedelta(seconds=expires_in)
-        
-        # DB에 저장
+        open_id = token_data.get("open_id")
+        granted_scope = token_data.get("scope") or scopes
+        refresh_token = token_data.get("refresh_token")
+        expires_in = token_data.get("expires_in")
+        token_type = token_data.get("token_type")
+
+        if not access_token or not open_id:
+            raise Exception("access_token 또는 open_id가 없습니다.")
+
+        # 6) 토큰 만료 시간 계산
+        token_expires_at = None
+        if expires_in:
+            kst = timezone(timedelta(hours=9))
+            token_expires_at = datetime.now(kst) + timedelta(seconds=expires_in)
+
+        # 7) DB 저장
         create_or_update_social_connection(
             db=db,
             user_id=user_id,
-            platform='instagram',
+            platform='tiktok',
             access_token=access_token,
-            refresh_token=None,  # Facebook은 장기 토큰을 별도로 요청해야 함
+            refresh_token=refresh_token,
             token_expires_at=token_expires_at,
-            platform_user_id=platform_user_id,
-            email=email,
+            platform_user_id=open_id,
+            email=None,
         )
-        
-        print(f"[SUCCESS] Instagram 연동 성공 - user_id: {user_id}, ig_user_id: {platform_user_id}")
-        frontend_url = f"{frontend_base_url}/account?instagram_connected=success"
+
+        print(f"[SUCCESS] TikTok 연동 성공 - user_id: {user_id}, open_id: {open_id}")
+        frontend_url = f"{frontend_base_url}/account?tiktok_connected=success"
         return RedirectResponse(url=frontend_url, status_code=302)
-        
+
     except Exception as e:
-        print(f"[ERROR] Instagram OAuth 콜백 처리 중 예외 발생: {str(e)}")
+        print(f"[ERROR] TikTok OAuth 콜백 처리 중 예외 발생: {str(e)}")
         import traceback
         traceback.print_exc()
-        
-        user_message = "Instagram 연동 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
-        frontend_url = f"{frontend_base_url}/account?instagram_connected=error&message=" + quote(user_message)
+
+        user_message = "TikTok 연동 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
+        frontend_url = f"{frontend_base_url}/account?tiktok_connected=error&message=" + quote(user_message)
         return RedirectResponse(url=frontend_url, status_code=302)
 
 
-@router.get("/instagram/status")
-def get_instagram_connection_status(
+@router.get("/tiktok/status")
+def get_tiktok_connection_status(
     current_user: UserInfo = Depends(get_current_user),
     db: Session = Depends(get_orm_session),
 ):
     """
-    Instagram 연동 상태 조회
+    TikTok 연동 상태 조회
     """
-    connection = get_social_connection(db, current_user.id, 'instagram')
+    connection = get_social_connection(db, current_user.id, 'tiktok')
     
     if connection:
-        # Business Account 확인
-        verification = verify_instagram_business_account(db, current_user.id)
         return {
             "connected": True,
-            "is_business": verification['is_business'],
-            "username": verification['username'],
-            "ig_user_id": verification['ig_user_id'],
-            "email": connection.email,
             "platform_user_id": connection.platform_user_id,
             "connected_at": connection.connected_at.isoformat() if connection.connected_at else None,
-            "error": verification.get('error'),
         }
     else:
         return {
             "connected": False,
-            "is_business": False,
-            "username": None,
-            "ig_user_id": None,
-            "email": None,
             "platform_user_id": None,
             "connected_at": None,
-            "error": None,
         }
 
 
-@router.delete("/instagram/disconnect")
-def disconnect_instagram(
+@router.delete("/tiktok/disconnect")
+def disconnect_tiktok(
     current_user: UserInfo = Depends(get_current_user),
     db: Session = Depends(get_orm_session),
 ):
     """
-    Instagram 연동 해제
+    TikTok 연동 해제
     """
     try:
-        delete_social_connection(db, current_user.id, 'instagram')
-        return {"message": "Instagram 연동이 해제되었습니다."}
+        delete_social_connection(db, current_user.id, 'tiktok')
+        return {
+            "platform": "tiktok",
+            "connected": False,
+            "platform_user_id": None,
+            "connected_at": None,
+            "error": None,
+        }
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -590,25 +572,24 @@ def disconnect_instagram(
         )
 
 
-@router.post("/instagram/upload", response_model=InstagramUploadResponse)
-def upload_reels_to_instagram_endpoint(
-    request: InstagramUploadRequest,
+@router.post("/tiktok/upload", response_model=TikTokUploadResponse)
+def upload_video_to_tiktok_endpoint(
+    request: TikTokUploadRequest,
     current_user: UserInfo = Depends(get_current_user),
     db: Session = Depends(get_orm_session),
 ):
     """
-    Instagram에 릴스 업로드
+    TikTok Draft 업로드
     """
     try:
-        result = upload_reels_to_instagram(
+        result = upload_video_to_tiktok(
             db=db,
             user_id=current_user.id,
             video_url=request.video_url,
             caption=request.caption,
             project_id=request.project_id,
-            share_to_feed=request.share_to_feed,
         )
-        return InstagramUploadResponse(**result)
+        return TikTokUploadResponse(**result)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

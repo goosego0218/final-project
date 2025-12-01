@@ -20,13 +20,6 @@ YOUTUBE_SCOPES = [
     'https://www.googleapis.com/auth/youtube.readonly'  # 채널 정보 조회 (읽기 전용)
 ]
 
-# Instagram API 스코프
-INSTAGRAM_SCOPES = [
-    'instagram_basic',
-    'instagram_content_publish',
-    'pages_show_list',
-    'pages_read_engagement',
-]
 
 def get_social_connection(
     db: Session,
@@ -339,233 +332,127 @@ def upload_video_to_youtube(
                 print(f"[WARN] 임시 파일 삭제 실패: {e}")
 
 
-def verify_instagram_business_account(
-    db: Session,
-    user_id: int,
-) -> dict:
-    """
-    Instagram Business Account 확인 및 정보 조회
-    
-    Returns:
-        dict: {
-            'is_business': bool,
-            'ig_user_id': str | None,
-            'username': str | None,
-            'error': str | None
-        }
-    """
-    import requests
-    
-    connection = get_social_connection(db, user_id, 'instagram')
-    if not connection:
-        return {
-            'is_business': False,
-            'ig_user_id': None,
-            'username': None,
-            'error': 'Instagram 연동이 필요합니다.'
-        }
-    
-    access_token = connection.access_token
-    
-    try:
-        # Facebook 페이지 목록 조회
-        pages_response = requests.get(
-            "https://graph.facebook.com/v20.0/me/accounts",
-            params={
-                "access_token": access_token,
-                "fields": "id,name,instagram_business_account"
-            }
-        )
-        
-        if pages_response.status_code != 200:
-            return {
-                'is_business': False,
-                'ig_user_id': None,
-                'username': None,
-                'error': f'페이지 조회 실패: {pages_response.text}'
-            }
-        
-        pages_data = pages_response.json()
-        
-        # Instagram Business Account가 연결된 페이지 찾기
-        for page in pages_data.get('data', []):
-            ig_account = page.get('instagram_business_account')
-            if ig_account:
-                ig_user_id = ig_account.get('id')
-                
-                # Instagram 계정 정보 조회
-                ig_info_response = requests.get(
-                    f"https://graph.facebook.com/v20.0/{ig_user_id}",
-                    params={
-                        "access_token": access_token,
-                        "fields": "id,username,account_type"
-                    }
-                )
-                
-                if ig_info_response.status_code == 200:
-                    ig_info = ig_info_response.json()
-                    return {
-                        'is_business': True,
-                        'ig_user_id': ig_user_id,
-                        'username': ig_info.get('username'),
-                        'error': None
-                    }
-        
-        return {
-            'is_business': False,
-            'ig_user_id': None,
-            'username': None,
-            'error': 'Instagram Business Account가 연결된 Facebook 페이지를 찾을 수 없습니다.'
-        }
-        
-    except Exception as e:
-        return {
-            'is_business': False,
-            'ig_user_id': None,
-            'username': None,
-            'error': f'확인 중 오류 발생: {str(e)}'
-        }
-
-
-def upload_reels_to_instagram(
+def upload_video_to_tiktok(
     db: Session,
     user_id: int,
     video_url: str,
     caption: str,
     project_id: int,
-    share_to_feed: bool = True,
 ) -> dict:
     """
-    Instagram에 릴스 업로드
-    
+    TikTok Draft 업로드 (FILE_UPLOAD 방식).
+
     Args:
         db: SQLAlchemy Session
         user_id: 사용자 ID
         video_url: NCP Object Storage의 비디오 URL
-        caption: 릴스 캡션
-        project_id: 프로젝트 ID (브랜드 프로필 가져오기 위해)
-        share_to_feed: 릴스+피드에 함께 올리기 여부
-        
+        caption: TikTok 캡션(타이틀)
+        project_id: 프로젝트 ID (로깅/확장용)
+
     Returns:
         dict: {
             'success': bool,
-            'media_id': str,
-            'message': str
+            'publish_id': str | None,
+            'message': str,
         }
-        
+
     Raises:
         ValueError: 연동 정보가 없거나 업로드 실패 시
     """
-    import requests
-    import time
-    from app.services.project_service import load_brand_profile_for_agent
-    from app.agents.state import BrandProfile
-    
-    # 1. Instagram Business Account 확인
-    verification = verify_instagram_business_account(db, user_id)
-    if not verification['is_business']:
-        raise ValueError(
-            verification['error'] or 
-            "Instagram Business Account가 필요합니다. Facebook 페이지와 연결된 Business Account를 확인해주세요."
-        )
-    
-    access_token = get_social_connection(db, user_id, 'instagram').access_token
-    ig_user_id = verification['ig_user_id']
-    
-    # 2. 브랜드 프로필에서 해시태그 자동 생성
-    brand_profile: BrandProfile = load_brand_profile_for_agent(db, project_id)
-    
-    # core_keywords를 해시태그로 변환
-    hashtags = []
-    if brand_profile.get("core_keywords"):
-        import re
-        keywords_str = brand_profile["core_keywords"]
-        keywords = re.split(r'[,/，、\s]+', keywords_str)
-        for keyword in keywords:
-            keyword = keyword.strip()
-            if keyword:
-                hashtag = f"#{keyword.replace(' ', '')}"
-                hashtags.append(hashtag)
-    
-    # 캡션에 해시태그 추가
-    if hashtags:
-        caption_with_hashtags = f"{caption}\n\n{' '.join(hashtags)}"
-    else:
-        caption_with_hashtags = caption
-    
-    # 3. 컨테이너 생성 (Step 1)
-    create_response = requests.post(
-        f"https://graph.facebook.com/v20.0/{ig_user_id}/media",
-        data={
-            "media_type": "REELS",
-            "video_url": video_url,
-            "caption": caption_with_hashtags,
-            "share_to_feed": "true" if share_to_feed else "false",
-            "access_token": access_token,
+    try:
+        import httpx
+        import requests
+        from app.core.config import settings
+
+        # 1. TikTok 연동 정보 조회
+        connection = get_social_connection(db, user_id, 'tiktok')
+        if not connection:
+            raise ValueError("TikTok 연동이 필요합니다.")
+
+        access_token = connection.access_token
+
+        # 2. NCP에서 영상 다운로드
+        with httpx.Client(timeout=300.0) as client:
+            with client.stream('GET', video_url) as response:
+                response.raise_for_status()
+                video_bytes = response.read()
+
+        file_size = len(video_bytes)
+        if file_size == 0:
+            raise ValueError("영상 파일 크기가 0입니다.")
+
+        # 3. TikTok init (FILE_UPLOAD)
+        init_url = "https://open.tiktokapis.com/v2/post/publish/inbox/video/init/"
+
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json; charset=UTF-8",
         }
-    )
-    
-    if create_response.status_code != 200:
-        raise ValueError(f"컨테이너 생성 실패: {create_response.text}")
-    
-    create_data = create_response.json()
-    container_id = create_data.get("id")
-    
-    if not container_id:
-        raise ValueError(f"컨테이너 생성 실패: {create_data}")
-    
-    print(f"[INFO] Instagram 컨테이너 생성 완료 - container_id: {container_id}")
-    
-    # 4. 업로드 처리 상태 확인 (Step 2)
-    max_attempts = 30  # 최대 150초 대기 (5초 간격)
-    for attempt in range(max_attempts):
-        status_response = requests.get(
-            f"https://graph.facebook.com/v20.0/{container_id}",
-            params={
-                "fields": "status_code",
-                "access_token": access_token,
-            }
-        )
-        
-        if status_response.status_code != 200:
-            raise ValueError(f"상태 확인 실패: {status_response.text}")
-        
-        status_data = status_response.json()
-        status_code = status_data.get("status_code")
-        
-        print(f"[INFO] Instagram 상태 확인 ({attempt + 1}/{max_attempts}): {status_code}")
-        
-        if status_code == "FINISHED":
-            break
-        elif status_code in ("ERROR", "EXPIRED"):
-            raise ValueError(f"릴스 처리 실패: {status_data}")
-        
-        time.sleep(5)  # 5초 대기
-    else:
-        raise ValueError("릴스 처리 시간 초과")
-    
-    # 5. 실제 릴스 게시 (Step 3)
-    publish_response = requests.post(
-        f"https://graph.facebook.com/v20.0/{ig_user_id}/media_publish",
-        data={
-            "creation_id": container_id,
-            "access_token": access_token,
+
+        body = {
+            "post_info": {
+                "title": caption or "AI 마케팅 파트너 자동 업로드",
+            },
+            "source_info": {
+                "source": "FILE_UPLOAD",
+                "video_size": file_size,
+                "chunk_size": file_size,
+                "total_chunk_count": 1,
+            },
         }
-    )
-    
-    if publish_response.status_code != 200:
-        raise ValueError(f"릴스 게시 실패: {publish_response.text}")
-    
-    publish_data = publish_response.json()
-    media_id = publish_data.get("id")
-    
-    if not media_id:
-        raise ValueError(f"릴스 게시 실패: {publish_data}")
-    
-    print(f"[SUCCESS] Instagram 릴스 업로드 완료 - media_id: {media_id}")
-    
-    return {
-        'success': True,
-        'media_id': media_id,
-        'message': 'Instagram에 성공적으로 업로드되었습니다.'
-    }
+
+        init_resp = requests.post(init_url, headers=headers, json=body, timeout=30)
+        init_data = init_resp.json()
+
+        error = init_data.get("error") or {}
+        if error.get("code") not in (None, "", "ok"):
+            raise ValueError(f"TikTok init 실패: {init_data}")
+
+        data = init_data.get("data") or {}
+        publish_id = data.get("publish_id")
+        upload_url = data.get("upload_url")
+
+        if not upload_url:
+            raise ValueError("TikTok init 응답에 upload_url이 없습니다.")
+
+        # 4. TikTok upload (단일 청크)
+        content_range = f"bytes 0-{file_size - 1}/{file_size}"
+
+        upload_headers = {
+            "Content-Type": "video/mp4",
+            "Content-Range": content_range,
+        }
+
+        upload_resp = requests.put(
+            upload_url,
+            headers=upload_headers,
+            data=video_bytes,
+            timeout=300,
+        )
+
+        # 응답 바디는 지금은 로그 용도만, API에서는 success/메시지만 넘깁니다.
+        try:
+            if upload_resp.content:
+                upload_data = upload_resp.json()
+            else:
+                upload_data = {"status_code": upload_resp.status_code}
+            print(f"[DEBUG] TikTok upload response: {upload_data}")
+        except Exception:
+            print(f"[WARN] TikTok upload 응답 JSON 파싱 실패: {upload_resp.text[:500]}")
+
+        return {
+            "success": True,
+            "publish_id": publish_id,
+            "message": "TikTok Draft 업로드 요청 완료.",
+        }
+
+    except ValueError:
+        # 서비스 레이어에서 의미 있는 메시지 그대로 위로 올림
+        raise
+    except Exception as e:
+        print(f"[ERROR] TikTok 업로드 중 오류: {e}")
+        import traceback
+        traceback.print_exc()
+        raise ValueError(f"업로드 중 오류 발생: {str(e)}")
+
+        
