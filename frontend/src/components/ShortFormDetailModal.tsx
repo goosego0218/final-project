@@ -12,18 +12,21 @@ import {
   Comment,
   getComments,
   createComment,
-  updateComment,
   deleteComment,
   toggleLike,
   getLikeStatus,
 } from "@/lib/api";
-import { MoreVertical, Edit2, Trash2 } from "lucide-react";
+import { Trash2, X } from "lucide-react";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface ShortFormDetailModalProps {
   open: boolean;
@@ -45,23 +48,38 @@ const ShortFormDetailModal = ({ open, short, onClose }: ShortFormDetailModalProp
   const [commentText, setCommentText] = useState("");
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
-  const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
-  const [editingCommentText, setEditingCommentText] = useState("");
+  const [deleteCommentId, setDeleteCommentId] = useState<number | null>(null);
 
   // 현재 사용자 ID 가져오기 (JWT 토큰에서)
   const getCurrentUserId = (): number | null => {
     try {
       const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
-      if (!token) return null;
+      if (!token) {
+        console.log('[getCurrentUserId] No token found');
+        return null;
+      }
       
       // JWT 토큰 디코딩 (payload는 두 번째 부분)
       const parts = token.split('.');
-      if (parts.length !== 3) return null;
+      if (parts.length !== 3) {
+        console.log('[getCurrentUserId] Invalid token format');
+        return null;
+      }
       
       const payload = JSON.parse(atob(parts[1]));
-      return payload.sub || payload.user_id || payload.id || null;
+      const userId = payload.sub || payload.user_id || payload.id;
+      
+      if (!userId) {
+        console.log('[getCurrentUserId] No user ID in payload:', payload);
+        return null;
+      }
+      
+      // sub는 문자열로 저장되어 있으므로 숫자로 변환
+      const userIdNum = typeof userId === 'string' ? parseInt(userId, 10) : userId;
+      console.log('[getCurrentUserId] Found user ID:', userIdNum);
+      return userIdNum;
     } catch (error) {
-      console.error('Failed to decode token:', error);
+      console.error('[getCurrentUserId] Failed to decode token:', error);
       return null;
     }
   };
@@ -188,25 +206,6 @@ const ShortFormDetailModal = ({ open, short, onClose }: ShortFormDetailModalProp
     },
   });
 
-  // 댓글 수정 mutation
-  const updateCommentMutation = useMutation({
-    mutationFn: ({ commentId, content }: { commentId: number; content: string }) =>
-      updateComment(commentId, { content }),
-    onSuccess: async () => {
-      setEditingCommentId(null);
-      setEditingCommentText("");
-      await refetchComments();
-      toast({ description: "댓글이 수정되었습니다" });
-    },
-    onError: (error: any) => {
-      console.error("[ShortFormDetailModal] 댓글 수정 에러:", error);
-      toast({
-        description: error?.message || "댓글 수정에 실패했습니다",
-        variant: "destructive",
-      });
-    },
-  });
-
   // 댓글 삭제 mutation
   const deleteCommentMutation = useMutation({
     mutationFn: (commentId: number) => deleteComment(commentId),
@@ -329,11 +328,12 @@ const ShortFormDetailModal = ({ open, short, onClose }: ShortFormDetailModalProp
                     ) : (
                       comments.map((comment) => {
                         const currentUserId = getCurrentUserId();
-                        const isMyComment = currentUserId !== null && comment.user_id === currentUserId;
-                        const isEditing = editingCommentId === comment.comment_id;
+                        const isMyComment = currentUserId !== null && Number(comment.user_id) === Number(currentUserId);
+                        
+                        console.log('[Comment] Current user ID:', currentUserId, 'Comment user ID:', comment.user_id, 'Is my comment:', isMyComment);
 
                         return (
-                          <div key={comment.comment_id} className="flex gap-3 group">
+                          <div key={comment.comment_id} className="flex gap-3">
                             <Avatar className="h-8 w-8 flex-shrink-0">
                               <AvatarFallback className="bg-primary text-primary-foreground text-xs">
                                 {comment.user_nickname.charAt(0)}
@@ -347,82 +347,14 @@ const ShortFormDetailModal = ({ open, short, onClose }: ShortFormDetailModalProp
                                 <span className="text-xs text-muted-foreground">
                                   {formatCommentDate(comment.create_dt)}
                                 </span>
-                                {isMyComment && !isEditing && (
-                                  <div className="ml-auto">
-                                    <DropdownMenu>
-                                      <DropdownMenuTrigger asChild>
-                                        <Button
-                                          variant="ghost"
-                                          size="icon"
-                                          className="h-6 w-6 opacity-0 group-hover:opacity-100"
-                                        >
-                                          <MoreVertical className="h-3 w-3" />
-                                        </Button>
-                                      </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                      <DropdownMenuItem
-                                        onClick={() => {
-                                          setEditingCommentId(comment.comment_id);
-                                          setEditingCommentText(comment.content);
-                                        }}
-                                      >
-                                        <Edit2 className="h-4 w-4 mr-2" />
-                                        수정
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem
-                                        onClick={() => {
-                                          if (confirm("댓글을 삭제하시겠습니까?")) {
-                                            deleteCommentMutation.mutate(comment.comment_id);
-                                          }
-                                        }}
-                                        className="text-destructive"
-                                      >
-                                        <Trash2 className="h-4 w-4 mr-2" />
-                                        삭제
-                                      </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
-                                  </div>
+                                {isMyComment && (
+                                  <Trash2
+                                    className="h-3 w-3 text-muted-foreground cursor-pointer"
+                                    onClick={() => setDeleteCommentId(comment.comment_id)}
+                                  />
                                 )}
                               </div>
-                              {isEditing ? (
-                                <div className="space-y-2">
-                                  <Textarea
-                                    value={editingCommentText}
-                                    onChange={(e) => setEditingCommentText(e.target.value)}
-                                    className="min-h-[60px] resize-none"
-                                    rows={2}
-                                  />
-                                  <div className="flex gap-2">
-                                    <Button
-                                      size="sm"
-                                      onClick={() => {
-                                        if (editingCommentText.trim()) {
-                                          updateCommentMutation.mutate({
-                                            commentId: comment.comment_id,
-                                            content: editingCommentText.trim(),
-                                          });
-                                        }
-                                      }}
-                                      disabled={!editingCommentText.trim() || updateCommentMutation.isPending}
-                                    >
-                                      저장
-                                    </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => {
-                                        setEditingCommentId(null);
-                                        setEditingCommentText("");
-                                      }}
-                                    >
-                                      취소
-                                    </Button>
-                                  </div>
-                                </div>
-                              ) : (
-                                <p className="text-sm text-foreground break-words">{comment.content}</p>
-                              )}
+                              <p className="text-sm text-foreground break-words">{comment.content}</p>
                             </div>
                           </div>
                         );
@@ -523,6 +455,45 @@ const ShortFormDetailModal = ({ open, short, onClose }: ShortFormDetailModalProp
           }
         }}
       />
+
+      {/* 댓글 삭제 확인 다이얼로그 */}
+      <AlertDialog open={deleteCommentId !== null} onOpenChange={(open) => !open && setDeleteCommentId(null)}>
+        <AlertDialogContent
+          onOverlayClick={() => setDeleteCommentId(null)}
+        >
+          {/* X 버튼 */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-4 top-4 h-6 w-6 rounded-sm opacity-70 ring-offset-background transition-opacity hover:bg-transparent hover:opacity-100 hover:text-foreground focus:outline-none focus:ring-0 z-10"
+            onClick={() => setDeleteCommentId(null)}
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </Button>
+          <AlertDialogHeader>
+            <AlertDialogTitle>댓글을 삭제하시겠습니까?</AlertDialogTitle>
+            <AlertDialogDescription>
+              삭제한 댓글은 복구할 수 없습니다.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteCommentMutation.isPending}>취소</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (deleteCommentId !== null) {
+                  deleteCommentMutation.mutate(deleteCommentId);
+                  setDeleteCommentId(null);
+                }
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteCommentMutation.isPending}
+            >
+              {deleteCommentMutation.isPending ? "삭제 중..." : "삭제"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };

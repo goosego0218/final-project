@@ -354,6 +354,7 @@ def upload_video_to_youtube_endpoint(
             description=request.description or "",  # 사용 안 함 (백엔드에서 자동 생성)
             tags=request.tags or [],
             privacy=request.privacy,
+            prod_id=request.prod_id,  # 선택적 prod_id 전달
         )
         
         return YouTubeUploadResponse(**result)

@@ -5,7 +5,7 @@
 # - 2025-12-XX: 전략 1 적용 - relationship 제거
 
 from sqlalchemy.orm import Session
-from app.models.project import GenerationProd
+from app.models.project import GenerationProd, ProdGroup
 from app.utils.file_utils import upload_base64_to_ncp, get_file_url
 
 
@@ -63,13 +63,16 @@ def get_logo_list(
 ) -> list[GenerationProd]:
     """
     프로젝트의 로고 목록 조회
+    - 프로젝트가 삭제되지 않은 경우만 조회
     """
     return (
         db.query(GenerationProd)
+        .join(ProdGroup, GenerationProd.grp_id == ProdGroup.grp_id)
         .filter(
             GenerationProd.grp_id == project_id,
             GenerationProd.type_id == prod_type_id,
-            GenerationProd.del_yn == 'N'
+            GenerationProd.del_yn == 'N',
+            ProdGroup.del_yn == 'N'  # 프로젝트가 삭제되지 않은 것만
         )
         .order_by(GenerationProd.create_dt.desc())
         .all()

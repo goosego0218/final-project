@@ -14,6 +14,7 @@ class YouTubeUploadRequest(BaseModel):
     description: Optional[str] = ""  # 사용 안 함 (백엔드에서 자동 생성)
     tags: Optional[List[str]] = []
     privacy: str = "public"
+    prod_id: Optional[int] = None  # 생성물 ID (선택적, 없으면 video_url로 찾음)
 
 
 class YouTubeUploadResponse(BaseModel):

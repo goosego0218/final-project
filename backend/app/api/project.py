@@ -76,15 +76,19 @@ def get_user_projects_endpoint(
     project_ids = [p.grp_id for p in projects]
     
     # 한 번의 쿼리로 모든 프로젝트의 로고/숏폼 개수 조회
+    # 프로젝트가 삭제되지 않은 경우만 조회
+    from app.models.project import ProdGroup
     counts = (
         db.query(
             GenerationProd.grp_id,
             GenerationProd.type_id,
             func.count(GenerationProd.prod_id).label('count')
         )
+        .join(ProdGroup, GenerationProd.grp_id == ProdGroup.grp_id)
         .filter(
             GenerationProd.grp_id.in_(project_ids),
-            GenerationProd.del_yn == 'N'
+            GenerationProd.del_yn == 'N',
+            ProdGroup.del_yn == 'N'  # 프로젝트가 삭제되지 않은 것만
         )
         .group_by(GenerationProd.grp_id, GenerationProd.type_id)
         .all()
