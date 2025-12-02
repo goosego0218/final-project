@@ -12,9 +12,21 @@ import {
   Comment,
   getComments,
   createComment,
+  deleteComment,
   toggleLike,
   getLikeStatus,
 } from "@/lib/api";
+import { Trash2, X } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface LogoDetailModalProps {
   open: boolean;
@@ -36,6 +48,41 @@ const LogoDetailModal = ({ open, logo, onClose }: LogoDetailModalProps) => {
   const [commentText, setCommentText] = useState("");
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
+  const [deleteCommentId, setDeleteCommentId] = useState<number | null>(null);
+
+  // 현재 사용자 ID 가져오기 (JWT 토큰에서)
+  const getCurrentUserId = (): number | null => {
+    try {
+      const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+      if (!token) {
+        console.log('[getCurrentUserId] No token found');
+        return null;
+      }
+      
+      // JWT 토큰 디코딩 (payload는 두 번째 부분)
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        console.log('[getCurrentUserId] Invalid token format');
+        return null;
+      }
+      
+      const payload = JSON.parse(atob(parts[1]));
+      const userId = payload.sub || payload.user_id || payload.id;
+      
+      if (!userId) {
+        console.log('[getCurrentUserId] No user ID in payload:', payload);
+        return null;
+      }
+      
+      // sub는 문자열로 저장되어 있으므로 숫자로 변환
+      const userIdNum = typeof userId === 'string' ? parseInt(userId, 10) : userId;
+      console.log('[getCurrentUserId] Found user ID:', userIdNum);
+      return userIdNum;
+    } catch (error) {
+      console.error('[getCurrentUserId] Failed to decode token:', error);
+      return null;
+    }
+  };
 
   const prodId = logo?.prod_id;
 
@@ -148,6 +195,27 @@ const LogoDetailModal = ({ open, logo, onClose }: LogoDetailModalProps) => {
     },
   });
 
+  // 댓글 삭제 mutation
+  const deleteCommentMutation = useMutation({
+    mutationFn: (commentId: number) => deleteComment(commentId),
+    onSuccess: async () => {
+      await refetchComments();
+      // 갤러리 / 메인 인기 섹션도 새로고침 (comment_count 반영)
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["logoGallery"] }),
+        queryClient.invalidateQueries({ queryKey: ["homePopularLogos"] }),
+      ]);
+      toast({ description: "댓글이 삭제되었습니다" });
+    },
+    onError: (error: any) => {
+      console.error("[LogoDetailModal] 댓글 삭제 에러:", error);
+      toast({
+        description: error?.message || "댓글 삭제에 실패했습니다",
+        variant: "destructive",
+      });
+    },
+  });
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -233,26 +301,39 @@ const LogoDetailModal = ({ open, logo, onClose }: LogoDetailModalProps) => {
                         아직 댓글이 없습니다. 첫 댓글을 남겨보세요!
                       </div>
                     ) : (
-                      comments.map((comment) => (
-                        <div key={comment.comment_id} className="flex gap-3">
-                          <Avatar className="h-8 w-8 flex-shrink-0">
-                            <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                              {comment.user_nickname.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-semibold text-sm text-foreground">
-                                {comment.user_nickname}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {formatCommentDate(comment.create_dt)}
-                              </span>
+                      comments.map((comment) => {
+                        const currentUserId = getCurrentUserId();
+                        const isMyComment = currentUserId !== null && Number(comment.user_id) === Number(currentUserId);
+                        
+                        console.log('[Comment] Current user ID:', currentUserId, 'Comment user ID:', comment.user_id, 'Is my comment:', isMyComment);
+
+                        return (
+                          <div key={comment.comment_id} className="flex gap-3">
+                            <Avatar className="h-8 w-8 flex-shrink-0">
+                              <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                                {comment.user_nickname.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-semibold text-sm text-foreground">
+                                  {comment.user_nickname}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  {formatCommentDate(comment.create_dt)}
+                                </span>
+                                {isMyComment && (
+                                  <Trash2
+                                    className="h-3 w-3 text-muted-foreground cursor-pointer"
+                                    onClick={() => setDeleteCommentId(comment.comment_id)}
+                                  />
+                                )}
+                              </div>
+                              <p className="text-sm text-foreground break-words">{comment.content}</p>
                             </div>
-                            <p className="text-sm text-foreground break-words">{comment.content}</p>
                           </div>
-                        </div>
-                      ))
+                        );
+                      })
                     )}
                   </div>
                 </div>
@@ -349,6 +430,45 @@ const LogoDetailModal = ({ open, logo, onClose }: LogoDetailModalProps) => {
           }
         }}
       />
+
+      {/* 댓글 삭제 확인 다이얼로그 */}
+      <AlertDialog open={deleteCommentId !== null} onOpenChange={(open) => !open && setDeleteCommentId(null)}>
+        <AlertDialogContent
+          onOverlayClick={() => setDeleteCommentId(null)}
+        >
+          {/* X 버튼 */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-4 top-4 h-6 w-6 rounded-sm opacity-70 ring-offset-background transition-opacity hover:bg-transparent hover:opacity-100 hover:text-foreground focus:outline-none focus:ring-0 z-10"
+            onClick={() => setDeleteCommentId(null)}
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </Button>
+          <AlertDialogHeader>
+            <AlertDialogTitle>댓글을 삭제하시겠습니까?</AlertDialogTitle>
+            <AlertDialogDescription>
+              삭제한 댓글은 복구할 수 없습니다.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteCommentMutation.isPending}>취소</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (deleteCommentId !== null) {
+                  deleteCommentMutation.mutate(deleteCommentId);
+                  setDeleteCommentId(null);
+                }
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteCommentMutation.isPending}
+            >
+              {deleteCommentMutation.isPending ? "삭제 중..." : "삭제"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };

@@ -10,9 +10,13 @@ from sqlalchemy.orm import Session
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
-from app.models.social import SocialConnection
+from app.models.social import SocialConnection, SocialPost
 from app.models.auth import UserInfo
+from app.models.project import GenerationProd
 from app.utils.encryption import encrypt_token, decrypt_token
+from app.utils.file_utils import get_file_path_from_url
+from app.services.shorts_service import save_shorts_to_storage_and_db
+import base64
 
 # YouTube API 스코프
 YOUTUBE_SCOPES = [
@@ -147,9 +151,10 @@ def upload_video_to_youtube(
     description: str = "",
     tags: list[str] = None,
     privacy: str = "public",
+    prod_id: Optional[int] = None,  # 생성물 ID (선택적, 없으면 video_url로 찾음)
 ) -> dict:
     """
-    YouTube에 비디오 업로드
+    YouTube에 비디오 업로드 및 social_post 테이블에 기록 저장
     
     Args:
         db: SQLAlchemy Session
@@ -160,6 +165,7 @@ def upload_video_to_youtube(
         description: 영상 설명 (사용 안 함, 브랜드 프로필에서 자동 생성)
         tags: 태그 리스트
         privacy: 'public', 'private', 'unlisted'
+        prod_id: 생성물 ID (선택적, 없으면 video_url로 찾음)
         
     Returns:
         dict: {
@@ -186,10 +192,89 @@ def upload_video_to_youtube(
     except ImportError as e:
         raise ValueError(f"필수 라이브러리가 설치되지 않았습니다: {str(e)}")
     
+    # 0. prod_id 찾기 또는 프로젝트에 저장 (중복 저장 방지)
+    if not prod_id:
+        file_path = get_file_path_from_url(video_url)
+        if file_path:
+            # 이미 NCP에 저장된 파일인 경우 file_path로 찾기
+            prod = (
+                db.query(GenerationProd)
+                .filter(
+                    GenerationProd.file_path == file_path,
+                    GenerationProd.del_yn == 'N'
+                )
+                .first()
+            )
+            if prod:
+                prod_id = prod.prod_id
+                print(f"[INFO] 기존 생성물 사용: prod_id={prod_id}")
+            else:
+                # file_path는 있지만 DB에 없는 경우 (비정상)
+                print(f"[WARN] file_path로 prod_id를 찾을 수 없습니다: {file_path}")
+        else:
+            # NCP URL이 아닌 경우 (임시 URL 등) - 비디오 다운로드 후 저장 필요
+            print(f"[INFO] video_url이 NCP URL이 아닙니다. 비디오를 다운로드하여 저장합니다: {video_url}")
+    
+    # prod_id가 없으면 video_url에서 비디오 다운로드 후 프로젝트에 저장
+    if not prod_id:
+        try:
+            import httpx
+            # 비디오 다운로드
+            with httpx.Client(timeout=300.0) as client:
+                response = client.get(video_url)
+                response.raise_for_status()
+                video_bytes = response.content
+            
+            # Base64로 인코딩
+            base64_video = base64.b64encode(video_bytes).decode('utf-8')
+            # Data URL 형식으로 변환
+            base64_video = f"data:video/mp4;base64,{base64_video}"
+            
+            # 프로젝트에 저장 (중복 저장 방지)
+            prod = save_shorts_to_storage_and_db(
+                db=db,
+                base64_video=base64_video,
+                project_id=project_id,
+                prod_type_id=2,  # 쇼츠 타입
+                user_id=user_id,
+            )
+            prod_id = prod.prod_id
+            print(f"[INFO] 비디오를 프로젝트에 저장 완료: prod_id={prod_id}")
+        except Exception as e:
+            print(f"[ERROR] 비디오 다운로드 및 저장 실패: {e}")
+            raise ValueError(f"비디오를 프로젝트에 저장하는데 실패했습니다: {str(e)}")
+    
     # 1. 사용자의 YouTube 연동 정보 가져오기 (복호화된 토큰 반환)
     connection = get_social_connection(db, user_id, 'youtube')
     if not connection:
+        # social_post 레코드 생성 (연동 실패 시)
+        if prod_id:
+            kst = timezone(timedelta(hours=9))
+            social_post = SocialPost(
+                prod_id=prod_id,
+                conn_id=0,  # 임시값 (연동 정보가 없으므로)
+                platform='youtube',
+                status='FAIL',
+                error_message="YouTube 연동이 필요합니다.",
+                requested_at=datetime.now(kst)
+            )
+            db.add(social_post)
+            db.commit()
         raise ValueError("YouTube 연동이 필요합니다.")
+    
+    # social_post 레코드 생성 (업로드 시작 시점)
+    social_post = None
+    if prod_id:
+        kst = timezone(timedelta(hours=9))
+        social_post = SocialPost(
+            prod_id=prod_id,
+            conn_id=connection.conn_id,
+            platform='youtube',
+            status='PENDING',
+            requested_at=datetime.now(kst)
+        )
+        db.add(social_post)
+        db.flush()  # post_id 생성
     
     # 2. 토큰으로 Credentials 생성 (이미 복호화된 상태)
     credentials = Credentials(
@@ -280,32 +365,52 @@ def upload_video_to_youtube(
         }
         
         # 영상 파일 업로드
-        media = MediaFileUpload(
-            temp_file,
-            mimetype='video/*',
-            resumable=True,
-            chunksize=1024*1024  # 1MB chunks
-        )
+        media = None
+        upload_request = None
+        try:
+            media = MediaFileUpload(
+                temp_file,
+                mimetype='video/*',
+                resumable=True,
+                chunksize=1024*1024  # 1MB chunks
+            )
+            
+            upload_request = youtube.videos().insert(
+                part='snippet,status',
+                body=body,
+                media_body=media
+            )
+            
+            response = None
+            print(f"[INFO] YouTube 업로드 시작: {title}")
+            while response is None:
+                status, response = upload_request.next_chunk()
+                if status:
+                    progress = int(status.progress() * 100)
+                    print(f"[INFO] 업로드 진행: {progress}%")
+            
+            video_id = response['id']
+            video_url_youtube = f"https://www.youtube.com/watch?v={video_id}"
+            shorts_url = f"https://www.youtube.com/shorts/{video_id}"
+            
+            print(f"[SUCCESS] YouTube 업로드 완료 - video_id: {video_id}")
+        finally:
+            # MediaFileUpload 객체 명시적 해제 (파일 핸들 닫기)
+            if media:
+                try:
+                    if hasattr(media, 'close'):
+                        media.close()
+                except Exception:
+                    pass
         
-        upload_request = youtube.videos().insert(
-            part='snippet,status',
-            body=body,
-            media_body=media
-        )
-        
-        response = None
-        print(f"[INFO] YouTube 업로드 시작: {title}")
-        while response is None:
-            status, response = upload_request.next_chunk()
-            if status:
-                progress = int(status.progress() * 100)
-                print(f"[INFO] 업로드 진행: {progress}%")
-        
-        video_id = response['id']
-        video_url_youtube = f"https://www.youtube.com/watch?v={video_id}"
-        shorts_url = f"https://www.youtube.com/shorts/{video_id}"
-        
-        print(f"[SUCCESS] YouTube 업로드 완료 - video_id: {video_id}")
+        # social_post 업데이트 (성공)
+        if social_post:
+            kst = timezone(timedelta(hours=9))
+            social_post.status = 'SUCCESS'
+            social_post.platform_post_id = video_id
+            social_post.platform_url = video_url_youtube
+            social_post.posted_at = datetime.now(kst)
+            db.commit()
         
         return {
             'success': True,
@@ -317,19 +422,52 @@ def upload_video_to_youtube(
         
     except HttpError as e:
         print(f"[ERROR] YouTube 업로드 HTTP 에러: {e}")
-        raise ValueError(f"YouTube 업로드 실패: {str(e)}")
+        error_msg = str(e)
+        # social_post 업데이트 (실패)
+        if social_post:
+            kst = timezone(timedelta(hours=9))
+            social_post.status = 'FAIL'
+            social_post.error_message = error_msg[:1000]  # 최대 길이 제한
+            if hasattr(e, 'status_code'):
+                social_post.error_code = str(e.status_code)
+            db.commit()
+        raise ValueError(f"YouTube 업로드 실패: {error_msg}")
     except Exception as e:
         print(f"[ERROR] YouTube 업로드 중 오류: {e}")
         import traceback
         traceback.print_exc()
-        raise ValueError(f"업로드 중 오류 발생: {str(e)}")
+        error_msg = str(e)
+        # social_post 업데이트 (실패)
+        if social_post:
+            kst = timezone(timedelta(hours=9))
+            social_post.status = 'FAIL'
+            social_post.error_message = error_msg[:1000]  # 최대 길이 제한
+            db.commit()
+        raise ValueError(f"업로드 중 오류 발생: {error_msg}")
     finally:
-        # 임시 파일 삭제
+        # 임시 파일 삭제 (재시도 로직 포함)
         if temp_file and os.path.exists(temp_file):
-            try:
-                os.unlink(temp_file)
-            except Exception as e:
-                print(f"[WARN] 임시 파일 삭제 실패: {e}")
+            import time
+            max_retries = 3
+            retry_delay = 0.5  # 0.5초 대기
+            
+            for attempt in range(max_retries):
+                try:
+                    # 파일 핸들이 해제될 시간을 주기 위해 짧은 지연
+                    if attempt > 0:
+                        time.sleep(retry_delay * attempt)
+                    os.unlink(temp_file)
+                    print(f"[INFO] 임시 파일 삭제 완료: {temp_file}")
+                    break
+                except PermissionError as e:
+                    if attempt < max_retries - 1:
+                        print(f"[WARN] 임시 파일 삭제 재시도 ({attempt + 1}/{max_retries}): {temp_file}")
+                        continue
+                    else:
+                        print(f"[WARN] 임시 파일 삭제 실패 (최대 재시도 횟수 초과): {e}")
+                except Exception as e:
+                    print(f"[WARN] 임시 파일 삭제 실패: {e}")
+                    break
 
 
 def upload_video_to_tiktok(

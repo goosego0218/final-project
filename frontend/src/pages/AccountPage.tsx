@@ -56,11 +56,11 @@ const AccountPage = () => {
   const [nickname, setNickname] = useState(getUserProfile().nickname || "사용자");
   const [userId, setUserId] = useState(getUserProfile().id || "user123");
   const [avatar, setAvatar] = useState<string | null>(getUserProfile().avatar || null);
-  const [instagramConnected, setInstagramConnected] = useState(getUserProfile().instagram?.connected || false);
+  const [tiktokConnected, setTiktokConnected] = useState(getUserProfile().tiktok?.connected || false);
   const [youtubeConnected, setYoutubeConnected] = useState(getUserProfile().youtube?.connected || false);
-  const [isInstagramModalOpen, setIsInstagramModalOpen] = useState(false);
-  const [instagramAccessToken, setInstagramAccessToken] = useState("");
-  const [instagramUserId, setInstagramUserId] = useState("");
+  const [isTiktokModalOpen, setIsTiktokModalOpen] = useState(false);
+  const [tiktokAccessToken, setTiktokAccessToken] = useState("");
+  const [tiktokUserId, setTiktokUserId] = useState("");
   const [showAccessToken, setShowAccessToken] = useState(false);
   const [youtubeEmail, setYoutubeEmail] = useState("");
   const [isYoutubeLoading, setIsYoutubeLoading] = useState(false);
@@ -94,12 +94,12 @@ const AccountPage = () => {
   const loadTikTokConnectionStatus = async () => {
     try {
       const status = await getTikTokConnectionStatus();
-      setInstagramConnected(status.connected);
+      setTiktokConnected(status.connected);
       // localStorage 업데이트
       const profile = getUserProfile();
       localStorage.setItem('userProfile', JSON.stringify({
         ...profile,
-        instagram: {
+        tiktok: {
           connected: status.connected,
         }
       }));
@@ -238,7 +238,7 @@ const AccountPage = () => {
       nickname,
       id: userId,
       avatar,
-      instagram: { connected: instagramConnected },
+      tiktok: { connected: tiktokConnected },
       youtube: { connected: youtubeConnected }
     }));
     
@@ -252,7 +252,7 @@ const AccountPage = () => {
     });
   };
 
-  const handleInstagramConnect = async () => {
+  const handleTiktokConnect = async () => {
     try {
       // 백엔드에서 TikTok OAuth URL 받아오기
       const { auth_url } = await getTikTokAuthUrl();
@@ -266,8 +266,8 @@ const AccountPage = () => {
     }
   };
 
-  const handleInstagramConnectConfirm = () => {
-    if (!instagramAccessToken.trim() || !instagramUserId.trim()) {
+  const handleTiktokConnectConfirm = () => {
+    if (!tiktokAccessToken.trim() || !tiktokUserId.trim()) {
       toast({
         title: "입력 오류",
         description: "ACCESS_TOKEN과 TIKTOK_USER_ID를 모두 입력해주세요.",
@@ -276,41 +276,41 @@ const AccountPage = () => {
       return;
     }
 
-    setIsInstagramModalOpen(false);
+    setIsTiktokModalOpen(false);
     
-    // ACCESS_TOKEN과 IG_USER_ID 저장
-    setInstagramConnected(true);
+    // ACCESS_TOKEN과 TIKTOK_USER_ID 저장
+    setTiktokConnected(true);
     const profile = getUserProfile();
     localStorage.setItem('userProfile', JSON.stringify({
       ...profile,
-      instagram: { 
+      tiktok: { 
         connected: true,
-        accessToken: instagramAccessToken,
-        userId: instagramUserId
+        accessToken: tiktokAccessToken,
+        userId: tiktokUserId
       }
     }));
     window.dispatchEvent(new Event('profileUpdated'));
     
     // 입력 필드 초기화
-    setInstagramAccessToken("");
-    setInstagramUserId("");
+    setTiktokAccessToken("");
+    setTiktokUserId("");
     
     toast({
-      title: "Instagram 계정이 연동되었어요",
+      title: "TikTok 계정이 연동되었어요",
       description: "이제 내 숏폼에서 바로 업로드할 수 있어요.",
       status: "success",
     });
   };
 
-  const handleInstagramDisconnect = async () => {
+  const handleTiktokDisconnect = async () => {
     try {
       await disconnectTikTok();
   
-      setInstagramConnected(false);
+      setTiktokConnected(false);
       const profile = getUserProfile();
       localStorage.setItem('userProfile', JSON.stringify({
         ...profile,
-        instagram: { connected: false },
+        tiktok: { connected: false },
       }));
       window.dispatchEvent(new Event('profileUpdated'));
   
@@ -501,29 +501,29 @@ const AccountPage = () => {
                 <div className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex items-center gap-3">
                     <div className={`p-2 rounded-full ${
-                      instagramConnected 
+                      tiktokConnected 
                         ? "bg-black" 
                         : "bg-muted-foreground/20"
                     }`}>
                       <img 
                         src="/icon/tiktok-logo.png" 
                         alt="TikTok" 
-                        className={`h-5 w-5 ${instagramConnected ? "opacity-100" : "opacity-30"}`}
+                        className={`h-5 w-5 ${tiktokConnected ? "opacity-100" : "opacity-30"}`}
                       />
                     </div>
                     <div>
                       <p className="font-medium">TikTok</p>
                       <p className="text-sm text-muted-foreground">
-                        {instagramConnected ? "연동됨" : "연동되지 않음"}
+                        {tiktokConnected ? "연동됨" : "연동되지 않음"}
                       </p>
                     </div>
                   </div>
-                  {instagramConnected ? (
-                    <Button variant="outline" onClick={handleInstagramDisconnect}>
+                  {tiktokConnected ? (
+                    <Button variant="outline" onClick={handleTiktokDisconnect}>
                       연동 끊기
                     </Button>
                   ) : (
-                    <Button onClick={handleInstagramConnect}>
+                    <Button onClick={handleTiktokConnect}>
                       연동하기
                     </Button>
                   )}
@@ -581,12 +581,12 @@ const AccountPage = () => {
       <Footer />
 
       {/* TikTok 연동 모달 */}
-      <Dialog open={isInstagramModalOpen} onOpenChange={(open) => {
-        setIsInstagramModalOpen(open);
+      <Dialog open={isTiktokModalOpen} onOpenChange={(open) => {
+        setIsTiktokModalOpen(open);
         if (!open) {
           // 다이얼로그가 닫힐 때 입력 필드 초기화
-          setInstagramAccessToken("");
-          setInstagramUserId("");
+          setTiktokAccessToken("");
+          setTiktokUserId("");
           setShowAccessToken(false);
         }
       }}>
@@ -605,8 +605,8 @@ const AccountPage = () => {
                   id="accessToken"
                   type={showAccessToken ? "text" : "password"}
                   placeholder="ACCESS_TOKEN을 입력하세요"
-                  value={instagramAccessToken}
-                  onChange={(e) => setInstagramAccessToken(e.target.value)}
+                  value={tiktokAccessToken}
+                  onChange={(e) => setTiktokAccessToken(e.target.value)}
                   className="pr-10"
                 />
                 <Button
@@ -630,17 +630,17 @@ const AccountPage = () => {
                 id="userId"
                 type="text"
                 placeholder="TIKTOK_USER_ID를 입력하세요"
-                value={instagramUserId}
-                onChange={(e) => setInstagramUserId(e.target.value)}
+                value={tiktokUserId}
+                onChange={(e) => setTiktokUserId(e.target.value)}
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsInstagramModalOpen(false)} className="hover:bg-transparent hover:border-border hover:text-foreground">
+            <Button variant="outline" onClick={() => setIsTiktokModalOpen(false)} className="hover:bg-transparent hover:border-border hover:text-foreground">
               취소
             </Button>
             <Button 
-              onClick={handleInstagramConnectConfirm}
+              onClick={handleTiktokConnectConfirm}
               className="bg-orange-500 hover:bg-orange-600 text-white"
             >
               연동하기

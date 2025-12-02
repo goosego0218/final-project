@@ -30,7 +30,7 @@ interface StudioTopBarProps {
   tokensUsed: number;
   tokensTotal: number;
   userAvatar?: string | null;
-  instagramConnected?: boolean;
+  tiktokConnected?: boolean;
   youtubeConnected?: boolean;
   studioType?: "logo" | "shorts";
 }
@@ -44,7 +44,7 @@ const StudioTopBar = ({
   tokensUsed,
   tokensTotal,
   userAvatar,
-  instagramConnected = false,
+  tiktokConnected = false,
   youtubeConnected = false,
   studioType,
 }: StudioTopBarProps) => {
@@ -100,7 +100,7 @@ const StudioTopBar = ({
                   <p className="text-xs text-muted-foreground">{userEmail}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  {instagramConnected ? (
+                  {tiktokConnected ? (
                     <img src="/icon/tiktok-logo.png" alt="TikTok" className="h-5 w-5" />
                   ) : (
                     <img src="/icon/tiktok-logo.png" alt="TikTok" className="h-5 w-5 opacity-30" />

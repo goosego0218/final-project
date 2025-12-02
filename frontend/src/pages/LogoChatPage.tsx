@@ -96,7 +96,7 @@ const LogoChatPage = () => {
         name: profile.nickname || "사용자",
         email: profile.id || "user@example.com",
         avatar: profile.avatar || null,
-        instagram: profile.instagram?.connected || false,
+        tiktok: profile.tiktok?.connected || false,
         youtube: profile.youtube?.connected || false,
         tokensUsed: 132,
         tokensTotal: 200,
@@ -106,7 +106,7 @@ const LogoChatPage = () => {
       name: "사용자",
       email: "user@example.com",
       avatar: null,
-      instagram: false,
+      tiktok: false,
       youtube: false,
       tokensUsed: 132,
       tokensTotal: 200,
@@ -653,7 +653,7 @@ const LogoChatPage = () => {
         tokensUsed={userProfile.tokensUsed}
         tokensTotal={userProfile.tokensTotal}
         userAvatar={userProfile.avatar}
-        instagramConnected={userProfile.instagram}
+        tiktokConnected={userProfile.tiktok}
         youtubeConnected={userProfile.youtube}
         studioType="logo"
       />

@@ -571,19 +571,19 @@ const ProjectDashboardPage = () => {
   // SNS 연동 여부 확인
   const checkSocialMediaConnection = () => {
     const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-    if (profile && (profile.instagram || profile.youtube)) {
+    if (profile && (profile.tiktok || profile.youtube)) {
       return {
-        instagram: profile.instagram?.connected || false,
+        tiktok: profile.tiktok?.connected || false,
         youtube: profile.youtube?.connected || false,
       };
     }
-    return { instagram: false, youtube: false };
+    return { tiktok: false, youtube: false };
   };
 
   // 숏폼 업로드 상태 확인 (localStorage에서)
   const getShortFormUploadStatus = (shortFormId: string) => {
     const uploadStatuses = JSON.parse(localStorage.getItem('shortFormUploadStatuses') || '{}');
-    return uploadStatuses[shortFormId] || { instagram: false, youtube: false };
+    return uploadStatuses[shortFormId] || { tiktok: false, youtube: false };
   };
 
   // 숏폼 ID를 savedItems의 ID로 변환 (URL 기반으로도 찾기)
@@ -594,10 +594,10 @@ const ProjectDashboardPage = () => {
   };
 
   // 숏폼 업로드 상태 저장
-  const saveShortFormUploadStatus = (shortFormId: string, platform: "instagram" | "youtube", uploaded: boolean) => {
+  const saveShortFormUploadStatus = (shortFormId: string, platform: "tiktok" | "youtube", uploaded: boolean) => {
     const uploadStatuses = JSON.parse(localStorage.getItem('shortFormUploadStatuses') || '{}');
     if (!uploadStatuses[shortFormId]) {
-      uploadStatuses[shortFormId] = { instagram: false, youtube: false };
+      uploadStatuses[shortFormId] = { tiktok: false, youtube: false };
     }
     uploadStatuses[shortFormId][platform] = uploaded;
     localStorage.setItem('shortFormUploadStatuses', JSON.stringify(uploadStatuses));
@@ -607,7 +607,7 @@ const ProjectDashboardPage = () => {
   const handleShortFormUploadClick = (shortForm: ShortFormItem, e: React.MouseEvent) => {
     e.stopPropagation();
     const connections = checkSocialMediaConnection();
-    const hasConnection = connections.instagram || connections.youtube;
+    const hasConnection = connections.tiktok || connections.youtube;
 
     if (hasConnection) {
       setSelectedShortFormForUpload(shortForm);
@@ -631,12 +631,12 @@ const ProjectDashboardPage = () => {
   // 플랫폼 선택 토글
   const handlePlatformToggle = (platform: string) => {
     const connections = checkSocialMediaConnection();
-    const isConnected = platform === "instagram" ? connections.instagram : connections.youtube;
+    const isConnected = platform === "tiktok" ? connections.tiktok : connections.youtube;
     
     if (!isConnected) {
       toast({
         title: "소셜 미디어 연동 필요",
-        description: `${platform === "instagram" ? "TikTok" : "YouTube"} 계정을 먼저 연동해주세요.`,
+        description: `${platform === "tiktok" ? "TikTok" : "YouTube"} 계정을 먼저 연동해주세요.`,
         status: "warning",
       });
       return;
@@ -646,10 +646,10 @@ const ProjectDashboardPage = () => {
     if (selectedShortFormForUpload) {
       const savedItemId = getShortFormSavedItemId(selectedShortFormForUpload.id, selectedShortFormForUpload.url);
       const uploadStatus = getShortFormUploadStatus(savedItemId);
-      if (uploadStatus[platform as "instagram" | "youtube"]) {
+      if (uploadStatus[platform as "tiktok" | "youtube"]) {
         toast({
           title: "이미 업로드됨",
-          description: `이 숏폼은 이미 ${platform === "instagram" ? "TikTok" : "YouTube"}에 업로드되었습니다.`,
+          description: `이 숏폼은 이미 ${platform === "tiktok" ? "TikTok" : "YouTube"}에 업로드되었습니다.`,
           status: "info",
         });
         return;
@@ -693,13 +693,13 @@ const ProjectDashboardPage = () => {
               privacy: 'public'
             });
             uploadResults.push({ platform: 'youtube', success: true });
-          } else if (platform === 'instagram') {
+          } else if (platform === 'tiktok') {
             await uploadToTikTok({
               video_url: selectedShortFormForUpload.url,
               caption: uploadTitle || selectedShortFormForUpload.title || "숏폼",
               project_id: Number(projectId),
             });
-            uploadResults.push({ platform: 'instagram', success: true });
+            uploadResults.push({ platform: 'tiktok', success: true });
           }
         } catch (error: any) {
           console.error(`${platform} 업로드 실패:`, error);
@@ -716,13 +716,13 @@ const ProjectDashboardPage = () => {
       const savedItemId = getShortFormSavedItemId(selectedShortFormForUpload.id, selectedShortFormForUpload.url);
       uploadResults.forEach(result => {
         if (result.success) {
-          saveShortFormUploadStatus(savedItemId, result.platform as "instagram" | "youtube", true);
+          saveShortFormUploadStatus(savedItemId, result.platform as "tiktok" | "youtube", true);
         }
       });
       
       // 결과 메시지 표시
-      const successPlatforms = uploadResults.filter(r => r.success).map(r => r.platform === "instagram" ? "TikTok" : "YouTube");
-      const failedPlatforms = uploadResults.filter(r => !r.success).map(r => r.platform === "instagram" ? "TikTok" : "YouTube");
+      const successPlatforms = uploadResults.filter(r => r.success).map(r => r.platform === "tiktok" ? "TikTok" : "YouTube");
+      const failedPlatforms = uploadResults.filter(r => !r.success).map(r => r.platform === "tiktok" ? "TikTok" : "YouTube");
       
       if (successPlatforms.length > 0 && failedPlatforms.length === 0) {
         // 모두 성공
@@ -1168,25 +1168,25 @@ const ProjectDashboardPage = () => {
                     <div className="flex flex-col items-center gap-1">
                     <Card 
                       className={`relative cursor-pointer transition-all hover:opacity-80 ${
-                        !connections.instagram || uploadStatus.instagram 
+                        !connections.tiktok || uploadStatus.tiktok 
                           ? "opacity-50 cursor-not-allowed" 
-                          : selectedPlatforms.has("instagram")
+                          : selectedPlatforms.has("tiktok")
                           ? "ring-2 ring-primary"
                           : ""
                       }`}
                       onClick={() => {
-                        if (!connections.instagram || uploadStatus.instagram) return;
-                        handlePlatformToggle("instagram");
+                        if (!connections.tiktok || uploadStatus.tiktok) return;
+                        handlePlatformToggle("tiktok");
                       }}
                     >
                       <CardContent className="p-6 flex flex-col items-center gap-4 min-w-[140px]">
                         <div className="absolute top-3 left-3">
                           <div className={`h-4 w-4 rounded-full border-2 ${
-                            selectedPlatforms.has("instagram")
+                            selectedPlatforms.has("tiktok")
                               ? "bg-primary border-primary"
                               : "border-muted-foreground/50"
                           }`}>
-                            {selectedPlatforms.has("instagram") && (
+                            {selectedPlatforms.has("tiktok") && (
                               <div className="h-full w-full rounded-full bg-primary flex items-center justify-center">
                                 <div className="h-2 w-2 rounded-full bg-background" />
                               </div>
@@ -1201,7 +1201,7 @@ const ProjectDashboardPage = () => {
                         <span className="text-sm font-medium lowercase">tiktok</span>
                       </CardContent>
                     </Card>
-                      {uploadStatus.instagram && (
+                      {uploadStatus.tiktok && (
                         <span className="text-xs text-muted-foreground mt-1">(이미 업로드됨)</span>
                       )}
                     </div>

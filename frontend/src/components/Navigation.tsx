@@ -328,7 +328,7 @@ const Navigation = () => {
                         <p className="text-xs text-muted-foreground">{userProfile?.id || "user123"}</p>
                       </div>
                       <div className="flex items-center gap-2">
-                        {userProfile?.instagram?.connected ? (
+                        {userProfile?.tiktok?.connected ? (
                           <img src="/icon/tiktok-logo.png" alt="TikTok" className="h-5 w-5" />
                         ) : (
                           <img src="/icon/tiktok-logo.png" alt="TikTok" className="h-5 w-5 opacity-30" />

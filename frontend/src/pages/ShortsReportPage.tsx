@@ -30,7 +30,7 @@ interface ShortFormReport {
   title: string;
   thumbnailUrl: string;
   videoUrl: string;
-  platforms: ("instagram" | "youtube")[];
+  platforms: ("tiktok" | "youtube")[];
   uploadedAt: string;
   views: number;
   likes: number;
@@ -40,11 +40,11 @@ interface ShortFormReport {
 
 const ShortsReportPage = () => {
   const [shortForms, setShortForms] = useState<ShortFormReport[]>([]);
-  const [platformFilter, setPlatformFilter] = useState<"all" | "instagram" | "youtube">("all");
+  const [platformFilter, setPlatformFilter] = useState<"all" | "tiktok" | "youtube">("all");
   const [sortBy, setSortBy] = useState<"views" | "uploaded" | "recentGrowth">("views");
   const [lastSyncedAt, setLastSyncedAt] = useState<Date | null>(null);
   const [chartPeriod, setChartPeriod] = useState<"7" | "30" | "90">("30");
-  const [chartPlatform, setChartPlatform] = useState<"all" | "instagram" | "youtube">("all");
+  const [chartPlatform, setChartPlatform] = useState<"all" | "tiktok" | "youtube">("all");
 
   // 업로드된 숏폼 데이터 로드
   useEffect(() => {
@@ -66,17 +66,17 @@ const ShortsReportPage = () => {
       "신제품 출시 예고",
     ];
 
-    const platforms: ("instagram" | "youtube")[][] = [
-      ["instagram"],
+    const platforms: ("tiktok" | "youtube")[][] = [
+      ["tiktok"],
       ["youtube"],
-      ["instagram", "youtube"],
-      ["instagram"],
+      ["tiktok", "youtube"],
+      ["tiktok"],
       ["youtube"],
-      ["instagram", "youtube"],
-      ["instagram"],
+      ["tiktok", "youtube"],
+      ["tiktok"],
       ["youtube"],
-      ["instagram", "youtube"],
-      ["instagram"],
+      ["tiktok", "youtube"],
+      ["tiktok"],
     ];
 
     const baseDate = new Date();
@@ -117,9 +117,9 @@ const ShortsReportPage = () => {
       if (project.savedItems) {
         project.savedItems.forEach((item: SavedItem) => {
           if (item.type === "short") {
-            const uploadStatus = uploadStatuses[item.id] || { instagram: false, youtube: false };
-            const platforms: ("instagram" | "youtube")[] = [];
-            if (uploadStatus.instagram) platforms.push("instagram");
+            const uploadStatus = uploadStatuses[item.id] || { tiktok: false, youtube: false };
+            const platforms: ("tiktok" | "youtube")[] = [];
+            if (uploadStatus.tiktok) platforms.push("tiktok");
             if (uploadStatus.youtube) platforms.push("youtube");
 
             // 업로드된 플랫폼이 있는 경우만 리포트에 포함
@@ -342,13 +342,13 @@ const ShortsReportPage = () => {
                       <TabsTrigger value="90">90일</TabsTrigger>
                     </TabsList>
                   </Tabs>
-                  <Select value={chartPlatform} onValueChange={(value: "all" | "instagram" | "youtube") => setChartPlatform(value)}>
+                  <Select value={chartPlatform} onValueChange={(value: "all" | "tiktok" | "youtube") => setChartPlatform(value)}>
                     <SelectTrigger className="w-[140px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">전체</SelectItem>
-                      <SelectItem value="instagram">Instagram</SelectItem>
+                      <SelectItem value="tiktok">TikTok</SelectItem>
                       <SelectItem value="youtube">YouTube</SelectItem>
                     </SelectContent>
                   </Select>
@@ -404,13 +404,13 @@ const ShortsReportPage = () => {
           {/* 필터 및 정렬 */}
           <div className="mb-6">
             <div className="flex flex-col md:flex-row gap-4">
-              <Select value={platformFilter} onValueChange={(value: "all" | "instagram" | "youtube") => setPlatformFilter(value)}>
+              <Select value={platformFilter} onValueChange={(value: "all" | "tiktok" | "youtube") => setPlatformFilter(value)}>
                 <SelectTrigger className="w-full md:w-[180px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">전체 플랫폼</SelectItem>
-                  <SelectItem value="instagram">Instagram</SelectItem>
+                  <SelectItem value="tiktok">TikTok</SelectItem>
                   <SelectItem value="youtube">YouTube</SelectItem>
                 </SelectContent>
               </Select>
@@ -460,10 +460,10 @@ const ShortsReportPage = () => {
                       )}
                       {/* 플랫폼 배지 오버레이 */}
                       <div className="absolute top-2 right-2 flex flex-col gap-1">
-                        {shortForm.platforms.includes("instagram") && (
-                          <Badge className="bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 text-white border-0 gap-1">
-                            <img src="/icon/instagram-logo.png" alt="Instagram" className="h-3 w-3" />
-                            Instagram
+                        {shortForm.platforms.includes("tiktok") && (
+                          <Badge className="bg-black text-white border-0 gap-1 hover:bg-black/90">
+                            <img src="/icon/tiktok-logo.png" alt="TikTok" className="h-3 w-3" />
+                            TikTok
                           </Badge>
                         )}
                         {shortForm.platforms.includes("youtube") && (

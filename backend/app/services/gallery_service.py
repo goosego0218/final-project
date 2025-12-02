@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from typing import Literal, Optional
 from sqlalchemy import desc, asc, func, or_
 
-from app.models.project import GenerationProd, Comment
+from app.models.project import GenerationProd, Comment, ProdGroup
 from app.models.brand import BrandInfo
 from app.models.auth import UserInfo
 from app.utils.file_utils import get_file_url
@@ -39,10 +39,12 @@ def get_public_logos(
     """
     query = (
         db.query(GenerationProd)
+        .join(ProdGroup, GenerationProd.grp_id == ProdGroup.grp_id)
         .filter(
             GenerationProd.type_id == 1,  # 로고 타입
             GenerationProd.pub_yn == 'Y',  # 공개된 것만
-            GenerationProd.del_yn == 'N'  # 삭제되지 않은 것만
+            GenerationProd.del_yn == 'N',  # 삭제되지 않은 것만
+            ProdGroup.del_yn == 'N'  # 프로젝트가 삭제되지 않은 것만
         )
     )
     
@@ -118,10 +120,12 @@ def get_public_shorts(
     """
     query = (
         db.query(GenerationProd)
+        .join(ProdGroup, GenerationProd.grp_id == ProdGroup.grp_id)
         .filter(
             GenerationProd.type_id == 2,  # 쇼츠 타입
             GenerationProd.pub_yn == 'Y',  # 공개된 것만
-            GenerationProd.del_yn == 'N'  # 삭제되지 않은 것만
+            GenerationProd.del_yn == 'N',  # 삭제되지 않은 것만
+            ProdGroup.del_yn == 'N'  # 프로젝트가 삭제되지 않은 것만
         )
     )
     
@@ -191,10 +195,12 @@ def get_public_logos_count(
     """
     query = (
         db.query(GenerationProd)
+        .join(ProdGroup, GenerationProd.grp_id == ProdGroup.grp_id)
         .filter(
             GenerationProd.type_id == 1,
             GenerationProd.pub_yn == 'Y',
-            GenerationProd.del_yn == 'N'
+            GenerationProd.del_yn == 'N',
+            ProdGroup.del_yn == 'N'  # 프로젝트가 삭제되지 않은 것만
         )
     )
     
@@ -236,10 +242,12 @@ def get_public_shorts_count(
     """
     query = (
         db.query(GenerationProd)
+        .join(ProdGroup, GenerationProd.grp_id == ProdGroup.grp_id)
         .filter(
             GenerationProd.type_id == 2,
             GenerationProd.pub_yn == 'Y',
-            GenerationProd.del_yn == 'N'
+            GenerationProd.del_yn == 'N',
+            ProdGroup.del_yn == 'N'  # 프로젝트가 삭제되지 않은 것만
         )
     )
     

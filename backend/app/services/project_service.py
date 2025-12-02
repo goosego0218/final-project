@@ -6,7 +6,7 @@
 
 from sqlalchemy.orm import Session
 
-from app.models.project import ProdGroup
+from app.models.project import ProdGroup, GenerationProd
 from app.models.brand import BrandInfo
 from app.schemas.project import ProjectGrp
 from app.agents.state import BrandProfile
@@ -98,6 +98,12 @@ def delete_project_group(
     
     if project.del_yn == "Y":
         raise ValueError("이미 삭제된 프로젝트입니다.")
+    
+    # 프로젝트 삭제 시 해당 프로젝트에 속한 모든 생성물도 함께 삭제 처리
+    db.query(GenerationProd).filter(
+        GenerationProd.grp_id == project_id,
+        GenerationProd.del_yn == 'N'
+    ).update({"del_yn": "Y"}, synchronize_session=False)
     
     # del_yn을 'Y'로 변경
     project.del_yn = "Y"
