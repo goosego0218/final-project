@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { getProjectDetail, deleteProject, ProjectDetail, ProjectListItem, getShortsList, getLogoList, uploadToYouTube, uploadToTikTok, updateLogoPubYn, updateShortsPubYn, downloadLogo, deleteLogo, deleteShorts } from "@/lib/api";
+import { getProjectDetail, deleteProject, ProjectDetail, ProjectListItem, getShortsList, getLogoList, uploadToYouTube, uploadToTikTok, updateLogoPubYn, updateShortsPubYn, downloadLogo, deleteLogo, deleteShorts, getSocialPostsByProdId } from "@/lib/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { 
@@ -46,6 +46,7 @@ interface ShortFormItem {
   createdAt: string;
   title?: string;
   isPublic?: boolean;
+  prodId?: number; // DB prod_id 추가
 }
 
 const ProjectDashboardPage = () => {
@@ -69,6 +70,7 @@ const ProjectDashboardPage = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadTitle, setUploadTitle] = useState(""); // 제목 입력 상태
+  const [uploadStatus, setUploadStatus] = useState<{ tiktok: boolean; youtube: boolean }>({ tiktok: false, youtube: false });
 
   const projectId = searchParams.get('project');
   
@@ -176,6 +178,7 @@ const ProjectDashboardPage = () => {
             createdAt: item.create_dt || new Date().toISOString(),
             title: `숏폼 ${shortsList.length - index}`, // 역순으로 번호 매기기
             isPublic: item.pub_yn === 'Y', // DB에서 가져온 pub_yn 값 사용
+            prodId: item.prod_id, // DB prod_id 추가
           }));
           setShortForms(dbShortForms);
         } catch (error) {
@@ -580,27 +583,31 @@ const ProjectDashboardPage = () => {
     return { tiktok: false, youtube: false };
   };
 
-  // 숏폼 업로드 상태 확인 (localStorage에서)
-  const getShortFormUploadStatus = (shortFormId: string) => {
-    const uploadStatuses = JSON.parse(localStorage.getItem('shortFormUploadStatuses') || '{}');
-    return uploadStatuses[shortFormId] || { tiktok: false, youtube: false };
-  };
-
-  // 숏폼 ID를 savedItems의 ID로 변환 (URL 기반으로도 찾기)
-  // TODO: DB에서 로고/숏폼 목록을 가져오면 이 함수도 수정 필요
-  const getShortFormSavedItemId = (shortFormId: string, shortFormUrl?: string) => {
-    // 일단 shortFormId 그대로 반환 (DB 기반으로 변경 예정)
-    return shortFormId;
-  };
-
-  // 숏폼 업로드 상태 저장
-  const saveShortFormUploadStatus = (shortFormId: string, platform: "tiktok" | "youtube", uploaded: boolean) => {
-    const uploadStatuses = JSON.parse(localStorage.getItem('shortFormUploadStatuses') || '{}');
-    if (!uploadStatuses[shortFormId]) {
-      uploadStatuses[shortFormId] = { tiktok: false, youtube: false };
+  // 숏폼 업로드 상태 확인 (DB에서 조회)
+  const getShortFormUploadStatus = async (prodId: number): Promise<{ tiktok: boolean; youtube: boolean }> => {
+    try {
+      const response = await getSocialPostsByProdId(prodId);
+      const platforms = {
+        tiktok: false,
+        youtube: false,
+      };
+      
+      // status='SUCCESS'인 것만 업로드된 것으로 간주
+      response.posts.forEach(post => {
+        if (post.status === 'SUCCESS') {
+          if (post.platform === 'tiktok') {
+            platforms.tiktok = true;
+          } else if (post.platform === 'youtube') {
+            platforms.youtube = true;
+          }
+        }
+      });
+      
+      return platforms;
+    } catch (error) {
+      console.error('업로드 상태 조회 실패:', error);
+      return { tiktok: false, youtube: false };
     }
-    uploadStatuses[shortFormId][platform] = uploaded;
-    localStorage.setItem('shortFormUploadStatuses', JSON.stringify(uploadStatuses));
   };
 
   // 숏폼 업로드 버튼 클릭 핸들러
@@ -612,13 +619,7 @@ const ProjectDashboardPage = () => {
     if (hasConnection) {
       setSelectedShortFormForUpload(shortForm);
       setIsUploadDialogOpen(true);
-      // 이미 업로드된 플랫폼 확인 (savedItems의 ID 사용, URL도 함께 전달)
-      const savedItemId = getShortFormSavedItemId(shortForm.id, shortForm.url);
-      const uploadStatus = getShortFormUploadStatus(savedItemId);
-      const initialPlatforms = new Set<string>();
-      // 이미 업로드된 플랫폼은 선택 불가 (취소 불가)
-      // 아직 업로드되지 않은 플랫폼만 선택 가능
-      setSelectedPlatforms(initialPlatforms);
+      setSelectedPlatforms(new Set<string>());
     } else {
       toast({
         title: "소셜 미디어 연동 필요",
@@ -628,8 +629,27 @@ const ProjectDashboardPage = () => {
     }
   };
 
+  // selectedShortFormForUpload가 변경될 때마다 업로드 상태 조회
+  useEffect(() => {
+    const fetchUploadStatus = async () => {
+      if (selectedShortFormForUpload?.prodId) {
+        try {
+          const status = await getShortFormUploadStatus(selectedShortFormForUpload.prodId);
+          setUploadStatus(status);
+        } catch (error) {
+          console.error('업로드 상태 조회 실패:', error);
+          setUploadStatus({ tiktok: false, youtube: false });
+        }
+      } else {
+        setUploadStatus({ tiktok: false, youtube: false });
+      }
+    };
+
+    fetchUploadStatus();
+  }, [selectedShortFormForUpload]);
+
   // 플랫폼 선택 토글
-  const handlePlatformToggle = (platform: string) => {
+  const handlePlatformToggle = async (platform: string) => {
     const connections = checkSocialMediaConnection();
     const isConnected = platform === "tiktok" ? connections.tiktok : connections.youtube;
     
@@ -643,16 +663,19 @@ const ProjectDashboardPage = () => {
     }
 
     // 이미 업로드된 플랫폼은 취소 불가
-    if (selectedShortFormForUpload) {
-      const savedItemId = getShortFormSavedItemId(selectedShortFormForUpload.id, selectedShortFormForUpload.url);
-      const uploadStatus = getShortFormUploadStatus(savedItemId);
-      if (uploadStatus[platform as "tiktok" | "youtube"]) {
-        toast({
-          title: "이미 업로드됨",
-          description: `이 숏폼은 이미 ${platform === "tiktok" ? "TikTok" : "YouTube"}에 업로드되었습니다.`,
-          status: "info",
-        });
-        return;
+    if (selectedShortFormForUpload && selectedShortFormForUpload.prodId) {
+      try {
+        const uploadStatus = await getShortFormUploadStatus(selectedShortFormForUpload.prodId);
+        if (uploadStatus[platform as "tiktok" | "youtube"]) {
+          toast({
+            title: "이미 업로드됨",
+            description: `이 숏폼은 이미 ${platform === "tiktok" ? "TikTok" : "YouTube"}에 업로드되었습니다.`,
+            status: "info",
+          });
+          return;
+        }
+      } catch (error) {
+        console.error('업로드 상태 조회 실패:', error);
       }
     }
     
@@ -712,14 +735,16 @@ const ProjectDashboardPage = () => {
         }
       }
       
-      // 성공한 플랫폼만 상태 저장
-      const savedItemId = getShortFormSavedItemId(selectedShortFormForUpload.id, selectedShortFormForUpload.url);
-      uploadResults.forEach(result => {
-        if (result.success) {
-          saveShortFormUploadStatus(savedItemId, result.platform as "tiktok" | "youtube", true);
+      // 업로드 성공 시 상태 다시 조회
+      if (selectedShortFormForUpload?.prodId && uploadResults.some(r => r.success)) {
+        try {
+          const status = await getShortFormUploadStatus(selectedShortFormForUpload.prodId);
+          setUploadStatus(status);
+        } catch (error) {
+          console.error('업로드 상태 조회 실패:', error);
         }
-      });
-      
+      }
+
       // 결과 메시지 표시
       const successPlatforms = uploadResults.filter(r => r.success).map(r => r.platform === "tiktok" ? "TikTok" : "YouTube");
       const failedPlatforms = uploadResults.filter(r => !r.success).map(r => r.platform === "tiktok" ? "TikTok" : "YouTube");
@@ -1159,8 +1184,6 @@ const ProjectDashboardPage = () => {
               <p className="text-sm text-muted-foreground text-center">업로드할 플랫폼을 선택해주세요</p>
               {selectedShortFormForUpload && (() => {
                 const connections = checkSocialMediaConnection();
-                const savedItemId = getShortFormSavedItemId(selectedShortFormForUpload.id, selectedShortFormForUpload.url);
-                const uploadStatus = getShortFormUploadStatus(savedItemId);
                 
                 return (
                   <div className="flex justify-center gap-4">

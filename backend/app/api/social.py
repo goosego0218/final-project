@@ -17,10 +17,13 @@ from app.schemas.social import (
     YouTubeUploadResponse,
     TikTokUploadRequest,
     TikTokUploadResponse,
+    SocialPostListResponse,
+    SocialPostResponse,
 )
 from app.services.social_service import (
     upload_video_to_youtube, 
     upload_video_to_tiktok,
+    get_social_posts_by_prod_id,
     YOUTUBE_SCOPES,
 )
 
@@ -602,3 +605,36 @@ def upload_video_to_tiktok_endpoint(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"업로드 중 오류 발생: {str(e)}"
         )
+
+
+@router.get("/posts/{prod_id}", response_model=SocialPostListResponse)
+def get_social_posts_by_prod_id_endpoint(
+    prod_id: int,
+    current_user: UserInfo = Depends(get_current_user),
+    db: Session = Depends(get_orm_session),
+):
+    """
+    특정 생성물(prod_id)에 대한 업로드 상태 조회.
+    - 현재 사용자의 업로드만 조회
+    - status='SUCCESS'인 것만 반환 (실제 업로드 성공한 것만)
+    """
+    posts = get_social_posts_by_prod_id(
+        db=db,
+        prod_id=prod_id,
+        user_id=current_user.id,
+    )
+    
+    return SocialPostListResponse(
+        prod_id=prod_id,
+        posts=[
+            SocialPostResponse(
+                post_id=post.post_id,
+                platform=post.platform,
+                platform_post_id=post.platform_post_id,
+                platform_url=post.platform_url,
+                status=post.status,
+                posted_at=post.posted_at.isoformat() if post.posted_at else None,
+            )
+            for post in posts
+        ]
+    )
