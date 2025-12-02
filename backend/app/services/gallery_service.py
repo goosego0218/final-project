@@ -1,8 +1,8 @@
 # 갤러리 관련 서비스
-# 작성일: 2025-12-XX
+# 작성일: 2025-11-28
 # 수정내역
-# - 2025-12-XX: 초기 작성 - 공개된 생성물 조회 및 정렬 기능
-# - 2025-12-XX: brand_info 기반 검색 기능 추가
+# - 2025-11-28: 초기 작성 - 공개된 생성물 조회 및 정렬 기능
+# - 2025-11-29: brand_info 기반 검색 기능 추가
 
 from sqlalchemy.orm import Session
 from typing import Literal, Optional
