@@ -45,6 +45,13 @@ public class OracleSocialPostRepository : ISocialPostRepository
 
             if (lastProcessedPostId.HasValue)
             {
+                // 커서 이후(post_id > :lastPostId)이면서
+                // - social_post.status = 'SUCCESS'
+                // - social_post.del_yn = 'N'
+                // - social_connection.del_yn = 'N'
+                // - generation_prod.del_yn = 'N'
+                // - prod_group.del_yn = 'N'
+                // 인 데이터만 조회
                 sql = @"
                     SELECT post_id, platform, platform_post_id
                     FROM (
@@ -52,10 +59,16 @@ public class OracleSocialPostRepository : ISocialPostRepository
                         FROM social_post p
                         JOIN social_connection c
                           ON p.conn_id = c.conn_id
+                        JOIN generation_prod gp
+                          ON p.prod_id = gp.prod_id
+                        JOIN prod_group pg
+                          ON gp.grp_id = pg.grp_id
                         WHERE p.status = 'SUCCESS'
                           AND p.platform_post_id IS NOT NULL
                           AND p.del_yn = 'N'
                           AND c.del_yn = 'N'
+                          AND gp.del_yn = 'N'
+                          AND pg.del_yn = 'N'
                           AND p.post_id > :lastPostId
                         ORDER BY p.post_id
                     )
@@ -70,6 +83,7 @@ public class OracleSocialPostRepository : ISocialPostRepository
             }
             else
             {
+                // 처음부터 커서 없이 조회하는 경우에도 동일한 조건 적용
                 sql = @"
                     SELECT post_id, platform, platform_post_id
                     FROM (
@@ -77,10 +91,16 @@ public class OracleSocialPostRepository : ISocialPostRepository
                         FROM social_post p
                         JOIN social_connection c
                           ON p.conn_id = c.conn_id
+                        JOIN generation_prod gp
+                          ON p.prod_id = gp.prod_id
+                        JOIN prod_group pg
+                          ON gp.grp_id = pg.grp_id
                         WHERE p.status = 'SUCCESS'
                           AND p.platform_post_id IS NOT NULL
                           AND p.del_yn = 'N'
                           AND c.del_yn = 'N'
+                          AND gp.del_yn = 'N'
+                          AND pg.del_yn = 'N'
                         ORDER BY p.post_id
                     )
                     WHERE ROWNUM <= :maxRows

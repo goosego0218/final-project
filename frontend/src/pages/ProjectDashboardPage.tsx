@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { getProjectDetail, deleteProject, ProjectDetail, ProjectListItem, getShortsList, getLogoList, uploadToYouTube, uploadToTikTok, updateLogoPubYn, updateShortsPubYn, downloadLogo, deleteLogo, deleteShorts, getSocialPostsByProdId } from "@/lib/api";
+import { getProjectDetail, deleteProject, ProjectDetail, ProjectListItem, getShortsList, getLogoList, uploadToYouTube, uploadToTikTok, updateLogoPubYn, updateShortsPubYn, downloadLogo, deleteLogo, deleteShorts, getSocialPostsByProdId, getTikTokConnectionStatus, getYouTubeConnectionStatus } from "@/lib/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { 
@@ -71,6 +71,7 @@ const ProjectDashboardPage = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadTitle, setUploadTitle] = useState(""); // 제목 입력 상태
   const [uploadStatus, setUploadStatus] = useState<{ tiktok: boolean; youtube: boolean }>({ tiktok: false, youtube: false });
+  const [socialConnections, setSocialConnections] = useState<{ tiktok: boolean; youtube: boolean }>({ tiktok: false, youtube: false });
 
   const projectId = searchParams.get('project');
   
@@ -571,17 +572,32 @@ const ProjectDashboardPage = () => {
     setIsDeleteItemDialogOpen(true);
   };
 
-  // SNS 연동 여부 확인
+  // SNS 연동 여부 확인 (DB에서 조회)
   const checkSocialMediaConnection = () => {
-    const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-    if (profile && (profile.tiktok || profile.youtube)) {
-      return {
-        tiktok: profile.tiktok?.connected || false,
-        youtube: profile.youtube?.connected || false,
-      };
-    }
-    return { tiktok: false, youtube: false };
+    return socialConnections;
   };
+
+  // DB에서 연동 상태 조회
+  useEffect(() => {
+    const loadConnectionStatus = async () => {
+      try {
+        const [tiktokStatus, youtubeStatus] = await Promise.all([
+          getTikTokConnectionStatus().catch(() => ({ connected: false })),
+          getYouTubeConnectionStatus().catch(() => ({ connected: false })),
+        ]);
+        
+        setSocialConnections({
+          tiktok: tiktokStatus.connected || false,
+          youtube: youtubeStatus.connected || false,
+        });
+      } catch (error) {
+        console.error('연동 상태 조회 실패:', error);
+        setSocialConnections({ tiktok: false, youtube: false });
+      }
+    };
+
+    loadConnectionStatus();
+  }, []);
 
   // 숏폼 업로드 상태 확인 (DB에서 조회)
   const getShortFormUploadStatus = async (prodId: number): Promise<{ tiktok: boolean; youtube: boolean }> => {

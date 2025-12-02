@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { projectStorage, type Message, type Project, type SavedItem } from "@/lib/projectStorage";
 import StudioTopBar from "@/components/StudioTopBar";
-import { getShortsIntro, getLogoIntro, sendLogoChat, sendShortsChat, getSocialPostsByProdId } from "@/lib/api";
+import { getShortsIntro, getLogoIntro, sendLogoChat, sendShortsChat, getSocialPostsByProdId, getTikTokConnectionStatus, getYouTubeConnectionStatus } from "@/lib/api";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -125,6 +125,7 @@ const StudioPage = () => {
 
   const [userProfile, setUserProfile] = useState(getUserProfile());
   const [isLoggedInState, setIsLoggedInState] = useState(false);
+  const [socialConnections, setSocialConnections] = useState<{ tiktok: boolean; youtube: boolean }>({ tiktok: false, youtube: false });
 
   // localStorage 변경 감지하여 사용자 정보 업데이트
   useEffect(() => {
@@ -1634,18 +1635,32 @@ const StudioPage = () => {
     }
   };
 
-  // 소셜 미디어 연동 상태 확인
+  // 소셜 미디어 연동 상태 확인 (DB에서 조회)
   const checkSocialMediaConnection = () => {
-    const stored = localStorage.getItem('userProfile');
-    if (stored) {
-      const profile = JSON.parse(stored);
-      return {
-        tiktok: profile.tiktok?.connected || false,
-        youtube: profile.youtube?.connected || false
-      };
-    }
-    return { tiktok: false, youtube: false };
+    return socialConnections;
   };
+
+  // DB에서 연동 상태 조회
+  useEffect(() => {
+    const loadConnectionStatus = async () => {
+      try {
+        const [tiktokStatus, youtubeStatus] = await Promise.all([
+          getTikTokConnectionStatus().catch(() => ({ connected: false })),
+          getYouTubeConnectionStatus().catch(() => ({ connected: false })),
+        ]);
+        
+        setSocialConnections({
+          tiktok: tiktokStatus.connected || false,
+          youtube: youtubeStatus.connected || false,
+        });
+      } catch (error) {
+        console.error('연동 상태 조회 실패:', error);
+        setSocialConnections({ tiktok: false, youtube: false });
+      }
+    };
+
+    loadConnectionStatus();
+  }, []);
 
   // 저장 버튼 클릭 핸들러
   const handleSave = (url: string, type: "logo" | "short", index: number) => {

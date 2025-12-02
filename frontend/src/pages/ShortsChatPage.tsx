@@ -12,7 +12,7 @@ import { Send, ChevronLeft, RefreshCw, Star, Plus, X, FolderOpen, Folder, Trash2
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { projectStorage, type Message, type SavedItem } from "@/lib/projectStorage";
 import StudioTopBar from "@/components/StudioTopBar";
-import { getShortsIntro, sendShortsChat, getProjectDetail, getShortsList, saveShorts, deleteShorts, uploadToYouTube, uploadToTikTok } from "@/lib/api";
+import { getShortsIntro, sendShortsChat, getProjectDetail, getShortsList, saveShorts, deleteShorts, uploadToYouTube, uploadToTikTok, getTikTokConnectionStatus, getYouTubeConnectionStatus } from "@/lib/api";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -71,6 +71,7 @@ const ShortsChatPage = () => {
   const [selectedPlatforms, setSelectedPlatforms] = useState<Set<string>>(new Set());
   const [isUploading, setIsUploading] = useState(false);
   const [uploadTitle, setUploadTitle] = useState("");
+  const [socialConnections, setSocialConnections] = useState<{ tiktok: boolean; youtube: boolean }>({ tiktok: false, youtube: false });
 
   // localStorage에서 사용자 정보 가져오기
   const getUserProfile = () => {
@@ -549,17 +550,32 @@ const ShortsChatPage = () => {
     item => item.url === selectedResult.url && item.type === selectedResult.type
   ) : false;
 
-  // SNS 연동 여부 확인
+  // SNS 연동 여부 확인 (DB에서 조회)
   const checkSocialMediaConnection = () => {
-    const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-    if (profile && (profile.tiktok || profile.youtube)) {
-      return {
-        tiktok: profile.tiktok?.connected || false,
-        youtube: profile.youtube?.connected || false,
-      };
-    }
-    return { tiktok: false, youtube: false };
+    return socialConnections;
   };
+
+  // DB에서 연동 상태 조회
+  useEffect(() => {
+    const loadConnectionStatus = async () => {
+      try {
+        const [tiktokStatus, youtubeStatus] = await Promise.all([
+          getTikTokConnectionStatus().catch(() => ({ connected: false })),
+          getYouTubeConnectionStatus().catch(() => ({ connected: false })),
+        ]);
+        
+        setSocialConnections({
+          tiktok: tiktokStatus.connected || false,
+          youtube: youtubeStatus.connected || false,
+        });
+      } catch (error) {
+        console.error('연동 상태 조회 실패:', error);
+        setSocialConnections({ tiktok: false, youtube: false });
+      }
+    };
+
+    loadConnectionStatus();
+  }, []);
 
   // 플랫폼 선택 토글
   const handlePlatformToggle = (platform: string) => {
