@@ -40,74 +40,44 @@ public class OracleSocialPostRepository : ISocialPostRepository
             await using var conn = new OracleConnection(connStr);
             await conn.OpenAsync(ct);
 
-            string sql;
+            const string sql = @"
+                SELECT post_id, platform, platform_post_id
+                FROM (
+                    SELECT p.post_id, p.platform, p.platform_post_id
+                    FROM social_post p
+                    JOIN social_connection c
+                      ON p.conn_id = c.conn_id
+                    JOIN generation_prod gp
+                      ON p.prod_id = gp.prod_id
+                    JOIN prod_grp pg
+                      ON gp.grp_id = pg.grp_id
+                    WHERE p.status = 'SUCCESS'
+                      AND p.platform_post_id IS NOT NULL
+                      AND p.del_yn = 'N'
+                      AND c.del_yn = 'N'
+                      AND gp.del_yn = 'N'
+                      AND pg.del_yn = 'N'
+                      AND ( :hasCursor = 0 OR p.post_id > :cursorPostId )
+                    ORDER BY p.post_id
+                )
+                WHERE ROWNUM <= :maxRows
+            ";
+
             await using var cmd = conn.CreateCommand();
-
-            if (lastProcessedPostId.HasValue)
-            {
-                // 커서 이후(post_id > :lastPostId)이면서
-                // - social_post.status = 'SUCCESS'
-                // - social_post.del_yn = 'N'
-                // - social_connection.del_yn = 'N'
-                // - generation_prod.del_yn = 'N'
-                // - prod_group.del_yn = 'N'
-                // 인 데이터만 조회
-                sql = @"
-                    SELECT post_id, platform, platform_post_id
-                    FROM (
-                        SELECT p.post_id, p.platform, p.platform_post_id
-                        FROM social_post p
-                        JOIN social_connection c
-                          ON p.conn_id = c.conn_id
-                        JOIN generation_prod gp
-                          ON p.prod_id = gp.prod_id
-                        JOIN prod_group pg
-                          ON gp.grp_id = pg.grp_id
-                        WHERE p.status = 'SUCCESS'
-                          AND p.platform_post_id IS NOT NULL
-                          AND p.del_yn = 'N'
-                          AND c.del_yn = 'N'
-                          AND gp.del_yn = 'N'
-                          AND pg.del_yn = 'N'
-                          AND p.post_id > :lastPostId
-                        ORDER BY p.post_id
-                    )
-                    WHERE ROWNUM <= :maxRows
-                ";
-
-                var lastPostIdParam = cmd.CreateParameter();
-                lastPostIdParam.ParameterName = "lastPostId";
-                lastPostIdParam.OracleDbType = OracleDbType.Int32;
-                lastPostIdParam.Value = lastProcessedPostId.Value;
-                cmd.Parameters.Add(lastPostIdParam);
-            }
-            else
-            {
-                // 처음부터 커서 없이 조회하는 경우에도 동일한 조건 적용
-                sql = @"
-                    SELECT post_id, platform, platform_post_id
-                    FROM (
-                        SELECT p.post_id, p.platform, p.platform_post_id
-                        FROM social_post p
-                        JOIN social_connection c
-                          ON p.conn_id = c.conn_id
-                        JOIN generation_prod gp
-                          ON p.prod_id = gp.prod_id
-                        JOIN prod_group pg
-                          ON gp.grp_id = pg.grp_id
-                        WHERE p.status = 'SUCCESS'
-                          AND p.platform_post_id IS NOT NULL
-                          AND p.del_yn = 'N'
-                          AND c.del_yn = 'N'
-                          AND gp.del_yn = 'N'
-                          AND pg.del_yn = 'N'
-                        ORDER BY p.post_id
-                    )
-                    WHERE ROWNUM <= :maxRows
-                ";
-            }
-
             cmd.CommandText = sql;
+
+            // 커서 여부 (0: 전체, 1: lastProcessedPostId 이후만)
+            var hasCursorParam = cmd.CreateParameter();
+            hasCursorParam.ParameterName = "hasCursor";
+            hasCursorParam.OracleDbType = OracleDbType.Int32;
+            hasCursorParam.Value = lastProcessedPostId.HasValue ? 1 : 0;
+            cmd.Parameters.Add(hasCursorParam);
+
+            var cursorPostIdParam = cmd.CreateParameter();
+            cursorPostIdParam.ParameterName = "cursorPostId";
+            cursorPostIdParam.OracleDbType = OracleDbType.Int32;
+            cursorPostIdParam.Value = lastProcessedPostId ?? 0;
+            cmd.Parameters.Add(cursorPostIdParam);
 
             var maxRowsParam = cmd.CreateParameter();
             maxRowsParam.ParameterName = "maxRows";
