@@ -27,6 +27,7 @@ import { projectStorage, type Message } from "@/lib/projectStorage";
 import { useToast } from "@/hooks/use-toast";
 import StudioTopBar from "@/components/StudioTopBar";
 import { sendBrandChat, createBrandProject, BrandInfo as ApiBrandInfo } from "@/lib/api";
+import { sendBrandChatStream } from "@/lib/api";
 
 type InfoStep = "collecting" | "logoQuestion" | "complete";
 
@@ -545,7 +546,6 @@ const ChatPage = () => {
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
     
-    // draft 모드 또는 DB 프로젝트 모드가 아닌 경우 리턴
     if (!dbProjectId && !isDraftMode) {
       toast({
         title: "오류",
@@ -555,69 +555,82 @@ const ChatPage = () => {
       return;
     }
     if (currentStep !== "collecting") return;
-  
+
     const userMessage: Message = {
       role: "user",
       content: inputMessage
     };
-  
+
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
-  
-    // 🆕 항상 백엔드 API 호출
+
+    // 스트리밍 응답을 위한 assistant 메시지 초기화
+    let assistantMessage: Message = {
+      role: "assistant",
+      content: ""
+    };
+    setMessages(prev => [...prev, assistantMessage]);
+    
     setIsLoadingChat(true);
+    
     try {
-      const response = await sendBrandChat({
-        message: inputMessage,
-        brand_session_id: brandSessionId || undefined, // 저장된 brand_session_id 사용
-        grp_nm: isDraftMode ? draftProjectInfo?.name : undefined,
-        grp_desc: isDraftMode ? draftProjectInfo?.description : undefined,
-      });
-
-      // 백엔드 응답을 assistant 메시지로 추가
-      const assistantMessage: Message = {
-        role: "assistant",
-        content: response.reply
-      };
-
-      // brand_session_id 저장 (응답에서 받은 값)
-      if (response.brand_session_id) {
-        setBrandSessionId(response.brand_session_id);
-      }
-
-      // brand_info 업데이트
-      if (response.brand_info) {
-        setBrandInfo(response.brand_info);
-      }
-
-      setTimeout(() => {
-        setMessages(prev => [...prev, assistantMessage]);
-        
-        // project_id가 반환되면 저장 (draft 모드에서 프로젝트 생성된 경우)
-        if (response.project_id && isDraftMode) {
-          setDbProjectId(response.project_id);
-          setIsDraftMode(false); // draft 모드 종료
-          
-          // draft 정보 삭제
-          localStorage.removeItem('makery_draft_project');
-          
-          // project_id를 brand_session_id로도 사용
-          if (response.brand_session_id) {
-            setBrandSessionId(response.brand_session_id);
-          } else {
-            setBrandSessionId(response.project_id.toString());
+      await sendBrandChatStream(
+        {
+          message: inputMessage,
+          brand_session_id: brandSessionId || undefined,
+          grp_nm: isDraftMode ? draftProjectInfo?.name : undefined,
+          grp_desc: isDraftMode ? draftProjectInfo?.description : undefined,
+        },
+        // onToken: 토큰이 도착할 때마다 호출
+        (content: string) => {
+          setMessages(prev => {
+            const updated = [...prev];
+            const lastIndex = updated.length - 1;
+            if (lastIndex >= 0 && updated[lastIndex].role === "assistant") {
+              updated[lastIndex] = {
+                ...updated[lastIndex],
+                content: updated[lastIndex].content + content
+              };
+            }
+            return updated;
+          });
+        },
+        // onMetadata: 메타데이터가 도착할 때 호출
+        (metadata) => {
+          if (metadata.brand_session_id) {
+            setBrandSessionId(metadata.brand_session_id);
           }
-          
-          // 프로젝트 생성 완료 메시지
+          if (metadata.brand_info) {
+            setBrandInfo(metadata.brand_info);
+          }
+          if (metadata.project_id && isDraftMode) {
+            setDbProjectId(metadata.project_id);
+            setIsDraftMode(false);
+            localStorage.removeItem('makery_draft_project');
+            
+            if (metadata.brand_session_id) {
+              setBrandSessionId(metadata.brand_session_id);
+            } else {
+              setBrandSessionId(metadata.project_id.toString());
+            }
+            
+            toast({
+              title: "프로젝트 생성 완료",
+              description: "브랜드 정보 수집을 계속합니다.",
+              status: "success",
+            });
+          }
+        },
+        // onError: 에러 발생 시 호출
+        (error: string) => {
+          console.error('브랜드 챗 스트리밍 오류:', error);
           toast({
-            title: "프로젝트 생성 완료",
-            description: "브랜드 정보 수집을 계속합니다.",
-            status: "success",
+            title: "오류",
+            description: error,
+            variant: "destructive",
           });
         }
-        
-      }, 500);
-  
+      );
     } catch (error) {
       console.error('브랜드 챗 API 오류:', error);
       toast({
@@ -625,6 +638,10 @@ const ChatPage = () => {
         description: error instanceof Error ? error.message : "메시지 전송에 실패했습니다.",
         variant: "destructive",
       });
+      // 에러 발생 시 assistant 메시지 제거
+      setMessages(prev => prev.filter((msg, idx) => 
+        !(idx === prev.length - 1 && msg.role === "assistant" && msg.content === "")
+      ));
     } finally {
       setIsLoadingChat(false);
     }
@@ -1151,56 +1168,50 @@ const ChatPage = () => {
       {/* Chat Area */}
       <div className="flex-1 container mx-auto px-4 py-4 flex flex-col max-w-4xl w-full min-h-0 overflow-hidden">
         <div className="flex-1 overflow-y-auto space-y-4 pr-2 min-h-0 scrollbar-hide">
-          {messages.map((message, index) => (
-            <div key={index} className="space-y-1">
-              {message.role === "assistant" && (
-                <div className="flex items-center gap-2 mb-1">
-                  <img 
-                    src="/makery-logo.png" 
-                    alt="Makery Logo" 
-                    className="h-5 w-5"
-                  />
-                  <span className="text-sm font-semibold text-foreground">MAKERY</span>
-                </div>
-              )}
-              <div
-                className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
-              >
-                <Card
-                  className={`max-w-[80%] p-4 ${
-                    message.role === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted"
-                  }`}
-                >
-                  <p className="whitespace-pre-wrap">{message.content}</p>
-                </Card>
-              </div>
-            </div>
-          ))}
-          
-          {/* 로딩 인디케이터 */}
-          {isLoadingChat && (
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 mb-1">
-                <img 
-                  src="/makery-logo.png" 
-                  alt="Makery Logo" 
-                  className="h-5 w-5"
-                />
-                <span className="text-sm font-semibold text-foreground">MAKERY</span>
-              </div>
-              <div className="flex justify-start">
-                <Card className="max-w-[80%] p-4 bg-muted">
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                    <p className="text-muted-foreground">답변을 생성하고 있습니다...</p>
+          {messages.map((message, index) => {
+            // 빈 assistant 메시지는 로딩 중일 때만 표시, 그 외에는 스킵
+            if (message.role === "assistant" && message.content === "" && !isLoadingChat) {
+              return null;
+            }
+            
+            return (
+              <div key={index} className="space-y-1">
+                {message.role === "assistant" && (
+                  <div className="flex items-center gap-2 mb-1">
+                    <img 
+                      src="/makery-logo.png" 
+                      alt="Makery Logo" 
+                      className="h-5 w-5"
+                    />
+                    <span className="text-sm font-semibold text-foreground">MAKERY</span>
                   </div>
-                </Card>
+                )}
+                <div
+                  className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+                >
+                  <Card
+                    className={`max-w-[80%] p-4 ${
+                      message.role === "user"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted"
+                    }`}
+                  >
+                    {message.role === "assistant" && message.content === "" && isLoadingChat ? (
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                        <p className="text-muted-foreground">답변을 생성하고 있습니다...</p>
+                      </div>
+                    ) : (
+                      <p className="whitespace-pre-wrap">{message.content}</p>
+                    )}
+                  </Card>
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })}
           
+          {/* 별도 로딩 인디케이터 제거 - 1206-1228줄 삭제 */}
+
           {canGenerate && (
             <div className="mt-4 flex justify-center gap-3">
               <Button size="lg" onClick={() => handleGenerateClick("logo")} className="gap-2 text-white" style={{ backgroundColor: '#7C22C8' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#6B1DB5'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#7C22C8'}>

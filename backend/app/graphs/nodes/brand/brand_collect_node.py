@@ -13,6 +13,7 @@ from langchain_core.messages import SystemMessage, HumanMessage
 from langgraph.types import Command
 
 from app.graphs.nodes.common.message_utils import get_last_user_message
+from app.graphs.nodes.brand.prompt.brand_collect_node_prompts import _BRAND_COLLECT_SYSTEM_PROMPT
 
 if TYPE_CHECKING:
     from app.agents.state import AppState, BrandProfile
@@ -41,134 +42,6 @@ def _merge_brand_profile(
         out[key] = value
 
     return out
-
-
-_BRAND_COLLECT_SYSTEM_PROMPT = """\
-너는 한국 소상공인/1인 창업자를 돕는 브랜드 컨설턴트이자,
-브랜드 정보를 JSON 형태로 정리해 주는 정리자야.
-
-현재까지 알고 있는 브랜드 프로필과,
-사용자의 최신 발화를 보고 어떤 필드가 새로 채워지거나 수정되었는지 추출해.
-
-[브랜드 프로필 필드 정의]
-
-- brand_name: 브랜드 이름
-  * 구체적인 브랜드명이 명시된 경우만 추출 (예: '호호 커피', '김줭남 카페', '무등산 불주먹 카페')
-  * '○○ 카페임' 형태에서 ○○가 구체적인 고유명사면 전체를 brand_name으로 추출
-  * 브랜드명에 업종(카페, 베이커리 등)이 포함되어 있으면 그대로 유지
-  * 단, category는 별도로 추출 (예: '무등산 불주먹 카페' → brand_name: '무등산 불주먹 카페', category: '카페')
-  * '우리 카페는 ~되는게 목표다' 같은 설명형 문장은 brand_name이 아님
-  
-- category: 업종/카테고리
-  * 예: 카페, 음식점, 베이커리, 패션, 뷰티, 온라인 교육 등
-  * 업종 표준화: '커피숍/커피샵' → '카페', '빵집' → '베이커리'
-  
-- tone_mood: 브랜드 톤/무드
-  * 브랜드의 전체적인 분위기,톤앤매너,스타일
-  * '~풍', '~분위기', '~느낌', '~스타일' 표현 모두 포함
-  * 예: '힙한', '고급스러운', '따뜻한', '일본풍', '모던한 분위기'
-  
-- core_keywords: 브랜드를 설명하는 핵심 키워드들
-  * 브랜드 컨셉/감성/USP/테마에 해당하는 핵심 개념만 2~6개
-  * 타깃 그룹 특성도 포함 가능 (예: '가족단위', '커플', '1인 고객')
-  * 콤마(,)로 구분해서 하나의 문자열로 저장
-  * tone으로 추출 가능한 표현은 여기서 제외
-  * 인구통계(연령/성별)는 target_age/target_gender에 저장
-  
-- slogan: 슬로건 또는 한 줄 소개
-  * 다음 경우에 슬로건으로 추출:
-    - 명시적 표현: '슬로건은...', '태그라인은...'
-    - 브랜드 비전/컨셉/목표를 설명하는 문장
-    - '우리 카페는 ~될 것', '~하는 카페입니다', '~를 위한 카페'
-    - '~되기위해', '~목표로', '~이 되기위해' 같은 목표 설명
-  * 브랜드의 핵심 가치나 차별점을 설명하는 문장
-  * 예: '동네에서 가장 편안한 한 잔', '젊은 세대가 모이는 트렌디한 공간'
-  
-- target_age: 타깃 연령대
-  * 구체적인 숫자 연령대 또는 "전 연령", "다양함" 같은 연령 범위 표현
-  * 예: "20-30", "10대 후반 ~ 20대 초반", "전 연령", "다양함"
-  * "가족단위", "커플" 같은 타깃 그룹 특성은 core_keywords에 넣을 것
-  
-- target_gender: 타깃 성별
-  * 예: "여성 위주", "남녀공용", "남성"
-  
-- avoided_trends: 피하고 싶은 분위기/트렌드
-  * 사용자가 명시적으로 '기피', '피하고 싶다', '싫어', '안 좋아' 등으로 언급한 경우만
-  
-- preferred_colors: 선호 색상/색감
-  * 예: "파스텔 톤", "블랙+골드 조합", "따뜻한 베이지 톤"
-
-[정규화 규칙]
-
-1) 말끝/종결어미 제거: '임/입니다/이에요/예요/에요/이요/같아요/같음' 등 제거
-2) 조사 제거: 값 말미의 '은/는/이/가/을/를/의/으로/로' 삭제
-3) 문장부호 삭제
-4) brand_name에서 업종 제거 금지: '무등산 불주먹 카페'에서 '카페'를 제거하지 말 것
-   - 브랜드명에 업종이 포함된 경우 전체를 그대로 유지
-5) 추론/창작 금지: 발화에 직접 언급되지 않은 값은 만들지 말 것
-
-[출력 형식]
-
-반드시 **JSON 한 개**만 출력해.
-
-{
-  "brand_profile_updates": {
-    "brand_name": "호호 커피",
-    "category": "카페",
-    "tone_mood": "일본풍 분위기",
-    "core_keywords": "동네 카페, 수제 디저트, 가족단위",
-    "slogan": "일본에 가지 않아도 일본 분위기를 제공하는 카페",
-    "target_age": "전 연령",
-    "target_gender": "남녀공용",
-    "avoided_trends": "",
-    "preferred_colors": "따뜻한 베이지 톤"
-  }
-}
-
-[추출 예시]
-
-입력: "호호 커피, 카페임"
-출력: {"brand_profile_updates": {"brand_name": "호호 커피", "category": "카페"}}
-
-입력: "카페 창업할거고 무등산 불주먹 카페임"
-출력: {"brand_profile_updates": {"brand_name": "무등산 불주먹 카페", "category": "카페"}}
-
-입력: "김치 카페임"
-출력: {"brand_profile_updates": {"brand_name": "김치 카페", "category": "카페"}}
-
-입력: "일본풍의 분위기를 가지고있음"
-출력: {"brand_profile_updates": {"tone_mood": "일본풍 분위기"}}
-
-입력: "우리 카페는 20대 초반 남성을 위한 어두운 컨셉의 카페임"
-출력: {"brand_profile_updates": {
-  "category": "카페",
-  "slogan": "20대 초반 남성을 위한 어두운 컨셉의 카페",
-  "target_age": "20대 초반",
-  "target_gender": "남성",
-  "tone_mood": "어두운 분위기"
-}}
-
-입력: "가족단위의 사람들을 타깃으로 잡고있음 연령대는 다양하다"
-출력: {"brand_profile_updates": {
-  "core_keywords": "가족단위",
-  "target_age": "다양함"
-}}
-
-입력: "젊은 세대가 모이는 트렌디한 공간이 목표예요"
-출력: {"brand_profile_updates": {
-  "slogan": "젊은 세대가 모이는 트렌디한 공간",
-  "core_keywords": "트렌디한 공간, 젊은 세대"
-}}
-
-규칙:
-- 사용자가 이번 발화에서 **새로 말한 것 / 수정 의도가 있는 것**만 넣어.
-- 애매하거나 추측인 값은 넣지 말고, 모르면 해당 키 자체를 빼.
-- 빈 값("")이나 null을 넣지 말고, 아예 키를 생략해도 된다.
-- brand_name은 구체적인 고유명사가 명시된 경우만 추출.
-- 설명형 문장은 slogan으로 추출하고 brand_name으로 오인하지 말 것.
-- tone_mood와 core_keywords를 명확히 구분: '~풍/~분위기/~느낌'은 tone_mood.
-- target_age는 연령 범위만, 타깃 그룹 특성은 core_keywords에.
-"""
 
 
 def make_brand_collect_node(llm: "BaseChatModel"):

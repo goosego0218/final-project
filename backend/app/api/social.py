@@ -583,7 +583,7 @@ def upload_video_to_tiktok_endpoint(
     db: Session = Depends(get_orm_session),
 ):
     """
-    TikTok Draft 업로드
+    TikTok Direct Post 업로드
     """
     try:
         result = upload_video_to_tiktok(

@@ -780,3 +780,121 @@ export async function getLikeStatus(prodId: number): Promise<LikeStatusResponse>
     method: 'GET',
   });
 }
+
+// 브랜드 챗 스트리밍 타입
+export interface BrandChatStreamEvent {
+  type: 'session' | 'token' | 'metadata' | 'done' | 'error';
+  brand_session_id?: string;
+  content?: string;
+  project_id?: number;
+  brand_info?: BrandInfo;
+  message?: string;
+}
+
+// 브랜드 챗 스트리밍 API 호출
+export async function sendBrandChatStream(
+  data: BrandChatRequest,
+  onToken: (content: string) => void,
+  onMetadata: (metadata: { project_id?: number; brand_info?: BrandInfo; brand_session_id?: string }) => void,
+  onError?: (error: string) => void
+): Promise<{ brand_session_id?: string; project_id?: number; brand_info?: BrandInfo }> {
+  const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+  
+  const response = await fetch(`${API_BASE_URL}/brand/chat/stream`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token && { Authorization: `Bearer ${token}` }),
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    let errorMessage = `API request failed: ${response.statusText}`;
+    
+    try {
+      const errorJson = JSON.parse(errorText);
+      errorMessage = errorJson.detail || errorMessage;
+    } catch {
+      if (errorText) {
+        errorMessage = errorText;
+      }
+    }
+    
+    throw new Error(errorMessage);
+  }
+
+  const reader = response.body?.getReader();
+  const decoder = new TextDecoder();
+  
+  if (!reader) {
+    throw new Error('Response body is not readable');
+  }
+
+  let buffer = '';
+  let brandSessionId: string | undefined;
+  let projectId: number | undefined;
+  let brandInfo: BrandInfo | undefined;
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      
+      if (done) break;
+      
+      buffer += decoder.decode(value, { stream: true });
+      
+      // SSE 형식 파싱 (data: 로 시작하는 라인)
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || ''; // 마지막 불완전한 라인은 버퍼에 보관
+      
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          try {
+            const event: BrandChatStreamEvent = JSON.parse(line.slice(6));
+            
+            switch (event.type) {
+              case 'session':
+                brandSessionId = event.brand_session_id;
+                onMetadata({ brand_session_id: brandSessionId });
+                break;
+              case 'token':
+                if (event.content) {
+                  onToken(event.content);
+                }
+                break;
+              case 'metadata':
+                projectId = event.project_id;
+                brandInfo = event.brand_info;
+                onMetadata({ 
+                  project_id: projectId, 
+                  brand_info: brandInfo,
+                  brand_session_id: brandSessionId 
+                });
+                break;
+              case 'error':
+                if (onError && event.message) {
+                  onError(event.message);
+                }
+                break;
+              case 'done':
+                // 스트리밍 완료
+                break;
+            }
+          } catch (e) {
+            console.error('Failed to parse SSE event:', e, line);
+          }
+        }
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  return {
+    brand_session_id: brandSessionId,
+    project_id: projectId,
+    brand_info: brandInfo,
+  };
+}

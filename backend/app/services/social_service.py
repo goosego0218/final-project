@@ -625,7 +625,8 @@ def upload_video_to_tiktok(
     prod_id: Optional[int] = None,  # 생성물 ID (선택적, 없으면 video_url로 찾음)
 ) -> dict:
     """
-    TikTok Draft 업로드 (FILE_UPLOAD 방식) 및 social_post 테이블에 기록 저장.
+    TikTok Direct Post 업로드 (FILE_UPLOAD 방식) 및 social_post 테이블에 기록 저장.
+    즉시 게시되며, 감사되지 않은 클라이언트는 비공개로만 게시됩니다.
 
     Args:
         db: SQLAlchemy Session
@@ -772,8 +773,8 @@ def upload_video_to_tiktok(
         if file_size == 0:
             raise ValueError("영상 파일 크기가 0입니다.")
 
-        # 3. TikTok init (FILE_UPLOAD)
-        init_url = "https://open.tiktokapis.com/v2/post/publish/inbox/video/init/"
+        # 3. TikTok init (FILE_UPLOAD) - Direct Post로 변경
+        init_url = "https://open.tiktokapis.com/v2/post/publish/video/init/"  # inbox 제거
 
         headers = {
             "Authorization": f"Bearer {access_token}",
@@ -783,6 +784,7 @@ def upload_video_to_tiktok(
         body = {
             "post_info": {
                 "title": caption or "AI 마케팅 파트너 자동 업로드",
+                "privacy_level": "SELF_ONLY",  # 필수 추가 (감사되지 않은 클라이언트용)
             },
             "source_info": {
                 "source": "FILE_UPLOAD",
@@ -858,7 +860,7 @@ def upload_video_to_tiktok(
             return {
                 "success": True,
                 "publish_id": publish_id,
-                "message": "TikTok Draft 업로드 요청 완료.",
+                "message": "TikTok Direct Post 업로드 완료.",  # 메시지 변경
             }
 
         except ValueError:
