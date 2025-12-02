@@ -1,3 +1,4 @@
+using makery_metrics_service.Services.Crypto;
 using makery_metrics_service.Services.Social;
 using makery_metrics_service.Services.TikTok;
 using makery_metrics_service.Services.YouTube;
@@ -18,6 +19,8 @@ public class MetricsCollectionService : IMetricsCollectionService
     private readonly IYouTubeMetricsClient _youTubeMetricsClient;
     private readonly ITikTokMetricsClient _tikTokMetricsClient;
     private readonly ISocialMetricsRepository _metricsRepository;
+    private readonly ISocialConnectionRepository _socialConnectionRepository;
+    private readonly IConfiguration _config;
 
     // 커서 기반 페이징을 위한 마지막 처리된 post_id (Singleton이므로 메모리에 유지됨)
     private int? _lastProcessedPostId;
@@ -27,7 +30,9 @@ public class MetricsCollectionService : IMetricsCollectionService
         ISocialPostRepository socialPostRepository,
         IYouTubeMetricsClient youTubeMetricsClient,
         ITikTokMetricsClient tikTokMetricsClient,
-        ISocialMetricsRepository metricsRepository
+        ISocialMetricsRepository metricsRepository,
+        ISocialConnectionRepository socialConnectionRepository,
+        IConfiguration config
     )
     {
         _logger = logger;
@@ -35,11 +40,13 @@ public class MetricsCollectionService : IMetricsCollectionService
         _youTubeMetricsClient = youTubeMetricsClient;
         _tikTokMetricsClient = tikTokMetricsClient;
         _metricsRepository = metricsRepository;
+        _socialConnectionRepository = socialConnectionRepository;
+        _config = config;
     }
 
     public async Task RunOnceAsync(CancellationToken ct = default)
     {
-        const int maxCount = 2;
+        const int maxCount = 6;
 
         _logger.LogInformation(
             "[MetricsCollectionService] 수집 배치 시작 (maxCount={MaxCount}, lastProcessedPostId={LastPostId})",
@@ -92,13 +99,94 @@ public class MetricsCollectionService : IMetricsCollectionService
             }
             else if (string.Equals(post.Platform, "tiktok", StringComparison.OrdinalIgnoreCase))
             {
-                // TODO: TikTok 메트릭 수집 로직 구현 예정
-                _logger.LogInformation(
-                    "[MetricsCollectionService] TikTok 메트릭 조회 (기본 틀) - post_id={PostId}, videoId={VideoId}",
-                    post.PostId,
-                    post.PlatformPostId
+                // 1) TikTok 연동 정보 조회
+                var conn = await _socialConnectionRepository.GetTikTokConnectionAsync(post.ConnId, ct);
+                if (conn is null)
+                {
+                    _logger.LogWarning(
+                        "[MetricsCollectionService] TikTok 연동 정보를 찾을 수 없음 - post_id={PostId}, conn_id={ConnId}",
+                        post.PostId,
+                        post.ConnId
+                    );
+                    continue;
+                }
+
+                // 2) 토큰 복호화
+                var decryptKey = _config["Crypto:TokenDecryptKey"];
+                if (string.IsNullOrWhiteSpace(decryptKey))
+                {
+                    _logger.LogError("[MetricsCollectionService] Crypto:TokenDecryptKey 설정이 없습니다.");
+                    continue;
+                }
+
+                var accessToken = TokenCrypto.DecryptToken(conn.EncryptedAccessToken, decryptKey);
+                if (string.IsNullOrWhiteSpace(accessToken))
+                {
+                    _logger.LogWarning(
+                        "[MetricsCollectionService] TikTok access_token 복호화 실패 - post_id={PostId}, conn_id={ConnId}",
+                        post.PostId,
+                        post.ConnId
+                    );
+                    continue;
+                }
+
+                // 3) TikTok publish 상태 조회 호출 (DB에서 가져온 값을 그대로 publish_id 로 사용)
+                var publishStatus = await _tikTokMetricsClient.FetchPublishStatusAsync(
+                    publishId: post.PlatformPostId,
+                    accessToken: accessToken,
+                    ct: ct
                 );
-                // 현재는 실행만 되도록 로그만 출력
+
+                var hasData = publishStatus?.Data is not null;
+                var videoId = publishStatus?.Data?.PublicalyAvailablePostId.FirstOrDefault();
+
+                _logger.LogInformation(
+                    "[MetricsCollectionService] TikTok publish 상태 조회 완료 - post_id={PostId}, publish_id={PublishId}, hasData={HasData}, video_id={VideoId}",
+                    post.PostId,
+                    post.PlatformPostId,
+                    hasData,
+                    videoId ?? "(none)"
+                );
+
+                // 4) video_id 가 있으면 TikTok 메트릭 조회
+                if (!string.IsNullOrWhiteSpace(videoId))
+                {
+                    var metrics = await _tikTokMetricsClient.GetMetricsAsync(
+                        videoId: videoId,
+                        accessToken: accessToken,
+                        openId: conn.OpenId,
+                        ct: ct
+                    );
+
+                    if (metrics is not null)
+                    {
+                        _logger.LogInformation(
+                            "[MetricsCollectionService] TikTok 메트릭 조회 성공 - post_id={PostId}, video_id={VideoId}, view={View}, like={Like}, comment={Comment}, share={Share}",
+                            post.PostId,
+                            videoId,
+                            metrics.ViewCount,
+                            metrics.LikeCount,
+                            metrics.CommentCount,
+                            metrics.ShareCount
+                        );
+                    }
+                    else
+                    {
+                        _logger.LogWarning(
+                            "[MetricsCollectionService] TikTok 메트릭 조회 실패 - post_id={PostId}, video_id={VideoId}",
+                            post.PostId,
+                            videoId
+                        );
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning(
+                        "[MetricsCollectionService] TikTok video_id 없음 - post_id={PostId}, publish_id={PublishId}",
+                        post.PostId,
+                        post.PlatformPostId
+                    );
+                }
             }
         }
 

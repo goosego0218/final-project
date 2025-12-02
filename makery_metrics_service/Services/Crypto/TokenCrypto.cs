@@ -63,7 +63,8 @@ public static class TokenCrypto
 
             var plaintext = new byte[cipher.Length];
 
-            using var aesGcm = new AesGcm(key);
+            // 태그 길이를 명시하는 생성자 사용 (권장 방식)
+            using var aesGcm = new AesGcm(key, TagSizeBytes);
             aesGcm.Decrypt(iv, cipher, tag, plaintext);
 
             return Encoding.UTF8.GetString(plaintext);
@@ -77,14 +78,17 @@ public static class TokenCrypto
 
     private static byte[] DeriveKeyFromSecret(string secret)
     {
-        using var kdf = new Rfc2898DeriveBytes(
-            password: Encoding.UTF8.GetBytes(secret),
-            salt: Encoding.UTF8.GetBytes(SaltString),
-            iterations: Iterations,
-            HashAlgorithmName.SHA256
-        );
+        var password = Encoding.UTF8.GetBytes(secret);
+        var salt = Encoding.UTF8.GetBytes(SaltString);
 
-        return kdf.GetBytes(KeySizeBytes);
+        // static Pbkdf2 메서드 사용 (이 환경에서는 위치 기반 인자로 호출)
+        return Rfc2898DeriveBytes.Pbkdf2(
+            password,
+            salt,
+            Iterations,
+            HashAlgorithmName.SHA256,
+            KeySizeBytes
+        );
     }
 
     private static byte[] Base64UrlDecode(string input)

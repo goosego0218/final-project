@@ -41,9 +41,9 @@ public class OracleSocialPostRepository : ISocialPostRepository
             await conn.OpenAsync(ct);
 
             const string sql = @"
-                SELECT post_id, platform, platform_post_id
+                SELECT post_id, platform, platform_post_id, conn_id
                 FROM (
-                    SELECT p.post_id, p.platform, p.platform_post_id
+                    SELECT p.post_id, p.platform, p.platform_post_id, p.conn_id
                     FROM social_post p
                     JOIN social_connection c
                       ON p.conn_id = c.conn_id
@@ -92,11 +92,13 @@ public class OracleSocialPostRepository : ISocialPostRepository
                 var postId = reader.GetInt32(0);
                 var platform = reader.GetString(1);
                 var platformPostId = reader.GetString(2);
+                var connId = reader.GetInt32(3);
 
                 results.Add(new SocialPostRecord(
                     PostId: postId,
                     Platform: platform,
-                    PlatformPostId: platformPostId
+                    PlatformPostId: platformPostId,
+                    ConnId: connId
                 ));
             }
         }

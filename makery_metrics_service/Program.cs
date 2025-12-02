@@ -24,6 +24,9 @@ builder.Services.AddScoped<OracleConnection>(sp =>
 // social_post 조회용 리포지토리 등록
 builder.Services.AddSingleton<ISocialPostRepository, OracleSocialPostRepository>();
 
+// social_connection 조회용 리포지토리 등록 (TikTok 토큰 복호화용)
+builder.Services.AddSingleton<ISocialConnectionRepository, OracleSocialConnectionRepository>();
+
 // social_post_metric 저장용 리포지토리 등록
 builder.Services.AddSingleton<ISocialMetricsRepository, OracleSocialMetricsRepository>();
 
