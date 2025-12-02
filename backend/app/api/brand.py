@@ -194,49 +194,69 @@ async def chat_brand_stream(
                 SMALLTALK_SYSTEM_PROMPT,
             )
             
-            # 그래프를 실행하여 brand_chat 노드까지 진행
-            # 먼저 intention, collect 등의 노드를 실행
+            trend_handled = False
             intermediate_state = state
+
             async for event in brand_graph.astream(state, config=config):
                 for node_name, node_output in event.items():
                     if node_name != "brand_chat":
-                        # brand_chat이 아닌 노드의 결과를 state에 반영
                         if isinstance(node_output, dict):
                             intermediate_state = {**intermediate_state, **node_output}
-                    
-                    # brand_chat 노드에 도달하면 LLM 스트리밍 시작
+
                     if node_name == "brand_chat":
-                        # brand_chat_node의 로직을 직접 실행 (스트리밍 모드)
+                        if trend_handled:
+                            continue
+
                         llm = get_fast_chat_model()
                         messages: list = list(intermediate_state.get("messages") or [])
                         brand_profile = intermediate_state.get("brand_profile") or {}
                         meta: dict = dict(intermediate_state.get("meta") or {})
-                        
+
                         intent_label = None
                         intent_info = meta.get("intent") or {}
                         if isinstance(intent_info, dict):
                             il = intent_info.get("label")
                             if isinstance(il, str):
                                 intent_label = il
-                        
+
                         validation: dict = dict(meta.get("validation") or {})
                         required_missing = validation.get("required_missing") or []
                         is_valid = bool(validation.get("is_valid", True))
-                        
+
                         missing_labels: list = []
                         if "brand_name" in required_missing:
                             missing_labels.append("브랜드 이름")
                         if "category" in required_missing:
                             missing_labels.append("업종")
-                        
+
                         trend_context: dict = dict(intermediate_state.get("trend_context") or {})
                         has_trend_result = bool(trend_context.get("last_result_summary"))
-                        
-                        # 시스템 메시지 구성
+
+                        # 트렌드 의도면 LLM 호출 없이 트렌드 요약만 스트리밍
+                        if intent_label and intent_label.startswith("trend") and has_trend_result:
+                            summary = str(trend_context.get("last_result_summary") or "")
+                            chunk_size = 80
+                            accumulated_content = ""
+
+                            for i in range(0, len(summary), chunk_size):
+                                chunk = summary[i:i + chunk_size]
+                                if not chunk:
+                                    continue
+                                accumulated_content += chunk
+                                yield f"data: {json.dumps({'type': 'token', 'content': chunk})}\n\n"
+
+                            ai_msg = AIMessage(content=accumulated_content)
+                            intermediate_state["messages"] = list(intermediate_state.get("messages", []))
+                            intermediate_state["messages"].append(ai_msg)
+
+                            # 그래프는 계속 진행하지만 brand_chat LLM은 생략
+                            trend_handled = True
+                            continue
+
+                        # ---- 기존 시스템 프롬프트/스트리밍 로직은 그대로 유지 ----
                         if intent_label == "smalltalk":
                             system = SystemMessage(content=SMALLTALK_SYSTEM_PROMPT)
                         else:
-                            # 브랜드 프로필 포맷팅
                             profile_lines = ["현재까지 파악된 브랜드 정보:"]
                             if brand_profile.get("brand_name"):
                                 profile_lines.append(f"- 브랜드명: {brand_profile['brand_name']}")
@@ -256,11 +276,10 @@ async def chat_brand_stream(
                                 profile_lines.append(f"- 피하고 싶은 분위기/트렌드: {brand_profile['avoided_trends']}")
                             if brand_profile.get("preferred_colors"):
                                 profile_lines.append(f"- 선호 색상/색감: {brand_profile['preferred_colors']}")
-                            
+
                             profile_text = "\n".join(profile_lines) if len(profile_lines) > 1 else "아직 확정된 브랜드 정보가 거의 없습니다."
                             system_content = f"{BRAND_CHAT_SYSTEM_PROMPT}\n\n{profile_text}"
-                            
-                            # 추가 지시사항 (기존 로직과 동일)
+
                             if intent_label == "finalize":
                                 if not is_valid:
                                     missing_text = ", ".join(missing_labels) if missing_labels else "브랜드 이름, 업종"
@@ -290,7 +309,7 @@ async def chat_brand_stream(
                                     "- 옵션값에 대해 1~2가지만 자연스럽게 질문할 수 있지만, 모든 옵션값을 채우려고 강요하지 마세요.\n"
                                     "- **중요: 필수값이 채워진 후 첫 번째 응답에서 반드시 옵션값 질문과 함께 또는 같은 문장에, 다음 단계(쇼츠/로고 생성)로 넘어갈 수 있다는 것을 명시적으로 안내해야 합니다.**\n"
                                 )
-                            
+
                             if has_trend_result:
                                 system_content += (
                                     "\n\n[트렌드 검색 결과 처리 지시 - 절대 준수]\n"
@@ -299,26 +318,21 @@ async def chat_brand_stream(
                                     "1. 트렌드 검색 결과에 포함된 모든 URL은 절대 제거하거나 생략하지 말고, 반드시 답변에 포함시켜야 합니다.\n"
                                     "2. 답변 마지막에 '참고 자료' 또는 '근거' 섹션을 반드시 추가하고, 해당 섹션에 모든 URL을 원본 그대로 나열해야 합니다.\n"
                                 )
-                            
+
                             system = SystemMessage(content=system_content)
-                        
+
                         chat_messages: list = [system]
                         chat_messages.extend(messages)
-                        
-                        # LLM 스트리밍 호출
+
                         accumulated_content = ""
                         async for chunk in llm.astream(chat_messages):
-                            if hasattr(chunk, 'content') and chunk.content:
+                            if hasattr(chunk, "content") and chunk.content:
                                 accumulated_content += chunk.content
-                                # 토큰 단위로 스트리밍
                                 yield f"data: {json.dumps({'type': 'token', 'content': chunk.content})}\n\n"
-                        
-                        # 스트리밍 완료 후 그래프 업데이트
-                        from langchain_core.messages import AIMessage
+
                         ai_msg = AIMessage(content=accumulated_content)
                         intermediate_state["messages"] = list(intermediate_state.get("messages", []))
                         intermediate_state["messages"].append(ai_msg)
-                        break
             
             # 최종 state 가져오기 및 저장
             final_state_result = brand_graph.get_state(config)

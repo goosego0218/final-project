@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, List, Dict, Any, Literal
 
-from langchain_core.messages import SystemMessage, AnyMessage
+from langchain_core.messages import SystemMessage, AIMessage, AnyMessage
 from langgraph.types import Command
 from langgraph.graph import END
 
@@ -108,7 +108,14 @@ def make_brand_chat_node(llm: "BaseChatModel"):
 
         # trend_context 확인 (트렌드 검색 결과가 있는지 체크)
         trend_context: Dict[str, Any] = dict(state.get("trend_context") or {})
-        has_trend_result = bool(trend_context.get("last_result_summary"))
+        trend_summary = trend_context.get("last_result_summary")
+
+        # 트렌드 관련 의도일 때는 LLM 브랜드 챗을 아예 타지 않고
+        #    트렌드 결과만 그대로 반환하고 종료
+        if intent_label and intent_label.startswith("trend") and trend_summary:
+            messages = list(state.get("messages") or [])
+            messages.append(AIMessage(content=trend_summary))
+            return Command(update={"messages": messages}, goto=END)
 
         # smalltalk 의도일 때: 브랜드 프로필은 사용하지 않고,
         # SMALLTALK_SYSTEM_PROMPT 만 사용
@@ -167,31 +174,6 @@ def make_brand_chat_node(llm: "BaseChatModel"):
                         "- 필수값이 채워진 상태에서 옵션값 질문을 2~3회 한 후에는 자동으로 확정 여부를 확인하는 방향으로 전환하세요."
                     )
 
-            # trend_context가 있을 때만 URL 보존 지시 추가
-            if has_trend_result:
-                system_content += (
-                    "\n\n[트렌드 검색 결과 처리 지시 - 절대 준수]\n"
-                    "중요: 이전 대화 히스토리에 트렌드 검색 결과가 포함되어 있습니다.\n"
-                    "**트렌드 검색 결과는 이미 완성된 추천 내용이므로, 이를 그대로 출력해야 합니다.**\n"
-                    "다음 규칙을 반드시 준수해야 합니다:\n"
-                    "1. 트렌드 검색 결과를 그대로 출력하세요. 새로운 내용을 추가로 생성하지 마세요.\n"
-                    "2. 트렌드 검색 결과에 포함된 모든 URL은 절대 제거하거나 생략하지 말고, 반드시 답변에 포함시켜야 합니다.\n"
-                    "3. 답변 마지막에 '참고 자료' 또는 '근거' 섹션을 반드시 추가하고, 해당 섹션에 모든 URL을 원본 그대로 나열해야 합니다.\n"
-                    "4. URL이 포함된 근거 정보는 사용자가 출처를 확인할 수 있도록 반드시 유지해야 합니다.\n"
-                    "5. '요약' 또는 '짧게 정리'하더라도, URL은 절대 생략하지 마세요.\n"
-                    "6. URL 형식(https://...)이 보이면 반드시 그대로 포함시켜야 합니다.\n"
-                    "7. 트렌드 검색 결과가 있을 때는 쇼츠나 로고 생성 관련 내용을 추가로 생성하지 마세요.\n"
-                    "\n"
-                    "예시:\n"
-                    "---\n"
-                    "[트렌드 검색 결과를 그대로 출력]\n"
-                    "...\n"
-                    "\n"
-                    "참고 자료:\n"
-                    "- https://example.com/article1\n"
-                    "- https://example.com/article2\n"
-                    "---"
-                )
 
             system = SystemMessage(content=system_content)
 

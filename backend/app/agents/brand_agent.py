@@ -68,9 +68,7 @@ def build_brand_graph():
 
     # 사용자 입력을 먼저 가드레일로 체크
     g.add_edge(START, "safeguard_check")
-    g.add_edge("safeguard_check", "brand_intention")  # 안전한 입력만 intent로
+    g.add_edge("safeguard_check", "brand_intention")
     g.add_edge("trend_refine", "trend_search")
-    g.add_edge("trend_search", "brand_chat")
-    # brand_chat은 Command.goto를 사용하므로 END로 직접 가거나 다른 노드로
 
     return g.compile(checkpointer=checkpointer)
