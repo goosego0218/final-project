@@ -2,7 +2,7 @@
 # 작성일: 2025-11-28
 # 수정내역
 # - 2025-11-28: 초기 작성
-# - 2025-12-XX: 전략 1 적용 - relationship 제거, 명시적 join 사용
+# - 2025-11-29: 전략 1 적용 - relationship 제거, 명시적 join 사용
 
 from sqlalchemy.orm import Session
 from typing import Optional, Tuple

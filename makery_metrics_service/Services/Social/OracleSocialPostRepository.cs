@@ -22,6 +22,7 @@ public class OracleSocialPostRepository : ISocialPostRepository
 
     public async Task<IReadOnlyList<SocialPostRecord>> GetPostsToCollectAsync(
         int maxCount,
+        int? lastProcessedPostId = null,
         CancellationToken ct = default
     )
     {
@@ -39,23 +40,58 @@ public class OracleSocialPostRepository : ISocialPostRepository
             await using var conn = new OracleConnection(connStr);
             await conn.OpenAsync(ct);
 
-            const string sql = @"
-                SELECT p.post_id, p.platform, p.platform_post_id
-                FROM social_post p
-                JOIN social_connection c
-                  ON p.conn_id = c.conn_id
-                WHERE p.status = 'SUCCESS'
-                  AND p.platform_post_id IS NOT NULL
-                  AND p.del_yn = 'N'
-                  AND c.del_yn = 'N'
-                  AND ROWNUM <= :maxRows
-            ";
-
+            string sql;
             await using var cmd = conn.CreateCommand();
+
+            if (lastProcessedPostId.HasValue)
+            {
+                sql = @"
+                    SELECT post_id, platform, platform_post_id
+                    FROM (
+                        SELECT p.post_id, p.platform, p.platform_post_id
+                        FROM social_post p
+                        JOIN social_connection c
+                          ON p.conn_id = c.conn_id
+                        WHERE p.status = 'SUCCESS'
+                          AND p.platform_post_id IS NOT NULL
+                          AND p.del_yn = 'N'
+                          AND c.del_yn = 'N'
+                          AND p.post_id > :lastPostId
+                        ORDER BY p.post_id
+                    )
+                    WHERE ROWNUM <= :maxRows
+                ";
+
+                var lastPostIdParam = cmd.CreateParameter();
+                lastPostIdParam.ParameterName = "lastPostId";
+                lastPostIdParam.OracleDbType = OracleDbType.Int32;
+                lastPostIdParam.Value = lastProcessedPostId.Value;
+                cmd.Parameters.Add(lastPostIdParam);
+            }
+            else
+            {
+                sql = @"
+                    SELECT post_id, platform, platform_post_id
+                    FROM (
+                        SELECT p.post_id, p.platform, p.platform_post_id
+                        FROM social_post p
+                        JOIN social_connection c
+                          ON p.conn_id = c.conn_id
+                        WHERE p.status = 'SUCCESS'
+                          AND p.platform_post_id IS NOT NULL
+                          AND p.del_yn = 'N'
+                          AND c.del_yn = 'N'
+                        ORDER BY p.post_id
+                    )
+                    WHERE ROWNUM <= :maxRows
+                ";
+            }
+
             cmd.CommandText = sql;
 
             var maxRowsParam = cmd.CreateParameter();
             maxRowsParam.ParameterName = "maxRows";
+            maxRowsParam.OracleDbType = OracleDbType.Int32;
             maxRowsParam.Value = maxCount;
             cmd.Parameters.Add(maxRowsParam);
 
@@ -63,7 +99,6 @@ public class OracleSocialPostRepository : ISocialPostRepository
 
             while (await reader.ReadAsync(ct))
             {
-                // 컬럼 순서: post_id (NUMBER), platform (VARCHAR2), platform_post_id (VARCHAR2)
                 var postId = reader.GetInt32(0);
                 var platform = reader.GetString(1);
                 var platformPostId = reader.GetString(2);

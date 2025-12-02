@@ -1,7 +1,7 @@
 # 갤러리 관련 엔드포인트
-# 작성일: 2025-12-XX
+# 작성일: 2025-11-29
 # 수정내역
-# - 2025-12-XX: 초기 작성
+# - 2025-11-29: 초기 작성
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session

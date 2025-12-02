@@ -29,6 +29,7 @@ class TikTokUploadRequest(BaseModel):
     video_url: str      # NCP Object Storage URL
     caption: str        # 틱톡 캡션
     project_id: int     # 브랜드 프로필 불러오기 용
+    prod_id: Optional[int] = None  # 생성물 ID (선택적, 없으면 video_url로 찾음)
 
 
 class TikTokUploadResponse(BaseModel):

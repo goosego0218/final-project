@@ -589,6 +589,7 @@ def upload_video_to_tiktok_endpoint(
             video_url=request.video_url,
             caption=request.caption,
             project_id=request.project_id,
+            prod_id=request.prod_id,  # 선택적 prod_id 전달
         )
         return TikTokUploadResponse(**result)
     except ValueError as e:

@@ -4,7 +4,7 @@
 # 수정내역
 # - 2025-11-24: 초기 작성
 # - 2025-11-29: 토큰 암호화/복호화 추가
-# - 2025-12-XX: 전략 1 적용 - relationship 제거
+# - 2025-11-30: 전략 1 적용 - relationship 제거
 
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta, timezone
@@ -70,6 +70,7 @@ def create_or_update_social_connection(
     - 이미 연동되어 있으면 업데이트
     - 없으면 새로 생성
     - 토큰은 암호화하여 저장
+    - 중복 연동 방지: 같은 platform_user_id가 다른 사용자에게 이미 연동되어 있으면 에러
     """
     # 토큰 암호화
     encrypted_access_token = encrypt_token(access_token)
@@ -107,6 +108,21 @@ def create_or_update_social_connection(
             existing.refresh_token = refresh_token or ""
         return existing
     else:
+        # 중복 연동 체크: 같은 platform_user_id가 다른 사용자에게 이미 연동되어 있는지 확인
+        if platform_user_id:
+            duplicate_connection = (
+                db.query(SocialConnection)
+                .filter(
+                    SocialConnection.platform == platform,
+                    SocialConnection.platform_user_id == platform_user_id,
+                    SocialConnection.user_id != user_id,
+                    SocialConnection.del_yn == "N",
+                )
+                .first()
+            )
+            if duplicate_connection:
+                raise ValueError(f"이미 다른 사용자가 연동한 {platform} 계정입니다.")
+        
         # 새로 생성 (암호화된 토큰 저장)
         connection = SocialConnection(
             user_id=user_id,
@@ -127,6 +143,98 @@ def create_or_update_social_connection(
         if connection.refresh_token:
             connection.refresh_token = refresh_token or ""
         return connection
+
+
+def refresh_tiktok_token(
+    db: Session,
+    user_id: int,
+) -> Optional[SocialConnection]:
+    """
+    TikTok access_token 갱신.
+    - refresh_token을 사용하여 새로운 access_token 발급
+    - 갱신된 토큰은 DB에 자동 저장
+    
+    Args:
+        db: SQLAlchemy Session
+        user_id: 사용자 ID
+    
+    Returns:
+        SocialConnection: 갱신된 연동 정보 (실패 시 None)
+    
+    Raises:
+        ValueError: 연동 정보가 없거나 갱신 실패 시
+    """
+    import requests
+    from app.core.config import settings
+    
+    connection = get_social_connection(db, user_id, 'tiktok')
+    if not connection:
+        raise ValueError("TikTok 연동이 필요합니다.")
+    
+    if not connection.refresh_token:
+        raise ValueError("TikTok refresh_token이 없습니다. 다시 연동해주세요.")
+    
+    if not settings.tiktok_client_key or not settings.tiktok_client_secret:
+        raise ValueError("TikTok 연동 설정이 올바르지 않습니다.")
+    
+    token_url = "https://open.tiktokapis.com/v2/oauth/token/"
+    
+    payload = {
+        "client_key": settings.tiktok_client_key,
+        "client_secret": settings.tiktok_client_secret,
+        "grant_type": "refresh_token",
+        "refresh_token": connection.refresh_token,
+    }
+    
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+    
+    try:
+        resp = requests.post(token_url, data=payload, headers=headers, timeout=10)
+        token_data = resp.json()
+        
+        if "error" in token_data:
+            error_msg = token_data.get("error", {}).get("message", str(token_data))
+            raise ValueError(f"TikTok 토큰 갱신 실패: {error_msg}")
+        
+        new_access_token = token_data.get("access_token")
+        new_refresh_token = token_data.get("refresh_token")  # 새로 발급될 수 있음
+        expires_in = token_data.get("expires_in")
+        
+        if not new_access_token:
+            raise ValueError("TikTok 토큰 갱신 응답에 access_token이 없습니다.")
+        
+        # 토큰 만료 시간 계산
+        token_expires_at = None
+        if expires_in:
+            kst = timezone(timedelta(hours=9))
+            token_expires_at = datetime.now(kst) + timedelta(seconds=expires_in)
+        
+        # refresh_token이 새로 발급되지 않았으면 기존 것 사용
+        if not new_refresh_token:
+            new_refresh_token = connection.refresh_token
+        
+        # DB에 갱신된 토큰 저장
+        updated_connection = create_or_update_social_connection(
+            db=db,
+            user_id=user_id,
+            platform='tiktok',
+            access_token=new_access_token,
+            refresh_token=new_refresh_token,
+            token_expires_at=token_expires_at,
+            platform_user_id=connection.platform_user_id,
+            email=connection.email,
+        )
+        
+        print(f"[SUCCESS] TikTok 토큰 갱신 성공 - user_id: {user_id}")
+        return updated_connection
+        
+    except ValueError:
+        raise
+    except Exception as e:
+        print(f"[ERROR] TikTok 토큰 갱신 중 오류: {e}")
+        import traceback
+        traceback.print_exc()
+        raise ValueError(f"TikTok 토큰 갱신 중 오류 발생: {str(e)}")
 
 
 def delete_social_connection(
@@ -476,9 +584,10 @@ def upload_video_to_tiktok(
     video_url: str,
     caption: str,
     project_id: int,
+    prod_id: Optional[int] = None,  # 생성물 ID (선택적, 없으면 video_url로 찾음)
 ) -> dict:
     """
-    TikTok Draft 업로드 (FILE_UPLOAD 방식).
+    TikTok Draft 업로드 (FILE_UPLOAD 방식) 및 social_post 테이블에 기록 저장.
 
     Args:
         db: SQLAlchemy Session
@@ -486,6 +595,7 @@ def upload_video_to_tiktok(
         video_url: NCP Object Storage의 비디오 URL
         caption: TikTok 캡션(타이틀)
         project_id: 프로젝트 ID (로깅/확장용)
+        prod_id: 생성물 ID (선택적, 없으면 video_url로 찾음)
 
     Returns:
         dict: {
@@ -502,10 +612,115 @@ def upload_video_to_tiktok(
         import requests
         from app.core.config import settings
 
+        # 0. prod_id 찾기 또는 프로젝트에 저장 (중복 저장 방지)
+        if not prod_id:
+            file_path = get_file_path_from_url(video_url)
+            if file_path:
+                # 이미 NCP에 저장된 파일인 경우 file_path로 찾기
+                prod = (
+                    db.query(GenerationProd)
+                    .filter(
+                        GenerationProd.file_path == file_path,
+                        GenerationProd.del_yn == 'N'
+                    )
+                    .first()
+                )
+                if prod:
+                    prod_id = prod.prod_id
+                    print(f"[INFO] 기존 생성물 사용: prod_id={prod_id}")
+                else:
+                    print(f"[WARN] file_path로 prod_id를 찾을 수 없습니다: {file_path}")
+            else:
+                print(f"[INFO] video_url이 NCP URL이 아닙니다. 비디오를 다운로드하여 저장합니다: {video_url}")
+        
+        # prod_id가 없으면 video_url에서 비디오 다운로드 후 프로젝트에 저장
+        if not prod_id:
+            try:
+                import httpx
+                # 비디오 다운로드
+                with httpx.Client(timeout=300.0) as client:
+                    response = client.get(video_url)
+                    response.raise_for_status()
+                    video_bytes = response.content
+                
+                # Base64로 인코딩
+                base64_video = base64.b64encode(video_bytes).decode('utf-8')
+                # Data URL 형식으로 변환
+                base64_video = f"data:video/mp4;base64,{base64_video}"
+                
+                # 프로젝트에 저장 (중복 저장 방지)
+                prod = save_shorts_to_storage_and_db(
+                    db=db,
+                    base64_video=base64_video,
+                    project_id=project_id,
+                    prod_type_id=2,  # 쇼츠 타입
+                    user_id=user_id,
+                )
+                prod_id = prod.prod_id
+                print(f"[INFO] 비디오를 프로젝트에 저장 완료: prod_id={prod_id}")
+            except Exception as e:
+                print(f"[ERROR] 비디오 다운로드 및 저장 실패: {e}")
+                raise ValueError(f"비디오를 프로젝트에 저장하는데 실패했습니다: {str(e)}")
+
         # 1. TikTok 연동 정보 조회
         connection = get_social_connection(db, user_id, 'tiktok')
         if not connection:
+            # social_post 레코드 생성 (연동 실패 시)
+            if prod_id:
+                kst = timezone(timedelta(hours=9))
+                social_post = SocialPost(
+                    prod_id=prod_id,
+                    conn_id=0,  # 임시값 (연동 정보가 없으므로)
+                    platform='tiktok',
+                    status='FAIL',
+                    error_message="TikTok 연동이 필요합니다.",
+                    requested_at=datetime.now(kst)
+                )
+                db.add(social_post)
+                db.commit()
             raise ValueError("TikTok 연동이 필요합니다.")
+
+        # social_post 레코드 생성 (업로드 시작 시점)
+        social_post = None
+        if prod_id:
+            kst = timezone(timedelta(hours=9))
+            social_post = SocialPost(
+                prod_id=prod_id,
+                conn_id=connection.conn_id,
+                platform='tiktok',
+                status='PENDING',
+                requested_at=datetime.now(kst)
+            )
+            db.add(social_post)
+            db.flush()  # post_id 생성
+
+        # TikTok 토큰 만료 체크 및 갱신
+        kst = timezone(timedelta(hours=9))
+        now_kst = datetime.now(kst)
+        needs_refresh = False
+        
+        # token_expires_at이 있고 만료되었거나 곧 만료될 경우 갱신
+        if connection.token_expires_at:
+            expires_at = connection.token_expires_at
+            if expires_at.tzinfo is None:
+                expires_at = expires_at.replace(tzinfo=kst)
+            else:
+                expires_at = expires_at.astimezone(kst)
+            
+            # 만료 시간이 5분 이내면 갱신 필요 (여유 있게)
+            if expires_at <= now_kst + timedelta(minutes=5):
+                needs_refresh = True
+                print(f"[INFO] TikTok 토큰 만료 임박 (만료 시간: {expires_at}, 현재: {now_kst}) - user_id: {user_id}")
+        
+        if needs_refresh:
+            try:
+                print(f"[INFO] TikTok 토큰 갱신 시도 - user_id: {user_id}")
+                connection = refresh_tiktok_token(db, user_id)
+                print(f"[INFO] TikTok 토큰 갱신 성공 - user_id: {user_id}")
+            except Exception as e:
+                print(f"[ERROR] TikTok 토큰 갱신 실패 - user_id: {user_id}, error: {e}")
+                # 갱신 실패해도 기존 토큰으로 시도 (만료되었을 수 있지만)
+                pass
 
         access_token = connection.access_token
 
@@ -539,50 +754,96 @@ def upload_video_to_tiktok(
             },
         }
 
-        init_resp = requests.post(init_url, headers=headers, json=body, timeout=30)
-        init_data = init_resp.json()
-
-        error = init_data.get("error") or {}
-        if error.get("code") not in (None, "", "ok"):
-            raise ValueError(f"TikTok init 실패: {init_data}")
-
-        data = init_data.get("data") or {}
-        publish_id = data.get("publish_id")
-        upload_url = data.get("upload_url")
-
-        if not upload_url:
-            raise ValueError("TikTok init 응답에 upload_url이 없습니다.")
-
-        # 4. TikTok upload (단일 청크)
-        content_range = f"bytes 0-{file_size - 1}/{file_size}"
-
-        upload_headers = {
-            "Content-Type": "video/mp4",
-            "Content-Range": content_range,
-        }
-
-        upload_resp = requests.put(
-            upload_url,
-            headers=upload_headers,
-            data=video_bytes,
-            timeout=300,
-        )
-
-        # 응답 바디는 지금은 로그 용도만, API에서는 success/메시지만 넘깁니다.
         try:
-            if upload_resp.content:
-                upload_data = upload_resp.json()
-            else:
-                upload_data = {"status_code": upload_resp.status_code}
-            print(f"[DEBUG] TikTok upload response: {upload_data}")
-        except Exception:
-            print(f"[WARN] TikTok upload 응답 JSON 파싱 실패: {upload_resp.text[:500]}")
+            init_resp = requests.post(init_url, headers=headers, json=body, timeout=30)
+            init_data = init_resp.json()
 
-        return {
-            "success": True,
-            "publish_id": publish_id,
-            "message": "TikTok Draft 업로드 요청 완료.",
-        }
+            error = init_data.get("error") or {}
+            if error.get("code") not in (None, "", "ok"):
+                error_msg = f"TikTok init 실패: {init_data}"
+                if social_post:
+                    kst = timezone(timedelta(hours=9))
+                    social_post.status = 'FAIL'
+                    social_post.error_message = error_msg[:1000]
+                    db.commit()
+                raise ValueError(error_msg)
+
+            data = init_data.get("data") or {}
+            publish_id = data.get("publish_id")
+            upload_url = data.get("upload_url")
+
+            if not upload_url:
+                error_msg = "TikTok init 응답에 upload_url이 없습니다."
+                if social_post:
+                    kst = timezone(timedelta(hours=9))
+                    social_post.status = 'FAIL'
+                    social_post.error_message = error_msg
+                    db.commit()
+                raise ValueError(error_msg)
+
+            # 4. TikTok upload (단일 청크)
+            content_range = f"bytes 0-{file_size - 1}/{file_size}"
+
+            upload_headers = {
+                "Content-Type": "video/mp4",
+                "Content-Range": content_range,
+            }
+
+            upload_resp = requests.put(
+                upload_url,
+                headers=upload_headers,
+                data=video_bytes,
+                timeout=300,
+            )
+
+            # 응답 바디는 지금은 로그 용도만, API에서는 success/메시지만 넘깁니다.
+            try:
+                if upload_resp.content:
+                    upload_data = upload_resp.json()
+                else:
+                    upload_data = {"status_code": upload_resp.status_code}
+                print(f"[DEBUG] TikTok upload response: {upload_data}")
+            except Exception:
+                print(f"[WARN] TikTok upload 응답 JSON 파싱 실패: {upload_resp.text[:500]}")
+
+            # social_post 업데이트 (성공)
+            if social_post:
+                kst = timezone(timedelta(hours=9))
+                social_post.status = 'SUCCESS'
+                social_post.platform_post_id = publish_id
+                # TikTok의 경우 publish_id만 있고 실제 URL은 나중에 조회해야 할 수 있음
+                # 일단 publish_id를 platform_url에도 저장 (필요시 나중에 수정)
+                social_post.platform_url = f"https://www.tiktok.com/@{publish_id}" if publish_id else None
+                social_post.posted_at = datetime.now(kst)
+                db.commit()
+
+            return {
+                "success": True,
+                "publish_id": publish_id,
+                "message": "TikTok Draft 업로드 요청 완료.",
+            }
+
+        except ValueError:
+            # ValueError는 그대로 위로 올림 (이미 social_post 업데이트 완료)
+            raise
+        except requests.RequestException as e:
+            error_msg = f"TikTok API 호출 실패: {str(e)}"
+            if social_post:
+                kst = timezone(timedelta(hours=9))
+                social_post.status = 'FAIL'
+                social_post.error_message = error_msg[:1000]
+                if hasattr(e, 'response') and e.response is not None:
+                    social_post.error_code = str(e.response.status_code)
+                db.commit()
+            raise ValueError(error_msg)
+        except Exception as e:
+            error_msg = f"TikTok 업로드 중 오류: {str(e)}"
+            if social_post:
+                kst = timezone(timedelta(hours=9))
+                social_post.status = 'FAIL'
+                social_post.error_message = error_msg[:1000]
+                db.commit()
+            raise ValueError(error_msg)
 
     except ValueError:
         # 서비스 레이어에서 의미 있는 메시지 그대로 위로 올림
