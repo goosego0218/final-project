@@ -8,7 +8,7 @@
 
 from __future__ import annotations
 
-from typing import Literal, Optional, Dict, Any, Annotated
+from typing import Literal, Optional, Dict, Any, Annotated, List
 from typing_extensions import TypedDict
 
 from langchain.agents import AgentState
@@ -43,6 +43,10 @@ class LogoState(TypedDict, total=False):
     logo_size_bytes: Optional[int]
     logo_generated_at: Optional[float]
 
+#--------------------------------------25-12-03--------------------------------------
+    # [추가] 레퍼런스 이미지 (Base64 문자열 리스트, 최대 6개)
+    reference_images: Optional[List[str]]  # ["data:image/png;base64,...", ...]
+#-----------------------------------------------------------------------------------
 
 class BrandProfile(TypedDict, total=False):
     """

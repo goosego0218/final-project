@@ -114,6 +114,7 @@ def chat_logo(
     - 브랜드 챗봇에서 project_id 가 생성된 후,
       같은 화면에서 '로고 만들기'를 선택하면 그 project_id 를 들고 이 엔드포인트를 친다.
     """
+    
     # 프로젝트 id 확인
     if req.project_id is None:
         raise HTTPException(
