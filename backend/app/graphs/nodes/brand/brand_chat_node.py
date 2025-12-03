@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, List, Dict, Any, Literal
 
-from langchain_core.messages import SystemMessage, AIMessage, AnyMessage
+from langchain_core.messages import SystemMessage, AnyMessage
 from langgraph.types import Command
 from langgraph.graph import END
 
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from app.agents.state import AppState, BrandProfile
     from langchain_core.language_models.chat_models import BaseChatModel
 
- 
+
 def _format_brand_profile(profile: "BrandProfile") -> str:
     """브랜드 프로필을 LLM 프롬프트용 텍스트로 정리."""
     if not profile:
@@ -92,7 +92,7 @@ def make_brand_chat_node(llm: "BaseChatModel"):
             il = intent_info.get("label")
             if isinstance(il, str):
                 intent_label = il
-        
+
         # 필수 필드 검증 결과(meta["validation"]) 읽기
         validation: Dict[str, Any] = dict(meta.get("validation") or {})
         required_missing = validation.get("required_missing") or []
@@ -108,14 +108,7 @@ def make_brand_chat_node(llm: "BaseChatModel"):
 
         # trend_context 확인 (트렌드 검색 결과가 있는지 체크)
         trend_context: Dict[str, Any] = dict(state.get("trend_context") or {})
-        trend_summary = trend_context.get("last_result_summary")
-
-        # 트렌드 관련 의도일 때는 LLM 브랜드 챗을 아예 타지 않고
-        #    트렌드 결과만 그대로 반환하고 종료
-        if intent_label and intent_label.startswith("trend") and trend_summary:
-            messages = list(state.get("messages") or [])
-            messages.append(AIMessage(content=trend_summary))
-            return Command(update={"messages": messages}, goto=END)
+        trend_summary: str = str(trend_context.get("last_result_summary") or "")
 
         # smalltalk 의도일 때: 브랜드 프로필은 사용하지 않고,
         # SMALLTALK_SYSTEM_PROMPT 만 사용
@@ -124,6 +117,16 @@ def make_brand_chat_node(llm: "BaseChatModel"):
         else:
             profile_text = _format_brand_profile(brand_profile)
             system_content = f"{BRAND_CHAT_SYSTEM_PROMPT}\n\n{profile_text}"
+
+            if intent_label and intent_label.startswith("trend") and trend_summary:
+                system_content += (
+                    "\n\n[트렌드 분석 결과]\n"
+                    f"{trend_summary}\n\n"
+                    "[지시]\n"
+                    "위 트렌드 분석 내용을 참고하여, 사용자가 이해하기 쉽게 설명하고 "
+                    "브랜드/콘텐츠 방향에 대한 구체적인 실행 아이디어를 제안하세요. "
+                    "가능하면 트렌드 텍스트의 핵심 문장과 URL은 그대로 유지하세요."
+                )
 
             # finalize + 필수 필드 검증 결과에 따른 추가 지시
             if intent_label == "finalize":
@@ -158,22 +161,24 @@ def make_brand_chat_node(llm: "BaseChatModel"):
                         f"{missing_text}."
                     )
                 elif is_valid:
-                    # 필수 항목이 모두 채워진 상태: 옵션값은 선택사항이며, 사용자가 다음 단계로 넘어가고 싶으면 확정 여부 확인
+                    # 필수 항목이 모두 채워진 상태: 옵션값은 선택사항
                     system_content += (
                         "\n\n[필수값 완료 상태 안내 - 반드시 준수]\n"
                         "현재 필수 정보(브랜드 이름, 업종)가 모두 채워져 있습니다.\n"
                         "옵션값(톤앤무드, 타겟 연령, 타겟 성별, 슬로건, 핵심 키워드, 피하고 싶은 트렌드, 선호 색상)은 선택사항입니다.\n"
                         "- 옵션값에 대해 1~2가지만 자연스럽게 질문할 수 있지만, 모든 옵션값을 채우려고 강요하지 마세요.\n"
-                        "- **중요: 필수값이 채워진 후 첫 번째 응답에서 반드시 옵션값 질문과 함께 또는 같은 문장에, 다음 단계(쇼츠/로고 생성)로 넘어갈 수 있다는 것을 명시적으로 안내해야 합니다.**\n"
+                        "- **중요: 필수값이 채워진 후 첫 번째 응답에서 반드시 옵션값 질문과 함께 또는 같은 문장에, "
+                        "다음 단계(쇼츠/로고 생성)로 넘어갈 수 있다는 것을 명시적으로 안내해야 합니다.**\n"
                         "  이 안내를 생략하지 마세요. 반드시 포함시켜야 합니다.\n"
                         "  예: '이제 브랜드의 방향성을 좀 더 구체화하거나 쇼츠 또는 로고를 생성할 수 있습니다.'\n"
                         "  예: '브랜드 방향을 더 구체화할 수도 있고, 바로 쇼츠나 로고를 만들어볼 수도 있어요.'\n"
-                        "  예: '혹시 어떤 분위기나 느낌을 원하시나요? 예를 들어, 따뜻한 느낌이나 고급스러운 느낌 등 어떤 것을 생각하고 계신가요? 또는 바로 쇼츠나 로고를 만들어볼 수도 있어요.'\n"
-                        "- 사용자가 옵션값 질문에 답변하지 않거나, '다음 단계', '확정', '이대로 진행', '쇼츠 만들고 싶다', '로고 만들고 싶다' 등의 의사를 표현하면,\n"
+                        "  예: '혹시 어떤 분위기나 느낌을 원하시나요? 예를 들어, 따뜻한 느낌이나 고급스러운 느낌 등 어떤 것을 생각하고 계신가요? "
+                        "또는 바로 쇼츠나 로고를 만들어볼 수도 있어요.'\n"
+                        "- 사용자가 옵션값 질문에 답변하지 않거나, '다음 단계', '확정', '이대로 진행', "
+                        "'쇼츠 만들고 싶다', '로고 만들고 싶다' 등의 의사를 표현하면,\n"
                         "  즉시 옵션값 질문을 중단하고 '이대로 브랜드를 확정해도 될까요?'라고 확인 질문을 던지세요.\n"
                         "- 필수값이 채워진 상태에서 옵션값 질문을 2~3회 한 후에는 자동으로 확정 여부를 확인하는 방향으로 전환하세요."
                     )
-
 
             system = SystemMessage(content=system_content)
 

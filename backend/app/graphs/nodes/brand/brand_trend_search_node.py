@@ -68,14 +68,10 @@ def make_brand_trend_search_node(llm: "BaseChatModel"):
         trend_context["last_query"] = query  # user_text 대신 query 사용
         trend_context["last_result_summary"] = answer
 
-        # 트렌드 결과를 히스토리에 AIMessage 로 추가
-        messages = list(state.get("messages") or [])
-        messages.append(AIMessage(content=answer))
-
         return Command(
             update={
                 "trend_context": trend_context,
-                "messages": messages,
+                # messages 는 건드리지 않음 (마지막 발화는 여전히 HUMAN)
             },
             goto="brand_chat",
         )
