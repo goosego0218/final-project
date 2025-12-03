@@ -18,8 +18,8 @@ from app.llm.client import get_chat_model, get_fast_chat_model, get_genai_client
 from app.graphs.nodes.shorts.decision_node import make_decision_node
 from app.graphs.nodes.shorts.general_chat_node import make_general_chat_node
 from app.graphs.nodes.shorts.trend_analysis_node import make_trend_analysis_node
-# from app.graphs.nodes.shorts.check_logo_node import make_check_logo_node
-# from app.graphs.nodes.shorts.fetch_logo_node import make_fetch_logo_node
+from app.graphs.nodes.shorts.shorts_entry_node import make_shorts_entry_node
+from app.graphs.nodes.shorts.analyze_user_request_node import make_analyze_user_request_node
 from app.graphs.nodes.shorts.generate_prompt_no_logo_node import make_generate_prompt_no_logo_node
 from app.graphs.nodes.shorts.generate_shorts_node import make_generate_shorts_node 
 
@@ -42,10 +42,11 @@ def build_shorts_graph():
     decision = make_decision_node(llm)
     general_chat = make_general_chat_node(fast_llm)
     trend_analysis = make_trend_analysis_node(llm)
-    # check_logo = make_check_logo_node(llm)
-    # fetch_logo = make_fetch_logo_node(llm)
     generate_prompt_no_logo = make_generate_prompt_no_logo_node(llm)
     generate_shorts = make_generate_shorts_node(genai_client)  # None일 수 있음 (노드에서 처리)  
+
+    shorts_entry = make_shorts_entry_node()
+    analyze_user_request = make_analyze_user_request_node(fast_llm)  
 
     # 그래프 생성
     graph = StateGraph(AppState)
@@ -54,8 +55,8 @@ def build_shorts_graph():
     graph.add_node("decision", decision)
     graph.add_node("general_chat", general_chat)
     graph.add_node("trend_analysis", trend_analysis)
-    # graph.add_node("check_logo", check_logo)
-    # graph.add_node("fetch_logo", fetch_logo)
+    graph.add_node("shorts_entry", shorts_entry)
+    graph.add_node("analyze_user_request", analyze_user_request)    
     graph.add_node("generate_prompt_no_logo", generate_prompt_no_logo)
     graph.add_node("generate_shorts", generate_shorts)
     
@@ -64,8 +65,8 @@ def build_shorts_graph():
     graph.add_edge("general_chat", END)
     graph.add_edge("trend_analysis", END)
     
-    # graph.add_edge("fetch_logo",END)
-    # graph.add_edge("generate_prompt_no_logo",END)
+    graph.add_edge("shorts_entry", "analyze_user_request")
+    graph.add_edge("analyze_user_request", "generate_prompt_no_logo")
     graph.add_edge("generate_prompt_no_logo", "generate_shorts")  
     graph.add_edge("generate_shorts", END)  
     

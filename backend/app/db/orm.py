@@ -30,7 +30,7 @@ engine = create_engine(
     max_overflow=20,  # 추가 커넥션 최대 개수 (총 30개까지 가능)
     pool_timeout=30,  # 커넥션 대기 시간 (초)
     pool_recycle=3600,  # 1시간마다 커넥션 재생성 (DB 타임아웃 방지)
-    echo=True,  # SQL 로깅 (디버깅 시 True)
+    # echo=True,  # SQL 로깅 (디버깅 시 True)
 )
 
 # 세션 팩토리

@@ -113,6 +113,22 @@ def make_brand_intention_node(llm: "BaseChatModel"):
             else:
                 label = "brand_info"
 
+        # 1) 직전 트렌드 히스토리가 없으면 trend_refine 금지
+        has_trend_history = bool(
+            trend_context.get("last_query") or trend_context.get("last_result_summary")
+        )
+        if label == "trend_refine" and not has_trend_history:
+            label = "brand_info"
+
+        # 2) "느낌/분위기" 언급인데 추천/다시/트렌드/결과 언급이 없으면 brand_info 강제
+        user_text_lower = (user_text or "").lower()
+        text_has_mood_keywords = ("느낌" in user_text) or ("분위기" in user_text)
+        text_has_recommend_keywords = any(
+            kw in user_text_lower for kw in ["추천", "다시", "트렌드", "결과"]
+        )
+        if label == "trend_refine" and text_has_mood_keywords and not text_has_recommend_keywords:
+            label = "brand_info"
+
         new_meta: Dict[str, Any] = dict(state.get("meta") or {})
         new_meta["intent"] = {
             "label": label,

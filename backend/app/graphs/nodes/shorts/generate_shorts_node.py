@@ -72,6 +72,24 @@ def make_generate_shorts_node(genai_client: "Client | None"):
             video1_result = op1.response.generated_videos[0]
             print("Part 1 생성 완료!")
 
+            # --- [추가] Part 1 결과 파일이 VEO 쪽에서 'processed' 될 때까지 대기 ---
+            try:
+                print("Part 1 비디오 처리 상태 확인 중...")
+                while True:
+                    file_info = genai_client.files.get(file=video1_result.video)
+                    # SDK 버전에 따라 속성명이 다를 수 있음: state / display_state / processed 등
+                    state = getattr(file_info, "state", None) or getattr(
+                        file_info, "display_state", None
+                    )
+                    print(f"Part 1 file state = {state}")
+                    # ACTIVE / READY / PROCESSED 계열이면 탈출
+                    if state and str(state).upper() in {"ACTIVE", "READY", "PROCESSED"}:
+                        break
+                    time.sleep(5)
+            except Exception as e:
+                # 상태 조회 실패해도 그냥 진행 (최악의 경우 예전 동작과 동일)
+                print(f"Part 1 파일 상태 조회 중 경고: {e}")
+
             # 프롬프트가 1개뿐이면 여기서 종료 (8초 영상)
             if len(prompts) == 1:
                 final_video_result = video1_result
@@ -80,7 +98,7 @@ def make_generate_shorts_node(genai_client: "Client | None"):
                 print("Step 2: Generating Part 2 (전-결: Resolution) via Extension...")
                 op2 = genai_client.models.generate_videos(
                     model=settings.veo_model,
-                    video=video1_result.video,  # <- Part 1 영상을 입력으로 전달
+                    video=video1_result.video,  # 처리 완료된 VEO 비디오를 입력
                     prompt=prompts[1],
                     config=config,
                 )
