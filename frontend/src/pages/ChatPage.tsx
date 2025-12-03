@@ -59,6 +59,35 @@ interface UnifiedBrandInfo {
   preferred_colors?: string | string[];
 }
 
+// 메시지 내 URL을 자동으로 링크로 렌더링하기 위한 유틸
+const urlRegex = /(https?:\/\/[^\s]+)/g;
+
+function renderMessageWithLinks(text: string) {
+  if (!text) return null;
+
+  // URL 기준으로 텍스트를 분리
+  const parts = text.split(urlRegex);
+
+  return parts.map((part, index) => {
+    // URL 형태인지 단순 검사
+    if (/^https?:\/\/[^\s]+$/.test(part)) {
+      return (
+        <a
+          key={index}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 underline break-all"
+        >
+          {part}
+        </a>
+      );
+    }
+
+    return <span key={index}>{part}</span>;
+  });
+}
+
 const ChatPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -1202,7 +1231,9 @@ const ChatPage = () => {
                         <p className="text-muted-foreground">답변을 생성하고 있습니다...</p>
                       </div>
                     ) : (
-                      <p className="whitespace-pre-wrap">{message.content}</p>
+                      <div className="whitespace-pre-wrap break-words">
+                        {renderMessageWithLinks(message.content)}
+                      </div>
                     )}
                   </Card>
                 </div>

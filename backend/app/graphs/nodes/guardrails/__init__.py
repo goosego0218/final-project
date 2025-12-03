@@ -1,2 +1,0 @@
-# Guardrails 노드
-
