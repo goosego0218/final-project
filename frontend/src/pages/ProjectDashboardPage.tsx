@@ -24,12 +24,13 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Trash2, Image, Video, Calendar, X, Upload, Instagram, Youtube, Download } from "lucide-react";
+import { Trash2, Image, Video, Calendar, X, Upload, Instagram, Youtube, Download, ChevronLeft, ChevronRight, CreditCard } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { addWatermarkToImage, addWatermarkToVideo } from "@/utils/watermark";
+import BusinessCardPreview from "@/components/BusinessCardPreview";
 
 interface LogoItem {
   id: string;
@@ -64,6 +65,7 @@ const ProjectDashboardPage = () => {
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [pendingToggleItem, setPendingToggleItem] = useState<{ type: "logo" | "short"; id: string } | null>(null);
   const [selectedImage, setSelectedImage] = useState<{ url: string; title: string; type: "logo" | "short" } | null>(null);
+  const [previewView, setPreviewView] = useState<"image" | "businessCard">("image");
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [selectedShortFormForUpload, setSelectedShortFormForUpload] = useState<ShortFormItem | null>(null);
   const [selectedPlatforms, setSelectedPlatforms] = useState<Set<string>>(new Set());
@@ -908,17 +910,31 @@ const ProjectDashboardPage = () => {
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDownload(logo);
-                            }}
-                            className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 dark:bg-background/90 hover:bg-black/70 dark:hover:bg-background text-white dark:text-foreground"
-                          >
-                            <Download className="h-4 w-4" />
-                          </Button>
+                          <div className="absolute bottom-2 left-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDownload(logo);
+                              }}
+                              className="bg-black/60 dark:bg-background/90 hover:bg-black/70 dark:hover:bg-background text-white dark:text-foreground"
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedImage({ url: logo.url, title: logo.title || "로고", type: "logo" });
+                                setPreviewView("businessCard");
+                              }}
+                              className="bg-black/60 dark:bg-background/90 hover:bg-black/70 dark:hover:bg-background text-white dark:text-foreground"
+                            >
+                              <CreditCard className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
                         <div className="p-4">
                           <h3 className="font-semibold text-foreground mb-1">
@@ -1328,10 +1344,28 @@ const ProjectDashboardPage = () => {
       </Dialog>
 
       {/* 이미지/비디오 확대 보기 다이얼로그 */}
-      <Dialog open={!!selectedImage} onOpenChange={(open) => !open && setSelectedImage(null)}>
-        <DialogContent className="max-w-none w-auto p-0 bg-transparent border-none shadow-none [&>button]:hidden">
+      <Dialog 
+        open={!!selectedImage} 
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedImage(null);
+            setPreviewView("image"); // 닫을 때 뷰 초기화
+          }
+        }}
+      >
+        <DialogContent 
+          className={`max-w-none w-auto p-0 bg-transparent border-none shadow-none [&>button]:hidden ${
+            previewView === "businessCard" && selectedImage?.type === "logo" 
+              ? "max-w-6xl p-6 bg-background border shadow-lg [&>button]:block" 
+              : ""
+          }`}
+        >
           <DialogTitle className="sr-only">{selectedImage?.title || "미리보기"}</DialogTitle>  
-          <div className="relative flex items-center justify-center min-w-[300px] min-h-[533px]">
+          <div className={`relative flex items-center justify-center ${
+            previewView === "businessCard" && selectedImage?.type === "logo" 
+              ? "" 
+              : "min-w-[300px] min-h-[533px]"
+          }`}>
             {selectedImage && (
               selectedImage.type === "short" ? (
                 <>
@@ -1359,20 +1393,40 @@ const ProjectDashboardPage = () => {
                   />
                 </>
               ) : (
-                <div className="relative">
-                  <img
-                    src={selectedImage.url}
-                    alt={selectedImage.title}
-                    className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg"
-                  />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-2 right-2 z-10 bg-background/80 hover:bg-transparent"
-                    onClick={() => setSelectedImage(null)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+                <div className="relative w-full h-full flex items-center justify-center">
+                  {/* 이미지 미리보기 모드일 때만 커스텀 닫기 버튼 표시 */}
+                  {previewView === "image" && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute top-2 right-2 z-10 bg-background/80 hover:bg-transparent"
+                      onClick={() => {
+                        setSelectedImage(null);
+                        setPreviewView("image");
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+
+                  {/* 이미지 확대 보기 */}
+                  {previewView === "image" && (
+                    <div className="relative">
+                      <img
+                        src={selectedImage.url}
+                        alt={selectedImage.title}
+                        className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg"
+                      />
+                    </div>
+                  )}
+
+                  {/* 명함 미리보기 */}
+                  {previewView === "businessCard" && selectedImage.type === "logo" && (
+                    <BusinessCardPreview
+                      logoUrl={selectedImage.url}
+                      logoTitle={selectedImage.title}
+                    />
+                  )}
                 </div>
               )
             )}
