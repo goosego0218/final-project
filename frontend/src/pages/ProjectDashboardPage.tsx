@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { getProjectDetail, deleteProject, ProjectDetail, ProjectListItem, getShortsList, getLogoList, uploadToYouTube, uploadToTikTok, updateLogoPubYn, updateShortsPubYn, downloadLogo, deleteLogo, deleteShorts, getSocialPostsByProdId, getTikTokConnectionStatus, getYouTubeConnectionStatus } from "@/lib/api";
+import { getProjectDetail, deleteProject, ProjectDetail, ProjectListItem, getShortsList, getLogoList, uploadToYouTube, uploadToTikTok, updateLogoPubYn, updateShortsPubYn, downloadLogo, deleteLogo, deleteShorts, getSocialPostsByProdId, getTikTokConnectionStatus, getYouTubeConnectionStatus, getBrandInfoByProjectId, BrandInfo as ApiBrandInfo } from "@/lib/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { 
@@ -74,11 +74,13 @@ const ProjectDashboardPage = () => {
   const [uploadTitle, setUploadTitle] = useState(""); // 제목 입력 상태
   const [uploadStatus, setUploadStatus] = useState<{ tiktok: boolean; youtube: boolean }>({ tiktok: false, youtube: false });
   const [socialConnections, setSocialConnections] = useState<{ tiktok: boolean; youtube: boolean }>({ tiktok: false, youtube: false });
+  const [isBrandInfoDialogOpen, setIsBrandInfoDialogOpen] = useState(false);
+  const [brandInfoForDialog, setBrandInfoForDialog] = useState<ApiBrandInfo | null>(null);
 
   const projectId = searchParams.get('project');
   
   // DB에서 프로젝트 정보 가져오기
-  const { data: project, isLoading: isProjectLoading, error: projectError } = useQuery({
+  const { data: project, isLoading: isProjectLoading, error: projectError, refetch: refetchProject } = useQuery({
     queryKey: ['project', projectId],
     queryFn: () => getProjectDetail(Number(projectId)),
     enabled: !!projectId && isLoggedIn,
@@ -852,16 +854,50 @@ const ProjectDashboardPage = () => {
           {/* 탭 영역 - 한 줄 레이아웃 */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="flex items-center justify-between mb-6">
-              <TabsList>
-                <TabsTrigger value="logos" className="flex items-center gap-2">
-                  <Image className="h-4 w-4" />
-                  로고
-                </TabsTrigger>
-                <TabsTrigger value="shorts" className="flex items-center gap-2">
-                  <Video className="h-4 w-4" />
-                  숏폼
-                </TabsTrigger>
-              </TabsList>
+              <div className="flex items-center gap-3">
+                <TabsList>
+                  <TabsTrigger value="logos" className="flex items-center gap-2">
+                    <Image className="h-4 w-4" />
+                    로고
+                  </TabsTrigger>
+                  <TabsTrigger value="shorts" className="flex items-center gap-2">
+                    <Video className="h-4 w-4" />
+                    숏폼
+                  </TabsTrigger>
+                </TabsList>
+                {/* 브랜드 정보 버튼 (브랜드 채팅에서 저장한 정보 조회) */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs text-muted-foreground border-muted-foreground/40"
+                  disabled={!project} // 프로젝트가 아직 로드되지 않았을 때만 비활성화
+                  onClick={async () => {
+                    if (!projectId) return;
+                    try {
+                      const info = await getBrandInfoByProjectId(Number(projectId));
+                      if (info) {
+                        setBrandInfoForDialog(info);
+                        setIsBrandInfoDialogOpen(true);
+                      } else {
+                        toast({
+                          title: "브랜드 정보 없음",
+                          description: "이 프로젝트에는 아직 저장된 브랜드 정보가 없습니다.",
+                          status: "info",
+                        });
+                      }
+                    } catch (error) {
+                      console.error("브랜드 정보 조회 실패:", error);
+                      toast({
+                        title: "브랜드 정보 조회 실패",
+                        description: "브랜드 정보를 가져오는 중 오류가 발생했습니다.",
+                        status: "error",
+                      });
+                    }
+                  }}
+                >
+                  브랜드 정보
+                </Button>
+              </div>
               <div className="flex items-center gap-3">
                 <Button
                   onClick={handleCreateLogo}
@@ -911,17 +947,17 @@ const ProjectDashboardPage = () => {
                             <Trash2 className="h-4 w-4" />
                           </Button>
                           <div className="absolute bottom-2 left-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDownload(logo);
-                              }}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDownload(logo);
+                            }}
                               className="bg-black/60 dark:bg-background/90 hover:bg-black/70 dark:hover:bg-background text-white dark:text-foreground"
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
                             <Button
                               variant="ghost"
                               size="sm"
@@ -1053,6 +1089,131 @@ const ProjectDashboardPage = () => {
       </div>
 
       <Footer />
+
+      {/* 브랜드 정보 보기 다이얼로그 */}
+      <AlertDialog open={isBrandInfoDialogOpen} onOpenChange={setIsBrandInfoDialogOpen}>
+        <AlertDialogContent className="max-w-3xl">
+          {/* X 버튼 */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-4 top-4 h-6 w-6 rounded-sm opacity-70 ring-offset-background transition-opacity hover:bg-transparent hover:opacity-100 hover:text-foreground focus:outline-none focus:ring-0 z-10"
+            onClick={() => setIsBrandInfoDialogOpen(false)}
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </Button>
+
+          <AlertDialogHeader className="pb-3">
+            <AlertDialogTitle className="text-2xl font-bold">브랜드 정보</AlertDialogTitle>
+            <AlertDialogDescription className="text-base pt-1">
+              이 프로젝트에 저장된 브랜드 정보를 확인할 수 있습니다.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+           {brandInfoForDialog ? (
+            <div className="space-y-4 py-2">
+              <div className="grid grid-cols-2 gap-4">
+                {/* 브랜드명 */}
+                <div className="bg-muted/50 rounded-lg p-3 border border-border">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">
+                    브랜드명
+                  </label>
+                  <p className="text-sm font-semibold text-foreground">
+                     {brandInfoForDialog.brand_name || "-"}
+                  </p>
+                </div>
+
+                {/* 업종 */}
+                <div className="bg-muted/50 rounded-lg p-3 border border-border">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">
+                    업종
+                  </label>
+                  <p className="text-sm font-semibold text-foreground">
+                     {brandInfoForDialog.category || "-"}
+                  </p>
+                </div>
+
+                {/* 톤앤무드 */}
+                <div className="bg-muted/50 rounded-lg p-3 border border-border">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">
+                    톤앤무드
+                  </label>
+                  <p className="text-sm font-semibold text-foreground">
+                     {brandInfoForDialog.tone_mood || "-"}
+                  </p>
+                </div>
+
+                {/* 타겟 연령 */}
+                <div className="bg-muted/50 rounded-lg p-3 border border-border">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">
+                    타겟 연령
+                  </label>
+                  <p className="text-sm font-semibold text-foreground">
+                     {brandInfoForDialog.target_age || "-"}
+                  </p>
+                </div>
+
+                {/* 타겟 성별 */}
+                <div className="bg-muted/50 rounded-lg p-3 border border-border">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">
+                    타겟 성별
+                  </label>
+                  <p className="text-sm font-semibold text-foreground">
+                     {brandInfoForDialog.target_gender || "-"}
+                  </p>
+                </div>
+
+                {/* 슬로건 */}
+                <div className="bg-muted/50 rounded-lg p-3 border border-border col-span-2">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">
+                    슬로건
+                  </label>
+                  <p className="text-sm font-semibold text-foreground">
+                     {brandInfoForDialog.slogan || "-"}
+                  </p>
+                </div>
+
+                {/* 핵심 키워드 */}
+                <div className="bg-muted/50 rounded-lg p-3 border border-border col-span-2">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">
+                    핵심 키워드
+                  </label>
+                  <p className="text-sm font-semibold text-foreground">
+                     {brandInfoForDialog.core_keywords || "-"}
+                  </p>
+                </div>
+
+                {/* 피하고 싶은 트렌드 */}
+                <div className="bg-muted/50 rounded-lg p-3 border border-border col-span-2">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">
+                    피하고 싶은 트렌드
+                  </label>
+                  <p className="text-sm font-semibold text-foreground">
+                     {brandInfoForDialog.avoided_trends || "-"}
+                  </p>
+                </div>
+
+                {/* 선호 색상 */}
+                <div className="bg-muted/50 rounded-lg p-3 border border-border col-span-2">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">
+                    선호 색상
+                  </label>
+                  <p className="text-sm font-semibold text-foreground">
+                     {brandInfoForDialog.preferred_colors || "-"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground py-4">
+              이 프로젝트에는 아직 저장된 브랜드 정보가 없습니다.
+            </p>
+          )}
+
+          <AlertDialogFooter className="pt-4" />
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* 로고/숏폼 삭제 확인 다이얼로그 */}
       <AlertDialog open={isDeleteItemDialogOpen} onOpenChange={setIsDeleteItemDialogOpen}>
@@ -1396,17 +1557,17 @@ const ProjectDashboardPage = () => {
                 <div className="relative w-full h-full flex items-center justify-center">
                   {/* 이미지 미리보기 모드일 때만 커스텀 닫기 버튼 표시 */}
                   {previewView === "image" && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute top-2 right-2 z-10 bg-background/80 hover:bg-transparent"
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-2 right-2 z-10 bg-background/80 hover:bg-transparent"
                       onClick={() => {
                         setSelectedImage(null);
                         setPreviewView("image");
                       }}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
                   )}
 
                   {/* 이미지 확대 보기 */}

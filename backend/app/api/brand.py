@@ -16,6 +16,7 @@ from app.schemas.chat import (
     BrandChatResponse,
     CreateBrandProjectRequest,
     CreateBrandProjectResponse,
+    BrandInfoResponse,
 )
 from app.db.orm import get_orm_session
 from app.core.deps import get_current_user
@@ -25,6 +26,7 @@ from langchain_core.messages import HumanMessage, AIMessage
 from app.agents.state import AppState
 from app.agents.brand_agent import build_brand_graph
 from app.services.brand_service import persist_brand_from_graph_state
+from app.services.project_service import load_brand_info_entity
 
 from uuid import uuid4
 
@@ -104,6 +106,7 @@ def chat_brand(
 
     messages = new_state["messages"]
     last_msg = messages[-1]
+    
     reply_text = getattr(last_msg, "content", str(last_msg))
 
     project_id: int | None = None
@@ -126,6 +129,37 @@ def chat_brand(
         project_id=project_id,
         brand_info=new_state["brand_profile"],
     )
+
+
+@router.get("/info/{project_id}", response_model=BrandInfoResponse)
+def get_brand_info(
+    project_id: int,
+    db: Session = Depends(get_orm_session),
+    current_user: UserInfo = Depends(get_current_user),
+):
+    """
+    특정 프로젝트(grp_id)에 저장된 브랜드 정보(brand_info 테이블)를 조회하는 엔드포인트.
+    - 로그인한 사용자의 프로젝트라는 전제는 project_id 생성 시 이미 보장됨 (추가 권한 체크가 필요하면 확장 가능)
+    """
+    info = load_brand_info_entity(db, project_id)
+
+    if info is None:
+        # brand_info가 아직 생성되지 않은 프로젝트일 수 있으므로 200 + null 응답
+        return BrandInfoResponse(brand_info=None)
+
+    brand_info_dict = {
+        "brand_name": info.brand_name,
+        "category": info.category,
+        "tone_mood": info.tone_mood,
+        "core_keywords": info.core_keywords,
+        "slogan": info.slogan,
+        "target_age": info.target_age,
+        "target_gender": info.target_gender,
+        "avoided_trends": info.avoided_trends,
+        "preferred_colors": info.preferred_colors,
+    }
+
+    return BrandInfoResponse(brand_info=brand_info_dict)
 
 
 @router.post("/chat/stream")
@@ -200,9 +234,31 @@ async def chat_brand_stream(
 
             async for event in brand_graph.astream(state, config=config):
                 for node_name, node_output in event.items():
-                    if node_name != "brand_chat":
+                    if node_name != "brand_chat" and node_name != "trend_search":
                         if isinstance(node_output, dict):
                             intermediate_state = {**intermediate_state, **node_output}
+
+                    if node_name == "trend_search":
+                        if isinstance(node_output, dict):
+                            intermediate_state = {**intermediate_state, **node_output}
+                            # messages에서 마지막 AIMessage 찾기 (트렌드 결과)
+                            messages = list(intermediate_state.get("messages") or [])
+                            if messages:
+                                last_msg = messages[-1]
+                                # 파일 상단에서 이미 import한 AIMessage 사용
+                                if isinstance(last_msg, AIMessage) and hasattr(last_msg, "content"):
+                                    # 트렌드 결과를 스트리밍으로 전송
+                                    trend_content = last_msg.content
+                                    # 긴 텍스트를 청크로 나눠서 스트리밍 (자연스러운 타이핑 효과)
+                                    chunk_size = 50  # 한 번에 전송할 문자 수
+                                    for i in range(0, len(trend_content), chunk_size):
+                                        chunk = trend_content[i:i + chunk_size]
+                                        yield "data: " + json.dumps(
+                                            {"type": "token", "content": chunk},
+                                            ensure_ascii=False,
+                                        ) + "\n\n"
+                                        # 약간의 딜레이로 자연스러운 타이핑 효과
+                                        await asyncio.sleep(0.01)
 
                     if node_name == "brand_chat":
                         llm = get_fast_chat_model()

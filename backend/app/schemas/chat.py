@@ -6,7 +6,7 @@
 # - 2025-11-19: response 스키마 추가
 # - 2025-11-23: ShortsResume 스키마 추가
 
-from typing import List, Optional, Literal
+from typing import List, Optional, Literal, Dict, Any
 from pydantic import BaseModel
 
 class BrandChatRequest(BaseModel): 
@@ -20,6 +20,11 @@ class BrandChatResponse(BaseModel):
     project_id: Optional[int] = None        
     brand_session_id: Optional[str] = None
     brand_info: Optional[dict] = None  # BrandProfile 정보
+
+
+class BrandInfoResponse(BaseModel):
+    """프로젝트 ID 기준으로 저장된 브랜드 정보를 조회할 때 사용하는 응답 스키마"""
+    brand_info: Optional[Dict[str, Any]] = None
 
 class CreateBrandProjectRequest(BaseModel):
     brand_session_id: str  # 필수: 세션 ID

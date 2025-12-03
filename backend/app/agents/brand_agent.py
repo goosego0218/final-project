@@ -23,7 +23,6 @@ from app.graphs.nodes.brand.brand_intention_node import make_brand_intention_nod
 from app.graphs.nodes.brand.brand_trend_search_node import make_brand_trend_search_node
 from app.graphs.nodes.brand.brand_trend_refine_node import make_brand_trend_refine_node
 from app.graphs.nodes.brand.persist_brand_node import make_persist_brand_node
-from app.graphs.nodes.guardrails.safeguard_node import make_safeguard_check_node
 
 
 # 세션별 대화 히스토리 유지를 위한 체크포인터
@@ -53,7 +52,6 @@ def build_brand_graph():
     brand_trend_refine = make_brand_trend_refine_node(llm)
     brand_chat = make_brand_chat_node(fast_llm)
     persist_brand = make_persist_brand_node()
-    safeguard_check = make_safeguard_check_node()  # 가드레일 노드
 
     g = StateGraph(AppState)
 
@@ -63,12 +61,10 @@ def build_brand_graph():
     g.add_node("trend_search", brand_trend_search)
     g.add_node("trend_refine", brand_trend_refine)
     g.add_node("brand_chat", brand_chat)
-    g.add_node("safeguard_check", safeguard_check)  # 가드레일 노드 추가
     g.add_node("persist_brand", persist_brand)
 
-    # 사용자 입력을 먼저 가드레일로 체크
-    g.add_edge(START, "safeguard_check")
-    g.add_edge("safeguard_check", "brand_intention")
+    # 엣지 연결
+    g.add_edge(START, "brand_intention")
     g.add_edge("trend_refine", "trend_search")
 
     return g.compile(checkpointer=checkpointer)
