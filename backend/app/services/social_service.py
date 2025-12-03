@@ -250,6 +250,44 @@ def delete_social_connection(
         connection.del_yn = "Y"
         db.commit()
 
+
+def get_social_posts_by_prod_id(
+    db: Session,
+    prod_id: int,
+    user_id: Optional[int] = None,
+) -> list[SocialPost]:
+    """
+    특정 생성물(prod_id)에 대한 social_post 목록 조회.
+    - del_yn = 'N'인 것만 조회
+    - status = 'SUCCESS'인 것만 조회 (실제 업로드 성공한 것만)
+    - user_id가 제공되면 해당 사용자의 연동 계정으로 업로드된 것만 조회
+    
+    Args:
+        db: SQLAlchemy Session
+        prod_id: 생성물 ID
+        user_id: 사용자 ID (선택적, 제공 시 해당 사용자의 연동 계정으로 필터링)
+    
+    Returns:
+        list[SocialPost]: 업로드된 플랫폼별 social_post 목록
+    """
+    query = (
+        db.query(SocialPost)
+        .join(SocialConnection, SocialPost.conn_id == SocialConnection.conn_id)
+        .filter(
+            SocialPost.prod_id == prod_id,
+            SocialPost.del_yn == 'N',
+            SocialPost.status == 'SUCCESS',  # 성공한 업로드만
+            SocialConnection.del_yn == 'N',  # 삭제되지 않은 연동 계정만
+        )
+    )
+    
+    # user_id가 제공되면 해당 사용자의 연동 계정으로 필터링
+    if user_id is not None:
+        query = query.filter(SocialConnection.user_id == user_id)
+    
+    return query.order_by(SocialPost.posted_at.desc()).all()
+
+
 def upload_video_to_youtube(
     db: Session,
     user_id: int,

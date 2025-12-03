@@ -40,54 +40,44 @@ public class OracleSocialPostRepository : ISocialPostRepository
             await using var conn = new OracleConnection(connStr);
             await conn.OpenAsync(ct);
 
-            string sql;
+            const string sql = @"
+                SELECT post_id, platform, platform_post_id, conn_id
+                FROM (
+                    SELECT p.post_id, p.platform, p.platform_post_id, p.conn_id
+                    FROM social_post p
+                    JOIN social_connection c
+                      ON p.conn_id = c.conn_id
+                    JOIN generation_prod gp
+                      ON p.prod_id = gp.prod_id
+                    JOIN prod_grp pg
+                      ON gp.grp_id = pg.grp_id
+                    WHERE p.status = 'SUCCESS'
+                      AND p.platform_post_id IS NOT NULL
+                      AND p.del_yn = 'N'
+                      AND c.del_yn = 'N'
+                      AND gp.del_yn = 'N'
+                      AND pg.del_yn = 'N'
+                      AND ( :hasCursor = 0 OR p.post_id > :cursorPostId )
+                    ORDER BY p.post_id
+                )
+                WHERE ROWNUM <= :maxRows
+            ";
+
             await using var cmd = conn.CreateCommand();
-
-            if (lastProcessedPostId.HasValue)
-            {
-                sql = @"
-                    SELECT post_id, platform, platform_post_id
-                    FROM (
-                        SELECT p.post_id, p.platform, p.platform_post_id
-                        FROM social_post p
-                        JOIN social_connection c
-                          ON p.conn_id = c.conn_id
-                        WHERE p.status = 'SUCCESS'
-                          AND p.platform_post_id IS NOT NULL
-                          AND p.del_yn = 'N'
-                          AND c.del_yn = 'N'
-                          AND p.post_id > :lastPostId
-                        ORDER BY p.post_id
-                    )
-                    WHERE ROWNUM <= :maxRows
-                ";
-
-                var lastPostIdParam = cmd.CreateParameter();
-                lastPostIdParam.ParameterName = "lastPostId";
-                lastPostIdParam.OracleDbType = OracleDbType.Int32;
-                lastPostIdParam.Value = lastProcessedPostId.Value;
-                cmd.Parameters.Add(lastPostIdParam);
-            }
-            else
-            {
-                sql = @"
-                    SELECT post_id, platform, platform_post_id
-                    FROM (
-                        SELECT p.post_id, p.platform, p.platform_post_id
-                        FROM social_post p
-                        JOIN social_connection c
-                          ON p.conn_id = c.conn_id
-                        WHERE p.status = 'SUCCESS'
-                          AND p.platform_post_id IS NOT NULL
-                          AND p.del_yn = 'N'
-                          AND c.del_yn = 'N'
-                        ORDER BY p.post_id
-                    )
-                    WHERE ROWNUM <= :maxRows
-                ";
-            }
-
             cmd.CommandText = sql;
+
+            // 커서 여부 (0: 전체, 1: lastProcessedPostId 이후만)
+            var hasCursorParam = cmd.CreateParameter();
+            hasCursorParam.ParameterName = "hasCursor";
+            hasCursorParam.OracleDbType = OracleDbType.Int32;
+            hasCursorParam.Value = lastProcessedPostId.HasValue ? 1 : 0;
+            cmd.Parameters.Add(hasCursorParam);
+
+            var cursorPostIdParam = cmd.CreateParameter();
+            cursorPostIdParam.ParameterName = "cursorPostId";
+            cursorPostIdParam.OracleDbType = OracleDbType.Int32;
+            cursorPostIdParam.Value = lastProcessedPostId ?? 0;
+            cmd.Parameters.Add(cursorPostIdParam);
 
             var maxRowsParam = cmd.CreateParameter();
             maxRowsParam.ParameterName = "maxRows";
@@ -102,11 +92,13 @@ public class OracleSocialPostRepository : ISocialPostRepository
                 var postId = reader.GetInt32(0);
                 var platform = reader.GetString(1);
                 var platformPostId = reader.GetString(2);
+                var connId = reader.GetInt32(3);
 
                 results.Add(new SocialPostRecord(
                     PostId: postId,
                     Platform: platform,
-                    PlatformPostId: platformPostId
+                    PlatformPostId: platformPostId,
+                    ConnId: connId
                 ));
             }
         }

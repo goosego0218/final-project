@@ -7,7 +7,8 @@ namespace makery_metrics_service.Services.Social;
 public record SocialPostRecord(
     int PostId,
     string Platform,
-    string PlatformPostId
+    string PlatformPostId,
+    int ConnId
 );
 
 /// <summary>

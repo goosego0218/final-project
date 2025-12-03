@@ -445,6 +445,28 @@ export async function uploadToTikTok(data: TikTokUploadRequest): Promise<TikTokU
   });
 }
 
+// social_post 조회 관련 타입
+export interface SocialPostResponse {
+  post_id: number;
+  platform: string;
+  platform_post_id: string | null;
+  platform_url: string | null;
+  status: string;
+  posted_at: string | null;
+}
+
+export interface SocialPostListResponse {
+  prod_id: number;
+  posts: SocialPostResponse[];
+}
+
+// 특정 생성물(prod_id)의 업로드 상태 조회
+export async function getSocialPostsByProdId(prodId: number): Promise<SocialPostListResponse> {
+  return apiRequest<SocialPostListResponse>(`/social/posts/${prodId}`, {
+    method: 'GET',
+  });
+}
+
 // 쇼츠 저장 API 호출
 export async function saveShorts(data: SaveShortsRequest): Promise<SaveShortsResponse> {
   return apiRequest<SaveShortsResponse>('/shorts/save', {

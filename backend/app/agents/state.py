@@ -25,6 +25,11 @@ class ShortsState(TypedDict, total=False):
     generated_prompt: Optional[str]
     video_file_path: Optional[str]
     save_choice: Optional[Literal["save", "regenerate"]]
+###############################25_12_02#############################################
+    generated_prompt_part_1: Optional[str]  # 16초 영상용 Part 1 (추가)
+    generated_prompt_part_2: Optional[str]  # 16초 영상용 Part 2 (추가)
+    is_16s_mode: Optional[bool]             # 16초 모드 여부 (추가)
+############################################################################
 
 
 class LogoState(TypedDict, total=False):

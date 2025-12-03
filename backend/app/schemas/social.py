@@ -36,3 +36,22 @@ class TikTokUploadResponse(BaseModel):
     success: bool
     publish_id: str | None
     message: str
+
+
+class SocialPostResponse(BaseModel):
+    """social_post 조회 응답 모델"""
+    post_id: int
+    platform: str
+    platform_post_id: Optional[str]
+    platform_url: Optional[str]
+    status: str
+    posted_at: Optional[str]  # ISO format datetime
+    
+    class Config:
+        from_attributes = True
+
+
+class SocialPostListResponse(BaseModel):
+    """생성물별 social_post 목록 조회 응답"""
+    prod_id: int
+    posts: List[SocialPostResponse]
