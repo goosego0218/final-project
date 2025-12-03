@@ -185,12 +185,25 @@ export interface BrandChatResponse {
   brand_info?: BrandInfo;
 }
 
+// 프로젝트 기반 브랜드 정보 조회 응답
+interface BrandInfoApiResponse {
+  brand_info?: BrandInfo;
+}
+
 // 브랜드 챗 API 호출
 export async function sendBrandChat(data: BrandChatRequest): Promise<BrandChatResponse> {
   return apiRequest<BrandChatResponse>('/brand/chat', {
     method: 'POST',
     body: JSON.stringify(data),
   });
+}
+
+// 프로젝트 ID(grp_id)로 브랜드 정보 조회
+export async function getBrandInfoByProjectId(projectId: number): Promise<BrandInfo | null> {
+  const res = await apiRequest<BrandInfoApiResponse>(`/brand/info/${projectId}`, {
+    method: 'GET',
+  });
+  return res.brand_info ?? null;
 }
 
 // 브랜드 프로젝트 생성
