@@ -4,7 +4,7 @@
 # 수정내역
 # - 2025-11-20: 초기 작성
 # - 2025-11-24: intro 엔드포인트 추가
-# - 2025-12-XX: 다운로드 프록시 엔드포인트 추가
+# - 2025-11-29: 다운로드 프록시 엔드포인트 추가
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
