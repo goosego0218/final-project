@@ -23,6 +23,7 @@ DECISION_SYSTEM_PROMPT = """
 - "요즘 트렌드 알려줘" -> trend_analysis
 """
 
+
 GENERAL_CHAT_SYSTEM_PROMPT = """
 너는 숏폼 영상 제작을 도와주는 친절한 챗봇이다.
 
@@ -88,14 +89,11 @@ Write everything as plain text in English, except Korean dialogue in section [5]
 [2. VISUAL STYLE]
 ------------------------------------------------------------
 - Vertical 9:16 format, 1080x1920, 24fps.
-- Default: Photo-realistic live-action with cinematic commercial look.
-- If user explicitly requests a style (e.g. cartoon, animation, motion graphic), override default:
-  * Cartoon → warm illustration style, bold outlines, playful yet premium.
-  * Animation → stylized 2D/3D animation, smooth motion, cinematic lighting.
-  * Motion graphic → clean kinetic typography, abstract shapes, brand color transitions.
-- Camera/scene movement should adapt to chosen style.
-- Always emphasize premium yet approachable feeling suitable for small businesses.
-- Never place Hangul/korean text on any prop, signage, packaging, UI, or background element.
+- Photo-realistic live-action with cinematic commercial look.
+- Shallow depth of field, soft bokeh, natural light falloff.
+- Smooth camera movements (slow dolly-in, pan, tilt) that feel stable and premium.
+- Color palette and props should reflect the brand’s preferred colors and mood.
+- Emphasize a **premium yet approachable** feeling suitable for small businesses.
 
 ------------------------------------------------------------
 [3. CHARACTER & ACTING]
@@ -128,7 +126,6 @@ GENERAL RULES:
   (e.g., hand reaching for the cup, about to take a bite, opening the door, sitting down to eat).
 - Do NOT show the brand logo at the end of Part 1.
 - END WITH ANTICIPATION: the viewer should strongly want to see what happens next.
-- Absolutely NO Korean characters may appear in any visual element (store signs, menus, posters, cups, phones, screens, etc.). Use English text or iconography only.
 
 **IF PART 2 (전-결: Climax & Resolution):**
 - VISUAL MATCH: Start exactly where Part 1 ended
@@ -137,8 +134,9 @@ GENERAL RULES:
 - 3–6s: Emotional payoff. Show satisfaction, joy, relief, comfort, or a warm moment with others.
 - 6–8s: LOGO ENDING. Transition to brand logo on a clean background with brand colors
   and a simple, strong final visual.
+- The logo must appear only as a graphic mark or English logotype; do NOT render any Korean characters inside the logo or on the end card.
+  The Korean slogan should be audio-only voiceover, not on-screen text.
 - Make sure the transition from the live-action scene to the logo feels smooth and cinematic.
-- Absolutely NO Korean characters may appear in any visual element (store signs, menus, posters, cups, phones, screens, etc.). Use English text or iconography only.
 
 ------------------------------------------------------------
 [5. DIALOGUE & NARRATION]
@@ -157,6 +155,7 @@ IF PART 1:
 IF PART 2:
 - Focus on **relief, satisfaction, or delight** after experiencing the product.
 - The final line should be a short, memorable Korean version of the **brand slogan**.
+- The Korean slogan should be audio-only voiceover, not on-screen text.
 - Make sure the slogan line sounds like a real commercial tagline, not a literal translation.
 
 ------------------------------------------------------------
@@ -176,16 +175,15 @@ IF PART 2:
 - No meme-style humor, TikTok dance trends, or childish filters.
 - No neon lighting dominating the scene; avoid overly saturated, unrealistic colors.
 - No shaky cam, rapid hyper cuts, glitch effects, or aggressive transitions.
-- No on-screen text, captions, or subtitles (only the brand logo mark at the end of PART 2).
+- No on-screen text, captions, or subtitles.
+  The brand logo mark at the end of PART 2 must not contain any **Korean characters**; it should be only a graphic mark or English-only logotype.
 - No sexual content, violence, dangerous behavior, or offensive gestures.
 - No messy or dirty environments that would harm the brand’s image.
-- No on-screen text in Korean; any written language must be English or iconography.
 
 ------------------------------------------------------------
 GLOBAL RULES
 ------------------------------------------------------------
 - Write ALL sections in English, except for the Korean dialogue lines in [5. DIALOGUE & NARRATION].
-- Do NOT describe or display any Korean characters (Hangul) in visual elements such as packaging, signage, UI, set dressing, or props. Use English text or iconography only.
 - Always output exactly 7 sections with the headers:
   [1. BRAND CONCEPT] to [7. NEGATIVE PROMPT], in order.
 - Do NOT include markdown syntax, bullets outside the described structure, or any explanations.

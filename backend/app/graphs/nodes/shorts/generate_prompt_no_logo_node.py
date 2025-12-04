@@ -36,12 +36,14 @@ def make_generate_prompt_no_logo_node(llm: "BaseChatModel"):
         shorts_state: "ShortsState" = dict(state.get("shorts_state") or {})
 
         brand_profile_json = json.dumps(brand_profile, ensure_ascii=False, indent=2)
-        
+
+        # 사용자의 요구사항(JSON) 읽기
         user_requirements = shorts_state.get("user_requirements") or {}
         user_requirements_json = json.dumps(
             user_requirements, ensure_ascii=False, indent=2
         )
 
+        # visual_style 필드만 따로 꺼내서 스타일 오버라이드에 사용
         visual_style = user_requirements.get("visual_style")
         if isinstance(visual_style, str):
             visual_style = visual_style.strip()
@@ -64,11 +66,10 @@ def make_generate_prompt_no_logo_node(llm: "BaseChatModel"):
                 "described in section [2. VISUAL STYLE].\n"
             )
 
-        # v2
         user_prompt_part1 = (
             f"Create the prompt for **PART 1 (기-승: Setup & Build-up, 0-8s)** of a 16-second story.\n\n"
             f"[BRAND PROFILE]\n{brand_profile_json}\n\n"
-            f"[USER REQUIREMENTS]\n{user_requirements_json}\n\n"         
+            f"[USER REQUIREMENTS]\n{user_requirements_json}\n\n"
             f"{visual_style_block}\n"
             f"INSTRUCTIONS:\n"
             f"- When there is any conflict between BRAND PROFILE and USER REQUIREMENTS,\n"
@@ -76,11 +77,11 @@ def make_generate_prompt_no_logo_node(llm: "BaseChatModel"):
             f"- Focus on establishing the scene and building anticipation.\n"
             f"- Imagine this is ONE possible story among many for this brand.\n"
             f"- Choose a specific everyday situation for the target customer "
-            f"that feels natural and relatable (e.g., busy workday break, weekend outing, late-night snack, etc.).\n"
+            f"  that feels natural and relatable (e.g., busy workday break, weekend outing, late-night snack, etc.).\n"
             f"- **DO NOT** show the logo at the end.\n"
             f"- End with an action IN PROGRESS (e.g., hand reaching for food, about to take a bite).\n"
             f"- The viewer should want to see what happens next.\n"
-            f"- Narration/dialogue in section [5] can be Korean, but ALL visual descriptions must avoid Korean text entirely (use English letters or non-text visuals, including the final logo/end card)."
+            f"- Only Korean dialogue in [5.] should be in Korean."
         )
 
         messages_1 = [
@@ -89,8 +90,7 @@ def make_generate_prompt_no_logo_node(llm: "BaseChatModel"):
         ]
         ai_msg_1 = llm.invoke(messages_1)
         prompt_part1 = getattr(ai_msg_1, "content", "")
-    
-        # [NEW] Part 1 프롬프트 요약 생성
+
         summary_system = SystemMessage(
             content=(
                 "You are a helpful assistant that summarizes Veo 3.1 video prompts.\n"
@@ -110,41 +110,24 @@ def make_generate_prompt_no_logo_node(llm: "BaseChatModel"):
         if not part1_summary:
             part1_summary = prompt_part1[:800]
 
-        # 기존 로직: Part 2가 Part 1과 자연스럽게 이어지도록
-        # 요약뿐 아니라 FULL Part 1 프롬프트까지 함께 전달한다.
-        part1_context = (
-            "Here is the FULL PART 1 prompt that must be continued exactly:\n"
-            "------------------------------------------------------------\n"
-            f"{prompt_part1}\n"
-            "------------------------------------------------------------"
-        )
 
         # [Part 2] 전-결 (Climax & Resolution)
         user_prompt_part2 = (
             f"Now create the prompt for **PART 2 (전-결: Climax & Resolution, 8-16s)**.\n\n"
-            "This prompt will be used with the Veo 3.1 **video extension** feature to EXTEND the previous 8-second clip.\n"
-            "So you are NOT making a new video from scratch — you are continuing the exact same scene.\n\n"
-            f"Use both the summary and full prompt below as the ONLY truth about what has already happened:\n"
-            f"[PART 1 SUMMARY]\n{part1_summary}\n\n"
-            f"{part1_context}\n\n"
+            f"It must continue DIRECTLY from Part 1. Here is a brief summary of PART 1:\n"
+            f"---\n{part1_summary}\n---\n\n"
             f"[USER REQUIREMENTS]\n{user_requirements_json}\n\n"
             f"{visual_style_block}\n"
-            "INSTRUCTIONS:\n"
-            "- In [4. SCENE COMPOSITION — 8 SECONDS], you are describing seconds 8–16 of the full 16-second story,\n"
-            "  but you MUST still use the 0–8s time range convention because this is one 8-second Veo clip.\n"
-            "- The VERY FIRST FRAME of PART 2 must visually match the LAST FRAME of PART 1:\n"
-            "  same location, same time of day, same lighting, same camera angle, same character pose, same props.\n"
-            "- Do NOT start with a new establishing shot, new place, or new characters.\n"
-            "- Just continue and complete the action that was in progress at the end of PART 1, then resolve it.\n"
-            "- When there is any conflict between BRAND PROFILE and USER REQUIREMENTS,\n"
-            "  you MUST follow USER REQUIREMENTS first.\n"
-            "- VISUAL MATCH: Start exactly where Part 1 ended (same lighting, angle, character position).\n"
-            "- Show the action completing (e.g., taking the bite, drinking the coffee, sharing the food).\n"
-            "- Show emotional satisfaction or relief in a way that fits this brand's tone.\n"
-            "- MUST end with the brand logo and slogan narration.\n"
-            "- This Part 2 should feel like a natural conclusion to Part 1, not a new episode.\n"
-            "- Narration/dialogue in section [5] can be Korean, but ALL visual descriptions must avoid Korean text entirely "
-            "(use English letters or non-text visuals, including the final logo/end card)."
+            f"INSTRUCTIONS:\n"
+            f"- When there is any conflict between BRAND PROFILE and USER REQUIREMENTS,\n"
+            f"  you MUST follow USER REQUIREMENTS first.\n"
+            f"- VISUAL MATCH: Start exactly where Part 1 ended (same lighting, angle, character position).\n"
+            f"- Show the action completing (e.g., taking the bite, drinking the coffee).\n"
+            f"- Show emotional satisfaction or relief in a way that fits this brand's tone.\n"
+            f"- MUST end with the brand logo and slogan narration.\n"
+            f"- The logo at the end must NOT contain any Korean text; the Korean slogan should be heard only as voiceover, not written on screen.\n"
+            f"- This Part 2 should feel like the natural resolution of THIS specific Part 1 concept.\n"
+            f"- Only Korean dialogue in [5.] should be in Korean."
         )
 
         messages_2 = [

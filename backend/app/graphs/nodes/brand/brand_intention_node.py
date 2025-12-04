@@ -51,12 +51,24 @@ def make_brand_intention_node(llm: "BaseChatModel"):
         profile_snippet = json.dumps(brand_profile, ensure_ascii=False)[:400]
         last_trend_summary = (trend_context.get("last_result_summary") or "")[:400]
 
+        last_ai_text = ""
+        for msg in reversed(state.get("messages", [])):
+            if hasattr(msg, "type") and msg.type == "ai":
+                content = getattr(msg, "content", "")
+                if isinstance(content, str):
+                    last_ai_text = content
+                    break
+        last_ai_snippet = last_ai_text[:400]
+
         system_prompt = _INTENTION_SYSTEM_PROMPT + f"""
 
 [참고 정보]
 
 - 현재까지 정리된 브랜드 프로필 (일부):
 {profile_snippet}
+
+- 직전 AI 메시지 (있다면):
+{last_ai_snippet}
 
 - 직전 트렌드 요약 (있다면):
 {last_trend_summary}
@@ -87,7 +99,6 @@ def make_brand_intention_node(llm: "BaseChatModel"):
                 "trend_new",
                 "trend_retry",
                 "trend_refine",
-                "finalize",
             )
 
             if intent_val in allowed:
@@ -108,8 +119,6 @@ def make_brand_intention_node(llm: "BaseChatModel"):
                 label = "trend_refine"
             elif "trend_new" in lowered:
                 label = "trend_new"
-            elif "finalize" in lowered:
-                label = "finalize"
             else:
                 label = "brand_info"
 
@@ -177,12 +186,6 @@ def make_brand_intention_node(llm: "BaseChatModel"):
             has_any_profile = bool(brand_profile_for_validation)
             if not has_any_profile:
                 goto = "brand_chat"
-            else:
-                goto = "brand_collect"
-
-        elif label == "finalize":
-            if is_valid:
-                goto = "persist_brand"
             else:
                 goto = "brand_collect"
 
