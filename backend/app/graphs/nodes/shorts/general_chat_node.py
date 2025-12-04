@@ -10,7 +10,7 @@ from langgraph.types import Command
 from langgraph.graph import END 
 from langchain_core.messages import SystemMessage
 
-from app.graphs.nodes.shorts.prompts import GENERAL_CHAT_SYSTEM_PROMPT
+from app.graphs.nodes.shorts.prompt.prompts import GENERAL_CHAT_SYSTEM_PROMPT
 
 if TYPE_CHECKING:
     from app.agents.state import AppState
