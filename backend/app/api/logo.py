@@ -5,6 +5,7 @@
 # - 2025-11-20: 초기 작성
 # - 2025-11-24: intro 엔드포인트 추가
 # - 2025-11-29: 다운로드 프록시 엔드포인트 추가
+# - 2025-12-04: 레퍼런스 이미지 처리 추가
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
@@ -128,6 +129,14 @@ def chat_logo(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="logo 챗봇 호출 시 message 는 필수입니다.",
         )
+#----------------------------------------25-12-04 레퍼런스 이미지 처리--------------------------------
+    reference_images = req.reference_images or []
+    if len(reference_images) > 6:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="레퍼런스 이미지는 최대 6개까지 가능합니다."
+        )
+#------------------------------------------------------------------------
     
     # TODO: logo 에이전트 호출
     from app.services.project_service import load_brand_profile_for_agent
@@ -142,6 +151,11 @@ def chat_logo(
         "project_draft": {},         
         "brand_profile": brand_profile,
         "trend_context": {},
+        #----------------------------------------25-12-04 레퍼런스 이미지 처리--------------------------------
+        "logo_state": {
+            "reference_images": reference_images,
+        },
+        #------------------------------------------------------------------------
         "meta": {},
     }
 
