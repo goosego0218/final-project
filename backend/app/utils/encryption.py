@@ -96,29 +96,68 @@ def encrypt_token(token: str) -> str:
     return base64.urlsafe_b64encode(encrypted_data).decode('utf-8')
 
 
+def _is_base64_encoded(s: str) -> bool:
+    """
+    문자열이 유효한 Base64 형식인지 확인
+    """
+    if not s:
+        return False
+    
+    # Base64 문자셋 확인 (urlsafe base64: A-Z, a-z, 0-9, -, _)
+    import re
+    base64_pattern = re.compile(r'^[A-Za-z0-9_-]+=*$')
+    if not base64_pattern.match(s):
+        return False
+    
+    # 길이가 4의 배수인지 확인 (패딩 제외)
+    # 패딩을 제거한 후 길이 확인
+    s_clean = s.rstrip('=')
+    if len(s_clean) % 4 == 1:
+        return False
+    
+    # 실제 디코딩 시도
+    try:
+        base64.urlsafe_b64decode(s + '==')  # 패딩 추가하여 시도
+        return True
+    except:
+        return False
+
+
 def decrypt_token(encrypted_token: str) -> str:
     """
     토큰 복호화 (AES-256-GCM)
     
     Args:
-        encrypted_token: 암호화된 토큰 (Base64 인코딩)
+        encrypted_token: 암호화된 토큰 (Base64 인코딩) 또는 평문 토큰
         
     Returns:
         평문 토큰
+        
+    Note:
+        평문 토큰이 감지되면 복호화 실패로 처리하여 호출자가 암호화하도록 함
     """
     if not encrypted_token:
         return encrypted_token
+    
+    # Base64 형식이 아니면 이미 평문으로 간주 (복호화 실패로 처리)
+    if not _is_base64_encoded(encrypted_token):
+        raise ValueError("평문 토큰 감지: 암호화 필요")
     
     try:
         key = _get_encryption_key_bytes()
         aesgcm = AESGCM(key)
         
-        # Base64 디코딩
-        encrypted_data = base64.urlsafe_b64decode(encrypted_token.encode('utf-8'))
+        # Base64 디코딩 (패딩 자동 처리)
+        try:
+            encrypted_data = base64.urlsafe_b64decode(encrypted_token.encode('utf-8'))
+        except Exception:
+            # Base64 디코딩 실패 시 평문으로 간주
+            raise ValueError("평문 토큰 감지: 암호화 필요")
         
         # IV 추출 (처음 12바이트)
         if len(encrypted_data) < 12:
-            raise ValueError("암호화된 데이터가 너무 짧습니다")
+            # 암호화된 데이터가 너무 짧으면 평문으로 간주
+            raise ValueError("평문 토큰 감지: 암호화 필요")
         
         iv = encrypted_data[:12]
         ciphertext = encrypted_data[12:]
@@ -126,8 +165,10 @@ def decrypt_token(encrypted_token: str) -> str:
         # 복호화
         plaintext = aesgcm.decrypt(iv, ciphertext, None)
         return plaintext.decode('utf-8')
-    except Exception as e:
-        # 복호화 실패 시 원본 반환 (마이그레이션 중일 수 있음)
-        print(f"[WARN] 토큰 복호화 실패, 원본 반환: {e}")
-        return encrypted_token
+    except ValueError as e:
+        # 평문 토큰 감지 시 예외를 다시 던져서 호출자가 처리하도록 함
+        raise
+    except Exception:
+        # 기타 복호화 실패 시 평문으로 간주
+        raise ValueError("평문 토큰 감지: 암호화 필요")
 

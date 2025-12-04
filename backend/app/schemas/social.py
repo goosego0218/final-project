@@ -55,3 +55,33 @@ class SocialPostListResponse(BaseModel):
     """생성물별 social_post 목록 조회 응답"""
     prod_id: int
     posts: List[SocialPostResponse]
+
+
+class ShortsReportItem(BaseModel):
+    """숏폼 리포트용 아이템"""
+    prod_id: int
+    title: Optional[str] = None
+    thumbnail_url: Optional[str] = None
+    video_url: Optional[str] = None
+    platforms: List[str]
+    uploaded_at: Optional[str] = None  # ISO datetime
+    views: int = 0
+    likes: int = 0
+    comments: int = 0
+
+
+class ShortsReportListResponse(BaseModel):
+    """숏폼 리포트 목록 응답"""
+    items: List[ShortsReportItem]
+    last_collected_at: Optional[str] = None  # 메트릭이 마지막으로 수집된 시각 (ISO)
+
+
+class ShortsViewsTimeseriesItem(BaseModel):
+    """숏폼 조회수 추이용 일자별 집계 아이템"""
+    date: str  # 'YYYY-MM-DD'
+    views: int
+
+
+class ShortsViewsTimeseriesResponse(BaseModel):
+    """숏폼 조회수 추이 응답"""
+    items: List[ShortsViewsTimeseriesItem]

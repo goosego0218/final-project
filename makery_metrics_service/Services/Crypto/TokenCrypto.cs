@@ -1,6 +1,7 @@
 using System;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace makery_metrics_service.Services.Crypto;
 
@@ -20,14 +21,45 @@ public static class TokenCrypto
     private const int TagSizeBytes = 16; // GCM 태그 크기
 
     /// <summary>
-    /// backend의 encrypt_token()으로 암호화된 토큰을 복호화합니다.
+    /// 문자열이 유효한 Base64 URL-safe 형식인지 확인합니다.
     /// </summary>
-    /// <param name="encryptedToken">Base64 URL-safe 문자열 (IV + cipher + tag)</param>
+    private static bool IsBase64Encoded(string s)
+    {
+        if (string.IsNullOrWhiteSpace(s))
+            return false;
+
+        // Base64 URL-safe 문자셋 확인 (A-Z, a-z, 0-9, -, _)
+        var base64Pattern = new Regex(@"^[A-Za-z0-9_-]+=*$");
+        if (!base64Pattern.IsMatch(s))
+            return false;
+
+        // 길이 검증 (패딩 제외 후 4의 배수 확인)
+        var sClean = s.TrimEnd('=');
+        if (sClean.Length % 4 == 1)
+            return false;
+
+        // 실제 디코딩 시도
+        try
+        {
+            Base64UrlDecode(s);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// backend의 encrypt_token()으로 암호화된 토큰을 복호화합니다.
+    /// 평문 토큰이 감지되면 그대로 반환합니다 (이미 평문이므로).
+    /// </summary>
+    /// <param name="encryptedToken">Base64 URL-safe 문자열 (IV + cipher + tag) 또는 평문 토큰</param>
     /// <param name="secret">
     /// Python settings.encryption_key 에 해당하는 값.
     /// (이 서비스에서는 appsettings.json 의 Crypto:TokenDecryptKey 사용 예정)
     /// </param>
-    /// <returns>복호화된 평문 토큰 (실패 시 원본 문자열 그대로 반환)</returns>
+    /// <returns>복호화된 평문 토큰 (평문 토큰이면 원본 그대로 반환)</returns>
     public static string DecryptToken(string encryptedToken, string secret)
     {
         if (string.IsNullOrWhiteSpace(encryptedToken))
@@ -36,15 +68,31 @@ public static class TokenCrypto
         if (string.IsNullOrWhiteSpace(secret))
             throw new ArgumentException("TokenDecryptKey 가 비어 있습니다.", nameof(secret));
 
+        // Base64 형식이 아니면 이미 평문으로 간주
+        if (!IsBase64Encoded(encryptedToken))
+            return encryptedToken;
+
         try
         {
             var key = DeriveKeyFromSecret(secret);
 
             // Base64 URL-safe 디코딩
-            var encryptedData = Base64UrlDecode(encryptedToken);
+            byte[] encryptedData;
+            try
+            {
+                encryptedData = Base64UrlDecode(encryptedToken);
+            }
+            catch
+            {
+                // Base64 디코딩 실패 시 평문으로 간주
+                return encryptedToken;
+            }
 
             if (encryptedData.Length < IvSizeBytes + TagSizeBytes)
-                throw new InvalidOperationException("암호화된 데이터가 너무 짧습니다.");
+            {
+                // 암호화된 데이터가 너무 짧으면 평문으로 간주
+                return encryptedToken;
+            }
 
             // IV (nonce)
             var iv = new byte[IvSizeBytes];
@@ -53,7 +101,10 @@ public static class TokenCrypto
             // cipher + tag 분리
             var cipherLength = encryptedData.Length - IvSizeBytes - TagSizeBytes;
             if (cipherLength <= 0)
-                throw new InvalidOperationException("암호문 길이가 유효하지 않습니다.");
+            {
+                // 암호문 길이가 유효하지 않으면 평문으로 간주
+                return encryptedToken;
+            }
 
             var cipher = new byte[cipherLength];
             var tag = new byte[TagSizeBytes];
@@ -71,7 +122,7 @@ public static class TokenCrypto
         }
         catch
         {
-            // backend decrypt_token 도 실패 시 원본을 그대로 반환하므로 동일하게 맞춤
+            // 복호화 실패 시 원본 반환 (이미 평문이거나 다른 형식일 수 있음)
             return encryptedToken;
         }
     }

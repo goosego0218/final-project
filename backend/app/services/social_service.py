@@ -7,14 +7,15 @@
 # - 2025-11-30: 전략 1 적용 - relationship 제거
 
 from sqlalchemy.orm import Session
-from datetime import datetime, timedelta, timezone
-from typing import Optional
+from sqlalchemy import func
+from datetime import datetime, timedelta, timezone, date
+from typing import Optional, List, Dict
 
-from app.models.social import SocialConnection, SocialPost
+from app.models.social import SocialConnection, SocialPost, SocialPostMetric
 from app.models.auth import UserInfo
 from app.models.project import GenerationProd
 from app.utils.encryption import encrypt_token, decrypt_token
-from app.utils.file_utils import get_file_path_from_url
+from app.utils.file_utils import get_file_path_from_url, get_file_url
 from app.services.shorts_service import save_shorts_to_storage_and_db
 import base64
 
@@ -48,9 +49,39 @@ def get_social_connection(
     
     if connection:
         # 복호화된 토큰으로 임시 교체 (DB에는 암호화된 상태로 유지)
-        connection.access_token = decrypt_token(connection.access_token)
+        # 평문 토큰이 발견되면 자동으로 암호화하여 저장
+        original_access_token = connection.access_token
+        try:
+            decrypted_access_token = decrypt_token(original_access_token)
+            connection.access_token = decrypted_access_token
+        except ValueError:
+            # 평문 토큰 감지: 암호화하여 저장
+            encrypted_access_token = encrypt_token(original_access_token)
+            db.query(SocialConnection).filter(
+                SocialConnection.user_id == user_id,
+                SocialConnection.platform == platform,
+                SocialConnection.del_yn == "N",
+            ).update({"access_token": encrypted_access_token}, synchronize_session=False)
+            db.commit()
+            # 복호화된 토큰으로 임시 교체 (원본 평문 유지)
+            connection.access_token = original_access_token
+        
         if connection.refresh_token:
-            connection.refresh_token = decrypt_token(connection.refresh_token)
+            original_refresh_token = connection.refresh_token
+            try:
+                decrypted_refresh_token = decrypt_token(original_refresh_token)
+                connection.refresh_token = decrypted_refresh_token
+            except ValueError:
+                # 평문 토큰 감지: 암호화하여 저장
+                encrypted_refresh_token = encrypt_token(original_refresh_token)
+                db.query(SocialConnection).filter(
+                    SocialConnection.user_id == user_id,
+                    SocialConnection.platform == platform,
+                    SocialConnection.del_yn == "N",
+                ).update({"refresh_token": encrypted_refresh_token}, synchronize_session=False)
+                db.commit()
+                # 복호화된 토큰으로 임시 교체 (원본 평문 유지)
+                connection.refresh_token = original_refresh_token
     
     return connection
 
@@ -286,6 +317,225 @@ def get_social_posts_by_prod_id(
         query = query.filter(SocialConnection.user_id == user_id)
     
     return query.order_by(SocialPost.posted_at.desc()).all()
+
+
+def get_shorts_report(
+    db: Session,
+    user_id: int,
+) -> list[dict]:
+    """
+    숏폼 리포트용:
+    - 현재 사용자가 SNS(YouTube, TikTok)에 올린 쇼츠 목록을 prod_id 단위로 집계.
+    - 조건:
+      - GenerationProd.type_id = 2 (쇼츠)
+      - GenerationProd.del_yn = 'N'
+      - SocialPost.del_yn = 'N'
+      - SocialPost.status = 'SUCCESS'
+      - SocialConnection.user_id = user_id
+    """
+    # 기본 정보 조회: 어떤 prod_id가 어떤 플랫폼에 어떤 post_id로 올라갔는지
+    rows = (
+        db.query(
+            GenerationProd.prod_id,
+            GenerationProd.file_path,
+            GenerationProd.create_dt.label("prod_created_at"),
+            SocialPost.platform,
+            SocialPost.posted_at,
+            SocialPost.post_id,
+        )
+        .join(SocialPost, SocialPost.prod_id == GenerationProd.prod_id)
+        .join(SocialConnection, SocialConnection.conn_id == SocialPost.conn_id)
+        .filter(
+            SocialConnection.user_id == user_id,
+            GenerationProd.type_id == 2,
+            GenerationProd.del_yn == "N",
+            SocialPost.del_yn == "N",
+            SocialPost.status == "SUCCESS",
+            SocialConnection.del_yn == "N",
+        )
+        .all()
+    )
+
+    if not rows:
+        return []
+
+    # post_id별 최신 메트릭 1개씩
+    metric_subq = (
+        db.query(
+            SocialPostMetric.post_id,
+            func.max(SocialPostMetric.captured_at).label("max_captured_at"),
+        )
+        .group_by(SocialPostMetric.post_id)
+        .subquery()
+    )
+
+    metric_rows = (
+        db.query(
+            SocialPostMetric.post_id,
+            SocialPostMetric.view_cnt,
+            SocialPostMetric.like_cnt,
+            SocialPostMetric.comment_cnt,
+        )
+        .join(
+            metric_subq,
+            (SocialPostMetric.post_id == metric_subq.c.post_id)
+            & (SocialPostMetric.captured_at == metric_subq.c.max_captured_at),
+        )
+        .all()
+    )
+
+    metrics_by_post = {
+        r.post_id: {
+            "views": r.view_cnt,
+            "likes": r.like_cnt,
+            "comments": r.comment_cnt,
+        }
+        for r in metric_rows
+    }
+
+    # prod_id 단위로 묶기
+    grouped: dict[int, dict] = {}
+
+    for r in rows:
+        item = grouped.get(r.prod_id)
+        if not item:
+            file_url = get_file_url(r.file_path)
+            item = {
+                "prod_id": r.prod_id,
+                "title": None,
+                "thumbnail_url": file_url,
+                "video_url": file_url,
+                "platforms": [],
+                "uploaded_at": r.posted_at.isoformat() if r.posted_at else None,
+                "views": 0,
+                "likes": 0,
+                "comments": 0,
+            }
+            grouped[r.prod_id] = item
+
+        # 플랫폼 추가
+        if r.platform not in item["platforms"]:
+            item["platforms"].append(r.platform)
+
+        # 업로드 시각: 가장 최근 시각으로
+        if r.posted_at:
+            posted_iso = r.posted_at.isoformat()
+            if item["uploaded_at"] is None or posted_iso > item["uploaded_at"]:
+                item["uploaded_at"] = posted_iso
+
+        # 메트릭 누적
+        m = metrics_by_post.get(r.post_id)
+        if m:
+            item["views"] += m["views"]
+            item["likes"] += m["likes"]
+            item["comments"] += m["comments"]
+
+    return list(grouped.values())
+
+
+def get_last_shorts_metric_captured_at(
+    db: Session,
+    user_id: int,
+) -> Optional[datetime]:
+    """
+    숏폼 메트릭이 마지막으로 수집된 시각 (captured_at 최대값)을 반환.
+    - Shorts(GenerationProd.type_id = 2) 이면서
+    - 현재 사용자가 올린 SNS 쇼츠에 대한 SocialPostMetric.captured_at 중 최댓값.
+    """
+    max_captured_at = (
+        db.query(func.max(SocialPostMetric.captured_at))
+        .join(SocialPost, SocialPostMetric.post_id == SocialPost.post_id)
+        .join(SocialConnection, SocialPost.conn_id == SocialConnection.conn_id)
+        .join(GenerationProd, SocialPost.prod_id == GenerationProd.prod_id)
+        .filter(
+            SocialConnection.user_id == user_id,
+            SocialConnection.del_yn == "N",
+            GenerationProd.type_id == 2,
+            GenerationProd.del_yn == "N",
+            SocialPost.del_yn == "N",
+            SocialPost.status == "SUCCESS",
+        )
+        .scalar()
+    )
+
+    return max_captured_at
+
+
+def get_shorts_views_timeseries(
+    db: Session,
+    user_id: int,
+    days: int,
+    platform: Optional[str] = None,
+) -> List[Dict]:
+    """
+    숏폼 조회수 추이용:
+    - 최근 N일 동안의 일별 조회수 합계를 반환.
+    - GenerationProd.type_id = 2 (쇼츠)
+    - GenerationProd.del_yn = 'N'
+    - SocialPost.del_yn = 'N'
+    - SocialPost.status = 'SUCCESS'
+    - SocialConnection.user_id = user_id, del_yn = 'N'
+    - SocialPostMetric.captured_at 기준으로 집계
+    """
+    if days <= 0:
+        return []
+
+    today: date = datetime.now().date()
+    start_date: date = today - timedelta(days=days - 1)
+
+    # 기본 쿼리: post_id 별 metric 로그를 날짜 단위로 합산
+    q = (
+        db.query(
+            func.trunc(SocialPostMetric.captured_at).label("metric_date"),
+            func.sum(SocialPostMetric.view_cnt).label("views"),
+        )
+        .join(SocialPost, SocialPostMetric.post_id == SocialPost.post_id)
+        .join(SocialConnection, SocialPost.conn_id == SocialConnection.conn_id)
+        .join(GenerationProd, SocialPost.prod_id == GenerationProd.prod_id)
+        .filter(
+            SocialConnection.user_id == user_id,
+            SocialConnection.del_yn == "N",
+            GenerationProd.type_id == 2,
+            GenerationProd.del_yn == "N",
+            SocialPost.del_yn == "N",
+            SocialPost.status == "SUCCESS",
+            SocialPostMetric.captured_at >= start_date,
+        )
+    )
+
+    # 플랫폼 필터 (youtube/tiktok)
+    if platform and platform in ("youtube", "tiktok"):
+        q = q.filter(SocialPost.platform == platform)
+
+    rows = (
+        q.group_by(func.trunc(SocialPostMetric.captured_at))
+        .order_by(func.trunc(SocialPostMetric.captured_at))
+        .all()
+    )
+
+    # 날짜별 조회수 매핑
+    by_date: Dict[date, int] = {}
+    for r in rows:
+        metric_date = r.metric_date
+        # Oracle TRUNC 결과가 datetime일 수 있으므로 date로 변환
+        if isinstance(metric_date, datetime):
+            d = metric_date.date()
+        else:
+            d = metric_date
+        by_date[d] = int(r.views or 0)
+
+    # 요청한 기간(days)만큼 날짜를 연속으로 채우기
+    items: List[Dict] = []
+    for i in range(days):
+        d = start_date + timedelta(days=i)
+        items.append(
+            {
+                "date": d.strftime("%Y-%m-%d"),
+                "views": by_date.get(d, 0),
+            }
+        )
+
+    return items
 
 
 def upload_video_to_youtube(
