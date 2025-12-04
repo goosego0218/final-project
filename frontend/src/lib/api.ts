@@ -231,6 +231,7 @@ export interface ShortsChatRequest {
   project_id: number;
   message?: string;
   shorts_session_id?: string;
+  images?: string[];  // Base64 인코딩된 이미지 리스트 추가
 }
 
 export interface ShortsChatResponse {

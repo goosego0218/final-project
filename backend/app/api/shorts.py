@@ -11,7 +11,7 @@
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional, Literal
 
 from langgraph.types import Command
 from langgraph.errors import GraphInterrupt
@@ -71,8 +71,26 @@ def chat_shorts(
     brand_profile = load_brand_profile_for_agent(db, req.project_id)
     shorts_session_id = req.shorts_session_id or str(uuid4())
 
+    # 이미지가 있으면 HumanMessage에 포함
+    message_content = req.message or ""
+    if req.images and len(req.images) > 0:
+        # 멀티모달 메시지 생성 (텍스트 + 이미지)
+        # HumanMessage는 이미 상단에서 import되어 있으므로 중복 import 제거
+        content = []
+        if message_content:
+            content.append({"type": "text", "text": message_content})
+        # 이미지 추가
+        for img in req.images:
+            content.append({
+                "type": "image_url",
+                "image_url": {"url": img}  # img는 이미 data:image/... 형식
+            })
+        human_msg = HumanMessage(content=content)
+    else:
+        human_msg = HumanMessage(content=message_content)
+    
     state: AppState = {
-        "messages": [HumanMessage(content=req.message)],
+        "messages": [human_msg],
         "mode": "shorts",
         "project_id": req.project_id,
         "project_draft": {},         

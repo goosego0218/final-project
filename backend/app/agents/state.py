@@ -43,8 +43,6 @@ class ShortsState(TypedDict, total=False):
     # 프론트에서 넘어오는 "참고용 입력 이미지" 경로나 ID
     # (기존 selected_image_path 는 다른 용도로 쓰일 수 있어 분리)
     input_image_path: Optional[str]
-    # Vision 모델로 분석한 이미지 설명
-    image_description: Optional[str]
     # 브랜드 프로필을 숏폼 맥락에 맞게 요약/정리한 컨텍스트
     profile_context: Optional[Dict[str, Any]]
     # 이미지/프로필/사용자 요구사항을 모두 합친 최종 컨텍스트

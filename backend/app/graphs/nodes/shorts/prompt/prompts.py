@@ -109,7 +109,7 @@ Write everything as plain text in English, except Korean dialogue in section [5]
 [4. SCENE COMPOSITION — 8 SECONDS]
 ------------------------------------------------------------
 
-**CRITICAL: First, determine whether this request is for PART 1 or PART 2.**
+CRITICAL: First, determine whether this request is for PART 1 or PART 2.
 
 GENERAL RULES:
 - Describe the full 0–8 second flow with clear time ranges.
@@ -118,25 +118,29 @@ GENERAL RULES:
   - Camera movement (static / dolly-in / pan / tilt / handheld-feel but stable).
   - Location, lighting, and key objects.
   - What the character is doing and feeling.
+- Use smooth, cinematic transitions between each time segment:
+  cut on motion, keep camera direction consistent, and avoid any jump cuts that feel like a separate video.
+- Treat PART 1 and PART 2 as one continuous short film:
+  PART 2 must visually continue the exact moment where PART 1 stopped, not restart the scene.
 
-**IF PART 1 (기-승: Setup & Build-up):**
-- 0–3s: Establishing shot. Show the brand space or environment, introduce the main character.
-- 3–6s: Hero shot. Product appears naturally; the character begins a key action or decision.
+IF PART 1 (기-승: Setup & Build-up):
+- 0–3s: Establishing shot. Show the brand space or environment and introduce the main character in a way that can smoothly connect to the next shot (same direction of movement, consistent lighting and framing).
+- 3–6s: Hero shot. The product appears naturally; the character begins a key action or decision. Keep the camera movement and framing consistent so this action can be continued seamlessly in PART 2.
 - 6–8s: Cliffhanger. End on an action IN PROGRESS
-  (e.g., hand reaching for the cup, about to take a bite, opening the door, sitting down to eat).
+  (e.g., hand lifting the cup mid-motion, camera zooms out to reveal more of the café, action paused just before completion to build anticipation).
+  Frame the last moment so that the final frame of PART 1 can be used as the first frame of PART 2 without any noticeable jump (same angle, same pose, same lighting).
 - Do NOT show the brand logo at the end of Part 1.
 - END WITH ANTICIPATION: the viewer should strongly want to see what happens next.
 
-**IF PART 2 (전-결: Climax & Resolution):**
+IF PART 2 (전-결: Climax & Resolution):
 - VISUAL MATCH: Start exactly where Part 1 ended
   (same lighting, same angle, same character position, same product).
-- 0–3s: Action completes (e.g., taking the bite, drinking the coffee, sharing the food).
-- 3–6s: Emotional payoff. Show satisfaction, joy, relief, comfort, or a warm moment with others.
-- 6–8s: LOGO ENDING. Transition to brand logo on a clean background with brand colors
-  and a simple, strong final visual.
-- The logo must appear only as a graphic mark or English logotype; do NOT render any Korean characters inside the logo or on the end card.
-  The Korean slogan should be audio-only voiceover, not on-screen text.
-- Make sure the transition from the live-action scene to the logo feels smooth and cinematic.
+- 0–3s: Action completes (e.g., taking the bite, drinking the coffee, sharing the food), with a smooth continuation of the camera move from the previous part.
+- 3–6s: Emotional payoff. Show satisfaction, joy, relief, comfort, or a warm moment with others, with gentle camera motion or stable framing that keeps the flow calm and premium.
+- 6–8s: Final lingering moment. Stay within the same live-action or product-focused scene and end on a strong, satisfying emotional or product shot.
+  Do NOT cut to a separate logo-only end card; the last frame should still feel like part of the story world.
+- If any brand logo appears naturally in the environment or on the product, it should feel integrated into the scene, not a hard graphic transition.
+- The Korean slogan, if used, should be an audio-only voiceover, not on-screen text.
 
 ------------------------------------------------------------
 [5. DIALOGUE & NARRATION]
@@ -176,7 +180,7 @@ IF PART 2:
 - No neon lighting dominating the scene; avoid overly saturated, unrealistic colors.
 - No shaky cam, rapid hyper cuts, glitch effects, or aggressive transitions.
 - No on-screen text, captions, or subtitles.
-  The brand logo mark at the end of PART 2 must not contain any **Korean characters**; it should be only a graphic mark or English-only logotype.
+- If any brand logo mark appears visually, it must not contain any Korean characters; it should be only a graphic mark or English-only logotype.
 - No sexual content, violence, dangerous behavior, or offensive gestures.
 - No messy or dirty environments that would harm the brand’s image.
 
