@@ -48,9 +48,39 @@ def get_social_connection(
     
     if connection:
         # 복호화된 토큰으로 임시 교체 (DB에는 암호화된 상태로 유지)
-        connection.access_token = decrypt_token(connection.access_token)
+        # 평문 토큰이 발견되면 자동으로 암호화하여 저장
+        original_access_token = connection.access_token
+        try:
+            decrypted_access_token = decrypt_token(original_access_token)
+            connection.access_token = decrypted_access_token
+        except ValueError:
+            # 평문 토큰 감지: 암호화하여 저장
+            encrypted_access_token = encrypt_token(original_access_token)
+            db.query(SocialConnection).filter(
+                SocialConnection.user_id == user_id,
+                SocialConnection.platform == platform,
+                SocialConnection.del_yn == "N",
+            ).update({"access_token": encrypted_access_token}, synchronize_session=False)
+            db.commit()
+            # 복호화된 토큰으로 임시 교체 (원본 평문 유지)
+            connection.access_token = original_access_token
+        
         if connection.refresh_token:
-            connection.refresh_token = decrypt_token(connection.refresh_token)
+            original_refresh_token = connection.refresh_token
+            try:
+                decrypted_refresh_token = decrypt_token(original_refresh_token)
+                connection.refresh_token = decrypted_refresh_token
+            except ValueError:
+                # 평문 토큰 감지: 암호화하여 저장
+                encrypted_refresh_token = encrypt_token(original_refresh_token)
+                db.query(SocialConnection).filter(
+                    SocialConnection.user_id == user_id,
+                    SocialConnection.platform == platform,
+                    SocialConnection.del_yn == "N",
+                ).update({"refresh_token": encrypted_refresh_token}, synchronize_session=False)
+                db.commit()
+                # 복호화된 토큰으로 임시 교체 (원본 평문 유지)
+                connection.refresh_token = original_refresh_token
     
     return connection
 
