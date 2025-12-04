@@ -13,17 +13,24 @@ import json
 from urllib.parse import quote, urlencode
 
 from app.schemas.social import (
-    YouTubeUploadRequest, 
+    YouTubeUploadRequest,
     YouTubeUploadResponse,
     TikTokUploadRequest,
     TikTokUploadResponse,
     SocialPostListResponse,
     SocialPostResponse,
+    ShortsReportListResponse,
+    ShortsReportItem,
+    ShortsViewsTimeseriesResponse,
+    ShortsViewsTimeseriesItem,
 )
 from app.services.social_service import (
-    upload_video_to_youtube, 
+    upload_video_to_youtube,
     upload_video_to_tiktok,
     get_social_posts_by_prod_id,
+    get_shorts_report,
+    get_shorts_views_timeseries,
+    get_last_shorts_metric_captured_at,
     YOUTUBE_SCOPES,
 )
 
@@ -638,3 +645,71 @@ def get_social_posts_by_prod_id_endpoint(
             for post in posts
         ]
     )
+
+
+@router.get("/shorts/report", response_model=ShortsReportListResponse)
+def get_shorts_report_endpoint(
+    current_user: UserInfo = Depends(get_current_user),
+    db: Session = Depends(get_orm_session),
+):
+    """
+    숏폼 리포트용:
+    - 현재 사용자가 SNS(YouTube, TikTok)에 올린 쇼츠 목록을 prod_id 기준으로 조회.
+    """
+    items_raw = get_shorts_report(db, current_user.id)
+
+    items = [
+        ShortsReportItem(
+            prod_id=i["prod_id"],
+            title=i.get("title"),
+            thumbnail_url=i.get("thumbnail_url"),
+            video_url=i.get("video_url"),
+            platforms=i.get("platforms", []),
+            uploaded_at=i.get("uploaded_at"),
+            views=i.get("views", 0),
+            likes=i.get("likes", 0),
+            comments=i.get("comments", 0),
+        )
+        for i in items_raw
+    ]
+
+    last_captured_at = get_last_shorts_metric_captured_at(db, current_user.id)
+
+    return ShortsReportListResponse(
+        items=items,
+        last_collected_at=last_captured_at.isoformat() if last_captured_at else None,
+    )
+
+
+@router.get("/shorts/views-timeseries", response_model=ShortsViewsTimeseriesResponse)
+def get_shorts_views_timeseries_endpoint(
+    days: int = Query(30, ge=1, le=180),
+    platform: str | None = Query(
+        None, description="필터링할 플랫폼 (youtube / tiktok / None=전체)"
+    ),
+    current_user: UserInfo = Depends(get_current_user),
+    db: Session = Depends(get_orm_session),
+):
+    """
+    숏폼 조회수 추이:
+    - 최근 N일 동안의 일자별 조회수 합계를 반환.
+    - platform 파라미터로 YouTube/TikTok/전체 필터링.
+    """
+    # 파라미터 정규화
+    platform_filter: str | None
+    if platform in ("youtube", "tiktok"):
+        platform_filter = platform
+    else:
+        platform_filter = None
+
+    raw_items = get_shorts_views_timeseries(
+        db=db,
+        user_id=current_user.id,
+        days=days,
+        platform=platform_filter,
+    )
+
+    items = [
+        ShortsViewsTimeseriesItem(date=i["date"], views=i["views"]) for i in raw_items
+    ]
+    return ShortsViewsTimeseriesResponse(items=items)

@@ -480,6 +480,56 @@ export async function getSocialPostsByProdId(prodId: number): Promise<SocialPost
   });
 }
 
+// 숏폼 리포트 (SNS 업로드 기준)
+export interface ShortsReportItem {
+  prod_id: number;
+  title: string | null;
+  thumbnail_url: string | null;
+  video_url: string | null;
+  platforms: ("tiktok" | "youtube")[];
+  uploaded_at: string | null;
+  views: number;
+  likes: number;
+  comments: number;
+}
+
+export interface ShortsReportListResponse {
+  items: ShortsReportItem[];
+  last_collected_at?: string | null;
+}
+
+export async function getShortsReport(): Promise<ShortsReportListResponse> {
+  return apiRequest<ShortsReportListResponse>('/social/shorts/report', {
+    method: 'GET',
+  });
+}
+
+export interface ShortsViewsTimeseriesItem {
+  date: string;  // 'YYYY-MM-DD'
+  views: number;
+}
+
+export interface ShortsViewsTimeseriesResponse {
+  items: ShortsViewsTimeseriesItem[];
+}
+
+export async function getShortsViewsTimeseries(
+  days: number,
+  platform: "all" | "tiktok" | "youtube",
+): Promise<ShortsViewsTimeseriesResponse> {
+  const params = new URLSearchParams({
+    days: days.toString(),
+  });
+
+  if (platform !== "all") {
+    params.append("platform", platform);
+  }
+
+  return apiRequest<ShortsViewsTimeseriesResponse>(`/social/shorts/views-timeseries?${params.toString()}`, {
+    method: 'GET',
+  });
+}
+
 // 쇼츠 저장 API 호출
 export async function saveShorts(data: SaveShortsRequest): Promise<SaveShortsResponse> {
   return apiRequest<SaveShortsResponse>('/shorts/save', {
