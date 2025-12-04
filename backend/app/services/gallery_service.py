@@ -68,10 +68,12 @@ def get_public_logos(
         )
     
     # 정렬 적용
+    # - create_dt 가 같은 행들이 많을 수 있어서, prod_id 를 함께 정렬 키에 넣어
+    #   페이지네이션 시에도 순서가 안정적으로 유지되도록 한다.
     if sort_by == "latest":
-        query = query.order_by(desc(GenerationProd.create_dt))
+        query = query.order_by(desc(GenerationProd.create_dt), desc(GenerationProd.prod_id))
     elif sort_by == "oldest":
-        query = query.order_by(asc(GenerationProd.create_dt))
+        query = query.order_by(asc(GenerationProd.create_dt), asc(GenerationProd.prod_id))
     elif sort_by == "likes":
         query = query.order_by(desc(GenerationProd.like_cnt))
     elif sort_by == "comments":
@@ -149,10 +151,12 @@ def get_public_shorts(
         )
     
     # 정렬 적용
+    # - create_dt 가 같은 행들이 많을 수 있어서, prod_id 를 함께 정렬 키에 넣어
+    #   페이지네이션 시에도 순서가 안정적으로 유지되도록 한다.
     if sort_by == "latest":
-        query = query.order_by(desc(GenerationProd.create_dt))
+        query = query.order_by(desc(GenerationProd.create_dt), desc(GenerationProd.prod_id))
     elif sort_by == "oldest":
-        query = query.order_by(asc(GenerationProd.create_dt))
+        query = query.order_by(asc(GenerationProd.create_dt), asc(GenerationProd.prod_id))
     elif sort_by == "likes":
         query = query.order_by(desc(GenerationProd.like_cnt))
     elif sort_by == "comments":
