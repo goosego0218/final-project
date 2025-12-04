@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Literal
 from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.types import Command
 
-from app.graphs.nodes.shorts.prompts import DECISION_SYSTEM_PROMPT
+from app.graphs.nodes.shorts.prompt.prompts import DECISION_SYSTEM_PROMPT
 
 if TYPE_CHECKING:
     from app.agents.state import AppState
@@ -49,14 +49,12 @@ def make_decision_node(llm: "BaseChatModel"):
         
         # 분기 로직
         if "check_logo" in content:
-            # return Command(goto="check_logo")
-            # return Command(goto="generate_prompt_no_logo")
-            return Command(goto="generate_prompt_no_logo")
+            return Command(goto="shorts_entry")
         elif "general_chat" in content:
             return Command(goto="general_chat")
         elif "trend_analysis" in content:
             return Command(goto="trend_analysis")
 
-        return Command(goto="generate_prompt_no_logo")    
+        return Command(goto="shorts_entry")
     
     return decision_node
