@@ -133,6 +133,7 @@ IF PART 2:
 - The final line should be a short, memorable Korean version of the brand slogan.
 - The Korean slogan should be audio-only voiceover, not on-screen text.
 - Make sure the slogan line sounds like a real commercial tagline, not a literal translation.
+- The final slogan line is heard only as Korean voiceover
 
 [6. AUDIO]
 - BGM: light, upbeat, and modern, supporting the brand mood.
@@ -150,6 +151,8 @@ IF PART 2:
 - If any brand logo mark appears visually, it must not contain any Korean characters; it should be only a graphic mark or English-only logotype.
 - No sexual content, violence, dangerous behavior, or offensive gestures.
 - No messy or dirty environments that would harm the brand’s image.
+- The bottom-center area of the frame (lower 20% of the image) MUST be completely free of any text, boxes, or subtitle-like graphics.
+- Do NOT simulate TV-show style captions or variety-show subtitles in any form, especially in Korean.
 
 GLOBAL RULES
 - Write ALL sections in English, except for the Korean dialogue lines in [5. DIALOGUE & NARRATION].

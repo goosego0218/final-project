@@ -558,7 +558,7 @@ const MyPage = () => {
                             <div className="flex items-center justify-between text-sm text-muted-foreground">
                               <div className="flex items-center gap-4">
                                 <span className="flex items-center gap-1">
-                                  <Heart className="w-4 h-4" />
+                                  <Heart className={`w-4 h-4 ${item.is_liked ? "fill-destructive text-destructive" : ""}`} />
                                   {item.likes.toLocaleString()}
                                 </span>
                                 <span className="flex items-center gap-1">
