@@ -994,10 +994,13 @@ const ShortsChatPage = () => {
                                               muted
                                               playsInline
                                               style={{ aspectRatio: '9/16' }}
+                                              onLoadedMetadata={(e) => {
+                                                e.currentTarget.currentTime = 2.5;
+                                              }}
                                               onMouseEnter={(e) => e.currentTarget.play()}
                                               onMouseLeave={(e) => {
                                                 e.currentTarget.pause();
-                                                e.currentTarget.currentTime = 0;
+                                                e.currentTarget.currentTime = 2.5;
                                               }}
                                             />
                                             {/* 재생 아이콘 오버레이 */}

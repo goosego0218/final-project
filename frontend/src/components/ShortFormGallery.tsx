@@ -156,12 +156,16 @@ const ShortFormGallery = ({ searchQuery = "", initialSelectedProdId }: ShortForm
                         muted
                         playsInline
                         preload="metadata"
+                        onLoadedMetadata={(e) => {
+                          // 1.5초 지점으로 이동하여 썸네일로 표시
+                          e.currentTarget.currentTime = 2.5;
+                        }}
                         onMouseEnter={(e) => {
                           e.currentTarget.play().catch(() => {});
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.pause();
-                          e.currentTarget.currentTime = 0;
+                          e.currentTarget.currentTime = 2.5; // 1.5초로 복귀
                         }}
                       />
                     ) : (

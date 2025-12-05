@@ -111,6 +111,9 @@ const PopularShortsHomeSection = () => {
                         muted
                         playsInline
                         preload="metadata"
+                        onLoadedMetadata={(e) => {
+                          e.currentTarget.currentTime = 2.5;
+                        }}
                       />
                     ) : (
                       <img

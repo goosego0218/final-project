@@ -1014,18 +1014,15 @@ const ProjectDashboardPage = () => {
                           playsInline
                           preload="metadata"
                           onLoadedMetadata={(e) => {
-                            // 메타데이터 로드 후 명시적으로 정지 상태로 설정
                             e.currentTarget.pause();
-                            e.currentTarget.currentTime = 0;
+                            e.currentTarget.currentTime = 2.5;
                           }}
                           onMouseEnter={(e) => {
-                            e.currentTarget.play().catch(() => {
-                              // 재생 실패 시 무시 (브라우저 정책 등)
-                            });
+                            e.currentTarget.play().catch(() => {});
                           }}
                           onMouseLeave={(e) => {
                             e.currentTarget.pause();
-                            e.currentTarget.currentTime = 0;
+                            e.currentTarget.currentTime = 2.5;
                           }}
                         />
                         {/* 재생 아이콘 오버레이 */}
