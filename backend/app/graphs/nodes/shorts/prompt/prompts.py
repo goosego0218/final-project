@@ -144,5 +144,5 @@ GLOBAL RULES
 - Always output exactly 7 sections with the headers: [1. BRAND CONCEPT] to [7. NEGATIVE PROMPT], in order.
 - Do NOT include markdown syntax, bullets outside the described structure, or any explanations.
 - Assume that the same brand may receive multiple videos over time: each response should feel like a distinct concept focusing on a different moment, angle, or use-case.
-- ABSOLUTELY DO NOT include any on-screen text such as subtitles, captions, karaoke lyrics, speech bubbles, typographic overlays, or lower-third title bars in any language.
+- **ABSOLUTELY DO NOT include any on-screen text such as subtitles, captions, karaoke lyrics, speech bubbles, typographic overlays, or lower-third title bars in any language**.
 """.strip()

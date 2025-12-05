@@ -37,43 +37,30 @@ def make_generate_prompt_no_logo_node(llm: "BaseChatModel"):
 
         brand_profile_json = json.dumps(brand_profile, ensure_ascii=False, indent=2)
 
-        # 사용자의 요구사항(JSON) 읽기
-        user_requirements = shorts_state.get("user_requirements") or {}
-        user_requirements_json = json.dumps(
-            user_requirements, ensure_ascii=False, indent=2
-        )
+        # 사용자 발화 원문: shorts_state.user_utterance 우선, 없으면 messages 에서 조회
+        user_utterance = (shorts_state.get("user_utterance") or "").strip()
+        if not user_utterance:
+            user_utterance = get_last_user_message(state).strip()
 
-        # visual_style 필드만 따로 꺼내서 스타일 오버라이드에 사용
-        visual_style = user_requirements.get("visual_style")
-        if isinstance(visual_style, str):
-            visual_style = visual_style.strip()
-        else:
-            visual_style = ""
-
-        # 스타일 오버라이드 블록
-        if visual_style:
-            visual_style_block = (
-                "\n[VISUAL STYLE OVERRIDE]\n"
-                "Ignore the default photo-realistic live-action description in section [2. VISUAL STYLE].\n"
-                "Instead, you MUST strictly follow this visual style description when describing shots:\n"
-                f"{visual_style}\n"
+        if user_utterance:
+            user_utterance_block = (
+                "[USER REQUEST - ORIGINAL]\n"
+                f"{user_utterance}\n\n"
+                "The above is the user's raw request (in Korean). "
+                "You MUST prioritize this request when deciding the concept, purpose, tone, "
+                "visual style, and key scenes for this video.\n\n"
             )
         else:
-            visual_style_block = (
-                "\n[VISUAL STYLE OVERRIDE]\n"
-                "If the user did not request a specific visual style,\n"
-                "you MUST keep using the default photo-realistic live-action cinematic commercial look\n"
-                "described in section [2. VISUAL STYLE].\n"
-            )
+            user_utterance_block = ""
+
 
         user_prompt_part1 = (
             f"Create the prompt for **PART 1 (기-승: Setup & Build-up, 0-8s)** of a 16-second story.\n\n"
-            f"[BRAND PROFILE]\n{brand_profile_json}\n\n"
-            f"[USER REQUIREMENTS]\n{user_requirements_json}\n\n"
-            f"{visual_style_block}\n"
+            f"{user_utterance_block}"
             f"INSTRUCTIONS:\n"
-            f"- When there is any conflict between BRAND PROFILE and USER REQUIREMENTS,\n"
-            f"  you MUST follow USER REQUIREMENTS first.\n"
+            f"[BRAND PROFILE]\n{brand_profile_json}\n\n"
+            f"- When there is any conflict between BRAND PROFILE and the USER REQUEST above,\n"
+            f"  you MUST follow the USER REQUEST first.\n"
             f"- Focus on establishing the scene and building anticipation.\n"
             f"- Imagine this is ONE possible story among many for this brand.\n"
             f"- Choose a specific everyday situation for the target customer "
@@ -119,19 +106,21 @@ def make_generate_prompt_no_logo_node(llm: "BaseChatModel"):
             f"Now create the prompt for **PART 2 (전-결: Climax & Resolution, 8-16s)**.\n\n"
             f"It must continue DIRECTLY from Part 1. Here is a brief summary of PART 1:\n"
             f"---\n{part1_summary}\n---\n\n"
-            f"[USER REQUIREMENTS]\n{user_requirements_json}\n\n"
-            f"{visual_style_block}\n"
+            f"{user_utterance_block}"
             f"INSTRUCTIONS:\n"
-            f"- When there is any conflict between BRAND PROFILE and USER REQUIREMENTS,\n"
-            f"  you MUST follow USER REQUIREMENTS first.\n"
+            f"[BRAND PROFILE]\n{brand_profile_json}\n\n"            
+            f"- When there is any conflict between BRAND PROFILE and the USER REQUEST above,\n"
+            f"  you MUST follow the USER REQUEST first.\n"
             f"- VISUAL MATCH: Start exactly where Part 1 ended (same lighting, angle, character position).\n"
             f"- In PART 2, it is IMPORTANT that the main character keeps the **same face, hairstyle, outfit, and body type** as in PART 1.\n"
             f"- Show the action completing (e.g., taking the bite, drinking the coffee).\n"
             f"- Show emotional satisfaction or relief in a way that fits this brand's tone.\n"
             f"- MUST end with the brand logo and slogan narration.\n"
+            f"- For narration, refer to brand_profile. (**brand name remains in language**)\n"
+            f"  (e.g., When you say a brand name, you say it consistently so that the brand name doesn't change.)\n"
             f"- The logo at the end must NOT contain any Korean text; the Korean slogan should be heard only as voiceover, not written on screen.\n"
             f"- This Part 2 should feel like the natural resolution of THIS specific Part 1 concept.\n"
-            f"- Do NOT include any on-screen text such as subtitles, captions, karaoke lyrics,\n"
+            f"- **IMPORTANT** Do NOT include any on-screen text such as subtitles, captions, karaoke lyrics,\n"
             f"- speech bubbles, or typographic overlays. Only natural objects in the scene may have text\n"
             f"  (e.g., product labels, shop signs), but do not describe big overlay text for dialogue.\n"                 
             f"- Only Korean dialogue in [5.] should be in Korean."

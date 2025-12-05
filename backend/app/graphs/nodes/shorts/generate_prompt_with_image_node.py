@@ -21,12 +21,11 @@ if TYPE_CHECKING:
 def make_generate_prompt_with_image_node(llm: "BaseChatModel"):
     """
     이미지를 참고하여 숏폼 프롬프트를 생성하는 노드 팩토리.
-    이미지 설명과 브랜드 프로필을 결합하여 프롬프트 생성.
     """
     
     def generate_prompt_with_image_node(state: "AppState") -> Command[Literal["__end__"]]:
         """
-        이미지 설명 + 브랜드 프로필 + 사용자 요구사항을 기반으로
+        이미지 + 브랜드 프로필 + 사용자 요구사항을 기반으로
         16초(Part 1 + Part 2) 프롬프트를 생성한다.
         """
         brand_profile: Dict[str, Any] = state.get("brand_profile") or {}
@@ -34,49 +33,35 @@ def make_generate_prompt_with_image_node(llm: "BaseChatModel"):
         
         brand_profile_json = json.dumps(brand_profile, ensure_ascii=False, indent=2)
         
-        # 이미지 설명
-        # image_description = shorts_state.get("image_description", "")
+        # 사용자 발화 원문
+        user_utterance = (shorts_state.get("user_utterance") or "").strip()
+        if not user_utterance:
+            # AppState 전체에서 마지막 human 메시지 fallback
+            from app.graphs.nodes.common.message_utils import get_last_user_message
+            user_utterance = get_last_user_message(state).strip()
         
-        # 사용자 요구사항
-        user_requirements = shorts_state.get("user_requirements") or {}
-        user_requirements_json = json.dumps(
-            user_requirements, ensure_ascii=False, indent=2
-        )
-        
-        # visual_style 오버라이드
-        visual_style = user_requirements.get("visual_style")
-        if isinstance(visual_style, str):
-            visual_style = visual_style.strip()
-        else:
-            visual_style = ""
-        
-        if visual_style:
-            visual_style_block = (
-                "\n[VISUAL STYLE OVERRIDE]\n"
-                "Ignore the default photo-realistic live-action description in section [2. VISUAL STYLE].\n"
-                "Instead, you MUST strictly follow this visual style description when describing shots:\n"
-                f"{visual_style}\n"
+        if user_utterance:
+            user_utterance_block = (
+                "[USER REQUEST - ORIGINAL]\n"
+                f"{user_utterance}\n\n"
+                "The above is the user's raw request (in Korean). "
+                "You MUST prioritize this request when deciding the concept, purpose, tone, "
+                "visual style, and key scenes for this video.\n\n"
             )
         else:
-            visual_style_block = (
-                "\n[VISUAL STYLE OVERRIDE]\n"
-                "If the user did not request a specific visual style,\n"
-                "you MUST keep using the default photo-realistic live-action cinematic commercial look\n"
-                "described in section [2. VISUAL STYLE].\n"
-            )
+            user_utterance_block = ""
         
         # Part 1 프롬프트 생성
         user_prompt_part1 = (
             f"Create the prompt for **PART 1 (기-승: Setup & Build-up, 0-8s)** of a 16-second story.\n\n"
-            f"[BRAND PROFILE]\n{brand_profile_json}\n\n"
-            f"[USER REQUIREMENTS]\n{user_requirements_json}\n\n"
-            f"{visual_style_block}\n"
+            f"{user_utterance_block}"
             f"INSTRUCTIONS:\n"
-            f"- The reference image provides visual guidance for the video style, composition, and mood.\n"
+            f"[BRAND PROFILE]\n{brand_profile_json}\n\n"
+            # f"- The reference image provides visual guidance for the video style, composition, and mood.\n"
             f"- When there is any conflict between BRAND PROFILE and USER REQUIREMENTS,\n"
             f"  you MUST follow USER REQUIREMENTS first.\n"
-            f"- When there is any conflict between REFERENCE IMAGE and other sources,\n"
-            f"  prioritize REFERENCE IMAGE for visual style, but follow USER REQUIREMENTS for content.\n"
+            # f"- When there is any conflict between REFERENCE IMAGE and other sources,\n"
+            # f"  prioritize REFERENCE IMAGE for visual style, but follow USER REQUIREMENTS for content.\n"
             f"- Focus on establishing the scene and building anticipation.\n"
             f"- Choose a specific everyday situation that feels natural and relatable.\n"
             f"- **DO NOT** show the logo at the end.\n"
@@ -118,9 +103,9 @@ def make_generate_prompt_with_image_node(llm: "BaseChatModel"):
             f"Now create the prompt for **PART 2 (전-결: Climax & Resolution, 8-16s)**.\n\n"
             f"It must continue DIRECTLY from Part 1. Here is a brief summary of PART 1:\n"
             f"---\n{part1_summary}\n---\n\n"
-            f"[USER REQUIREMENTS]\n{user_requirements_json}\n\n"
-            f"{visual_style_block}\n"
+            f"{user_utterance_block}"
             f"INSTRUCTIONS:\n"
+            f"[BRAND PROFILE]\n{brand_profile_json}\n\n"
             f"- When there is any conflict between BRAND PROFILE and USER REQUIREMENTS,\n"
             f"  you MUST follow USER REQUIREMENTS first.\n"
             f"- VISUAL MATCH: Start exactly where Part 1 ended (same lighting, angle, character position).\n"
@@ -129,7 +114,7 @@ def make_generate_prompt_with_image_node(llm: "BaseChatModel"):
             f"- Show emotional satisfaction or relief in a way that fits this brand's tone.\n"
             f"- End with a strong, satisfying emotional or product shot inside the same scene, not a separate logo-only end card.\n"
             f"- Do NOT cut to a standalone logo screen; keep the last frame within the cinematic live-action or product shot.\n"
-            f"- Do NOT include any on-screen text such as subtitles, captions, karaoke lyrics,\n"
+            f"- **IMPORTANT** Do NOT include any on-screen text such as subtitles, captions, karaoke lyrics,\n"
             f"- speech bubbles, or typographic overlays. Only natural objects in the scene may have text\n"
             f"  (e.g., product labels, shop signs), but do not describe big overlay text for dialogue.\n"                 
             f"- Only Korean dialogue in [5.] should be in Korean.\n"
