@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Literal
 import time
 import base64
 import io
-from PIL import Image  # 필수
+from PIL import Image  
 
 from langgraph.types import Command
 from langgraph.graph import END
@@ -35,7 +35,6 @@ def make_generate_logo_node(genai_client: "Client"):
         logo_state = dict(state.get("logo_state") or {})
         prompt = logo_state.get("generated_prompt")
 
-        # [2025-12-04] 레퍼런스 이미지 가져오기
         reference_images_base64 = logo_state.get("reference_images") or []
 
         if not prompt:
@@ -45,7 +44,6 @@ def make_generate_logo_node(genai_client: "Client"):
         try:
             print(f"로고 생성 시작 (레퍼런스: {len(reference_images_base64)}장)")
 
-            # 1. Base64 -> PIL Image 변환
             pil_images = []
             for idx, b64_str in enumerate(reference_images_base64):
                 try:
@@ -60,22 +58,27 @@ def make_generate_logo_node(genai_client: "Client"):
                 except Exception as e:
                     print(f"이미지 변환 실패 ({idx}): {e}")
 
-            # 2. Gemini API 입력 구성 (텍스트 + 이미지들)
-            # Gemini는 리스트에 섞어 넣으면 알아서 멀티모달로 처리함
             contents = [prompt] + pil_images
 
-            # 3. 설정 구성 (4K 해상도)
+            ref_mode = logo_state.get("ref_mode", "generated_history")
+            if ref_mode == "user_upload":
+                temperature = 0.3
+                print(f"레퍼런스 이미지 있음, temperature: {temperature}")
+            else:
+                temperature = 1.0
+                print(f"레퍼런스 이미지 없음, temperature: {temperature}")
+                
             generate_content_config = types.GenerateContentConfig(
-                temperature=1.0,
+                # temperature=1.0,
+                temperature=temperature,
                 top_p=0.95,
                 response_modalities=["IMAGE"],
                 image_config=types.ImageConfig(
                     aspect_ratio="1:1",
-                    image_size="2K",  # 4K 고해상도
+                    image_size="2K",  
                 ),
             )
             
-            # 4. API 호출
             response = genai_client.models.generate_content(
                 model=settings.google_genai_model,
                 contents=contents,  
@@ -90,12 +93,9 @@ def make_generate_logo_node(genai_client: "Client"):
                     image_bytes = part.inline_data.data
                     break
                 elif hasattr(part, 'file_data') and part.file_data:
-                    # 파일 데이터인 경우 다운로드 필요
                     print(f"파일 URI: {part.file_data.file_uri}")
-                    # TODO: 파일 다운로드 로직(필요 시 구현)
                     pass
                 else:
-                    # as_image() 시도 (PIL Image일 경우)
                     try:
                         img = part.as_image()
                         if img and isinstance(img, Image.Image):
@@ -113,13 +113,11 @@ def make_generate_logo_node(genai_client: "Client"):
             
             print(f"이미지 데이터 크기: {len(image_bytes)} bytes")
             
-            # Base64 인코딩 
             image_base64 = base64.b64encode(image_bytes).decode('utf-8')
             logo_data_url = f"data:image/png;base64,{image_base64}"
             
             print(f"Base64 인코딩 완료 (길이: {len(image_base64)})")
             
-            # 프론트로 메시지 전달 
             success_msg = AIMessage(
                 content=(
                     f"로고가 생성되었습니다!\n"
@@ -131,11 +129,7 @@ def make_generate_logo_node(genai_client: "Client"):
             logo_state["logo_url"] = logo_data_url
             logo_state["logo_size_bytes"] = len(image_bytes)
             logo_state["logo_generated_at"] = time.time()
-
-            # [중요] 방금 만든 로고를 다음 턴의 기본 레퍼런스로 저장
             logo_state["reference_images"] = [logo_data_url]
-
-            # [중요] 모드를 '히스토리 기반'으로 변경 (다음 요청이 오면 Edit 모드로 동작하도록)
             logo_state["ref_mode"] = "generated_history"
             
             return Command(

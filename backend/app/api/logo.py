@@ -1,6 +1,7 @@
 # 로고 관련 엔드포인트
 # 작성자: 황민준
 # 작성일: 2025-11-20
+# 대타 : 주후상
 # 수정내역
 # - 2025-11-20: 초기 작성
 # - 2025-11-24: intro 엔드포인트 추가
@@ -36,7 +37,6 @@ router = APIRouter(
     tags=["logo"],
 )
 
-# 그래프를 지연 로딩 (필요할 때만 빌드)
 _logo_graph = None
 
 def get_logo_graph():
@@ -45,6 +45,7 @@ def get_logo_graph():
     if _logo_graph is None:
         _logo_graph = build_logo_graph()
     return _logo_graph
+
 
 @router.post("/intro", response_model=LogoChatResponse, summary="로고 진입 시 브랜드 정보 요약")
 def get_logo_intro(
@@ -74,8 +75,7 @@ def get_logo_intro(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e),
         )
-    
-    # 브랜드 프로필이 비어있거나 필수 정보가 없는 경우
+
     if not brand_profile or not brand_profile.get("brand_name") or not brand_profile.get("category"):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -85,11 +85,10 @@ def get_logo_intro(
     try:
         brand_summary = summarize_brand_profile_with_llm(brand_profile, mode="logo")
     except Exception as e:
-        # LLM 호출 실패 시 기본 요약 생성
         brand_name = brand_profile.get("brand_name", "브랜드")
         category = brand_profile.get("category", "")
         brand_summary = f"{brand_name}은(는) {category} 업종의 브랜드입니다. 로고를 만들어볼까요?"
-        # 로그는 남기되 사용자에게는 기본 메시지 반환
+
         import logging
         logging.error(f"브랜드 요약 생성 실패: {e}")
     
@@ -100,6 +99,7 @@ def get_logo_intro(
         project_id=req.project_id,
         logo_session_id=logo_session_id,
     )
+
 
 @router.post("/chat", response_model=LogoChatResponse)
 def chat_logo(
@@ -116,29 +116,25 @@ def chat_logo(
       같은 화면에서 '로고 만들기'를 선택하면 그 project_id 를 들고 이 엔드포인트를 친다.
     """
     
-    # 프로젝트 id 확인
     if req.project_id is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="logo 챗봇 호출 시 project_id 는 필수입니다.",
         )
     
-    # message 확인 (chat 엔드포인트에서는 필수)
     if not req.message or not req.message.strip():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="logo 챗봇 호출 시 message 는 필수입니다.",
         )
-#----------------------------------------25-12-04 레퍼런스 이미지 처리--------------------------------
+
     reference_images = req.reference_images or []
     if len(reference_images) > 6:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="레퍼런스 이미지는 최대 6개까지 가능합니다."
         )
-#------------------------------------------------------------------------
-    
-    # TODO: logo 에이전트 호출
+
     from app.services.project_service import load_brand_profile_for_agent
     brand_profile = load_brand_profile_for_agent(db, req.project_id)
 
@@ -153,16 +149,12 @@ def chat_logo(
         "trend_context": {},
         "meta": {},
     }
-    # 1. 유저가 이번에 이미지를 직접 올렸다 -> Style Transfer 모드
+
     if reference_images:
         state['logo_state'] = {
             "reference_images": reference_images,
-            "ref_mode": "user_upload"  # 명시적 모드 설정
+            "ref_mode": "user_upload"  
         }
-    # 2. 유저가 이미지를 안 올렸다 -> 기존 State(직전 생성 로고)를 사용하거나, 없으면 New 모드
-    #    여기서는 logo_state를 건드리지 않음으로써 체크포인트 값을 유지함.
-    #    대신, 만약 체크포인트에도 이미지가 없다면 노드에서 알아서 New 모드로 동작.
-    #    단, "이전 로고 수정" 의도임을 노드에 알리기 위해 ref_mode 힌트는 줄 수 있음(선택).
     
     new_state = get_logo_graph().invoke(
         state,
@@ -180,6 +172,7 @@ def chat_logo(
         project_id=req.project_id,
         logo_session_id=logo_session_id,
     )
+
 
 @router.post("/save", response_model=SaveLogoResponse, summary="로고 저장")
 def save_logo_endpoint(
@@ -222,6 +215,7 @@ def save_logo_endpoint(
             detail=f"로고 저장 실패: {str(e)}"
         )
 
+
 @router.get("/list", response_model=List[LogoListItemResponse], summary="로고 목록 조회")
 def get_logo_list_endpoint(
     project_id: int,
@@ -234,7 +228,6 @@ def get_logo_list_endpoint(
     - project_id: 프로젝트 그룹 ID (query parameter)
     - 현재 로그인한 사용자가 생성한 프로젝트의 로고만 조회 가능
     """
-    # 프로젝트 접근 권한 확인
     from app.services.project_service import load_project_group_entity
     
     project = load_project_group_entity(db, project_id)
@@ -244,17 +237,14 @@ def get_logo_list_endpoint(
             detail="프로젝트를 찾을 수 없습니다.",
         )
     
-    # 본인이 생성한 프로젝트인지 확인
     if project.creator_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="접근 권한이 없습니다.",
         )
     
-    # 로고 목록 조회
     logo_list = get_logo_list(db=db, project_id=project_id, prod_type_id=1)
     
-    # 응답 모델로 변환
     result = []
     for prod in logo_list:
         file_url = get_file_url(prod.file_path)
@@ -267,6 +257,7 @@ def get_logo_list_endpoint(
         ))
     
     return result
+
 
 @router.delete("/{prod_id}", summary="로고 삭제")
 def delete_logo_endpoint(
