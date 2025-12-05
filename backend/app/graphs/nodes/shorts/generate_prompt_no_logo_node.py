@@ -112,6 +112,7 @@ def make_generate_prompt_no_logo_node(llm: "BaseChatModel"):
             f"- When there is any conflict between BRAND PROFILE and the USER REQUEST above,\n"
             f"  you MUST follow the USER REQUEST first.\n"
             f"- VISUAL MATCH: Start exactly where Part 1 ended (same lighting, angle, character position).\n"
+            f"- Keep the same hand holding the product, the same seat, and the same table position as the very last moment of Part 1.\n"
             f"- In PART 2, it is IMPORTANT that the main character keeps the **same face, hairstyle, outfit, and body type** as in PART 1.\n"
             f"- Show the action completing (e.g., taking the bite, drinking the coffee).\n"
             f"- Show emotional satisfaction or relief in a way that fits this brand's tone.\n"

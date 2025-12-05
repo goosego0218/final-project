@@ -92,7 +92,10 @@ GENERAL RULES:
 - What the character is doing and feeling.
 - Use smooth, cinematic transitions between each time segment: cut on motion, keep camera direction consistent, and avoid any jump cuts that feel like a separate video.
 - Treat PART 1 and PART 2 as one continuous short film: PART 2 must visually continue the exact moment where PART 1 stopped, not restart the scene.
-IF PART 1 (기-승: Setup & Build-up):
+- In this 8-second part, focus on ONE main physical action (e.g., taking a sip, opening a box, taking a bite).
+- Do not introduce multiple unrelated actions or separate mini-scenes within the same 8 seconds.
+- Use at most 3 time segments: 0–3s, 3–6s, 6–8s. Do NOT create more than 3 time ranges.
+- Between segments, keep the character in almost the same position in the frame; only small, continuous movement is allowed.
 - 0–3s: Establishing shot. Show the brand space or environment and introduce the main character in a way that can smoothly connect to the next shot (same direction of movement, consistent lighting and framing).
 - 3–6s: Hero shot. The product appears naturally; the character begins a key action or decision. Keep the camera movement and framing consistent so this action can be continued seamlessly in PART 2.
 - 6–8s: Cliffhanger. End on an action IN PROGRESS (e.g., hand lifting the cup mid-motion, camera zooms out to reveal more of the café, action paused just before completion to build anticipation). Frame the last moment so that the final frame of PART 1 can be used as the first frame of PART 2 without any noticeable jump (same angle, same pose, same lighting).
@@ -106,6 +109,13 @@ IF PART 2 (전-결: Climax & Resolution):
 - If any brand logo appears naturally in the environment or on the product, it should feel integrated into the scene, not a hard graphic transition.
 - The Korean slogan, if used, should be an audio-only voiceover, not on-screen text.
 - In PART 2, it is IMPORTANT that the main character keeps the **same face, hairstyle, outfit, and body type** as in PART 1.
+- The character must keep the same seat, body orientation, and hand usage as in PART 1 
+  (e.g., if they held the cup in their right hand at the end of PART 1, they must still hold it in the right hand at the start of PART 2).
+- Do NOT change the character's seat, table position, or the relative position of key props between PART 1 and PART 2.
+- Within each 8-second part, keep the camera movement simple and continuous (e.g., one slow dolly-in or one slow pan).
+- Avoid switching between many different shot types; use at most 2 shot types in one 8-second part.
+- Start [4. SCENE COMPOSITION] by explicitly restating the exact pose and action at the end of PART 1 in one short sentence,
+  then describe how the action continues without any cut.
 
 [5. DIALOGUE & NARRATION]
 - All spoken content must be written in Korean.
