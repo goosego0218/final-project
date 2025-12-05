@@ -55,6 +55,7 @@ class ShortsChatRequest(BaseModel):
     project_id: int
     message: Optional[str] = None
     shorts_session_id: Optional[str] = None
+    images: Optional[List[str]] = None  # Base64 인코딩된 이미지 리스트 추가
 
 class ShortsChatResponse(BaseModel):
     reply: str
