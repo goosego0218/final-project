@@ -206,11 +206,35 @@ const MyPage = () => {
                           >
                             {/* 9:16 Thumbnail */}
                             <div className="aspect-[9/16] bg-secondary/30 relative">
-                              <img
-                                src={item.image}
-                                alt={item.title}
-                                className="w-full h-full object-cover"
-                              />
+                              {isVideoUrl(item.videoUrl || item.image) ? (
+                                <video
+                                  src={item.videoUrl || item.image}
+                                  className="w-full h-full object-cover"
+                                  muted
+                                  playsInline
+                                  preload="metadata"
+                                  onLoadedMetadata={(e) => {
+                                    e.currentTarget.pause();
+                                    e.currentTarget.currentTime = 0;
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.play().catch(() => {});
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.pause();
+                                    e.currentTarget.currentTime = 0;
+                                  }}
+                                />
+                              ) : (
+                                <img
+                                  src={item.image}
+                                  alt={item.title}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).src = "/placeholder.svg";
+                                  }}
+                                />
+                              )}
 
                               {/* Duration badge */}
                               <div className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm rounded-lg px-2.5 py-1 shadow-md">
