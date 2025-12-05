@@ -80,6 +80,9 @@ def make_generate_prompt_with_image_node(llm: "BaseChatModel"):
             f"- Focus on establishing the scene and building anticipation.\n"
             f"- Choose a specific everyday situation that feels natural and relatable.\n"
             f"- **DO NOT** show the logo at the end.\n"
+            f"- Do NOT include any on-screen text such as subtitles, captions, karaoke lyrics,\n"
+            f"- speech bubbles, or typographic overlays. Only natural objects in the scene may have text\n"
+            f"  (e.g., product labels, shop signs), but do not describe big overlay text for dialogue.\n"            
             f"- End with an action IN PROGRESS.\n"
             f"- Only Korean dialogue in [5.] should be in Korean."
         )
@@ -121,11 +124,14 @@ def make_generate_prompt_with_image_node(llm: "BaseChatModel"):
             f"- When there is any conflict between BRAND PROFILE and USER REQUIREMENTS,\n"
             f"  you MUST follow USER REQUIREMENTS first.\n"
             f"- VISUAL MATCH: Start exactly where Part 1 ended (same lighting, angle, character position).\n"
-            f"- In PART 2, the main character must keep the **same face, hairstyle, outfit, and body type** as in PART 1.\n"
+            f"- In PART 2, it is IMPORTANT that the main character keeps the **same face, hairstyle, outfit, and body type** as in PART 1.\n"
             f"- Show the action completing.\n"
             f"- Show emotional satisfaction or relief in a way that fits this brand's tone.\n"
             f"- End with a strong, satisfying emotional or product shot inside the same scene, not a separate logo-only end card.\n"
             f"- Do NOT cut to a standalone logo screen; keep the last frame within the cinematic live-action or product shot.\n"
+            f"- Do NOT include any on-screen text such as subtitles, captions, karaoke lyrics,\n"
+            f"- speech bubbles, or typographic overlays. Only natural objects in the scene may have text\n"
+            f"  (e.g., product labels, shop signs), but do not describe big overlay text for dialogue.\n"                 
             f"- Only Korean dialogue in [5.] should be in Korean.\n"
         )
         
