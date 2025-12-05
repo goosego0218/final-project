@@ -84,8 +84,10 @@ def make_generate_prompt_no_logo_node(llm: "BaseChatModel"):
         summary_system = SystemMessage(
             content=(
                 "You are a helpful assistant that summarizes Veo 3.1 video prompts.\n"
-                "Given a full PART 1 prompt, summarize it in 3–4 concise sentences.\n"
-                "Focus on: 1) visual setup, 2) main actions, 3) emotional tone, and 4) cliffhanger ending.\n"
+                "Given a full PART 1 prompt, do the following:\n"
+                "1) First, write ONE short sentence that precisely describes the final frame and character pose at the very end of PART 1.\n"
+                "   Start this sentence with 'FINAL FRAME:'.\n"
+                "2) Then, in 2–3 additional sentences, summarize: 1) visual setup, 2) main actions, 3) emotional tone, and 4) cliffhanger ending.\n"
                 "Do NOT include section headers or markdown. Output plain English sentences only."
             )
         )
@@ -106,6 +108,9 @@ def make_generate_prompt_no_logo_node(llm: "BaseChatModel"):
             f"Now create the prompt for **PART 2 (전-결: Climax & Resolution, 8-16s)**.\n\n"
             f"It must continue DIRECTLY from Part 1. Here is a brief summary of PART 1:\n"
             f"---\n{part1_summary}\n---\n\n"
+            f"The first sentence above starting with 'FINAL FRAME:' describes the exact final frame of PART 1.\n"
+            f"In [4. SCENE COMPOSITION — 8 SECONDS], you MUST literally reuse that 'FINAL FRAME:' sentence "
+            f"as the opening sentence, then continue the description so that the action flows without any cut.\n\n"
             f"{user_utterance_block}"
             f"INSTRUCTIONS:\n"
             f"[BRAND PROFILE]\n{brand_profile_json}\n\n"            

@@ -103,6 +103,8 @@ GENERAL RULES:
 - END WITH ANTICIPATION: the viewer should strongly want to see what happens next.
 IF PART 2 (전-결: Climax & Resolution):
 - VISUAL MATCH: Start exactly where Part 1 ended (same lighting, same angle, same character position, same product).
+- In 0–3s, the first ~1 second should look almost identical to the final frame of PART 1 (only very small motion), 
+  then the action gradually continues without any abrupt change in pose, framing, or lighting.
 - 0–3s: Action completes (e.g., taking the bite, drinking the coffee, sharing the food), with a smooth continuation of the camera move from the previous part.
 - 3–6s: Emotional payoff. Show satisfaction, joy, relief, comfort, or a warm moment with others, with gentle camera motion or stable framing that keeps the flow calm and premium.
 - 6–8s: Final lingering moment. Stay within the same live-action or product-focused scene and end on a strong, satisfying emotional or product shot. Do NOT cut to a separate logo-only end card; the last frame should still feel like part of the story world.
