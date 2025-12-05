@@ -532,6 +532,36 @@ export async function getShortsViewsTimeseries(
   });
 }
 
+// 마이페이지 관련 인터페이스
+export interface MyPageItem {
+  prod_id: number;
+  type: "logo" | "short";
+  file_url: string | null;
+  title: string | null;
+  likes: number;
+  comments: number;
+  created_at: string | null;
+  is_liked: boolean;
+}
+
+export interface MyPageItemsResponse {
+  items: MyPageItem[];
+}
+
+// 공유한 작품 조회
+export async function getSharedItems(): Promise<MyPageItemsResponse> {
+  return apiRequest<MyPageItemsResponse>('/mypage/shared', {
+    method: 'GET',
+  });
+}
+
+// 좋아요한 작품 조회
+export async function getLikedItems(): Promise<MyPageItemsResponse> {
+  return apiRequest<MyPageItemsResponse>('/mypage/liked', {
+    method: 'GET',
+  });
+}
+
 // 쇼츠 저장 API 호출
 export async function saveShorts(data: SaveShortsRequest): Promise<SaveShortsResponse> {
   return apiRequest<SaveShortsResponse>('/shorts/save', {
