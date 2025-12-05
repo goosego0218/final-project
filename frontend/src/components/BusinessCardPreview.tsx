@@ -49,7 +49,8 @@ const BusinessCardPreview = ({ logoUrl, logoTitle }: BusinessCardPreviewProps) =
       case "top-left":
         return { ...baseStyle, position: "absolute", top: "20px", left: "20px" };
       case "top-center":
-        return { ...baseStyle, position: "absolute", top: "20px", left: "50%", transform: "translateX(-50%)" };
+        // 상단 중앙은 카드 상단에 완전히 붙여서 배치
+        return { ...baseStyle, position: "absolute", top: "0px", left: "50%", transform: "translateX(-50%)" };
       case "top-right":
         return { ...baseStyle, position: "absolute", top: "20px", right: "20px" };
       case "center":

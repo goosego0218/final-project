@@ -83,6 +83,8 @@ class Settings(BaseSettings):
     ncp_endpoint: str = ""
     ncp_bucket_name: str = ""
 
+    # 요거 잠깐 추가가
+    safeguard_enabled: bool = False
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

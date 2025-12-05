@@ -4,9 +4,11 @@
 # 수정내역
 # - 2025-11-19: 초기 작성
 # - 2025-11-27: 로고 에이전트 추가
+# - 2025-12-04: 프롬프트생성용모델 추가
 
 from __future__ import annotations
 
+from langchain_openai import ChatOpenAI
 from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import MemorySaver
 
@@ -16,6 +18,7 @@ from app.llm.client import get_chat_model, get_gemini_image_client
 # 노드 함수들 import
 from app.graphs.nodes.logo.generate_logo_prompt_node import make_generate_logo_prompt_node
 from app.graphs.nodes.logo.generate_logo_node import make_generate_logo_node
+from app.llm.client import get_logo_prompt_model
 
 checkpointer = MemorySaver()
 
@@ -30,8 +33,12 @@ def build_logo_graph():
     llm = get_chat_model()
     gemini_client = get_gemini_image_client()
     
+    #----------------------------------------25-12-04 프롬프트생성용모델--------------------------------
+    llm_prompt = get_logo_prompt_model()
+    #------------------------------------------------------------------------
+
     # 노드 생성
-    generate_logo_prompt = make_generate_logo_prompt_node(llm)
+    generate_logo_prompt = make_generate_logo_prompt_node(llm_prompt)
     generate_logo = make_generate_logo_node(gemini_client)
     
     # 그래프 생성

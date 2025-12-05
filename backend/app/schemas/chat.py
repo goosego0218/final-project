@@ -5,6 +5,7 @@
 # - 2025-11-18: 초기 작성
 # - 2025-11-19: response 스키마 추가
 # - 2025-11-23: ShortsResume 스키마 추가
+# - 2025-12-04: LogoChatRequest 스키마 추가
 
 from typing import List, Optional, Literal, Dict, Any
 from pydantic import BaseModel
@@ -36,10 +37,14 @@ class CreateBrandProjectResponse(BaseModel):
     grp_nm: str
     grp_desc: Optional[str] = None
 
+
+#----------------------------------------25-12-04 스키마 추가--------------------------------
 class LogoChatRequest(BaseModel):
     project_id: int                    
     message: Optional[str] = None  # intro 호출 시에는 None 가능
     logo_session_id: Optional[str] = None
+    reference_images: Optional[List[str]] = None
+#------------------------------------------------------------------------
 
 class LogoChatResponse(BaseModel):
     reply: str
@@ -57,7 +62,6 @@ class ShortsChatResponse(BaseModel):
     project_id: int
     shorts_session_id: str
 
-#----------------------------------------25-11-23 스키마 추가--------------------------------
 
 class ShortsResumeRequest(BaseModel):
     project_id: int

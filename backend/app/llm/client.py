@@ -24,6 +24,17 @@ def get_chat_model():
         api_key=settings.openai_api_key,
         temperature=settings.openai_temperature,
     )
+    
+@lru_cache
+def get_logo_prompt_model():
+    """
+    프롬프트 생성용 모델
+    """
+    return ChatOpenAI(
+        model="gpt-5",
+        api_key=settings.openai_api_key,
+        temperature=0.15,
+    )
 
 @lru_cache
 def get_fast_chat_model():
