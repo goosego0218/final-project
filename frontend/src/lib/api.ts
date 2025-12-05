@@ -252,6 +252,7 @@ export interface LogoChatRequest {
   project_id: number;
   message?: string;
   logo_session_id?: string;
+  reference_images?: string[];
 }
 
 export interface LogoChatResponse {

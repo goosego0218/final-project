@@ -295,6 +295,7 @@ const LogoChatPage = () => {
         project_id: parseInt(currentProjectId),
         message: currentInput,
         logo_session_id: logoSessionId || undefined,
+        reference_images: currentImages.length > 0 ? currentImages : undefined,
       });
       if (response.logo_session_id) {
         setLogoSessionId(response.logo_session_id);

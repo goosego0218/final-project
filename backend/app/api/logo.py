@@ -5,6 +5,7 @@
 # - 2025-11-20: 초기 작성
 # - 2025-11-24: intro 엔드포인트 추가
 # - 2025-11-29: 다운로드 프록시 엔드포인트 추가
+# - 2025-12-04: 레퍼런스 이미지 처리 추가
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
@@ -114,6 +115,7 @@ def chat_logo(
     - 브랜드 챗봇에서 project_id 가 생성된 후,
       같은 화면에서 '로고 만들기'를 선택하면 그 project_id 를 들고 이 엔드포인트를 친다.
     """
+    
     # 프로젝트 id 확인
     if req.project_id is None:
         raise HTTPException(
@@ -127,6 +129,14 @@ def chat_logo(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="logo 챗봇 호출 시 message 는 필수입니다.",
         )
+#----------------------------------------25-12-04 레퍼런스 이미지 처리--------------------------------
+    reference_images = req.reference_images or []
+    if len(reference_images) > 6:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="레퍼런스 이미지는 최대 6개까지 가능합니다."
+        )
+#------------------------------------------------------------------------
     
     # TODO: logo 에이전트 호출
     from app.services.project_service import load_brand_profile_for_agent
@@ -143,7 +153,17 @@ def chat_logo(
         "trend_context": {},
         "meta": {},
     }
-
+    # 1. 유저가 이번에 이미지를 직접 올렸다 -> Style Transfer 모드
+    if reference_images:
+        state['logo_state'] = {
+            "reference_images": reference_images,
+            "ref_mode": "user_upload"  # 명시적 모드 설정
+        }
+    # 2. 유저가 이미지를 안 올렸다 -> 기존 State(직전 생성 로고)를 사용하거나, 없으면 New 모드
+    #    여기서는 logo_state를 건드리지 않음으로써 체크포인트 값을 유지함.
+    #    대신, 만약 체크포인트에도 이미지가 없다면 노드에서 알아서 New 모드로 동작.
+    #    단, "이전 로고 수정" 의도임을 노드에 알리기 위해 ref_mode 힌트는 줄 수 있음(선택).
+    
     new_state = get_logo_graph().invoke(
         state,
         config={"configurable": {
