@@ -130,6 +130,7 @@ def make_generate_prompt_no_logo_node(llm: "BaseChatModel"):
             # f"- speech bubbles, or typographic overlays. Only natural objects in the scene may have text\n"
             f"  (e.g., product labels, shop signs), but do not describe big overlay text for dialogue.\n"                 
             f"- Only Korean dialogue in [5.] should be in Korean."
+            f"- At no point should there be any subtitle-like text or boxes at the bottom of the frame.\n"
         )
 
         messages_2 = [
