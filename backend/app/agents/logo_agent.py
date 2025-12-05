@@ -18,6 +18,7 @@ from app.llm.client import get_chat_model, get_gemini_image_client
 # 노드 함수들 import
 from app.graphs.nodes.logo.generate_logo_prompt_node import make_generate_logo_prompt_node
 from app.graphs.nodes.logo.generate_logo_node import make_generate_logo_node
+from app.llm.client import get_logo_prompt_model
 
 checkpointer = MemorySaver()
 
@@ -33,7 +34,7 @@ def build_logo_graph():
     gemini_client = get_gemini_image_client()
     
     #----------------------------------------25-12-04 프롬프트생성용모델--------------------------------
-    llm_prompt = ChatOpenAI(model="gpt-5", temperature=0.15)
+    llm_prompt = get_logo_prompt_model()
     #------------------------------------------------------------------------
 
     # 노드 생성

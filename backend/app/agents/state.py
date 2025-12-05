@@ -66,6 +66,8 @@ class LogoState(TypedDict, total=False):
 #--------------------------------------25-12-04--------------------------------------
     # [추가] 레퍼런스 이미지 (Base64 문자열 리스트, 최대 6개)
     reference_images: Optional[List[str]]  # ["data:image/png;base64,...", ...]
+    # [추가] 레퍼런스 모드 구분 ("user_upload" vs "generated_history")
+    ref_mode: Optional[Literal["user_upload", "generated_history"]]
 #-----------------------------------------------------------------------------------
 
 class BrandProfile(TypedDict, total=False):

@@ -71,7 +71,7 @@ def make_generate_logo_node(genai_client: "Client"):
                 response_modalities=["IMAGE"],
                 image_config=types.ImageConfig(
                     aspect_ratio="1:1",
-                    image_size="4K",  # 4K 고해상도
+                    image_size="2K",  # 4K 고해상도
                 ),
             )
             
@@ -131,6 +131,12 @@ def make_generate_logo_node(genai_client: "Client"):
             logo_state["logo_url"] = logo_data_url
             logo_state["logo_size_bytes"] = len(image_bytes)
             logo_state["logo_generated_at"] = time.time()
+
+            # [중요] 방금 만든 로고를 다음 턴의 기본 레퍼런스로 저장
+            logo_state["reference_images"] = [logo_data_url]
+
+            # [중요] 모드를 '히스토리 기반'으로 변경 (다음 요청이 오면 Edit 모드로 동작하도록)
+            logo_state["ref_mode"] = "generated_history"
             
             return Command(
                 update={"messages": [success_msg], "logo_state": logo_state},

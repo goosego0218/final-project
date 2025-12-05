@@ -151,14 +151,19 @@ def chat_logo(
         "project_draft": {},         
         "brand_profile": brand_profile,
         "trend_context": {},
-        #----------------------------------------25-12-04 레퍼런스 이미지 처리--------------------------------
-        "logo_state": {
-            "reference_images": reference_images,
-        },
-        #------------------------------------------------------------------------
         "meta": {},
     }
-
+    # 1. 유저가 이번에 이미지를 직접 올렸다 -> Style Transfer 모드
+    if reference_images:
+        state['logo_state'] = {
+            "reference_images": reference_images,
+            "ref_mode": "user_upload"  # 명시적 모드 설정
+        }
+    # 2. 유저가 이미지를 안 올렸다 -> 기존 State(직전 생성 로고)를 사용하거나, 없으면 New 모드
+    #    여기서는 logo_state를 건드리지 않음으로써 체크포인트 값을 유지함.
+    #    대신, 만약 체크포인트에도 이미지가 없다면 노드에서 알아서 New 모드로 동작.
+    #    단, "이전 로고 수정" 의도임을 노드에 알리기 위해 ref_mode 힌트는 줄 수 있음(선택).
+    
     new_state = get_logo_graph().invoke(
         state,
         config={"configurable": {
