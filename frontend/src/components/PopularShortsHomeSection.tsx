@@ -114,6 +114,10 @@ const PopularShortsHomeSection = () => {
                         onLoadedMetadata={(e) => {
                           e.currentTarget.currentTime = 2.5;
                         }}
+                        onEnded={(e) => {
+                          e.currentTarget.pause();
+                          e.currentTarget.currentTime = 2.5; // 끝나면 일시정지하고 썸네일 위치로
+                        }}
                       />
                     ) : (
                       <img

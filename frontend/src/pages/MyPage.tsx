@@ -224,6 +224,10 @@ const MyPage = () => {
                                     e.currentTarget.pause();
                                     e.currentTarget.currentTime = 0;
                                   }}
+                                  onEnded={(e) => {
+                                    e.currentTarget.pause();
+                                    e.currentTarget.currentTime = 0; // 끝나면 일시정지하고 처음으로
+                                  }}
                                 />
                               ) : (
                                 <img
@@ -489,6 +493,10 @@ const MyPage = () => {
                                     e.currentTarget.pause();
                                     e.currentTarget.currentTime = 0;
                                   }}
+                                  onEnded={(e) => {
+                                    e.currentTarget.pause();
+                                    e.currentTarget.currentTime = 0; // 끝나면 일시정지하고 처음으로
+                                  }}
                                 />
                               ) : (
                                 <img
@@ -679,7 +687,6 @@ const MyPage = () => {
                     controls
                     autoPlay
                     loop
-                    muted
                     playsInline
                   />
                 </>

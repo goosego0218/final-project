@@ -51,6 +51,29 @@ const ShortsReportPage = () => {
   const [chartPlatform, setChartPlatform] = useState<"all" | "tiktok" | "youtube">("all");
   const [chartData, setChartData] = useState<{ date: string; views: number }[]>([]);
   const [isChartLoading, setIsChartLoading] = useState(false);
+  const [dummyStats, setDummyStats] = useState({
+    totalViews: 0,
+    avgViews: 0,
+    totalLikes: 0,
+    totalComments: 0,
+  });
+
+  // 더미 통계 데이터 생성 (컴포넌트 마운트 시 한 번만)
+  useEffect(() => {
+    // 기본값에 1의 자리까지 랜덤 변동 추가 (정수로)
+    const baseTotalViews = 125000;
+    const baseAvgViews = 5200;
+    const baseTotalLikes = 8500;
+    const baseTotalComments = 320;
+    
+    // 1의 자리까지 랜덤: 기본값 ±0~9 범위의 랜덤 변동
+    setDummyStats({
+      totalViews: baseTotalViews + Math.floor(Math.random() * 20) - 10, // ±10 범위
+      avgViews: baseAvgViews + Math.floor(Math.random() * 20) - 10, // ±10 범위
+      totalLikes: baseTotalLikes + Math.floor(Math.random() * 20) - 10, // ±10 범위
+      totalComments: baseTotalComments + Math.floor(Math.random() * 20) - 10, // ±10 범위
+    });
+  }, []);
 
   // 업로드된 숏폼 데이터 로드
   useEffect(() => {
@@ -85,30 +108,55 @@ const ShortsReportPage = () => {
     }
   };
 
-  // 조회수 추이 차트 데이터 로드 (DB 기준)
+  // 조회수 추이 차트 데이터 생성 (90일치 우상향 더미 데이터)
   useEffect(() => {
-    const loadChart = async () => {
-      setIsChartLoading(true);
-      try {
-        const days = parseInt(chartPeriod, 10);
-        const res = await getShortsViewsTimeseries(days, chartPlatform);
-        const data = res.items.map((item) => ({
-          date: new Date(item.date).toLocaleDateString("ko-KR", {
+    const generateDummyChartData = () => {
+      const days = parseInt(chartPeriod, 10);
+      const data: { date: string; views: number }[] = [];
+      const today = new Date();
+      
+      // 시작값과 끝값 설정 (우상향)
+      const startValue = 800; // 시작 조회수
+      const endValue = 2500; // 끝 조회수
+      const baseIncrement = (endValue - startValue) / days;
+      
+      let previousValue = startValue;
+      
+      for (let i = days - 1; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        
+        // 우상향 트렌드 계산
+        const trendValue = startValue + (days - 1 - i) * baseIncrement;
+        
+        // 상향 기준 변동: 0~40% 범위의 랜덤 증가 + 이전 값보다는 항상 높거나 같게
+        const randomIncrease = Math.random() * trendValue * 0.4; // 0~40% 랜덤 증가
+        const baseValue = Math.max(trendValue, previousValue * 0.98); // 이전 값의 98% 이상 보장
+        const newValue = baseValue + randomIncrease;
+        
+        // 최소값 보장 및 정수로 변환
+        const views = Math.max(500, Math.round(newValue));
+        previousValue = views;
+        
+        data.push({
+          date: date.toLocaleDateString("ko-KR", {
             month: "2-digit",
             day: "2-digit",
           }),
-          views: item.views,
-        }));
-        setChartData(data);
-      } catch (e) {
-        console.error("Failed to load shorts views timeseries", e);
-        setChartData([]);
-      } finally {
-        setIsChartLoading(false);
+          views,
+        });
       }
+      
+      return data;
     };
 
-    loadChart();
+    setIsChartLoading(true);
+    // 약간의 딜레이로 로딩 효과
+    setTimeout(() => {
+      const data = generateDummyChartData();
+      setChartData(data);
+      setIsChartLoading(false);
+    }, 300);
   }, [chartPeriod, chartPlatform]);
 
   // 필터링 및 정렬된 데이터
@@ -142,21 +190,16 @@ const ShortsReportPage = () => {
     return sorted;
   }, [shortForms, platformFilter, sortBy]);
 
-  // 요약 통계 계산
+  // 요약 통계 계산 (더미 데이터)
   const summaryStats = useMemo(() => {
-    const totalViews = shortForms.reduce((sum, sf) => sum + sf.views, 0);
-    const totalLikes = shortForms.reduce((sum, sf) => sum + sf.likes, 0);
-    const totalComments = shortForms.reduce((sum, sf) => sum + sf.comments, 0);
-    const avgViews = shortForms.length > 0 ? Math.round(totalViews / shortForms.length) : 0;
-
     return {
-      totalViews,
-      avgViews,
-      totalLikes,
-      totalComments,
-      count: shortForms.length,
+      totalViews: dummyStats.totalViews,
+      avgViews: dummyStats.avgViews,
+      totalLikes: dummyStats.totalLikes,
+      totalComments: dummyStats.totalComments,
+      count: shortForms.length, // 실제 숏폼 개수는 유지
     };
-  }, [shortForms]);
+  }, [shortForms, dummyStats]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -373,8 +416,15 @@ const ShortsReportPage = () => {
                           src={shortForm.videoUrl}
                           className="w-full h-full object-cover"
                           muted
-                          loop
                           playsInline
+                          preload="metadata"
+                          onLoadedMetadata={(e) => {
+                            e.currentTarget.currentTime = 2.5; // 썸네일을 2.5초로 설정
+                          }}
+                          onEnded={(e) => {
+                            e.currentTarget.pause();
+                            e.currentTarget.currentTime = 2.5; // 끝나면 일시정지하고 썸네일 위치로
+                          }}
                         />
                       ) : (
                         <img

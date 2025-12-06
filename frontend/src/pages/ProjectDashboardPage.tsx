@@ -1024,6 +1024,10 @@ const ProjectDashboardPage = () => {
                             e.currentTarget.pause();
                             e.currentTarget.currentTime = 2.5;
                           }}
+                          onEnded={(e) => {
+                            e.currentTarget.pause();
+                            e.currentTarget.currentTime = 2.5; // 끝나면 일시정지하고 썸네일 위치로
+                          }}
                         />
                         {/* 재생 아이콘 오버레이 */}
                         <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-t-lg pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
@@ -1546,7 +1550,6 @@ const ProjectDashboardPage = () => {
                     controls
                     autoPlay
                     loop
-                    muted
                     playsInline
                   />
                 </>
