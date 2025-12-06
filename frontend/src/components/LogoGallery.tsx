@@ -9,19 +9,12 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
 import Footer from "@/components/Footer";
 import LogoDetailModal from "@/components/LogoDetailModal";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getLogoGallery,
-  getComments,
-  createComment,
-  toggleLike,
-  getLikeStatus,
   SortOption,
   GalleryItem,
-  Comment,
 } from "@/lib/api";
 
 interface LogoGalleryProps {
@@ -31,115 +24,54 @@ interface LogoGalleryProps {
 
 const LogoGallery = ({ searchQuery = "", initialSelectedProdId }: LogoGalleryProps) => {
   const [sortBy, setSortBy] = useState<SortOption>("latest");
-  const [page, setPage] = useState(1);
+  const [pageIndex, setPageIndex] = useState(0); // 0-based 페이지 인덱스
   const [allLogos, setAllLogos] = useState<GalleryItem[]>([]); // 누적된 모든 로고 데이터
   const [selectedLogo, setSelectedLogo] = useState<GalleryItem | null>(null);
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
 
   const ITEMS_PER_PAGE = 12;
 
-  // 사용자 ID 추출 (쿼리 키에 포함하여 사용자별 캐시 분리)
-  const getUserId = () => {
+  // 갤러리 데이터 조회: 항상 DB에서 직접 조회 (페이지 인덱스 기반, 서버에서 누적 범위까지 잘라서 가져옴)
+  // - pageIndex = 0  → skip=0, limit=12  (최신 12개)
+  // - pageIndex = 1  → skip=0, limit=24  (최신 24개)
+  //   이런 식으로, "현재까지 보여줄 전체 개수"를 서버 쿼리에서 결정하게 함
+  const fetchPage = async (targetPageIndex: number) => {
+    setIsLoading(true);
     try {
-      const profile = localStorage.getItem('userProfile');
-      if (profile) {
-        const parsed = JSON.parse(profile);
-        return parsed.id || null;
-      }
+      const skip = 0;
+      const limit = (targetPageIndex + 1) * ITEMS_PER_PAGE;
+      const data = await getLogoGallery(
+        sortBy,
+        skip,
+        limit,
+        searchQuery || undefined
+      );
+
+      // 항상 서버에서 내려온 전체 구간으로 교체
+      setAllLogos(data.items || []);
+
+      const loadedCount = data.items?.length ?? 0;
+      const totalCount = data.total_count ?? loadedCount;
+      setHasMore(loadedCount < totalCount);
     } catch (e) {
-      // ignore
+      // TODO: 에러 토스트 필요하면 여기에서 처리
+      console.error("Failed to load logo gallery:", e);
+    } finally {
+      setIsLoading(false);
     }
-    return null;
   };
 
-  const [userId, setUserId] = useState(getUserId());
-
-  // 로그인 상태 변경 감지 및 사용자 ID 업데이트
+  // 정렬/검색 조건이 바뀌면 첫 페이지부터 다시 조회
   useEffect(() => {
-    let isMounted = true;
-    
-    const checkUserChange = () => {
-      if (!isMounted) return;
-      
-      const hasLoginFlag = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
-      const hasToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
-      const currentLoggedIn = hasLoginFlag && !!hasToken;
-      
-      const newUserId = currentLoggedIn ? getUserId() : null;
-      
-      if (newUserId !== userId) {
-        setUserId(newUserId);
-        setPage(1); // 페이지 초기화
-        setAllLogos([]); // 누적 데이터 초기화
-        // 사용자가 변경되면 갤러리 쿼리 캐시 완전히 제거 (refetch는 useQuery가 자동으로 처리)
-        queryClient.removeQueries({ queryKey: ['logoGallery'] });
-      }
-    };
-
-    // 초기 확인 (한 번만)
-    checkUserChange();
-
-    // storage 이벤트 리스너 (다른 탭에서 로그인/로그아웃 시)
-    window.addEventListener('storage', checkUserChange);
-    
-    // 같은 탭에서의 변경도 감지하기 위해 interval 사용 (하지만 너무 자주 체크하지 않도록)
-    const interval = setInterval(checkUserChange, 2000);
-
-    return () => {
-      isMounted = false;
-      window.removeEventListener('storage', checkUserChange);
-      clearInterval(interval);
-    };
-  }, [userId, queryClient]);
-
-  // 갤러리 데이터 조회 (사용자 ID를 쿼리 키에 포함하여 사용자별 캐시 분리)
-  // 페이지네이션: 한 번에 12개씩 가져오기
-  const { data: galleryData, isLoading, refetch: refetchGallery } = useQuery({
-    queryKey: ['logoGallery', sortBy, searchQuery, userId, page],
-    queryFn: () =>
-      getLogoGallery(
-        sortBy,
-        (page - 1) * ITEMS_PER_PAGE,
-        ITEMS_PER_PAGE,
-        searchQuery || undefined
-      ),
-    // 갤러리 화면이 마운트될 때마다 항상 DB에서 최신 데이터를 가져오기
-    staleTime: 0,
-    refetchOnMount: true,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-  });
-
-  // 선택된 로고의 댓글 조회
-  // (상세 모달에서 댓글/좋아요를 처리하므로, 여기서는 리스트/선택만 관리)
-
-  // 새로운 페이지 데이터가 로드되면 누적 (같은 prod_id는 항상 최신 데이터로 교체)
-  useEffect(() => {
-    if (!galleryData?.items) return;
-
-    setAllLogos((prev) => {
-      // 첫 페이지이거나 정렬/검색 조건이 바뀐 경우에는 전부 교체
-      if (page === 1) {
-        return galleryData.items;
-      }
-
-      // 이후 페이지에서는 기존 데이터에 병합하되,
-      // 같은 prod_id가 있으면 서버에서 가져온 최신 데이터로 교체
-      const byId = new Map<number, GalleryItem>();
-      prev.forEach((logo) => {
-        byId.set(logo.prod_id, logo);
-      });
-      galleryData.items.forEach((logo) => {
-        byId.set(logo.prod_id, logo);
-      });
-      return Array.from(byId.values());
-    });
-  }, [galleryData, page]);
+    setPageIndex(0);
+    setHasMore(true);
+    fetchPage(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortBy, searchQuery]);
 
   // 표시할 로고 목록 (누적된 모든 데이터)
   const displayedLogos = allLogos;
-  const hasMore = galleryData ? (page * ITEMS_PER_PAGE) < galleryData.total_count : false;
 
   // 초기 진입 시 특정 prod_id가 쿼리 파라미터로 넘어온 경우, 해당 로고를 자동으로 선택
   useEffect(() => {
@@ -179,14 +111,14 @@ const LogoGallery = ({ searchQuery = "", initialSelectedProdId }: LogoGalleryPro
   };
 
   const handleLoadMore = () => {
-    setPage((prev) => prev + 1);
-    // 페이지가 변경되면 useQuery가 자동으로 다음 페이지 데이터를 가져옴
+    const nextPage = pageIndex + 1;
+    setPageIndex(nextPage);
+    fetchPage(nextPage);
   };
 
   const handleSortChange = (value: SortOption) => {
     setSortBy(value);
-    setPage(1);
-    setAllLogos([]); // 정렬 변경 시 누적 데이터 초기화
+    setAllLogos([]); // 정렬 변경 시 누적 데이터 초기화 (fetchPage에서 다시 채움)
   };
 
   if (isLoading) {

@@ -21,9 +21,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Eye, Heart, MessageCircle, BarChart3 } from "lucide-react";
-import { projectStorage, type Project, type SavedItem } from "@/lib/projectStorage";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid } from "recharts";
+import {
+  getShortsReport,
+  ShortsReportItem,
+  getShortsViewsTimeseries,
+} from "@/lib/api";
 
 interface ShortFormReport {
   id: string;
@@ -45,117 +49,67 @@ const ShortsReportPage = () => {
   const [lastSyncedAt, setLastSyncedAt] = useState<Date | null>(null);
   const [chartPeriod, setChartPeriod] = useState<"7" | "30" | "90">("30");
   const [chartPlatform, setChartPlatform] = useState<"all" | "tiktok" | "youtube">("all");
+  const [chartData, setChartData] = useState<{ date: string; views: number }[]>([]);
+  const [isChartLoading, setIsChartLoading] = useState(false);
 
   // 업로드된 숏폼 데이터 로드
   useEffect(() => {
     loadShortFormReports();
   }, []);
 
-  // 더미 데이터 생성 함수
-  const generateDummyData = (): ShortFormReport[] => {
-    const dummyTitles = [
-      "새로운 브랜드 소개 영상",
-      "제품 런칭 프로모션",
-      "고객 후기 인터뷰",
-      "이벤트 안내 영상",
-      "브랜드 스토리텔링",
-      "제품 사용법 튜토리얼",
-      "시즌 컬렉션 소개",
-      "특별 할인 이벤트",
-      "브랜드 미션 영상",
-      "신제품 출시 예고",
-    ];
+  const loadShortFormReports = async () => {
+    try {
+      const res = await getShortsReport();
+      const reports: ShortFormReport[] = res.items.map((item: ShortsReportItem) => ({
+        id: String(item.prod_id),
+        title: item.title || "제목 없음",
+        thumbnailUrl: item.thumbnail_url || item.video_url || "/placeholder.svg",
+        videoUrl: item.video_url || "",
+        platforms: (item.platforms || []) as ("tiktok" | "youtube")[],
+        uploadedAt: item.uploaded_at || new Date().toISOString(),
+        views: item.views,
+        likes: item.likes,
+        comments: item.comments,
+      }));
 
-    const platforms: ("tiktok" | "youtube")[][] = [
-      ["tiktok"],
-      ["youtube"],
-      ["tiktok", "youtube"],
-      ["tiktok"],
-      ["youtube"],
-      ["tiktok", "youtube"],
-      ["tiktok"],
-      ["youtube"],
-      ["tiktok", "youtube"],
-      ["tiktok"],
-    ];
-
-    const baseDate = new Date();
-    const dummyData: ShortFormReport[] = [];
-
-    for (let i = 0; i < 8; i++) {
-      const daysAgo = i * 2 + Math.floor(Math.random() * 3);
-      const uploadDate = new Date(baseDate);
-      uploadDate.setDate(uploadDate.getDate() - daysAgo);
-
-      const views = Math.floor(Math.random() * 50000) + 1000;
-      const likes = Math.floor(views * (0.02 + Math.random() * 0.05));
-      const comments = Math.floor(likes * (0.1 + Math.random() * 0.2));
-
-      dummyData.push({
-        id: `dummy-${i + 1}`,
-        title: dummyTitles[i],
-        thumbnailUrl: `https://picsum.photos/seed/short-${i}/400/700`,
-        videoUrl: `https://picsum.photos/seed/short-${i}/400/700`,
-        platforms: platforms[i],
-        uploadedAt: uploadDate.toISOString(),
-        views,
-        likes,
-        comments,
-      });
-    }
-
-    return dummyData;
-  };
-
-  const loadShortFormReports = () => {
-    const projects = projectStorage.getProjects();
-    const uploadStatuses = JSON.parse(localStorage.getItem('shortFormUploadStatuses') || '{}');
-    const reports: ShortFormReport[] = [];
-
-    // 모든 프로젝트에서 업로드된 숏폼 찾기
-    projects.forEach((project: Project) => {
-      if (project.savedItems) {
-        project.savedItems.forEach((item: SavedItem) => {
-          if (item.type === "short") {
-            const uploadStatus = uploadStatuses[item.id] || { tiktok: false, youtube: false };
-            const platforms: ("tiktok" | "youtube")[] = [];
-            if (uploadStatus.tiktok) platforms.push("tiktok");
-            if (uploadStatus.youtube) platforms.push("youtube");
-
-            // 업로드된 플랫폼이 있는 경우만 리포트에 포함
-            if (platforms.length > 0) {
-              // 통계 데이터 가져오기
-              const stats = JSON.parse(localStorage.getItem(`short_stats_${item.id}`) || '{}');
-              
-              reports.push({
-                id: item.id,
-                title: item.title || "제목 없음",
-                thumbnailUrl: item.url,
-                videoUrl: item.url,
-                platforms,
-                uploadedAt: item.createdAt || new Date().toISOString(),
-                views: stats.views || Math.floor(Math.random() * 10000) + 100,
-                likes: stats.likes || Math.floor(Math.random() * 500) + 10,
-                comments: stats.comments || Math.floor(Math.random() * 100) + 1,
-                projectId: project.id,
-              });
-            }
-          }
-        });
-      }
-    });
-
-    // 실제 데이터가 없거나 적으면 더미 데이터 추가
-    if (reports.length === 0) {
-      const dummyData = generateDummyData();
-      setShortForms(dummyData);
-    } else {
       setShortForms(reports);
+      if (res.last_collected_at) {
+        setLastSyncedAt(new Date(res.last_collected_at));
+      } else {
+        setLastSyncedAt(null);
+      }
+    } catch (e) {
+      console.error("Failed to load shorts report", e);
+      setShortForms([]);
+      setLastSyncedAt(null);
     }
-    
-    // 마지막 동기화 시간 설정 (현재는 현재 시간으로 설정, 실제로는 API에서 받아야 함)
-    setLastSyncedAt(new Date());
   };
+
+  // 조회수 추이 차트 데이터 로드 (DB 기준)
+  useEffect(() => {
+    const loadChart = async () => {
+      setIsChartLoading(true);
+      try {
+        const days = parseInt(chartPeriod, 10);
+        const res = await getShortsViewsTimeseries(days, chartPlatform);
+        const data = res.items.map((item) => ({
+          date: new Date(item.date).toLocaleDateString("ko-KR", {
+            month: "2-digit",
+            day: "2-digit",
+          }),
+          views: item.views,
+        }));
+        setChartData(data);
+      } catch (e) {
+        console.error("Failed to load shorts views timeseries", e);
+        setChartData([]);
+      } finally {
+        setIsChartLoading(false);
+      }
+    };
+
+    loadChart();
+  }, [chartPeriod, chartPlatform]);
 
   // 필터링 및 정렬된 데이터
   const filteredAndSortedData = useMemo(() => {
@@ -176,8 +130,10 @@ const ShortsReportPage = () => {
         case "uploaded":
           return new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime();
         case "recentGrowth":
-          // 최근 3일 증가율 (Mock 데이터, 실제로는 백엔드에서 계산)
-          return Math.random() - 0.5; // 임시 랜덤 정렬
+          // 최근 조회수 증가 순 정렬:
+          // - 현재는 전체 누적 조회수 기준으로 정렬 (DB에서 가져온 값)
+          // - 더 정교한 증가율 계산이 필요하면 조회수 추이 API를 확장해서 사용 가능
+          return b.views - a.views;
         default:
           return 0;
       }
@@ -185,37 +141,6 @@ const ShortsReportPage = () => {
 
     return sorted;
   }, [shortForms, platformFilter, sortBy]);
-
-  // 그래프 데이터 생성
-  const chartData = useMemo(() => {
-    const days = parseInt(chartPeriod);
-    const data: { date: string; views: number }[] = [];
-    const today = new Date();
-
-    // 기간 필터링된 숏폼
-    let filteredForChart = shortForms;
-    if (chartPlatform !== "all") {
-      filteredForChart = shortForms.filter(sf => sf.platforms.includes(chartPlatform));
-    }
-
-    // 각 날짜별 조회수 합계 계산 (더미 데이터)
-    for (let i = days - 1; i >= 0; i--) {
-      const date = new Date(today);
-      date.setDate(date.getDate() - i);
-      
-      // 해당 날짜의 조회수 합계 (실제로는 백엔드에서 받아야 함)
-      // 더미 데이터: 랜덤하게 생성하되, 최근일수록 높은 경향
-      const baseViews = filteredForChart.reduce((sum, sf) => sum + sf.views, 0);
-      const dailyViews = Math.floor(baseViews / days * (0.5 + Math.random() * 1.5) * (1 + (days - i) / days * 0.3));
-      
-      data.push({
-        date: date.toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' }),
-        views: dailyViews,
-      });
-    }
-
-    return data;
-  }, [shortForms, chartPeriod, chartPlatform]);
 
   // 요약 통계 계산
   const summaryStats = useMemo(() => {
@@ -448,8 +373,11 @@ const ShortsReportPage = () => {
                           src={shortForm.videoUrl}
                           className="w-full h-full object-cover"
                           muted
-                          loop
                           playsInline
+                          onEnded={(e) => {
+                            e.currentTarget.pause();
+                            e.currentTarget.currentTime = 0; // 끝나면 일시정지하고 처음으로
+                          }}
                         />
                       ) : (
                         <img

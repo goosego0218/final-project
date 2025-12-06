@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from app.agents.state import AppState, BrandProfile
     from langchain_core.language_models.chat_models import BaseChatModel
 
- 
+
 def _format_brand_profile(profile: "BrandProfile") -> str:
     """브랜드 프로필을 LLM 프롬프트용 텍스트로 정리."""
     if not profile:
@@ -92,7 +92,7 @@ def make_brand_chat_node(llm: "BaseChatModel"):
             il = intent_info.get("label")
             if isinstance(il, str):
                 intent_label = il
-        
+
         # 필수 필드 검증 결과(meta["validation"]) 읽기
         validation: Dict[str, Any] = dict(meta.get("validation") or {})
         required_missing = validation.get("required_missing") or []
@@ -108,7 +108,7 @@ def make_brand_chat_node(llm: "BaseChatModel"):
 
         # trend_context 확인 (트렌드 검색 결과가 있는지 체크)
         trend_context: Dict[str, Any] = dict(state.get("trend_context") or {})
-        has_trend_result = bool(trend_context.get("last_result_summary"))
+        trend_summary: str = str(trend_context.get("last_result_summary") or "")
 
         # smalltalk 의도일 때: 브랜드 프로필은 사용하지 않고,
         # SMALLTALK_SYSTEM_PROMPT 만 사용
@@ -118,79 +118,48 @@ def make_brand_chat_node(llm: "BaseChatModel"):
             profile_text = _format_brand_profile(brand_profile)
             system_content = f"{BRAND_CHAT_SYSTEM_PROMPT}\n\n{profile_text}"
 
-            # finalize + 필수 필드 검증 결과에 따른 추가 지시
-            if intent_label == "finalize":
-                if not is_valid:
-                    # 필수 항목이 비어 있을 때: 먼저 부족한 필드를 물어보도록 유도
-                    if missing_labels:
-                        missing_text = ", ".join(missing_labels)
-                    else:
-                        missing_text = "브랜드 이름, 업종"
-                    system_content += (
-                        "\n\n[필수 정보 보완 지시]\n"
-                        "브랜드를 최종 정리하기 전에, 다음 필수 항목이 아직 정리되지 않았습니다: "
-                        f"{missing_text}.\n"
-                        "사용자에게 자연스럽게 다시 질문해서 이 정보를 먼저 채워 넣으세요. "
-                        "이미 사용자가 말한 내용과 충돌하는 경우, 사용자가 방금 말한 최신 내용을 우선합니다."
-                    )
-                else:
-                    # 필수 항목이 모두 채워진 상태: 요약 + 확정 여부 확인
-                    system_content += (
-                        "\n\n[브랜드 확정 지시]\n"
-                        "현재 brand_profile 에 필수 정보(브랜드 이름, 업종)가 모두 채워져 있습니다.\n"
-                        "지금까지 모인 브랜드 정보를 간단히 요약해 주고, "
-                        "\"이대로 브랜드를 확정해도 될까요?\" 라고 자연스럽게 확인 질문을 던지세요."
-                    )
-            else:
-                # finalize 는 아니지만 필수 항목이 비어 있는 경우: 대화 중에 자연스럽게 보완
-                if required_missing and missing_labels:
-                    missing_text = ", ".join(missing_labels)
-                    system_content += (
-                        "\n\n[부족 정보 안내]\n"
-                        "브랜드 대화를 이어가면서, 다음 필수 항목도 자연스럽게 질문해서 채워 넣으세요: "
-                        f"{missing_text}."
-                    )
-                elif is_valid:
-                    # 필수 항목이 모두 채워진 상태: 옵션값은 선택사항이며, 사용자가 다음 단계로 넘어가고 싶으면 확정 여부 확인
-                    system_content += (
-                        "\n\n[필수값 완료 상태 안내 - 반드시 준수]\n"
-                        "현재 필수 정보(브랜드 이름, 업종)가 모두 채워져 있습니다.\n"
-                        "옵션값(톤앤무드, 타겟 연령, 타겟 성별, 슬로건, 핵심 키워드, 피하고 싶은 트렌드, 선호 색상)은 선택사항입니다.\n"
-                        "- 옵션값에 대해 1~2가지만 자연스럽게 질문할 수 있지만, 모든 옵션값을 채우려고 강요하지 마세요.\n"
-                        "- **중요: 필수값이 채워진 후 첫 번째 응답에서 반드시 옵션값 질문과 함께 또는 같은 문장에, 다음 단계(쇼츠/로고 생성)로 넘어갈 수 있다는 것을 명시적으로 안내해야 합니다.**\n"
-                        "  이 안내를 생략하지 마세요. 반드시 포함시켜야 합니다.\n"
-                        "  예: '이제 브랜드의 방향성을 좀 더 구체화하거나 쇼츠 또는 로고를 생성할 수 있습니다.'\n"
-                        "  예: '브랜드 방향을 더 구체화할 수도 있고, 바로 쇼츠나 로고를 만들어볼 수도 있어요.'\n"
-                        "  예: '혹시 어떤 분위기나 느낌을 원하시나요? 예를 들어, 따뜻한 느낌이나 고급스러운 느낌 등 어떤 것을 생각하고 계신가요? 또는 바로 쇼츠나 로고를 만들어볼 수도 있어요.'\n"
-                        "- 사용자가 옵션값 질문에 답변하지 않거나, '다음 단계', '확정', '이대로 진행', '쇼츠 만들고 싶다', '로고 만들고 싶다' 등의 의사를 표현하면,\n"
-                        "  즉시 옵션값 질문을 중단하고 '이대로 브랜드를 확정해도 될까요?'라고 확인 질문을 던지세요.\n"
-                        "- 필수값이 채워진 상태에서 옵션값 질문을 2~3회 한 후에는 자동으로 확정 여부를 확인하는 방향으로 전환하세요."
-                    )
-
-            # trend_context가 있을 때만 URL 보존 지시 추가
-            if has_trend_result:
+            if intent_label and intent_label.startswith("trend") and trend_summary:
                 system_content += (
-                    "\n\n[트렌드 검색 결과 처리 지시 - 절대 준수]\n"
-                    "중요: 이전 대화 히스토리에 트렌드 검색 결과가 포함되어 있습니다.\n"
-                    "**트렌드 검색 결과는 이미 완성된 추천 내용이므로, 이를 그대로 출력해야 합니다.**\n"
-                    "다음 규칙을 반드시 준수해야 합니다:\n"
-                    "1. 트렌드 검색 결과를 그대로 출력하세요. 새로운 내용을 추가로 생성하지 마세요.\n"
-                    "2. 트렌드 검색 결과에 포함된 모든 URL은 절대 제거하거나 생략하지 말고, 반드시 답변에 포함시켜야 합니다.\n"
-                    "3. 답변 마지막에 '참고 자료' 또는 '근거' 섹션을 반드시 추가하고, 해당 섹션에 모든 URL을 원본 그대로 나열해야 합니다.\n"
-                    "4. URL이 포함된 근거 정보는 사용자가 출처를 확인할 수 있도록 반드시 유지해야 합니다.\n"
-                    "5. '요약' 또는 '짧게 정리'하더라도, URL은 절대 생략하지 마세요.\n"
-                    "6. URL 형식(https://...)이 보이면 반드시 그대로 포함시켜야 합니다.\n"
-                    "7. 트렌드 검색 결과가 있을 때는 쇼츠나 로고 생성 관련 내용을 추가로 생성하지 마세요.\n"
-                    "\n"
-                    "예시:\n"
-                    "---\n"
-                    "[트렌드 검색 결과를 그대로 출력]\n"
-                    "...\n"
-                    "\n"
-                    "참고 자료:\n"
-                    "- https://example.com/article1\n"
-                    "- https://example.com/article2\n"
-                    "---"
+                    "\n\n[트렌드 분석 결과]\n"
+                    f"{trend_summary}\n\n"
+                    "[지시]\n"
+                    "위 트렌드 분석 텍스트를 거의 그대로 사용자에게 보여주세요. "
+                    "본문에 있는 문장 구조와 URL, 리스트 포맷은 절대 변경하지 마세요."
+                )
+
+            if required_missing and missing_labels:
+                missing_text = ", ".join(missing_labels)
+                system_content += (
+                    "\n\n[부족 정보 안내]\n"
+                    "브랜드 대화를 이어가면서, 다음 필수 항목도 자연스럽게 질문해서 채워 넣으세요: "
+                    f"{missing_text}."
+                )
+            elif is_valid:
+                # 필수 항목이 모두 채워진 상태: 옵션값은 선택사항
+                system_content += (
+                    "\n\n[필수값 완료 상태 안내 - 반드시 준수]\n"
+                    "현재 필수 정보(브랜드 이름, 업종)가 모두 채워져 있습니다.\n"
+                    "옵션값(톤앤무드, 타겟 연령, 타겟 성별, 슬로건, 핵심 키워드, 피하고 싶은 트렌드, 선호 색상)은 선택사항입니다.\n"
+                    "- 옵션값에 대해 1~2가지만 자연스럽게 질문할 수 있지만, 모든 옵션값을 채우려고 강요하지 마세요.\n"
+                    "- **중요: 필수값이 채워진 후 첫 번째 응답에서 반드시 옵션값 질문과 함께 또는 같은 문장에, "
+                    "다음 단계(쇼츠/로고 생성)로 넘어갈 수 있다는 것을 명시적으로 안내해야 합니다.**\n"
+                    "  이 안내를 생략하지 마세요. 반드시 포함시켜야 합니다.\n"
+                    "  예: '이제 브랜드의 방향성을 좀 더 구체화하거나 쇼츠 또는 로고를 생성할 수 있습니다.'\n"
+                    "  예: '브랜드 방향을 더 구체화할 수도 있고, 또는 생성하기 버튼을 클릭하여 브랜드 프로필을 확정하고 로고나 쇼츠를 만들러 갈 수 있어요.'\n"
+                    "  예: '혹시 어떤 분위기나 느낌을 원하시나요? 예를 들어, 따뜻한 느낌이나 고급스러운 느낌 등 어떤 것을 생각하고 계신가요? "
+                    "또는 생성하기 버튼을 클릭하여 브랜드 프로필을 확정하고 로고나 쇼츠를 만들러 갈 수 있어요.'\n"
+                    "- 사용자가 옵션값 질문에 답변하지 않거나, '다음 단계', '확정', '이대로 진행', "
+                    "'쇼츠 만들고 싶다', '로고 만들고 싶다' 등의 의사를 표현하면,\n"
+                    "  먼저 지금까지 정리된 내용만으로도 브랜드 프로필을 확정하고 다음 단계로 넘어갈 수 있다는 점을 안내하세요.\n"
+                    "  그 다음, 현재 브랜드 프로필에서 **실제로 아직 입력되지 않은 옵션 항목들만** 골라 짧게 예시로 언급하세요.\n"
+                    "  (예: 톤앤무드, 타겟 연령/성별, 슬로건, 핵심 키워드, 피하고 싶은 트렌드, 선호 색상 중에서\n"
+                    "   값이 비어 있는 항목만 선택해서 말하세요.)\n"
+                    "  그런 뒤, '지금 상태로 바로 확정해서 다음 단계(로고/쇼츠 생성)로 넘어갈지, 아니면 이런 항목들도 조금 더 정리해 보고 확정할지'를 선택하도록 질문하세요.\n"
+                    "  예: '지금까지 이야기해 주신 내용만으로도 브랜드 프로필을 확정하고 다음 단계(로고·쇼츠 생성)로 넘어갈 수 있습니다.\n"
+                    "       다만 현재 프로필을 보면 톤앤무드, 슬로건, 선호 색상처럼 아직 입력되지 않은 항목들이 몇 가지 있어요.\n"
+                    "       지금 상태로 바로 확정해서 넘어가실까요, 아니면 이런 항목들도 조금만 더 이야기해 보고 확정하실까요?'\n"
+                    "- 필수값이 채워진 상태에서 옵션값 질문을 2~3회 한 후에는, 위와 같은 방식으로 자연스럽게 확정 여부와 "
+                    "남은 항목 추가 수집 중에서 선택하도록 유도하세요."
                 )
 
             system = SystemMessage(content=system_content)

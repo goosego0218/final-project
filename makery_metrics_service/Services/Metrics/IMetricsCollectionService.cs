@@ -15,7 +15,8 @@ public interface IMetricsCollectionService
     /// (예: social_post 몇 건을 읽어서, 이후 단계에서 메트릭을 수집/저장)
     /// </summary>
     /// <param name="ct">작업 취소 토큰</param>
-    Task RunOnceAsync(CancellationToken ct = default);
+    /// <returns>처리한 post 건수 (0이면 더 이상 처리할 데이터가 없음)</returns>
+    Task<int> RunOnceAsync(CancellationToken ct = default);
 }
 
 

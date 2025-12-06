@@ -317,7 +317,7 @@ END;
 CREATE TABLE social_connection (
     conn_id           NUMBER           NOT NULL,               -- 연동ID (PK)
     user_id           NUMBER           NOT NULL,               -- 유저번호 (FK → user_info.id)
-    platform          VARCHAR2(50)     NOT NULL,               -- 플랫폼 (youtube, tiktok 등)
+    platform          VARCHAR2(50)     NOT NULL,               -- 플랫폼 (youtube, instagram 등)
     platform_user_id  VARCHAR2(255)    NULL,                   -- 플랫폼 사용자 ID (채널 ID 등)
     email             VARCHAR2(255)    NULL,                   -- 연동된 이메일
     access_token      VARCHAR2(2000)   NOT NULL,               -- 액세스 토큰 (암호화 저장)
@@ -356,7 +356,7 @@ COMMENT ON TABLE social_connection IS '소셜 미디어 연동 테이블';
 
 COMMENT ON COLUMN social_connection.conn_id          IS '연동ID';
 COMMENT ON COLUMN social_connection.user_id          IS '유저번호';
-COMMENT ON COLUMN social_connection.platform         IS '플랫폼 (youtube, tiktok)';
+COMMENT ON COLUMN social_connection.platform         IS '플랫폼 (youtube, instagram)';
 COMMENT ON COLUMN social_connection.platform_user_id IS '플랫폼 사용자 ID (YouTube 채널 ID 등)';
 COMMENT ON COLUMN social_connection.email            IS '연동된 이메일';
 COMMENT ON COLUMN social_connection.access_token     IS '액세스 토큰 (암호화 저장)';
@@ -522,7 +522,7 @@ CREATE TABLE social_post (
     post_id            NUMBER          NOT NULL,                 -- PK
     prod_id            NUMBER          NOT NULL,                 -- 생성물 → generation_prod.prod_id
     conn_id            NUMBER          NOT NULL,                 -- 연동 계정 → social_connection.conn_id
-    platform           VARCHAR2(50)    NOT NULL,                 -- 'youtube', 'tiktok'
+    platform           VARCHAR2(50)    NOT NULL,                 -- 'youtube', 'instagram'
     platform_post_id   VARCHAR2(255)   NULL,                     -- YouTube videoId, 인스타 mediaId
     platform_url       VARCHAR2(1000)  NULL,                     -- 실제 URL
     status             VARCHAR2(20)    DEFAULT 'PENDING' NOT NULL,  -- PENDING / SUCCESS / FAIL / DELETED 등
@@ -561,8 +561,8 @@ COMMENT ON TABLE social_post IS '소셜 미디어 게시물 테이블';
 COMMENT ON COLUMN social_post.post_id            IS '게시물 ID';
 COMMENT ON COLUMN social_post.prod_id            IS '생성물 번호';
 COMMENT ON COLUMN social_post.conn_id            IS '연동 계정 ID';
-COMMENT ON COLUMN social_post.platform           IS '플랫폼 (youtube, tiktok)';
-COMMENT ON COLUMN social_post.platform_post_id   IS '플랫폼 게시물 ID (YouTube videoId, TikTok publishId)';
+COMMENT ON COLUMN social_post.platform           IS '플랫폼 (youtube, instagram)';
+COMMENT ON COLUMN social_post.platform_post_id   IS '플랫폼 게시물 ID (YouTube videoId, Instagram mediaId)';
 COMMENT ON COLUMN social_post.platform_url       IS '플랫폼 게시물 URL';
 COMMENT ON COLUMN social_post.status             IS '업로드 상태 (PENDING/SUCCESS/FAIL/DELETED)';
 COMMENT ON COLUMN social_post.error_code         IS '실패 시 에러 코드';

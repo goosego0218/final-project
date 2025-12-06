@@ -8,7 +8,7 @@
 
 from __future__ import annotations
 
-from typing import Literal, Optional, Dict, Any, Annotated
+from typing import Literal, Optional, Dict, Any, Annotated, List
 from typing_extensions import TypedDict
 
 from langchain.agents import AgentState
@@ -16,15 +16,38 @@ from langchain.agents import AgentState
 class ShortsState(TypedDict, total=False):
     """
     숏폼 에이전트 전용 State
-    
-    AppState 내부에 shorts_state: ShortsAgentState 형태로 사용
+
+    AppState 내부에 shorts_state: ShortsState 형태로 사용
     """
+    # 로고 사용 여부 / 기존 구조
     logo_usage_choice: Optional[Literal["use_existing", "without_logo"]]
     logo_file_path: Optional[str]
     selected_image_path: Optional[str]
+    # 단일 프롬프트 / 영상 결과
     generated_prompt: Optional[str]
     video_file_path: Optional[str]
+    # 저장 / 재생성 선택
     save_choice: Optional[Literal["save", "regenerate"]]
+    # 16초(8+8초) 모드 관련
+    generated_prompt_part_1: Optional[str]  # 16초 영상용 Part 1
+    generated_prompt_part_2: Optional[str]  # 16초 영상용 Part 2
+    is_16s_mode: Optional[bool]             # 16초 모드 여부
+    # 이번 턴 사용자 발화 원문
+    user_utterance: Optional[str]
+    # 사용자 발화 + 브랜드 프로필에서 추출한 구조화된 요구사항
+    user_requirements: Optional[Dict[str, Any]]
+    # 입력 소스 모드: 이미지 기반 / 브랜드 프로필 기반
+    # - "image_to_video": 업로드 이미지 레퍼런스로 영상 생성
+    # - "profile_to_video": 이미지 없이 브랜드 프로필 + 발화만으로 생성
+    input_mode: Optional[Literal["image_to_video", "profile_to_video"]]
+    # 프론트에서 넘어오는 "참고용 입력 이미지" 경로나 ID
+    # (기존 selected_image_path 는 다른 용도로 쓰일 수 있어 분리)
+    input_image_path: Optional[str]
+    # 브랜드 프로필을 숏폼 맥락에 맞게 요약/정리한 컨텍스트
+    profile_context: Optional[Dict[str, Any]]
+    # 이미지/프로필/사용자 요구사항을 모두 합친 최종 컨텍스트
+    # - build_shorts_prompt 노드에서 이걸 기반으로 실제 Veo 프롬프트를 만든다
+    merged_requirements: Optional[Dict[str, Any]]
 
 
 class LogoState(TypedDict, total=False):
@@ -37,7 +60,8 @@ class LogoState(TypedDict, total=False):
     logo_url: Optional[str]
     logo_size_bytes: Optional[int]
     logo_generated_at: Optional[float]
-
+    reference_images: Optional[List[str]] 
+    ref_mode: Optional[Literal["user_upload", "generated_history"]]
 
 class BrandProfile(TypedDict, total=False):
     """

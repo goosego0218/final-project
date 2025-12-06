@@ -3,325 +3,65 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart, Share2, MessageCircle, Eye, Send, Sparkles, Play } from "lucide-react";
+import { Heart, Share2, MessageCircle, Eye, Send, Sparkles, Play, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import CreateFromStyleModal from "@/components/CreateFromStyleModal";
-import { projectStorage } from "@/lib/projectStorage";
 import { AuthModals } from "@/components/AuthModals";
+import { getSharedItems, getLikedItems, MyPageItem } from "@/lib/api";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const MyPage = () => {
   const { toast } = useToast();
   const [sharedFilter, setSharedFilter] = useState<"all" | "logo" | "short">("all");
   const [likedFilter, setLikedFilter] = useState<"all" | "logo" | "short">("all");
-  const [selectedItem, setSelectedItem] = useState<any>(null);
-  const [isLiked, setIsLiked] = useState(false);
-  const [likesCount, setLikesCount] = useState(0);
-  const [commentText, setCommentText] = useState("");
-  const [comments, setComments] = useState<Array<{ author: string; authorAvatar?: string; content: string; time: string }>>([]);
+  const [selectedImage, setSelectedImage] = useState<{ url: string; title: string; type: "logo" | "short" } | null>(null);
   const [isCreateNewModalOpen, setIsCreateNewModalOpen] = useState(false);
   const [selectedItemForCreate, setSelectedItemForCreate] = useState<any>(null);
-  const [likedItems, setLikedItems] = useState<Array<{ id: number; type: "logo" | "short"; image: string; title: string; likes: number; comments?: number; duration?: string }>>([]);
-  const [sharedItems, setSharedItems] = useState<Array<{ id: string | number; type: "logo" | "short"; image: string; title: string; likes: number; comments?: number; duration?: string }>>([]);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
+  const queryClient = useQueryClient();
 
-  // Load liked items from localStorage
-  useEffect(() => {
-    const loadLikedItems = () => {
-      const likedLogos = JSON.parse(localStorage.getItem('liked_logos') || '[]');
-      const likedShorts = JSON.parse(localStorage.getItem('liked_shorts') || '[]');
-      
-      // Generate all logos (same as LogoGallery)
-      const generateMockLogos = () => {
-        const brands = [
-          { name: "카페 드 플뢰르", tags: ["카페", "음식"] },
-          { name: "봄꽃 축제", tags: ["축제", "이벤트"] },
-          { name: "디지털 스튜디오", tags: ["기술", "디자인"] },
-          { name: "그린 마켓", tags: ["음식", "건강"] },
-          { name: "뮤직 페스타", tags: ["축제", "음악"] },
-          { name: "베이커리 하우스", tags: ["음식", "카페"] },
-          { name: "아트 갤러리", tags: ["예술", "전시"] },
-          { name: "푸드 트럭", tags: ["음식", "축제"] },
-          { name: "요가 센터", tags: ["건강", "운동"] },
-          { name: "북 카페", tags: ["카페", "문화"] },
-          { name: "와인 바", tags: ["음식", "분위기"] },
-          { name: "재즈 클럽", tags: ["음악", "축제"] },
-          { name: "플라워 샵", tags: ["자연", "선물"] },
-          { name: "펫 카페", tags: ["카페", "동물"] },
-          { name: "시네마 라운지", tags: ["문화", "엔터테인먼트"] },
-          { name: "스포츠 바", tags: ["음식", "운동"] },
-          { name: "브런치 카페", tags: ["음식", "카페"] },
-          { name: "야시장", tags: ["축제", "음식"] },
-          { name: "디저트 공방", tags: ["음식", "카페"] },
-          { name: "크래프트 비어", tags: ["음식", "분위기"] },
-        ];
-        return brands.map((brand, index) => ({
-          id: index + 1,
-          imageSrc: "/placeholder.svg",
-          brandName: brand.name,
-          likes: Math.floor(Math.random() * 5000) + 100,
-          comments: Math.floor(Math.random() * 500) + 10,
-          createdAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000),
-          tags: brand.tags,
-        }));
-      };
+  // 공유한 작품 조회 (DB)
+  const { data: sharedItemsData, isLoading: isLoadingShared } = useQuery({
+    queryKey: ['mypage', 'shared'],
+    queryFn: getSharedItems,
+    staleTime: 30 * 1000, // 30초
+  });
 
-      // Generate all short forms (same as ShortFormGallery)
-      const generateMockShortForms = () => {
-        const titles = [
-          "오픈 1시간 전 준비 브이로그",
-          "신제품 언박싱 첫 인상",
-          "매장 내부 둘러보기",
-          "고객 인터뷰 하이라이트",
-          "비하인드 더 신 스페셜",
-          "일상 속 브랜드 스토리",
-          "축제 현장 생생 리포트",
-          "음식 먹방 챌린지",
-          "카페 투어 브이로그",
-          "메이킹 필름 스페셜",
-          "제품 리뷰 하이라이트",
-          "이벤트 현장 스케치",
-          "팀 소개 영상",
-          "신메뉴 맛보기",
-          "공간 인테리어 소개",
-          "직원 일상 브이로그",
-          "고객 후기 모음",
-          "시즌 프로모션 영상",
-          "콜라보 프로젝트 소개",
-          "특별 기획전 현장",
-        ];
-        return Array.from({ length: 60 }, (_, i) => ({
-          id: i + 1,
-          title: titles[i % titles.length],
-          thumbnailUrl: "/placeholder.svg",
-          likes: Math.floor(Math.random() * 10000) + 100,
-          comments: Math.floor(Math.random() * 1000) + 10,
-          duration: `0:${String(Math.floor(Math.random() * 50) + 10).padStart(2, '0')}`,
-          createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
-          tags: [],
-        }));
-      };
+  // 좋아요한 작품 조회 (DB)
+  const { data: likedItemsData, isLoading: isLoadingLiked } = useQuery({
+    queryKey: ['mypage', 'liked'],
+    queryFn: getLikedItems,
+    staleTime: 30 * 1000, // 30초
+  });
 
-      // Load public logos and shorts
-      const publicLogos = JSON.parse(localStorage.getItem('public_logos') || '[]');
-      const publicShorts = JSON.parse(localStorage.getItem('public_shortforms') || '[]');
-      
-      const allLogos = [
-        ...publicLogos.map((logo: any) => ({
-          id: logo.id,
-          imageSrc: logo.url,
-          brandName: logo.brandName,
-          likes: logo.likes || 0,
-          comments: logo.comments || 0,
-          createdAt: new Date(logo.createdAt),
-          tags: logo.tags || [],
-        })),
-        ...generateMockLogos()
-      ];
+  // 데이터 변환: MyPageItem -> 기존 형식
+  const sharedItems = sharedItemsData?.items.map(item => ({
+    id: item.prod_id,
+    type: item.type,
+    image: item.file_url || "/placeholder.svg",
+    videoUrl: item.type === "short" ? item.file_url : undefined,
+    title: item.title || (item.type === "logo" ? "로고" : "숏폼"),
+    likes: item.likes,
+    comments: item.comments,
+    duration: item.type === "short" ? "0:15" : undefined,
+    is_liked: item.is_liked,
+  })) || [];
 
-      const allShorts = [
-        ...publicShorts.map((sf: any) => ({
-          id: sf.id,
-          title: sf.title,
-          thumbnailUrl: sf.thumbnailUrl,
-          likes: sf.likes || 0,
-          comments: sf.comments || 0,
-          duration: sf.duration || "0:15",
-          createdAt: new Date(sf.createdAt),
-          tags: sf.tags || [],
-        })),
-        ...generateMockShortForms()
-      ];
-
-      // Filter liked items
-      const likedLogosList = allLogos
-        .filter((logo) => likedLogos.includes(logo.id))
-        .map((logo) => {
-          // localStorage에서 통계 불러오기
-          const stats = JSON.parse(localStorage.getItem(`logo_stats_${logo.id}`) || '{}');
-          return {
-            id: logo.id,
-            type: "logo" as const,
-            image: logo.imageSrc,
-            title: logo.brandName,
-            likes: stats.likes !== undefined ? stats.likes : logo.likes,
-            comments: stats.comments !== undefined ? stats.comments : logo.comments,
-          };
-        });
-
-      const likedShortsList = allShorts
-        .filter((short) => likedShorts.includes(short.id))
-        .map((short) => {
-          // localStorage에서 통계 불러오기
-          const stats = JSON.parse(localStorage.getItem(`short_stats_${short.id}`) || '{}');
-          return {
-            id: short.id,
-            type: "short" as const,
-            image: short.thumbnailUrl,
-            title: short.title,
-            likes: stats.likes !== undefined ? stats.likes : short.likes,
-            comments: stats.comments !== undefined ? stats.comments : short.comments,
-          };
-        });
-
-      setLikedItems([...likedLogosList, ...likedShortsList]);
-    };
-
-    loadLikedItems();
-
-    // Listen for storage changes to update liked items
-    const handleStorageChange = () => {
-      loadLikedItems();
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    // Also check periodically for changes (since storage event doesn't fire in same tab)
-    const interval = setInterval(loadLikedItems, 1000);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      clearInterval(interval);
-    };
-  }, []);
-
-  // 공유한 작품 로드 (현재 남아있는 프로젝트 데이터 기준으로 계산)
-  useEffect(() => {
-    const loadSharedItems = () => {
-      // 현재 남아있는 모든 프로젝트 가져오기
-      const allProjects = projectStorage.getProjects();
-      
-      // localStorage에서 공개된 항목 목록 가져오기
-      const publicLogos = JSON.parse(localStorage.getItem('public_logos') || '[]');
-      const publicShortForms = JSON.parse(localStorage.getItem('public_shortforms') || '[]');
-      
-      // 공개된 로고/숏폼 ID 집합 생성
-      const publicLogoIds = new Set(publicLogos.map((l: any) => l.id));
-      const publicShortFormIds = new Set(publicShortForms.map((sf: any) => sf.id));
-      
-      const logoItems: Array<{ id: string | number; type: "logo" | "short"; image: string; title: string; likes: number; comments?: number; duration?: string }> = [];
-      const shortItems: Array<{ id: string | number; type: "logo" | "short"; image: string; videoUrl?: string; title: string; likes: number; comments?: number; duration?: string }> = [];
-      
-      // 각 프로젝트를 순회하면서 공개된 항목만 수집
-      allProjects.forEach((project) => {
-        // 프로젝트의 savedItems 확인
-        if (project.savedItems) {
-          project.savedItems.forEach((item) => {
-            if (item.type === "logo" && publicLogoIds.has(item.id)) {
-              // 공개된 로고이고 실제로 프로젝트에 존재하는지 확인
-              const publicLogo = publicLogos.find((l: any) => l.id === item.id && l.projectId === project.id);
-              if (publicLogo) {
-                // localStorage에서 통계 불러오기
-                const stats = JSON.parse(localStorage.getItem(`logo_stats_${item.id}`) || '{}');
-                logoItems.push({
-                  id: item.id,
-                  type: "logo" as const,
-                  image: publicLogo.url, // 워터마크가 추가된 URL 사용
-                  title: item.title || "로고",
-                  likes: stats.likes !== undefined ? stats.likes : (publicLogo.likes || 0),
-                  comments: stats.comments !== undefined ? stats.comments : (publicLogo.comments || 0),
-                });
-              }
-            } else if (item.type === "short" && publicShortFormIds.has(item.id)) {
-              // 공개된 숏폼이고 실제로 프로젝트에 존재하는지 확인
-              const publicShortForm = publicShortForms.find((sf: any) => sf.id === item.id && sf.projectId === project.id);
-              if (publicShortForm) {
-                // localStorage에서 통계 불러오기
-                const stats = JSON.parse(localStorage.getItem(`short_stats_${item.id}`) || '{}');
-                shortItems.push({
-                  id: item.id,
-                  type: "short" as const,
-                  image: publicShortForm.thumbnailUrl || publicShortForm.videoUrl || item.url, // 공개된 숏폼의 URL 사용
-                  videoUrl: publicShortForm.videoUrl || item.url, // 공개된 숏폼의 비디오 URL 사용
-                  title: item.title || "숏폼",
-                  likes: stats.likes !== undefined ? stats.likes : (publicShortForm.likes || 0),
-                  comments: stats.comments !== undefined ? stats.comments : (publicShortForm.comments || 0),
-                  duration: publicShortForm.duration || "0:15",
-                });
-              }
-            }
-          });
-        }
-        
-        // 업로드된 로고도 확인 (업로드된 로고는 savedItems에 없을 수 있음)
-        if (project.logo) {
-          const uploadedLogoId = 'uploaded_logo';
-          if (publicLogoIds.has(uploadedLogoId)) {
-            const publicLogo = publicLogos.find((l: any) => l.id === uploadedLogoId && l.projectId === project.id);
-            if (publicLogo) {
-              // 이미 추가되었는지 확인
-              if (!logoItems.some(item => item.id === uploadedLogoId && item.image === publicLogo.url)) {
-                // localStorage에서 통계 불러오기
-                const stats = JSON.parse(localStorage.getItem(`logo_stats_${uploadedLogoId}`) || '{}');
-                logoItems.push({
-                  id: uploadedLogoId,
-                  type: "logo" as const,
-                  image: publicLogo.url, // 워터마크가 추가된 URL 사용
-                  title: "업로드된 로고",
-                  likes: stats.likes !== undefined ? stats.likes : (publicLogo.likes || 0),
-                  comments: stats.comments !== undefined ? stats.comments : (publicLogo.comments || 0),
-                });
-              }
-            }
-          }
-        }
-      });
-      
-      setSharedItems([...logoItems, ...shortItems]);
-    };
-    
-    loadSharedItems();
-    
-    // localStorage 및 프로젝트 변경 감지
-    const handleStorageChange = () => {
-      loadSharedItems();
-    };
-    
-    const handleLogoStatsUpdate = (e: CustomEvent) => {
-      const { id, likes, comments } = e.detail;
-      setSharedItems(prev => prev.map(item => {
-        if (item.id === id && item.type === "logo") {
-          return {
-            ...item,
-            ...(likes !== undefined && { likes }),
-            ...(comments !== undefined && { comments })
-          };
-        }
-        return item;
-      }));
-    };
-    
-    const handleShortStatsUpdate = (e: CustomEvent) => {
-      const { id, likes, comments } = e.detail;
-      setSharedItems(prev => prev.map(item => {
-        const itemId = item.id || item.title?.charCodeAt(0) || 0;
-        if (itemId === id && item.type === "short") {
-          return {
-            ...item,
-            ...(likes !== undefined && { likes }),
-            ...(comments !== undefined && { comments })
-          };
-        }
-        return item;
-      }));
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('logoStatsUpdated', handleLogoStatsUpdate as EventListener);
-    window.addEventListener('shortStatsUpdated', handleShortStatsUpdate as EventListener);
-    const interval = setInterval(loadSharedItems, 1000);
-    
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('logoStatsUpdated', handleLogoStatsUpdate as EventListener);
-      window.removeEventListener('shortStatsUpdated', handleShortStatsUpdate as EventListener);
-      clearInterval(interval);
-    };
-  }, []);
+  const likedItems = likedItemsData?.items.map(item => ({
+    id: item.prod_id,
+    type: item.type,
+    image: item.file_url || "/placeholder.svg",
+    videoUrl: item.type === "short" ? item.file_url : undefined,
+    title: item.title || (item.type === "logo" ? "로고" : "숏폼"),
+    likes: item.likes,
+    comments: item.comments,
+    duration: item.type === "short" ? "0:15" : undefined,
+    is_liked: item.is_liked,
+  })) || [];
 
   const filteredSharedItems = sharedFilter === "all" 
     ? [...sharedItems.filter(item => item.type === "logo"), ...sharedItems.filter(item => item.type === "short")]
@@ -331,287 +71,23 @@ const MyPage = () => {
     ? [...likedItems.filter(item => item.type === "logo"), ...likedItems.filter(item => item.type === "short")]
     : likedItems.filter(item => item.type === likedFilter);
 
-  // Helper functions for managing liked items
-  const getLikedLogos = (): Set<number> => {
-    const liked = localStorage.getItem('liked_logos');
-    return liked ? new Set(JSON.parse(liked)) : new Set();
+  // 비디오 URL인지 확인하는 헬퍼 함수
+  const isVideoUrl = (url: string | undefined | null): boolean => {
+    if (!url) return false;
+    return !url.endsWith('.svg') && !url.endsWith('.jpg') && !url.endsWith('.png') && !url.endsWith('.jpeg') && !url.endsWith('.gif') && !url.startsWith('data:image');
   };
 
-  const getLikedShorts = (): Set<number> => {
-    const liked = localStorage.getItem('liked_shorts');
-    return liked ? new Set(JSON.parse(liked)) : new Set();
-  };
-
-  // Reset likes count and load comments when item changes
-  useEffect(() => {
-    if (selectedItem) {
-      setLikesCount(0);
-      if (selectedItem.type === "logo") {
-        const liked = getLikedLogos();
-        setIsLiked(liked.has(selectedItem.id));
-        
-        // Load comments from localStorage
-        const savedComments = localStorage.getItem(`logo_comments_${selectedItem.id}`);
-        if (savedComments) {
-          setComments(JSON.parse(savedComments));
-        } else {
-          setComments([]);
-        }
-      } else {
-        const liked = getLikedShorts();
-        const shortId = selectedItem.id || selectedItem.title?.charCodeAt(0) || 0;
-        setIsLiked(liked.has(shortId));
-        
-        // Load comments from localStorage
-        const savedComments = localStorage.getItem(`short_comments_${shortId}`);
-        if (savedComments) {
-          setComments(JSON.parse(savedComments));
-        } else {
-          setComments([]);
-        }
-      }
-    } else {
-      setComments([]);
-    }
-  }, [selectedItem]);
-
-  const handleLike = () => {
-    if (!selectedItem) return;
-    
-    // 로그인 상태 확인
-    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
-    if (!isLoggedIn) {
-      setIsLoginOpen(true);
-      return;
-    }
-    
-    const newLikedState = !isLiked;
-    setIsLiked(newLikedState);
-    
-    // Save to localStorage
-    if (selectedItem.type === "logo") {
-      const liked = JSON.parse(localStorage.getItem('liked_logos') || '[]');
-      if (newLikedState) {
-        if (!liked.includes(selectedItem.id)) {
-          liked.push(selectedItem.id);
-        }
-      } else {
-        const index = liked.indexOf(selectedItem.id);
-        if (index > -1) {
-          liked.splice(index, 1);
-        }
-      }
-      localStorage.setItem('liked_logos', JSON.stringify(liked));
-      
-      // 카드 목록의 좋아요 수 업데이트
-      const updatedLikes = Math.max(0, newLikedState ? (selectedItem.likes || 0) + 1 : (selectedItem.likes || 0) - 1);
-      
-      // 선택된 아이템의 좋아요 수 즉시 업데이트
-      setSelectedItem(prev => prev ? { ...prev, likes: updatedLikes } : null);
-      
-      setSharedItems(prev => prev.map(item => {
-        if (item.id === selectedItem.id && item.type === "logo") {
-          return {
-            ...item,
-            likes: updatedLikes
-          };
-        }
-        return item;
-      }));
-      setLikedItems(prev => prev.map(item => {
-        if (item.id === selectedItem.id && item.type === "logo") {
-          return {
-            ...item,
-            likes: updatedLikes
-          };
-        }
-        return item;
-      }));
-      
-      // localStorage에 좋아요 수 저장
-      const stats = JSON.parse(localStorage.getItem(`logo_stats_${selectedItem.id}`) || '{}');
-      stats.likes = updatedLikes;
-      localStorage.setItem(`logo_stats_${selectedItem.id}`, JSON.stringify(stats));
-      
-      // storage 이벤트 발생시켜 다른 컴포넌트에도 알림
-      window.dispatchEvent(new CustomEvent('logoStatsUpdated', { detail: { id: selectedItem.id, likes: updatedLikes } }));
-    } else {
-      const liked = JSON.parse(localStorage.getItem('liked_shorts') || '[]');
-      const shortId = selectedItem.id || selectedItem.title?.charCodeAt(0) || 0;
-      if (newLikedState) {
-        if (!liked.includes(shortId)) {
-          liked.push(shortId);
-        }
-      } else {
-        const index = liked.indexOf(shortId);
-        if (index > -1) {
-          liked.splice(index, 1);
-        }
-      }
-      localStorage.setItem('liked_shorts', JSON.stringify(liked));
-      
-      // 카드 목록의 좋아요 수 업데이트
-      const currentLikes = typeof selectedItem.likes === 'number' ? selectedItem.likes : 0;
-      const updatedLikes = Math.max(0, newLikedState ? currentLikes + 1 : currentLikes - 1);
-      
-      // 선택된 아이템의 좋아요 수 즉시 업데이트
-      setSelectedItem(prev => prev ? { ...prev, likes: updatedLikes } : null);
-      
-      setSharedItems(prev => prev.map(item => {
-        const itemId = item.id || item.title?.charCodeAt(0) || 0;
-        if (itemId === shortId && item.type === "short") {
-          return {
-            ...item,
-            likes: updatedLikes
-          };
-        }
-        return item;
-      }));
-      setLikedItems(prev => prev.map(item => {
-        const itemId = item.id || item.title?.charCodeAt(0) || 0;
-        if (itemId === shortId && item.type === "short") {
-          return {
-            ...item,
-            likes: updatedLikes
-          };
-        }
-        return item;
-      }));
-      
-      // localStorage에 좋아요 수 저장
-      const stats = JSON.parse(localStorage.getItem(`short_stats_${shortId}`) || '{}');
-      stats.likes = updatedLikes;
-      localStorage.setItem(`short_stats_${shortId}`, JSON.stringify(stats));
-      
-      // storage 이벤트 발생시켜 다른 컴포넌트에도 알림
-      window.dispatchEvent(new CustomEvent('shortStatsUpdated', { detail: { id: shortId, likes: updatedLikes } }));
-    }
-    
-    toast({ 
-      description: newLikedState ? "좋아요를 눌렀습니다" : "좋아요를 취소했습니다",
-      status: "default",
+  // 아이템 클릭 핸들러 - 단순 미리보기 모달 열기
+  const handleItemClick = (item: any) => {
+    setSelectedImage({
+      url: item.image,
+      title: item.title,
+      type: item.type,
     });
-    
-    // Reload liked items
-    window.dispatchEvent(new Event('storage'));
-  };
-
-  const handleComment = () => {
-    if (commentText.trim() && selectedItem) {
-      // 로그인 상태 확인
-      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
-      if (!isLoggedIn) {
-        setIsLoginOpen(true);
-        return;
-      }
-      
-      const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-      const newComment = {
-        author: userProfile.nickname || "익명",
-        authorAvatar: userProfile.avatar || undefined,
-        content: commentText,
-        time: "방금 전"
-      };
-      const updatedComments = [newComment, ...comments];
-      setComments(updatedComments);
-      
-      // Save comments to localStorage
-      if (selectedItem.type === "logo") {
-        localStorage.setItem(`logo_comments_${selectedItem.id}`, JSON.stringify(updatedComments));
-        
-        // 카드 목록의 댓글 수 업데이트
-        const updatedCommentsCount = updatedComments.length;
-        setSharedItems(prev => prev.map(item => {
-          if (item.id === selectedItem.id && item.type === "logo") {
-            return {
-              ...item,
-              comments: updatedCommentsCount
-            };
-          }
-          return item;
-        }));
-        setLikedItems(prev => prev.map(item => {
-          if (item.id === selectedItem.id && item.type === "logo") {
-            return {
-              ...item,
-              comments: updatedCommentsCount
-            };
-          }
-          return item;
-        }));
-        
-        // localStorage에 댓글 수 저장
-        const stats = JSON.parse(localStorage.getItem(`logo_stats_${selectedItem.id}`) || '{}');
-        stats.comments = updatedCommentsCount;
-        localStorage.setItem(`logo_stats_${selectedItem.id}`, JSON.stringify(stats));
-        
-        // storage 이벤트 발생시켜 다른 컴포넌트에도 알림
-        window.dispatchEvent(new CustomEvent('logoStatsUpdated', { detail: { id: selectedItem.id, comments: updatedCommentsCount } }));
-      } else {
-        const shortId = selectedItem.id || selectedItem.title?.charCodeAt(0) || 0;
-        localStorage.setItem(`short_comments_${shortId}`, JSON.stringify(updatedComments));
-        
-        // 카드 목록의 댓글 수 업데이트
-        const updatedCommentsCount = updatedComments.length;
-        setSharedItems(prev => prev.map(item => {
-          const itemId = item.id || item.title?.charCodeAt(0) || 0;
-          if (itemId === shortId && item.type === "short") {
-            return {
-              ...item,
-              comments: updatedCommentsCount
-            };
-          }
-          return item;
-        }));
-        setLikedItems(prev => prev.map(item => {
-          const itemId = item.id || item.title?.charCodeAt(0) || 0;
-          if (itemId === shortId && item.type === "short") {
-            return {
-              ...item,
-              comments: updatedCommentsCount
-            };
-          }
-          return item;
-        }));
-        
-        // localStorage에 댓글 수 저장
-        const stats = JSON.parse(localStorage.getItem(`short_stats_${shortId}`) || '{}');
-        stats.comments = updatedCommentsCount;
-        localStorage.setItem(`short_stats_${shortId}`, JSON.stringify(stats));
-        
-        // storage 이벤트 발생시켜 다른 컴포넌트에도 알림
-        window.dispatchEvent(new CustomEvent('shortStatsUpdated', { detail: { id: shortId, comments: updatedCommentsCount } }));
-      }
-      
-      toast({ 
-        description: "댓글이 등록되었습니다",
-        status: "default",
-      });
-      setCommentText("");
+    // 로고인 경우 CreateFromStyleModal을 위한 데이터 저장
+    if (item.type === "logo") {
+      setSelectedItemForCreate(item);
     }
-  };
-
-  const handleShare = () => {
-    const url = selectedItem ? `${window.location.origin}/${selectedItem.type === "logo" ? "logos" : "shorts"}?${selectedItem.type === "logo" ? "logo" : "short"}=${selectedItem.id}` : window.location.href;
-    navigator.clipboard.writeText(url);
-    toast({ 
-      description: "링크가 복사되었습니다",
-      status: "default",
-    });
-  };
-
-  const handleCreateNew = () => {
-    if (!selectedItem || selectedItem.type !== "logo") return;
-    // 선택된 로고를 별도 state에 저장
-    setSelectedItemForCreate(selectedItem);
-    // 아이템 상세 모달 닫기
-    setSelectedItem(null);
-    setIsLiked(false);
-    setLikesCount(0);
-    setComments([]);
-    setCommentText("");
-    // 모달 열기
-    setIsCreateNewModalOpen(true);
   };
 
   return (
@@ -635,35 +111,47 @@ const MyPage = () => {
             </TabsList>
             
             <TabsContent value="shared" className="space-y-6">
-              <div className="flex gap-2 mb-6">
-                <Badge 
-                  variant={sharedFilter === "all" ? "default" : "outline"}
-                  className="cursor-pointer px-4 py-2"
-                  onClick={() => setSharedFilter("all")}
-                >
-                  전체
-                </Badge>
-                <Badge 
-                  variant={sharedFilter === "logo" ? "default" : "outline"}
-                  className={`cursor-pointer px-4 py-2 ${
-                    sharedFilter === "logo" 
-                      ? "bg-[#7C22C8] text-white hover:bg-[#6B1DB5]" 
-                      : ""
-                  }`}
-                  onClick={() => setSharedFilter("logo")}
-                >
-                  로고
-                </Badge>
-                <Badge 
-                  variant={sharedFilter === "short" ? "default" : "outline"}
-                  className="cursor-pointer px-4 py-2"
-                  onClick={() => setSharedFilter("short")}
-                >
-                  숏폼
-                </Badge>
-              </div>
-              
-              {sharedFilter === "all" ? (
+              {isLoadingShared && (
+                <div className="text-center py-16">
+                  <p className="text-muted-foreground">로딩 중...</p>
+                </div>
+              )}
+              {!isLoadingShared && sharedItems.length === 0 && (
+                <div className="text-center py-16">
+                  <p className="text-muted-foreground">공유한 작품이 없습니다.</p>
+                </div>
+              )}
+              {!isLoadingShared && sharedItems.length > 0 && (
+                <>
+                  <div className="flex gap-2 mb-6">
+                    <Badge 
+                      variant={sharedFilter === "all" ? "default" : "outline"}
+                      className="cursor-pointer px-4 py-2"
+                      onClick={() => setSharedFilter("all")}
+                    >
+                      전체
+                    </Badge>
+                    <Badge 
+                      variant={sharedFilter === "logo" ? "default" : "outline"}
+                      className={`cursor-pointer px-4 py-2 ${
+                        sharedFilter === "logo" 
+                          ? "bg-[#7C22C8] text-white hover:bg-[#6B1DB5]" 
+                          : ""
+                      }`}
+                      onClick={() => setSharedFilter("logo")}
+                    >
+                      로고
+                    </Badge>
+                    <Badge 
+                      variant={sharedFilter === "short" ? "default" : "outline"}
+                      className="cursor-pointer px-4 py-2"
+                      onClick={() => setSharedFilter("short")}
+                    >
+                      숏폼
+                    </Badge>
+                  </div>
+                  
+                  {sharedFilter === "all" ? (
                 <>
                   {/* 로고 섹션 */}
                   {sharedItems.filter(item => item.type === "logo").length > 0 && (
@@ -674,7 +162,7 @@ const MyPage = () => {
                           <Card
                             key={item.id}
                             className="group cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-xl"
-                            onClick={() => setSelectedItem(item)}
+                            onClick={() => handleItemClick(item)}
                           >
                             <CardContent className="p-0">
                               <div className="aspect-square bg-muted rounded-t-lg overflow-hidden">
@@ -688,7 +176,7 @@ const MyPage = () => {
                                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                                   <div className="flex items-center gap-4">
                                     <span className="flex items-center gap-1">
-                                      <Heart className={`w-4 h-4 ${getLikedLogos().has(Number(item.id)) ? "text-destructive fill-destructive" : ""}`} />
+                                      <Heart className={`w-4 h-4 ${item.is_liked ? "fill-destructive text-destructive" : ""}`} />
                                       {item.likes.toLocaleString()}
                                     </span>
                                     <span className="flex items-center gap-1">
@@ -714,15 +202,43 @@ const MyPage = () => {
                           <div
                             key={item.id}
                             className="group relative bg-card rounded-2xl overflow-hidden border border-border/50 hover:shadow-xl hover:scale-[1.02] transition-all duration-200 cursor-pointer"
-                            onClick={() => setSelectedItem(item)}
+                            onClick={() => handleItemClick(item)}
                           >
                             {/* 9:16 Thumbnail */}
                             <div className="aspect-[9/16] bg-secondary/30 relative">
-                              <img
-                                src={item.image}
-                                alt={item.title}
-                                className="w-full h-full object-cover"
-                              />
+                              {isVideoUrl(item.videoUrl || item.image) ? (
+                                <video
+                                  src={item.videoUrl || item.image}
+                                  className="w-full h-full object-cover"
+                                  muted
+                                  playsInline
+                                  preload="metadata"
+                                  onLoadedMetadata={(e) => {
+                                    e.currentTarget.pause();
+                                    e.currentTarget.currentTime = 0;
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.play().catch(() => {});
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.pause();
+                                    e.currentTarget.currentTime = 0;
+                                  }}
+                                  onEnded={(e) => {
+                                    e.currentTarget.pause();
+                                    e.currentTarget.currentTime = 0; // 끝나면 일시정지하고 처음으로
+                                  }}
+                                />
+                              ) : (
+                                <img
+                                  src={item.image}
+                                  alt={item.title}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).src = "/placeholder.svg";
+                                  }}
+                                />
+                              )}
 
                               {/* Duration badge */}
                               <div className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm rounded-lg px-2.5 py-1 shadow-md">
@@ -744,7 +260,7 @@ const MyPage = () => {
                               <div className="flex items-center justify-between text-sm text-muted-foreground">
                                 <div className="flex items-center gap-4">
                                   <div className="flex items-center gap-1">
-                                    <Heart className={`w-4 h-4 ${getLikedShorts().has(Number(item.id)) ? "text-destructive fill-destructive" : ""}`} />
+                                    <Heart className={`w-4 h-4 ${item.is_liked ? "fill-destructive text-destructive" : ""}`} />
                                     <span>{item.likes.toLocaleString()}</span>
                                   </div>
                                   <div className="flex items-center gap-1">
@@ -767,7 +283,7 @@ const MyPage = () => {
                       <Card
                         key={item.id}
                         className="group cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-xl"
-                        onClick={() => setSelectedItem(item)}
+                        onClick={() => handleItemClick(item)}
                       >
                         <CardContent className="p-0">
                           <div className="aspect-square bg-muted rounded-t-lg overflow-hidden">
@@ -797,14 +313,38 @@ const MyPage = () => {
                       <div
                         key={item.id}
                         className="group relative bg-card rounded-2xl overflow-hidden border border-border/50 hover:shadow-xl hover:scale-[1.02] transition-all duration-200 cursor-pointer"
-                        onClick={() => setSelectedItem(item)}
+                        onClick={() => handleItemClick(item)}
                       >
                         <div className="aspect-[9/16] bg-secondary/30 relative">
-                          <img
-                            src={item.image}
-                            alt={item.title}
-                            className="w-full h-full object-cover"
-                          />
+                          {isVideoUrl(item.videoUrl || item.image) ? (
+                            <video
+                              src={item.videoUrl || item.image}
+                              className="w-full h-full object-cover"
+                              muted
+                              playsInline
+                              preload="metadata"
+                              onLoadedMetadata={(e) => {
+                                e.currentTarget.pause();
+                                e.currentTarget.currentTime = 0;
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.play().catch(() => {});
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.pause();
+                                e.currentTarget.currentTime = 0;
+                              }}
+                            />
+                          ) : (
+                            <img
+                              src={item.image}
+                              alt={item.title}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = "/placeholder.svg";
+                              }}
+                            />
+                          )}
                           <div className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm rounded-lg px-2.5 py-1 shadow-md">
                             <span className="text-xs font-medium text-foreground">
                               {item.duration || "0:15"}
@@ -820,7 +360,7 @@ const MyPage = () => {
                           <div className="flex items-center justify-between text-sm text-muted-foreground">
                             <div className="flex items-center gap-4">
                               <div className="flex items-center gap-1">
-                                <Heart className="w-4 h-4 text-destructive fill-destructive" />
+                                <Heart className={`w-4 h-4 ${item.is_liked ? "fill-destructive text-destructive" : ""}`} />
                                 <span>{item.likes.toLocaleString()}</span>
                               </div>
                               <div className="flex items-center gap-1">
@@ -835,38 +375,52 @@ const MyPage = () => {
                   ))}
                 </div>
               )}
+                </>
+              )}
             </TabsContent>
             
             <TabsContent value="liked" className="space-y-6">
-              <div className="flex gap-2 mb-6">
-                <Badge 
-                  variant={likedFilter === "all" ? "default" : "outline"}
-                  className="cursor-pointer px-4 py-2"
-                  onClick={() => setLikedFilter("all")}
-                >
-                  전체
-                </Badge>
-                <Badge 
-                  variant={likedFilter === "logo" ? "default" : "outline"}
-                  className={`cursor-pointer px-4 py-2 ${
-                    likedFilter === "logo" 
-                      ? "bg-[#7C22C8] text-white hover:bg-[#6B1DB5]" 
-                      : ""
-                  }`}
-                  onClick={() => setLikedFilter("logo")}
-                >
-                  로고
-                </Badge>
-                <Badge 
-                  variant={likedFilter === "short" ? "default" : "outline"}
-                  className="cursor-pointer px-4 py-2"
-                  onClick={() => setLikedFilter("short")}
-                >
-                  숏폼
-                </Badge>
-              </div>
-              
-              {likedFilter === "all" ? (
+              {isLoadingLiked && (
+                <div className="text-center py-16">
+                  <p className="text-muted-foreground">로딩 중...</p>
+                </div>
+              )}
+              {!isLoadingLiked && likedItems.length === 0 && (
+                <div className="text-center py-16">
+                  <p className="text-muted-foreground">좋아요한 작품이 없습니다.</p>
+                </div>
+              )}
+              {!isLoadingLiked && likedItems.length > 0 && (
+                <>
+                  <div className="flex gap-2 mb-6">
+                    <Badge 
+                      variant={likedFilter === "all" ? "default" : "outline"}
+                      className="cursor-pointer px-4 py-2"
+                      onClick={() => setLikedFilter("all")}
+                    >
+                      전체
+                    </Badge>
+                    <Badge 
+                      variant={likedFilter === "logo" ? "default" : "outline"}
+                      className={`cursor-pointer px-4 py-2 ${
+                        likedFilter === "logo" 
+                          ? "bg-[#7C22C8] text-white hover:bg-[#6B1DB5]" 
+                          : ""
+                      }`}
+                      onClick={() => setLikedFilter("logo")}
+                    >
+                      로고
+                    </Badge>
+                    <Badge 
+                      variant={likedFilter === "short" ? "default" : "outline"}
+                      className="cursor-pointer px-4 py-2"
+                      onClick={() => setLikedFilter("short")}
+                    >
+                      숏폼
+                    </Badge>
+                  </div>
+                  
+                  {likedFilter === "all" ? (
                 <>
                   {/* 로고 섹션 */}
                   {likedItems.filter(item => item.type === "logo").length > 0 && (
@@ -877,7 +431,7 @@ const MyPage = () => {
                           <Card
                             key={item.id}
                             className="group cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-xl"
-                            onClick={() => setSelectedItem(item)}
+                            onClick={() => handleItemClick(item)}
                           >
                             <CardContent className="p-0">
                               <div className="aspect-square bg-muted rounded-t-lg overflow-hidden">
@@ -891,7 +445,7 @@ const MyPage = () => {
                                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                                   <div className="flex items-center gap-4">
                                     <span className="flex items-center gap-1">
-                                      <Heart className={`w-4 h-4 ${getLikedLogos().has(Number(item.id)) ? "text-destructive fill-destructive" : ""}`} />
+                                      <Heart className={`w-4 h-4 ${item.is_liked ? "fill-destructive text-destructive" : ""}`} />
                                       {item.likes.toLocaleString()}
                                     </span>
                                     <span className="flex items-center gap-1">
@@ -917,15 +471,43 @@ const MyPage = () => {
                           <div
                             key={item.id}
                             className="group relative bg-card rounded-2xl overflow-hidden border border-border/50 hover:shadow-xl hover:scale-[1.02] transition-all duration-200 cursor-pointer"
-                            onClick={() => setSelectedItem(item)}
+                            onClick={() => handleItemClick(item)}
                           >
                             {/* 9:16 Thumbnail */}
                             <div className="aspect-[9/16] bg-secondary/30 relative">
-                              <img
-                                src={item.image}
-                                alt={item.title}
-                                className="w-full h-full object-cover"
-                              />
+                              {isVideoUrl(item.videoUrl || item.image) ? (
+                                <video
+                                  src={item.videoUrl || item.image}
+                                  className="w-full h-full object-cover"
+                                  muted
+                                  playsInline
+                                  preload="metadata"
+                                  onLoadedMetadata={(e) => {
+                                    e.currentTarget.pause();
+                                    e.currentTarget.currentTime = 0;
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.play().catch(() => {});
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.pause();
+                                    e.currentTarget.currentTime = 0;
+                                  }}
+                                  onEnded={(e) => {
+                                    e.currentTarget.pause();
+                                    e.currentTarget.currentTime = 0; // 끝나면 일시정지하고 처음으로
+                                  }}
+                                />
+                              ) : (
+                                <img
+                                  src={item.image}
+                                  alt={item.title}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).src = "/placeholder.svg";
+                                  }}
+                                />
+                              )}
 
                               {/* Duration badge */}
                               <div className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm rounded-lg px-2.5 py-1 shadow-md">
@@ -947,7 +529,7 @@ const MyPage = () => {
                               <div className="flex items-center justify-between text-sm text-muted-foreground">
                                 <div className="flex items-center gap-4">
                                   <div className="flex items-center gap-1">
-                                    <Heart className={`w-4 h-4 ${getLikedShorts().has(Number(item.id)) ? "text-destructive fill-destructive" : ""}`} />
+                                    <Heart className={`w-4 h-4 ${item.is_liked ? "fill-destructive text-destructive" : ""}`} />
                                     <span>{item.likes.toLocaleString()}</span>
                                   </div>
                                   <div className="flex items-center gap-1">
@@ -970,7 +552,7 @@ const MyPage = () => {
                       <Card
                         key={item.id}
                         className="group cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-xl"
-                        onClick={() => setSelectedItem(item)}
+                        onClick={() => handleItemClick(item)}
                       >
                         <CardContent className="p-0">
                           <div className="aspect-square bg-muted rounded-t-lg overflow-hidden">
@@ -984,7 +566,7 @@ const MyPage = () => {
                             <div className="flex items-center justify-between text-sm text-muted-foreground">
                               <div className="flex items-center gap-4">
                                 <span className="flex items-center gap-1">
-                                  <Heart className={`w-4 h-4 ${getLikedLogos().has(Number(item.id)) ? "text-destructive fill-destructive" : ""}`} />
+                                  <Heart className={`w-4 h-4 ${item.is_liked ? "fill-destructive text-destructive" : ""}`} />
                                   {item.likes.toLocaleString()}
                                 </span>
                                 <span className="flex items-center gap-1">
@@ -1000,14 +582,38 @@ const MyPage = () => {
                       <div
                         key={item.id}
                         className="group relative bg-card rounded-2xl overflow-hidden border border-border/50 hover:shadow-xl hover:scale-[1.02] transition-all duration-200 cursor-pointer"
-                        onClick={() => setSelectedItem(item)}
+                        onClick={() => handleItemClick(item)}
                       >
                         <div className="aspect-[9/16] bg-secondary/30 relative">
-                          <img
-                            src={item.image}
-                            alt={item.title}
-                            className="w-full h-full object-cover"
-                          />
+                          {isVideoUrl(item.videoUrl || item.image) ? (
+                            <video
+                              src={item.videoUrl || item.image}
+                              className="w-full h-full object-cover"
+                              muted
+                              playsInline
+                              preload="metadata"
+                              onLoadedMetadata={(e) => {
+                                e.currentTarget.pause();
+                                e.currentTarget.currentTime = 0;
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.play().catch(() => {});
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.pause();
+                                e.currentTarget.currentTime = 0;
+                              }}
+                            />
+                          ) : (
+                            <img
+                              src={item.image}
+                              alt={item.title}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = "/placeholder.svg";
+                              }}
+                            />
+                          )}
                           <div className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm rounded-lg px-2.5 py-1 shadow-md">
                             <span className="text-xs font-medium text-foreground">
                               0:15
@@ -1023,7 +629,7 @@ const MyPage = () => {
                           <div className="flex items-center justify-between text-sm text-muted-foreground">
                             <div className="flex items-center gap-4">
                               <div className="flex items-center gap-1">
-                                <Heart className={`w-4 h-4 ${getLikedShorts().has(Number(item.id)) ? "text-destructive fill-destructive" : ""}`} />
+                                <Heart className={`w-4 h-4 ${item.is_liked ? "fill-destructive text-destructive" : ""}`} />
                                 <span>{item.likes.toLocaleString()}</span>
                               </div>
                               <div className="flex items-center gap-1">
@@ -1038,316 +644,90 @@ const MyPage = () => {
                   ))}
                 </div>
               )}
+                </>
+              )}
             </TabsContent>
           </Tabs>
         </div>
       </div>
 
-      {/* Detail Modal - Logo */}
-      {selectedItem?.type === "logo" && (
-        <Dialog open={!!selectedItem} onOpenChange={(open) => {
+      {/* 이미지/비디오 확대 보기 다이얼로그 */}
+      <Dialog 
+        open={!!selectedImage} 
+        onOpenChange={(open) => {
           if (!open) {
-            // 창 닫을 때 카드에 반영
-            if (selectedItem) {
-              setSharedItems(prev => prev.map(item => {
-                if (item.id === selectedItem.id && item.type === "logo") {
-                  return {
-                    ...item,
-                    likes: selectedItem.likes || 0,
-                    comments: comments.length
-                  };
-                }
-                return item;
-              }));
-              setLikedItems(prev => prev.map(item => {
-                if (item.id === selectedItem.id && item.type === "logo") {
-                  return {
-                    ...item,
-                    likes: selectedItem.likes || 0,
-                    comments: comments.length
-                  };
-                }
-                return item;
-              }));
-            }
-            setSelectedItem(null);
-            setIsLiked(false);
-            setLikesCount(0);
-            setComments([]);
-            setCommentText("");
+            setSelectedImage(null);
           }
-        }}>
-          <DialogContent className="max-w-[800px] w-[90vw] overflow-hidden p-0 gap-0">
-            <div className="flex md:flex-row flex-col">
-              {/* Left: Logo Image */}
-              <div className="bg-background flex items-center justify-center p-0 border-r border-border aspect-square w-full md:w-[400px] md:flex-shrink-0 rounded-l-lg overflow-hidden">
-                <img 
-                  src={selectedItem.image} 
-                  alt={selectedItem.title} 
-                  className="w-full h-full object-contain"
-                />
-              </div>
-
-              {/* Right: Comments and Actions */}
-              <div className="flex flex-col bg-background w-full md:w-[400px] md:flex-shrink-0 aspect-square md:aspect-auto md:h-[400px] rounded-r-lg">
-                {/* Comments Section - Top */}
-                <div className="flex-1 min-h-0 overflow-y-auto p-6">
-                  <div className="space-y-4">
-                    {comments.length === 0 ? (
-                      <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-                        아직 댓글이 없습니다. 첫 댓글을 남겨보세요!
-                      </div>
-                    ) : (
-                      comments.map((comment, idx) => (
-                        <div key={idx} className="flex gap-3">
-                          <Avatar className="h-8 w-8 flex-shrink-0">
-                            {comment.authorAvatar ? (
-                              <AvatarImage src={comment.authorAvatar} alt={comment.author} />
-                            ) : null}
-                            <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                              {comment.author.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-semibold text-sm text-foreground">{comment.author}</span>
-                              <span className="text-xs text-muted-foreground">{comment.time}</span>
-                            </div>
-                            <p className="text-sm text-foreground break-words">{comment.content}</p>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-
-                {/* Action Buttons - Middle */}
-                <div className={`p-3 border-t-[1px] border-border space-y-2`}>
-                  <div className="flex items-center gap-3">
-                    <Button 
-                      variant="ghost" 
-                      onClick={handleLike}
-                      className={`h-8 px-3 gap-2 ${selectedItem?.type === "logo" ? "hover:bg-[#7C22C8]/10 hover:text-[#7C22C8]" : "hover:bg-primary/10 hover:text-primary"}`}
-                    >
-                      <Heart className={`h-4 w-4 ${isLiked ? "fill-destructive text-destructive" : ""}`} />
-                      <span className="text-sm font-semibold text-foreground">
-                        {selectedItem ? selectedItem.likes.toLocaleString() : "0"}
-                      </span>
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      className={`h-8 px-3 gap-2 ${selectedItem?.type === "logo" ? "hover:bg-[#7C22C8]/10 hover:text-[#7C22C8]" : "hover:bg-primary/10 hover:text-primary"}`}
-                    >
-                      <MessageCircle className="h-4 w-4" />
-                      <span className="text-sm font-semibold text-foreground">
-                        {comments.length.toLocaleString()}
-                      </span>
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      onClick={handleShare}
-                      className={`h-8 w-8 ${selectedItem?.type === "logo" ? "hover:bg-[#7C22C8]/10 hover:text-[#7C22C8]" : "hover:bg-primary/10 hover:text-primary"}`}
-                    >
-                      <Share2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <Button onClick={handleCreateNew} className={`w-full h-9 text-white text-sm ${selectedItem?.type === "logo" ? "bg-[#7C22C8] hover:bg-[#6B1DB5]" : "bg-primary hover:bg-primary/90"}`}>
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    이 스타일로 새로운 작품 만들기
+        }}
+      >
+        <DialogContent 
+          className="max-w-none w-auto p-0 bg-transparent border-none shadow-none [&>button]:hidden"
+        >
+          <DialogTitle className="sr-only">{selectedImage?.title || "미리보기"}</DialogTitle>  
+          <div className="relative flex items-center justify-center min-w-[300px] min-h-[533px]">
+            {selectedImage && (
+              selectedImage.type === "short" ? (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-2 right-2 z-10 bg-background/80 hover:bg-transparent"
+                    onClick={() => setSelectedImage(null)}
+                  >
+                    <X className="h-4 w-4" />
                   </Button>
-                </div>
-
-                {/* Comment Input - Bottom */}
-                <div className="p-3 border-t-[1px] border-border">
-                  <div className="flex gap-2">
-                    <Textarea 
-                      placeholder="댓글을 입력하세요..." 
-                      value={commentText} 
-                      onChange={(e) => setCommentText(e.target.value)} 
-                      className={`h-[40px] min-h-[40px] max-h-[40px] resize-none flex-1 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-2 ${selectedItem?.type === "logo" ? "focus-visible:border-[#7C22C8]" : "focus-visible:border-primary"}`}
-                      rows={1}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          if (commentText.trim()) {
-                            handleComment();
-                          }
-                        }
-                      }}
-                    />
-                    <Button 
-                      onClick={handleComment} 
-                      disabled={!commentText.trim()} 
-                      className={`h-[40px] px-6 text-white disabled:opacity-50 ${selectedItem?.type === "logo" ? "bg-[#7C22C8] hover:bg-[#6B1DB5]" : "bg-primary hover:bg-primary/90"}`}
-                    >
-                      등록
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
-
-      {/* Detail Modal - Short Form */}
-      {selectedItem?.type === "short" && (
-        <Dialog open={!!selectedItem} onOpenChange={(open) => {
-          if (!open) {
-            // 창 닫을 때 카드에 반영
-            if (selectedItem) {
-              const shortId = selectedItem.id || selectedItem.title?.charCodeAt(0) || 0;
-              setSharedItems(prev => prev.map(item => {
-                const itemId = item.id || item.title?.charCodeAt(0) || 0;
-                if (itemId === shortId && item.type === "short") {
-                  return {
-                    ...item,
-                    likes: selectedItem.likes || 0,
-                    comments: comments.length
-                  };
-                }
-                return item;
-              }));
-              setLikedItems(prev => prev.map(item => {
-                const itemId = item.id || item.title?.charCodeAt(0) || 0;
-                if (itemId === shortId && item.type === "short") {
-                  return {
-                    ...item,
-                    likes: selectedItem.likes || 0,
-                    comments: comments.length
-                  };
-                }
-                return item;
-              }));
-            }
-            setSelectedItem(null);
-            setIsLiked(false);
-            setLikesCount(0);
-            setComments([]);
-            setCommentText("");
-          }
-        }}>
-          <DialogContent className="max-w-[800px] w-[90vw] overflow-hidden p-0 gap-0">
-            <div className="flex md:flex-row flex-col">
-              {/* Left: Short Form Video (9:16 ratio) */}
-              <div className="bg-background flex items-center justify-center p-0 border-r border-border aspect-[9/16] w-full md:w-[300px] md:flex-shrink-0 rounded-l-lg overflow-hidden relative">
-                {selectedItem.type === "short" && (selectedItem.videoUrl || selectedItem.image) ? (
                   <video
-                    src={selectedItem.videoUrl || selectedItem.image}
-                    className="w-full h-full object-cover"
+                    src={selectedImage.url}
+                    className="rounded-lg"
+                    style={{ 
+                      width: 'min(90vw, 400px)',
+                      height: 'auto',
+                      aspectRatio: '9/16'
+                    }}
+                    controls
                     autoPlay
                     loop
-                    muted
                     playsInline
-                    controls
                   />
-                ) : (
-                  <img 
-                    src={selectedItem.image} 
-                    alt={selectedItem.title} 
-                    className="w-full h-full object-cover"
-                  />
-                )}
-              </div>
-
-              {/* Right: Comments and Actions */}
-              <div className="flex flex-col bg-background w-full md:w-[500px] md:flex-shrink-0 aspect-[9/16] md:aspect-auto md:h-[533px] rounded-r-lg">
-                {/* Comments Section - Top */}
-                <div className="flex-1 min-h-0 overflow-y-auto p-6">
-                  <div className="space-y-4">
-                    {comments.length === 0 ? (
-                      <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-                        아직 댓글이 없습니다. 첫 댓글을 남겨보세요!
-                      </div>
-                    ) : (
-                      comments.map((comment, idx) => (
-                        <div key={idx} className="flex gap-3">
-                          <Avatar className="h-8 w-8 flex-shrink-0">
-                            {comment.authorAvatar ? (
-                              <AvatarImage src={comment.authorAvatar} alt={comment.author} />
-                            ) : null}
-                            <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                              {comment.author.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-semibold text-sm text-foreground">{comment.author}</span>
-                              <span className="text-xs text-muted-foreground">{comment.time}</span>
-                            </div>
-                            <p className="text-sm text-foreground break-words">{comment.content}</p>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-
-                {/* Action Buttons - Middle */}
-                <div className={`p-3 border-t-[1px] border-border space-y-2`}>
-                  <div className="flex items-center gap-3">
-                    <Button 
-                      variant="ghost" 
-                      onClick={handleLike}
-                      className={`h-8 px-3 gap-2 ${selectedItem?.type === "logo" ? "hover:bg-[#7C22C8]/10 hover:text-[#7C22C8]" : "hover:bg-primary/10 hover:text-primary"}`}
-                    >
-                      <Heart className={`h-4 w-4 ${isLiked ? "fill-destructive text-destructive" : ""}`} />
-                      <span className="text-sm font-semibold text-foreground">
-                        {Math.max(0, selectedItem ? (selectedItem.likes || 0) + likesCount : 0).toLocaleString()}
-                      </span>
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      className={`h-8 px-3 gap-2 ${selectedItem?.type === "logo" ? "hover:bg-[#7C22C8]/10 hover:text-[#7C22C8]" : "hover:bg-primary/10 hover:text-primary"}`}
-                    >
-                      <MessageCircle className="h-4 w-4" />
-                      <span className="text-sm font-semibold text-foreground">
-                        {comments.length.toLocaleString()}
-                      </span>
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      onClick={handleShare}
-                      className={`h-8 w-8 ${selectedItem?.type === "logo" ? "hover:bg-[#7C22C8]/10 hover:text-[#7C22C8]" : "hover:bg-primary/10 hover:text-primary"}`}
-                    >
-                      <Share2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Comment Input - Bottom */}
-                <div className="p-3 border-t-[1px] border-border">
-                  <div className="flex gap-2">
-                    <Textarea 
-                      placeholder="댓글을 입력하세요..." 
-                      value={commentText} 
-                      onChange={(e) => setCommentText(e.target.value)} 
-                      className={`h-[40px] min-h-[40px] max-h-[40px] resize-none flex-1 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-2 ${selectedItem?.type === "logo" ? "focus-visible:border-[#7C22C8]" : "focus-visible:border-primary"}`}
-                      rows={1}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          if (commentText.trim()) {
-                            handleComment();
-                          }
-                        }
-                      }}
+                </>
+              ) : (
+                <div className="relative w-full h-full flex items-center justify-center">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-2 right-2 z-10 bg-background/80 hover:bg-transparent"
+                    onClick={() => setSelectedImage(null)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                  <div className="relative">
+                    <img
+                      src={selectedImage.url}
+                      alt={selectedImage.title}
+                      className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg"
                     />
-                    <Button 
-                      onClick={handleComment} 
-                      disabled={!commentText.trim()} 
-                      className={`h-[40px] px-6 text-white disabled:opacity-50 ${selectedItem?.type === "logo" ? "bg-[#7C22C8] hover:bg-[#6B1DB5]" : "bg-primary hover:bg-primary/90"}`}
-                    >
-                      등록
-                    </Button>
                   </div>
                 </div>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+              )
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* 새로운 작품 만들기 모달 - 로고일 때만 표시 */}
+      {selectedItemForCreate && selectedItemForCreate.type === "logo" && (
+        <CreateFromStyleModal
+          open={isCreateNewModalOpen}
+          onOpenChange={(open) => {
+            setIsCreateNewModalOpen(open);
+            if (!open) {
+              setSelectedItemForCreate(null);
+            }
+          }}
+          baseAssetType="logo"
+          baseAssetId={selectedItemForCreate.id}
+          baseAssetImageUrl={selectedItemForCreate.image}
+        />
       )}
 
       {/* 새로운 작품 만들기 모달 - 로고일 때만 표시 */}
@@ -1394,3 +774,4 @@ const MyPage = () => {
 };
 
 export default MyPage;
+

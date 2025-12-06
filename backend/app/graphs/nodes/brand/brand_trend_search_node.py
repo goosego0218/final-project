@@ -11,6 +11,8 @@ from typing import TYPE_CHECKING, Dict, Any, Literal
 from langchain_core.messages import AIMessage
 from langgraph.types import Command
 
+from langgraph.graph import END
+
 from app.graphs.nodes.common.message_utils import get_last_user_message
 from app.agents.trend_agent import run_trend_query_for_api
 
@@ -26,7 +28,7 @@ def make_brand_trend_search_node(llm: "BaseChatModel"):
     - 실제 트렌드 분석은 app.agents.trend_agent.run_trend_query_for_api 가 담당한다.
     """
 
-    def trend_search(state: "AppState") -> Command[Literal["brand_chat"]]:
+    def trend_search(state: "AppState") -> Command[Literal["brand_chat", "__end__"]]:
         """
         사용자의 마지막 발화를 트렌드 질의로 삼아 trend_agent 를 호출하고,
         결과를 messages 및 trend_context 에 반영하는 노드.
@@ -64,20 +66,22 @@ def make_brand_trend_search_node(llm: "BaseChatModel"):
             user_id=user_id,
         )
 
+        messages = list(state.get("messages") or [])
+        trend_message = AIMessage(content=answer)
+        messages.append(trend_message)
+
         # trend_context 업데이트
         trend_context["last_query"] = query  # user_text 대신 query 사용
         trend_context["last_result_summary"] = answer
-
-        # 트렌드 결과를 히스토리에 AIMessage 로 추가
-        messages = list(state.get("messages") or [])
-        messages.append(AIMessage(content=answer))
-
+        
         return Command(
             update={
                 "trend_context": trend_context,
-                "messages": messages,
+                # messages 는 건드리지 않음 (마지막 발화는 여전히 HUMAN)
+                "messages": messages
             },
-            goto="brand_chat",
+            # goto="brand_chat",
+            goto=END
         )
 
     return trend_search

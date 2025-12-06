@@ -44,9 +44,9 @@ public class MetricsCollectionService : IMetricsCollectionService
         _config = config;
     }
 
-    public async Task RunOnceAsync(CancellationToken ct = default)
+    public async Task<int> RunOnceAsync(CancellationToken ct = default)
     {
-        const int maxCount = 6;
+        const int maxCount = 20; // 배치당 처리 건수 (TikTok API rate limit 고려)
 
         _logger.LogInformation(
             "[MetricsCollectionService] 수집 배치 시작 (maxCount={MaxCount}, lastProcessedPostId={LastPostId})",
@@ -58,9 +58,8 @@ public class MetricsCollectionService : IMetricsCollectionService
 
         if (posts.Count == 0)
         {
-            _logger.LogInformation("[MetricsCollectionService] 수집 대상 social_post 가 없습니다. 커서 초기화.");
-            _lastProcessedPostId = null; // 다음 배치에서 처음부터 다시 시작
-            return;
+            _logger.LogInformation("[MetricsCollectionService] 수집 대상 social_post 가 없습니다.");
+            return 0; // 더 이상 처리할 데이터가 없음
         }
 
         foreach (var post in posts)
@@ -90,8 +89,10 @@ public class MetricsCollectionService : IMetricsCollectionService
                 }
                 else
                 {
+                    // YouTube 메트릭 조회 실패 - 처리는 완료된 것으로 간주하고 커서 업데이트
+                    _lastProcessedPostId = post.PostId;
                     _logger.LogWarning(
-                        "[MetricsCollectionService] YouTube 메트릭 조회 실패 - post_id={PostId}, videoId={VideoId}",
+                        "[MetricsCollectionService] YouTube 메트릭 조회 실패 - post_id={PostId}, videoId={VideoId}. 처리 완료로 간주하고 다음으로 진행",
                         post.PostId,
                         post.PlatformPostId
                     );
@@ -160,15 +161,24 @@ public class MetricsCollectionService : IMetricsCollectionService
 
                     if (metrics is not null)
                     {
-                        _logger.LogInformation(
-                            "[MetricsCollectionService] TikTok 메트릭 조회 성공 - post_id={PostId}, video_id={VideoId}, view={View}, like={Like}, comment={Comment}, share={Share}",
-                            post.PostId,
-                            videoId,
-                            metrics.ViewCount,
-                            metrics.LikeCount,
-                            metrics.CommentCount,
-                            metrics.ShareCount
-                        );
+                        var saveResult = await _metricsRepository.SaveMetricsAsync(post.PostId, metrics, ct);
+                        if (saveResult)
+                        {
+                            _lastProcessedPostId = post.PostId; // 성공 시에만 커서 업데이트
+                            _logger.LogInformation(
+                                "[MetricsCollectionService] TikTok 메트릭 저장 완료 - post_id={PostId}, video_id={VideoId}, view={View}, like={Like}, comment={Comment}, share={Share}",
+                                post.PostId,
+                                videoId,
+                                metrics.ViewCount,
+                                metrics.LikeCount,
+                                metrics.CommentCount,
+                                metrics.ShareCount
+                            );
+                        }
+                        else
+                        {
+                            _logger.LogWarning("[MetricsCollectionService] TikTok 메트릭 저장 실패 - post_id={PostId}", post.PostId);
+                        }
                     }
                     else
                     {
@@ -181,8 +191,10 @@ public class MetricsCollectionService : IMetricsCollectionService
                 }
                 else
                 {
-                    _logger.LogWarning(
-                        "[MetricsCollectionService] TikTok video_id 없음 - post_id={PostId}, publish_id={PublishId}",
+                    // video_id가 없는 경우 (비공개 영상 등) - 처리는 완료된 것으로 간주하고 커서 업데이트
+                    _lastProcessedPostId = post.PostId;
+                    _logger.LogInformation(
+                        "[MetricsCollectionService] TikTok video_id 없음 (비공개 영상 등) - post_id={PostId}, publish_id={PublishId}. 처리 완료로 간주하고 다음으로 진행",
                         post.PostId,
                         post.PlatformPostId
                     );
@@ -195,6 +207,8 @@ public class MetricsCollectionService : IMetricsCollectionService
             posts.Count,
             _lastProcessedPostId
         );
+
+        return posts.Count;
     }
 }
 

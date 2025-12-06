@@ -185,12 +185,25 @@ export interface BrandChatResponse {
   brand_info?: BrandInfo;
 }
 
+// 프로젝트 기반 브랜드 정보 조회 응답
+interface BrandInfoApiResponse {
+  brand_info?: BrandInfo;
+}
+
 // 브랜드 챗 API 호출
 export async function sendBrandChat(data: BrandChatRequest): Promise<BrandChatResponse> {
   return apiRequest<BrandChatResponse>('/brand/chat', {
     method: 'POST',
     body: JSON.stringify(data),
   });
+}
+
+// 프로젝트 ID(grp_id)로 브랜드 정보 조회
+export async function getBrandInfoByProjectId(projectId: number): Promise<BrandInfo | null> {
+  const res = await apiRequest<BrandInfoApiResponse>(`/brand/info/${projectId}`, {
+    method: 'GET',
+  });
+  return res.brand_info ?? null;
 }
 
 // 브랜드 프로젝트 생성
@@ -218,6 +231,7 @@ export interface ShortsChatRequest {
   project_id: number;
   message?: string;
   shorts_session_id?: string;
+  images?: string[];  // Base64 인코딩된 이미지 리스트 추가
 }
 
 export interface ShortsChatResponse {
@@ -239,6 +253,7 @@ export interface LogoChatRequest {
   project_id: number;
   message?: string;
   logo_session_id?: string;
+  reference_images?: string[];
 }
 
 export interface LogoChatResponse {
@@ -463,6 +478,86 @@ export interface SocialPostListResponse {
 // 특정 생성물(prod_id)의 업로드 상태 조회
 export async function getSocialPostsByProdId(prodId: number): Promise<SocialPostListResponse> {
   return apiRequest<SocialPostListResponse>(`/social/posts/${prodId}`, {
+    method: 'GET',
+  });
+}
+
+// 숏폼 리포트 (SNS 업로드 기준)
+export interface ShortsReportItem {
+  prod_id: number;
+  title: string | null;
+  thumbnail_url: string | null;
+  video_url: string | null;
+  platforms: ("tiktok" | "youtube")[];
+  uploaded_at: string | null;
+  views: number;
+  likes: number;
+  comments: number;
+}
+
+export interface ShortsReportListResponse {
+  items: ShortsReportItem[];
+  last_collected_at?: string | null;
+}
+
+export async function getShortsReport(): Promise<ShortsReportListResponse> {
+  return apiRequest<ShortsReportListResponse>('/social/shorts/report', {
+    method: 'GET',
+  });
+}
+
+export interface ShortsViewsTimeseriesItem {
+  date: string;  // 'YYYY-MM-DD'
+  views: number;
+}
+
+export interface ShortsViewsTimeseriesResponse {
+  items: ShortsViewsTimeseriesItem[];
+}
+
+export async function getShortsViewsTimeseries(
+  days: number,
+  platform: "all" | "tiktok" | "youtube",
+): Promise<ShortsViewsTimeseriesResponse> {
+  const params = new URLSearchParams({
+    days: days.toString(),
+  });
+
+  if (platform !== "all") {
+    params.append("platform", platform);
+  }
+
+  return apiRequest<ShortsViewsTimeseriesResponse>(`/social/shorts/views-timeseries?${params.toString()}`, {
+    method: 'GET',
+  });
+}
+
+// 마이페이지 관련 인터페이스
+export interface MyPageItem {
+  prod_id: number;
+  type: "logo" | "short";
+  file_url: string | null;
+  title: string | null;
+  likes: number;
+  comments: number;
+  created_at: string | null;
+  is_liked: boolean;
+}
+
+export interface MyPageItemsResponse {
+  items: MyPageItem[];
+}
+
+// 공유한 작품 조회
+export async function getSharedItems(): Promise<MyPageItemsResponse> {
+  return apiRequest<MyPageItemsResponse>('/mypage/shared', {
+    method: 'GET',
+  });
+}
+
+// 좋아요한 작품 조회
+export async function getLikedItems(): Promise<MyPageItemsResponse> {
+  return apiRequest<MyPageItemsResponse>('/mypage/liked', {
     method: 'GET',
   });
 }

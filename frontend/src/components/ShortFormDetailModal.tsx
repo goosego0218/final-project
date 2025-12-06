@@ -300,7 +300,6 @@ const ShortFormDetailModal = ({ open, short, onClose }: ShortFormDetailModalProp
                     className="w-full h-full object-cover"
                     autoPlay
                     loop
-                    muted
                     playsInline
                     controls
                   />

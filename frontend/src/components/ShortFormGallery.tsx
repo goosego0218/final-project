@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import Footer from "@/components/Footer";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getShortsGallery,
   SortOption,
@@ -24,106 +23,50 @@ interface ShortFormGalleryProps {
 
 const ShortFormGallery = ({ searchQuery = "", initialSelectedProdId }: ShortFormGalleryProps) => {
   const [sortBy, setSortBy] = useState<SortOption>("latest");
-  const [page, setPage] = useState(1);
+  const [pageIndex, setPageIndex] = useState(0); // 0-based 페이지 인덱스
   const [allShorts, setAllShorts] = useState<GalleryItem[]>([]); // 누적된 모든 쇼츠 데이터
   const [selectedShort, setSelectedShort] = useState<GalleryItem | null>(null);
-  const queryClient = useQueryClient();
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
 
   const ITEMS_PER_PAGE = 12;
 
-  // 사용자 ID 추출 (쿼리 키에 포함하여 사용자별 캐시 분리)
-  const getUserId = () => {
+  // 갤러리 데이터 조회: 항상 DB에서 직접 조회 (페이지 인덱스 기반, 서버에서 누적 범위까지 잘라서 가져옴)
+  const fetchPage = async (targetPageIndex: number) => {
+    setIsLoading(true);
     try {
-      const profile = localStorage.getItem('userProfile');
-      if (profile) {
-        const parsed = JSON.parse(profile);
-        return parsed.id || null;
-      }
+      const skip = 0;
+      const limit = (targetPageIndex + 1) * ITEMS_PER_PAGE;
+      const data = await getShortsGallery(
+        sortBy,
+        skip,
+        limit,
+        searchQuery || undefined
+      );
+
+      // 항상 서버에서 내려온 전체 구간으로 교체
+      setAllShorts(data.items || []);
+
+      const loadedCount = data.items?.length ?? 0;
+      const totalCount = data.total_count ?? loadedCount;
+      setHasMore(loadedCount < totalCount);
     } catch (e) {
-      // ignore
+      console.error("Failed to load shorts gallery:", e);
+    } finally {
+      setIsLoading(false);
     }
-    return null;
   };
 
-  const [userId, setUserId] = useState(getUserId());
-
-  // 로그인 상태 변경 감지 및 사용자 ID 업데이트
+  // 정렬/검색 조건이 바뀌면 첫 페이지부터 다시 조회
   useEffect(() => {
-    let isMounted = true;
-    
-    const checkUserChange = () => {
-      if (!isMounted) return;
-      
-      const hasLoginFlag = localStorage.getItem('isLoggedIn') === 'true' || sessionStorage.getItem('isLoggedIn') === 'true';
-      const hasToken = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
-      const currentLoggedIn = hasLoginFlag && !!hasToken;
-      
-      const newUserId = currentLoggedIn ? getUserId() : null;
-      
-      if (newUserId !== userId) {
-        setUserId(newUserId);
-        setPage(1); // 페이지 초기화
-        setAllShorts([]); // 누적 데이터 초기화
-        // 사용자가 변경되면 갤러리 쿼리 캐시 완전히 제거 (refetch는 useQuery가 자동으로 처리)
-        queryClient.removeQueries({ queryKey: ['shortsGallery'] });
-      }
-    };
-
-    // 초기 확인 (한 번만)
-    checkUserChange();
-
-    // storage 이벤트 리스너 (다른 탭에서 로그인/로그아웃 시)
-    window.addEventListener('storage', checkUserChange);
-    
-    // 같은 탭에서의 변경도 감지하기 위해 interval 사용 (하지만 너무 자주 체크하지 않도록)
-    const interval = setInterval(checkUserChange, 2000);
-
-    return () => {
-      isMounted = false;
-      window.removeEventListener('storage', checkUserChange);
-      clearInterval(interval);
-    };
-  }, [userId, queryClient]);
-
-  // 갤러리 데이터 조회 (사용자 ID를 쿼리 키에 포함하여 사용자별 캐시 분리)
-  // 페이지네이션: 한 번에 12개씩 가져오기
-  const { data: galleryData, isLoading, refetch: refetchGallery } = useQuery({
-    queryKey: ['shortsGallery', sortBy, searchQuery, userId, page],
-    queryFn: () =>
-      getShortsGallery(
-        sortBy,
-        (page - 1) * ITEMS_PER_PAGE,
-        ITEMS_PER_PAGE,
-        searchQuery || undefined
-      ),
-    // 쇼츠 갤러리 화면이 마운트될 때마다 항상 DB에서 최신 데이터를 가져오기
-    staleTime: 0,
-    refetchOnMount: true,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-  });
-
-
-  // 새로운 페이지 데이터가 로드되면 누적
-  useEffect(() => {
-    if (galleryData?.items) {
-      if (page === 1) {
-        // 첫 페이지는 교체
-        setAllShorts(galleryData.items);
-      } else {
-        // 이후 페이지는 누적 (중복 제거)
-        setAllShorts((prev) => {
-          const existingIds = new Set(prev.map((short) => short.prod_id));
-          const newItems = galleryData.items.filter((item) => !existingIds.has(item.prod_id));
-          return [...prev, ...newItems];
-        });
-      }
-    }
-  }, [galleryData, page]);
+    setPageIndex(0);
+    setHasMore(true);
+    fetchPage(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortBy, searchQuery]);
 
   // 표시할 쇼츠 목록 (누적된 모든 데이터)
   const displayedShorts = allShorts;
-  const hasMore = galleryData ? (page * ITEMS_PER_PAGE) < galleryData.total_count : false;
 
   // 초기 진입 시 특정 prod_id가 쿼리 파라미터로 넘어온 경우, 해당 숏폼을 자동으로 선택
   useEffect(() => {
@@ -148,14 +91,14 @@ const ShortFormGallery = ({ searchQuery = "", initialSelectedProdId }: ShortForm
   };
 
   const handleLoadMore = () => {
-    setPage((prev) => prev + 1);
-    // 페이지가 변경되면 useQuery가 자동으로 다음 페이지 데이터를 가져옴
+    const nextPage = pageIndex + 1;
+    setPageIndex(nextPage);
+    fetchPage(nextPage);
   };
 
   const handleSortChange = (value: SortOption) => {
     setSortBy(value);
-    setPage(1);
-    setAllShorts([]); // 정렬 변경 시 누적 데이터 초기화
+    setAllShorts([]); // 정렬 변경 시 누적 데이터 초기화 (fetchPage에서 다시 채움)
   };
 
   const isVideoUrl = (url: string) => {
@@ -213,12 +156,20 @@ const ShortFormGallery = ({ searchQuery = "", initialSelectedProdId }: ShortForm
                         muted
                         playsInline
                         preload="metadata"
+                        onLoadedMetadata={(e) => {
+                          // 1.5초 지점으로 이동하여 썸네일로 표시
+                          e.currentTarget.currentTime = 2.5;
+                        }}
                         onMouseEnter={(e) => {
                           e.currentTarget.play().catch(() => {});
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.pause();
-                          e.currentTarget.currentTime = 0;
+                          e.currentTarget.currentTime = 2.5; // 1.5초로 복귀
+                        }}
+                        onEnded={(e) => {
+                          e.currentTarget.pause();
+                          e.currentTarget.currentTime = 2.5; // 끝나면 일시정지하고 썸네일 위치로
                         }}
                       />
                     ) : (

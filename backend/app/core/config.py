@@ -83,10 +83,8 @@ class Settings(BaseSettings):
     ncp_endpoint: str = ""
     ncp_bucket_name: str = ""
 
-    # Kanana Safeguard (가드레일)
+    # 요거 잠깐 추가가
     safeguard_enabled: bool = False
-    safeguard_server_url: str = ""  # GPU 서버 URL (예: "http://gpu-server:8001")
-
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

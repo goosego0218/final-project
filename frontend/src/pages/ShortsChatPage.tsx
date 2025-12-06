@@ -288,6 +288,7 @@ const ShortsChatPage = () => {
         project_id: parseInt(currentProjectId),
         message: currentInput,
         shorts_session_id: shortsSessionId || undefined,
+        images: currentImages.length > 0 ? currentImages : undefined,  // 이미지 추가
       });
       if (response.shorts_session_id) {
         setShortsSessionId(response.shorts_session_id);
@@ -993,10 +994,13 @@ const ShortsChatPage = () => {
                                               muted
                                               playsInline
                                               style={{ aspectRatio: '9/16' }}
+                                              onLoadedMetadata={(e) => {
+                                                e.currentTarget.currentTime = 2.5;
+                                              }}
                                               onMouseEnter={(e) => e.currentTarget.play()}
                                               onMouseLeave={(e) => {
                                                 e.currentTarget.pause();
-                                                e.currentTarget.currentTime = 0;
+                                                e.currentTarget.currentTime = 2.5;
                                               }}
                                             />
                                             {/* 재생 아이콘 오버레이 */}
