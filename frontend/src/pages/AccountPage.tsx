@@ -556,7 +556,6 @@ const AccountPage = () => {
                     <Button 
                       onClick={handleYoutubeConnect}
                       disabled={isYoutubeLoading}
-                      className="bg-orange-500 hover:bg-orange-600"
                     >
                       {isYoutubeLoading ? (
                         <>
@@ -564,10 +563,8 @@ const AccountPage = () => {
                           연동 중...
                         </>
                       ) : (
-                        <>
-                          <Youtube className="h-4 w-4 mr-2" />
-                          연동하기
-                        </>
+                        // YouTube 아이콘 제거, 텍스트만 표시
+                        <>연동하기</>
                       )}
                     </Button>
                   )}
