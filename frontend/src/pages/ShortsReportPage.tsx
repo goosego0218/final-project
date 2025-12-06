@@ -373,8 +373,11 @@ const ShortsReportPage = () => {
                           src={shortForm.videoUrl}
                           className="w-full h-full object-cover"
                           muted
-                          loop
                           playsInline
+                          onEnded={(e) => {
+                            e.currentTarget.pause();
+                            e.currentTarget.currentTime = 0; // 끝나면 일시정지하고 처음으로
+                          }}
                         />
                       ) : (
                         <img

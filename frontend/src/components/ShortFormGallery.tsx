@@ -167,6 +167,10 @@ const ShortFormGallery = ({ searchQuery = "", initialSelectedProdId }: ShortForm
                           e.currentTarget.pause();
                           e.currentTarget.currentTime = 2.5; // 1.5초로 복귀
                         }}
+                        onEnded={(e) => {
+                          e.currentTarget.pause();
+                          e.currentTarget.currentTime = 2.5; // 끝나면 일시정지하고 썸네일 위치로
+                        }}
                       />
                     ) : (
                       <img
